@@ -10,7 +10,8 @@
     "dev": "pnpm -r run dev",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "version:bump": "node scripts/bump-version.mjs"
   },
   "keywords": [
     "fhir",
