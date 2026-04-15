@@ -1,0 +1,21 @@
+{
+  "name": "@fhir-dsl/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "fhir-gen": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@fhir-dsl/generator": "workspace:*",
+    "commander": "^13.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
