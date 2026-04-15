@@ -28,14 +28,14 @@ type ResolveIncluded<S extends FhirSchema, IncludedTypes extends string> = Inclu
 export interface SearchQueryBuilder<
   S extends FhirSchema,
   RT extends string,
-  SP extends Record<string, any> = Record<string, any>,
+  SP = Record<string, any>,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
 > {
   where<K extends string & keyof SP>(
     param: K,
     op: SearchPrefixFor<SP[K]>,
-    value: SP[K]["value"],
+    value: SP[K] extends { value: infer V } ? V : string,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
 
   include<K extends string & keyof IncludeFor<S, RT>>(

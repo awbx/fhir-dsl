@@ -49,6 +49,15 @@ importers:
         specifier: workspace:*
         version: link:../types
 
+  packages/example:
+    dependencies:
+      '@fhir-dsl/core':
+        specifier: workspace:*
+        version: link:../core
+      '@fhir-dsl/types':
+        specifier: workspace:*
+        version: link:../types
+
   packages/generator:
     dependencies:
       '@fhir-dsl/utils':

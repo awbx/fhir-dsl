@@ -22,7 +22,7 @@ export type Executor = (query: CompiledQuery) => Promise<unknown>;
 export class SearchQueryBuilderImpl<
   S extends FhirSchema,
   RT extends string,
-  SP extends Record<string, any>,
+  SP,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
 > implements SearchQueryBuilder<S, RT, SP, Inc, Prof>
@@ -44,7 +44,7 @@ export class SearchQueryBuilderImpl<
   where<K extends string & keyof SP>(
     param: K,
     op: SearchPrefixFor<SP[K]>,
-    value: SP[K]["value"],
+    value: SP[K] extends { value: infer V } ? V : string,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
     return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
       ...this.#state,
