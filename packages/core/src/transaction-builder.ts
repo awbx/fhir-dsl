@@ -1,4 +1,5 @@
 import type { Bundle, BundleEntry, Resource } from "@fhir-dsl/types";
+import type { FhirSchema } from "./types.js";
 import type { Executor } from "./search-query-builder.js";
 
 // --- Transaction Entry Builder ---
@@ -13,12 +14,12 @@ interface TransactionEntry {
 
 // --- Transaction Builder ---
 
-export interface TransactionBuilder<RM extends Record<string, any>> {
-  create<RT extends string & keyof RM>(resource: RM[RT] & Resource): TransactionBuilder<RM>;
+export interface TransactionBuilder<S extends FhirSchema> {
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S>;
 
-  update<RT extends string & keyof RM>(resource: RM[RT] & Resource): TransactionBuilder<RM>;
+  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S>;
 
-  delete<RT extends string & keyof RM>(resourceType: RT, id: string): TransactionBuilder<RM>;
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TransactionBuilder<S>;
 
   compile(): Bundle;
 
@@ -27,7 +28,7 @@ export interface TransactionBuilder<RM extends Record<string, any>> {
 
 // --- Transaction Builder Implementation ---
 
-export class TransactionBuilderImpl<RM extends Record<string, any>> implements TransactionBuilder<RM> {
+export class TransactionBuilderImpl<S extends FhirSchema> implements TransactionBuilder<S> {
   readonly #entries: TransactionEntry[];
   readonly #executor: Executor;
 
@@ -36,8 +37,8 @@ export class TransactionBuilderImpl<RM extends Record<string, any>> implements T
     this.#entries = entries ?? [];
   }
 
-  create<RT extends string & keyof RM>(resource: RM[RT] & Resource): TransactionBuilder<RM> {
-    return new TransactionBuilderImpl<RM>(this.#executor, [
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
+    return new TransactionBuilderImpl<S>(this.#executor, [
       ...this.#entries,
       {
         resource,
@@ -49,12 +50,12 @@ export class TransactionBuilderImpl<RM extends Record<string, any>> implements T
     ]);
   }
 
-  update<RT extends string & keyof RM>(resource: RM[RT] & Resource): TransactionBuilder<RM> {
+  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
     const id = resource.id;
     if (!id) {
       throw new Error("Resource must have an id for update operations");
     }
-    return new TransactionBuilderImpl<RM>(this.#executor, [
+    return new TransactionBuilderImpl<S>(this.#executor, [
       ...this.#entries,
       {
         resource,
@@ -66,8 +67,8 @@ export class TransactionBuilderImpl<RM extends Record<string, any>> implements T
     ]);
   }
 
-  delete<RT extends string & keyof RM>(resourceType: RT, id: string): TransactionBuilder<RM> {
-    return new TransactionBuilderImpl<RM>(this.#executor, [
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TransactionBuilder<S> {
+    return new TransactionBuilderImpl<S>(this.#executor, [
       ...this.#entries,
       {
         request: {
@@ -85,7 +86,7 @@ export class TransactionBuilderImpl<RM extends Record<string, any>> implements T
       entry: this.#entries.map((e) => ({
         resource: e.resource,
         request: {
-          method: e.request.method as any,
+          method: e.request.method,
           url: e.request.url,
         },
       })) as BundleEntry[],

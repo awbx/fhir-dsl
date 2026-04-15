@@ -1,10 +1,11 @@
 import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import type { ReadQueryBuilder } from "./query-builder.js";
+import type { FhirSchema } from "./types.js";
 import type { Executor } from "./search-query-builder.js";
 
-export class ReadQueryBuilderImpl<RM extends Record<string, any>, RT extends string>
-  implements ReadQueryBuilder<RM, RT>
+export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string>
+  implements ReadQueryBuilder<S, RT>
 {
   readonly #resourceType: string;
   readonly #id: string;
@@ -24,8 +25,8 @@ export class ReadQueryBuilderImpl<RM extends Record<string, any>, RT extends str
     };
   }
 
-  async execute(): Promise<RM[RT] & Resource> {
+  async execute(): Promise<S["resources"][RT] & Resource> {
     const query = this.compile();
-    return (await this.#executor(query)) as RM[RT] & Resource;
+    return (await this.#executor(query)) as S["resources"][RT] & Resource;
   }
 }

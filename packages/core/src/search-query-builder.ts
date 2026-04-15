@@ -1,7 +1,7 @@
 import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import type { BundleLink, SearchQueryBuilder, SearchResult } from "./query-builder.js";
-import type { IncludeFor, ResolveProfile, SearchPrefixFor, SortDirection } from "./types.js";
+import type { FhirSchema, IncludeFor, ResolveProfile, SearchPrefixFor, SortDirection } from "./types.js";
 
 // --- Internal query state ---
 
@@ -20,12 +20,12 @@ export type Executor = (query: CompiledQuery) => Promise<unknown>;
 // --- Immutable Search Query Builder Implementation ---
 
 export class SearchQueryBuilderImpl<
-  RM extends Record<string, any>,
+  S extends FhirSchema,
   RT extends string,
   SP extends Record<string, any>,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
-> implements SearchQueryBuilder<RM, RT, SP, Inc, Prof>
+> implements SearchQueryBuilder<S, RT, SP, Inc, Prof>
 {
   readonly #state: QueryState;
   readonly #executor: Executor;
@@ -45,8 +45,8 @@ export class SearchQueryBuilderImpl<
     param: K,
     op: SearchPrefixFor<SP[K]>,
     value: SP[K]["value"],
-  ): SearchQueryBuilder<RM, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<RM, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
       ...this.#state,
       params: [
         ...this.#state.params,
@@ -59,31 +59,31 @@ export class SearchQueryBuilderImpl<
     });
   }
 
-  include<K extends string & keyof IncludeFor<RT>>(
+  include<K extends string & keyof IncludeFor<S, RT>>(
     param: K,
-  ): SearchQueryBuilder<RM, RT, SP, Inc | (IncludeFor<RT>[K] extends string ? IncludeFor<RT>[K] : never), Prof> {
+  ): SearchQueryBuilder<S, RT, SP, Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never), Prof> {
     return new SearchQueryBuilderImpl(this.#state.resourceType, this.#executor, {
       ...this.#state,
       includes: [...this.#state.includes, param],
     });
   }
 
-  sort(param: string & keyof SP, direction: SortDirection = "asc"): SearchQueryBuilder<RM, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<RM, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+  sort(param: string & keyof SP, direction: SortDirection = "asc"): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
       ...this.#state,
       sorts: [...this.#state.sorts, { param, direction }],
     });
   }
 
-  count(n: number): SearchQueryBuilder<RM, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<RM, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+  count(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
       ...this.#state,
       count: n,
     });
   }
 
-  offset(n: number): SearchQueryBuilder<RM, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<RM, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+  offset(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
       ...this.#state,
       offset: n,
     });
@@ -123,13 +123,13 @@ export class SearchQueryBuilderImpl<
     };
   }
 
-  async execute(): Promise<SearchResult<ResolveProfile<RM, RT, Prof> & Resource, [Inc] extends [never] ? never : any>> {
+  async execute(): Promise<SearchResult<ResolveProfile<S, RT, Prof> & Resource, [Inc] extends [never] ? never : any>> {
     const query = this.compile();
     const bundle = (await this.#executor(query)) as any;
 
     const entries: Array<{ resource?: any; search?: { mode?: string } }> = bundle.entry ?? [];
 
-    const data: Array<ResolveProfile<RM, RT, Prof> & Resource> = [];
+    const data: Array<ResolveProfile<S, RT, Prof> & Resource> = [];
     const included: Array<Resource> = [];
 
     for (const entry of entries) {

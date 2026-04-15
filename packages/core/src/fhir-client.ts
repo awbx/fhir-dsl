@@ -1,10 +1,9 @@
-import type { FhirResourceMap, ProfileRegistry } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 import { type Executor, SearchQueryBuilderImpl } from "./search-query-builder.js";
 import { type TransactionBuilder, TransactionBuilderImpl } from "./transaction-builder.js";
-import type { ProfileNames, SearchParamFor } from "./types.js";
+import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
 
 // --- Client Configuration ---
 
@@ -75,41 +74,46 @@ export class FhirRequestError extends Error {
 
 // --- FhirClient ---
 
-export class FhirClient<RM extends Record<string, any> = FhirResourceMap> {
+export class FhirClient<S extends FhirSchema> {
   readonly #executor: Executor;
 
   constructor(config: FhirClientConfig) {
     this.#executor = createFetchExecutor(config);
   }
 
-  search<RT extends string & keyof RM>(resourceType: RT): SearchQueryBuilder<RM, RT, SearchParamFor<RT>>;
-  search<RT extends string & keyof RM, P extends ProfileNames<RT>>(
+  search<RT extends string & keyof S["resources"]>(
+    resourceType: RT,
+  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
+  search<RT extends string & keyof S["resources"], P extends ProfileNames<S, RT>>(
     resourceType: RT,
     profile: P,
-  ): SearchQueryBuilder<RM, RT, SearchParamFor<RT>, never, P>;
-  search<RT extends string & keyof RM>(
+  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>, never, P>;
+  search<RT extends string & keyof S["resources"]>(
     resourceType: RT,
     profile?: string,
-  ): SearchQueryBuilder<RM, RT, SearchParamFor<RT>> {
+  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>> {
     if (profile) {
-      return new SearchQueryBuilderImpl<RM, RT, SearchParamFor<RT>>(resourceType, this.#executor, undefined, profile);
+      return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
+        resourceType,
+        this.#executor,
+        undefined,
+        profile,
+      );
     }
-    return new SearchQueryBuilderImpl<RM, RT, SearchParamFor<RT>>(resourceType, this.#executor);
+    return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(resourceType, this.#executor);
   }
 
-  read<RT extends string & keyof RM>(resourceType: RT, id: string): ReadQueryBuilder<RM, RT> {
-    return new ReadQueryBuilderImpl<RM, RT>(resourceType, id, this.#executor);
+  read<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): ReadQueryBuilder<S, RT> {
+    return new ReadQueryBuilderImpl<S, RT>(resourceType, id, this.#executor);
   }
 
-  transaction(): TransactionBuilder<RM> {
-    return new TransactionBuilderImpl<RM>(this.#executor);
+  transaction(): TransactionBuilder<S> {
+    return new TransactionBuilderImpl<S>(this.#executor);
   }
 }
 
 // --- Factory function ---
 
-export function createFhirClient<RM extends Record<string, any> = FhirResourceMap>(
-  config: FhirClientConfig,
-): FhirClient<RM> {
-  return new FhirClient<RM>(config);
+export function createFhirClient<S extends FhirSchema>(config: FhirClientConfig): FhirClient<S> {
+  return new FhirClient<S>(config);
 }

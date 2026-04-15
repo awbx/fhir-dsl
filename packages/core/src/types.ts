@@ -1,38 +1,47 @@
-import type { IncludeRegistry, ProfileRegistry, SearchParam, SearchParamRegistry } from "@fhir-dsl/types";
+import type { SearchParam } from "@fhir-dsl/types";
+
+// --- FhirSchema: the "Database" type for FHIR, like Kysely's Database ---
+
+export interface FhirSchema {
+  resources: Record<string, any>;
+  searchParams: Record<string, Record<string, SearchParam>>;
+  includes: Record<string, Record<string, string>>;
+  profiles: Record<string, Record<string, any>>;
+}
 
 // --- Extract search params for a given resource type ---
 
-export type SearchParamFor<RT extends string> = RT extends keyof SearchParamRegistry
-  ? SearchParamRegistry[RT]
+export type SearchParamFor<S extends FhirSchema, RT extends string> = RT extends keyof S["searchParams"]
+  ? S["searchParams"][RT]
   : Record<string, SearchParam>;
 
 // --- Extract include params for a given resource type ---
 
-export type IncludeFor<RT extends string> = RT extends keyof IncludeRegistry
-  ? IncludeRegistry[RT]
+export type IncludeFor<S extends FhirSchema, RT extends string> = RT extends keyof S["includes"]
+  ? S["includes"][RT]
   : Record<string, string>;
 
 // --- Extract profiles for a given resource type ---
 
-export type ProfileFor<RT extends string> = RT extends keyof ProfileRegistry
-  ? ProfileRegistry[RT]
+export type ProfileFor<S extends FhirSchema, RT extends string> = RT extends keyof S["profiles"]
+  ? S["profiles"][RT]
   : Record<string, never>;
 
-export type ProfileNames<RT extends string> = RT extends keyof ProfileRegistry
-  ? string & keyof ProfileRegistry[RT]
+export type ProfileNames<S extends FhirSchema, RT extends string> = RT extends keyof S["profiles"]
+  ? string & keyof S["profiles"][RT]
   : never;
 
 export type ResolveProfile<
-  RM extends Record<string, any>,
+  S extends FhirSchema,
   RT extends string,
   P extends string | undefined,
 > = P extends string
-  ? RT extends keyof ProfileRegistry
-    ? P extends keyof ProfileRegistry[RT]
-      ? ProfileRegistry[RT][P]
-      : RM[RT]
-    : RM[RT]
-  : RM[RT];
+  ? RT extends keyof S["profiles"]
+    ? P extends keyof S["profiles"][RT]
+      ? S["profiles"][RT][P]
+      : RT extends keyof S["resources"] ? S["resources"][RT] : never
+    : RT extends keyof S["resources"] ? S["resources"][RT] : never
+  : RT extends keyof S["resources"] ? S["resources"][RT] : never;
 
 // --- Search prefix/operator types based on param type ---
 
