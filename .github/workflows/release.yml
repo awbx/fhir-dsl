@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   publish:
@@ -30,6 +32,11 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          pnpm -r exec pnpm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Publish
         run: pnpm -r publish --access public --no-git-checks
