@@ -4,7 +4,7 @@ import { Command } from "commander";
 
 export const generateCommand = new Command("generate")
   .description("Generate TypeScript types from FHIR specification")
-  .requiredOption("--version <version>", "FHIR version (r4, r4b, r5)", "r4")
+  .requiredOption("--version <version>", "FHIR version (e.g., r4, r4b, r5, r6)", "r4")
   .option("--ig <packages...>", "IG packages to include (e.g., hl7.fhir.us.core@6.1.0)")
   .option("--resources <list>", "Comma-separated resource names (default: all)")
   .requiredOption("--out <dir>", "Output directory for generated types")

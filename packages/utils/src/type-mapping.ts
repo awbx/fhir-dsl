@@ -71,6 +71,8 @@ const FHIR_COMPLEX_TO_TS: Record<string, string> = {
   ExtendedContactDetail: "ExtendedContactDetail",
   VirtualServiceDetail: "VirtualServiceDetail",
   MonetaryComponent: "MonetaryComponent",
+  RelativeTime: "RelativeTime",
+  DosageDetails: "DosageDetails",
 };
 
 const FHIR_SEARCH_PARAM_TYPE_TO_TS: Record<string, string> = {

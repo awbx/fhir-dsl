@@ -88,19 +88,18 @@ function compileQuery() {
 // --- Profile-constrained queries ---
 
 async function searchUSCorePatients() {
-  // Using a profile narrows the return type to USCorePatient
+  // Using a profile narrows the return type to USCorePatientProfile
   const result = await fhir
-    .search("Patient", "us-core")
+    .search("Patient", "us-core-patient")
     .where("name", "eq", "Smith")
     .where("gender", "eq", "female")
     .execute();
 
   for (const patient of result.data) {
-    // USCorePatient guarantees these are present (non-optional):
-    console.log(patient.identifier[0].system); // required in US Core
-    console.log(patient.identifier[0].value); // required in US Core
-    console.log(patient.name[0].family); // required in US Core
+    // USCorePatientProfile narrows gender to FhirCode (required)
     console.log(patient.gender); // required in US Core
+    console.log(patient.name?.[0]?.family);
+    console.log(patient.birthDate);
   }
 }
 
@@ -112,9 +111,9 @@ async function searchVitalSigns() {
     .execute();
 
   for (const obs of result.data) {
-    // USCoreVitalSignsObservation guarantees category, code, subject
-    console.log(obs.category[0].coding[0].code); // "vital-signs"
-    console.log(obs.subject.reference); // required in US Core
+    // USCoreVitalSignsProfile extends Observation
+    console.log(obs.code.coding?.[0]?.code);
+    console.log(obs.status);
     console.log(obs.valueQuantity?.value);
   }
 }
