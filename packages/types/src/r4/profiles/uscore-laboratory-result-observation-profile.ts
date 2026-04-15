@@ -1,14 +1,12 @@
 import type { FhirBoolean, FhirDateTime, FhirInteger, FhirString, FhirTime } from "../primitives.js";
 import type { CodeableConcept, Period, Quantity, Range, Ratio, Reference, SampledData } from "../datatypes.js";
-import type { us-core-observation-clinical-result } from "../resources/us-core-observation-clinical-result.js";
+import type { Observation } from "../resources/observation.js";
 
 /**
  * US Core Laboratory Result Observation Profile
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab
  */
-export interface USCoreLaboratoryResultObservationProfile extends us-core-observation-clinical-result {
-  category: unknown;
-  code?: unknown;
+export interface USCoreLaboratoryResultObservationProfile extends Observation {
   valueQuantity?: Quantity;
   valueCodeableConcept?: CodeableConcept;
   valueString?: FhirString;

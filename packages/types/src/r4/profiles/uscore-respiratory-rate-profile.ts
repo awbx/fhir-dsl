@@ -1,12 +1,11 @@
 import type { CodeableConcept } from "../datatypes.js";
-import type { us-core-vital-signs } from "../resources/us-core-vital-signs.js";
+import type { Observation } from "../resources/observation.js";
 
 /**
  * US Core Respiratory Rate Profile
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-respiratory-rate
  */
-export interface USCoreRespiratoryRateProfile extends us-core-vital-signs {
+export interface USCoreRespiratoryRateProfile extends Observation {
   code?: CodeableConcept;
-  valueQuantity?: unknown;
 }
 

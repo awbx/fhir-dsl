@@ -97,14 +97,28 @@ export interface ProfileRegistry {
     "us-core-medicationrequest": USCoreMedicationRequestProfile;
   };
   Observation: {
+    "head-occipital-frontal-circumference-percentile": USCorePediatricHeadOccipitalFrontalCircumferencePercentileProfile;
+    "pediatric-bmi-for-age": USCorePediatricBMIforAgeObservationProfile;
+    "pediatric-weight-for-height": USCorePediatricWeightForHeightObservationProfile;
+    "us-core-blood-pressure": USCoreBloodPressureProfile;
+    "us-core-bmi": USCoreBMIProfile;
+    "us-core-body-height": USCoreBodyHeightProfile;
+    "us-core-body-temperature": USCoreBodyTemperatureProfile;
+    "us-core-body-weight": USCoreBodyWeightProfile;
+    "us-core-head-circumference": USCoreHeadCircumferenceProfile;
+    "us-core-heart-rate": USCoreHeartRateProfile;
     "us-core-observation-clinical-result": USCoreObservationClinicalResultProfile;
+    "us-core-observation-lab": USCoreLaboratoryResultObservationProfile;
     "us-core-observation-occupation": USCoreObservationOccupationProfile;
     "us-core-observation-pregnancyintent": USCoreObservationPregnancyIntentProfile;
     "us-core-observation-pregnancystatus": USCoreObservationPregnancyStatusProfile;
     "us-core-observation-screening-assessment": USCoreObservationScreeningAssessmentProfile;
     "us-core-observation-sexual-orientation": USCoreObservationSexualOrientationProfile;
+    "us-core-pulse-oximetry": USCorePulseOximetryProfile;
+    "us-core-respiratory-rate": USCoreRespiratoryRateProfile;
     "us-core-simple-observation": USCoreSimpleObservationProfile;
     "us-core-smokingstatus": USCoreSmokingStatusProfile;
+    "us-core-vital-signs": USCoreVitalSignsProfile;
   };
   Organization: {
     "us-core-organization": USCoreOrganizationProfile;
@@ -124,6 +138,9 @@ export interface ProfileRegistry {
   Provenance: {
     "us-core-provenance": USCoreProvenance;
   };
+  QuestionnaireResponse: {
+    "us-core-questionnaireresponse": USCoreQuestionnaireResponseProfile;
+  };
   RelatedPerson: {
     "us-core-relatedperson": USCoreRelatedPersonProfile;
   };
@@ -132,29 +149,6 @@ export interface ProfileRegistry {
   };
   Specimen: {
     "us-core-specimen": USCoreSpecimenProfile;
-  };
-  sdc-questionnaireresponse: {
-    "us-core-questionnaireresponse": USCoreQuestionnaireResponseProfile;
-  };
-  us-core-observation-clinical-result: {
-    "us-core-observation-lab": USCoreLaboratoryResultObservationProfile;
-  };
-  us-core-vital-signs: {
-    "head-occipital-frontal-circumference-percentile": USCorePediatricHeadOccipitalFrontalCircumferencePercentileProfile;
-    "pediatric-bmi-for-age": USCorePediatricBMIforAgeObservationProfile;
-    "pediatric-weight-for-height": USCorePediatricWeightForHeightObservationProfile;
-    "us-core-blood-pressure": USCoreBloodPressureProfile;
-    "us-core-bmi": USCoreBMIProfile;
-    "us-core-body-height": USCoreBodyHeightProfile;
-    "us-core-body-temperature": USCoreBodyTemperatureProfile;
-    "us-core-body-weight": USCoreBodyWeightProfile;
-    "us-core-head-circumference": USCoreHeadCircumferenceProfile;
-    "us-core-heart-rate": USCoreHeartRateProfile;
-    "us-core-pulse-oximetry": USCorePulseOximetryProfile;
-    "us-core-respiratory-rate": USCoreRespiratoryRateProfile;
-  };
-  vitalsigns: {
-    "us-core-vital-signs": USCoreVitalSignsProfile;
   };
 }
 

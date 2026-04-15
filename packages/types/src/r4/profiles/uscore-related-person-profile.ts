@@ -6,11 +6,6 @@ import type { RelatedPerson } from "../resources/related-person.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-relatedperson
  */
 export interface USCoreRelatedPersonProfile extends RelatedPerson {
-  active: unknown;
   patient?: Reference<"us-core-patient">;
-  relationship?: unknown;
-  name?: unknown;
-  telecom?: unknown;
-  address?: unknown;
 }
 

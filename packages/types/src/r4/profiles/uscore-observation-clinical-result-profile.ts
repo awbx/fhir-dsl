@@ -7,10 +7,6 @@ import type { Observation } from "../resources/observation.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-clinical-result
  */
 export interface USCoreObservationClinicalResultProfile extends Observation {
-  status?: unknown;
-  category: unknown;
-  category?: unknown;
-  code?: unknown;
   subject: Reference<"us-core-patient">;
   effectiveDateTime?: FhirDateTime;
   effectivePeriod?: Period;
@@ -27,6 +23,5 @@ export interface USCoreObservationClinicalResultProfile extends Observation {
   valueTime?: FhirTime;
   valueDateTime?: FhirDateTime;
   valuePeriod?: Period;
-  dataAbsentReason?: unknown;
 }
 

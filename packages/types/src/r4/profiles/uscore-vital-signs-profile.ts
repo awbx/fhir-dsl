@@ -1,16 +1,13 @@
 import type { FhirBoolean, FhirDateTime, FhirInteger, FhirString, FhirTime } from "../primitives.js";
 import type { CodeableConcept, Period, Quantity, Range, Ratio, Reference, SampledData } from "../datatypes.js";
-import type { vitalsigns } from "../resources/vitalsigns.js";
+import type { Observation } from "../resources/observation.js";
 
 /**
  * US Core Vital Signs Profile
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs
  */
-export interface USCoreVitalSignsProfile extends vitalsigns {
-  status?: unknown;
+export interface USCoreVitalSignsProfile extends Observation {
   category: CodeableConcept[];
-  category: CodeableConcept;
-  code?: unknown;
   subject?: Reference<"us-core-patient">;
   effectiveDateTime?: FhirDateTime;
   effectivePeriod?: Period;
@@ -25,7 +22,5 @@ export interface USCoreVitalSignsProfile extends vitalsigns {
   valueTime?: FhirTime;
   valueDateTime?: FhirDateTime;
   valuePeriod?: Period;
-  dataAbsentReason?: unknown;
-  component?: unknown;
 }
 

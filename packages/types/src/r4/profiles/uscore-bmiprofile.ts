@@ -1,12 +1,11 @@
 import type { CodeableConcept } from "../datatypes.js";
-import type { us-core-vital-signs } from "../resources/us-core-vital-signs.js";
+import type { Observation } from "../resources/observation.js";
 
 /**
  * US Core BMI Profile
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-bmi
  */
-export interface USCoreBMIProfile extends us-core-vital-signs {
+export interface USCoreBMIProfile extends Observation {
   code?: CodeableConcept;
-  valueQuantity?: unknown;
 }
 

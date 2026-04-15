@@ -7,13 +7,10 @@ import type { Observation } from "../resources/observation.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-sexual-orientation
  */
 export interface USCoreObservationSexualOrientationProfile extends Observation {
-  status?: unknown;
-  code?: unknown;
   subject: Reference<"us-core-patient">;
   effectiveDateTime?: FhirDateTime;
   effectivePeriod?: Period;
   effectiveTiming?: Timing;
   effectiveInstant?: FhirInstant;
-  valueCodeableConcept?: unknown;
 }
 

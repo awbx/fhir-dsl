@@ -7,12 +7,8 @@ import type { Immunization } from "../resources/immunization.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization
  */
 export interface USCoreImmunizationProfile extends Immunization {
-  status?: unknown;
-  statusReason?: unknown;
-  vaccineCode?: unknown;
   patient?: Reference<"us-core-patient">;
   occurrenceDateTime?: FhirDateTime;
   occurrenceString?: FhirString;
-  primarySource?: unknown;
 }
 

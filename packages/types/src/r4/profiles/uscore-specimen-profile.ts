@@ -6,7 +6,6 @@ import type { Specimen } from "../resources/specimen.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-specimen
  */
 export interface USCoreSpecimenProfile extends Specimen {
-  type: unknown;
   subject?: Reference<"us-core-patient">;
 }
 

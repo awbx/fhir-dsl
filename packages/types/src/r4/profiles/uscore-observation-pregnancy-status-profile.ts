@@ -6,12 +6,7 @@ import type { Observation } from "../resources/observation.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-pregnancystatus
  */
 export interface USCoreObservationPregnancyStatusProfile extends Observation {
-  status?: unknown;
-  category?: unknown;
-  category?: unknown;
-  code?: unknown;
   subject: Reference<"us-core-patient">;
-  effectiveDateTime: unknown;
   valueCodeableConcept: CodeableConcept;
 }
 

@@ -8,8 +8,6 @@ import type { Procedure } from "../resources/procedure.js";
  */
 export interface USCoreProcedureProfile extends Procedure {
   basedOn?: Reference<"us-core-careplan" | "us-core-servicerequest">;
-  status?: unknown;
-  code: unknown;
   subject?: Reference<"us-core-patient">;
   performedDateTime?: FhirDateTime;
   performedPeriod?: Period;

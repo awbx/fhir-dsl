@@ -8,10 +8,5 @@ import type { PractitionerRole } from "../resources/practitioner-role.js";
 export interface USCorePractitionerRoleProfile extends PractitionerRole {
   practitioner?: Reference<"us-core-practitioner">;
   organization?: Reference<"us-core-organization">;
-  code?: unknown;
-  specialty?: unknown;
-  location?: unknown;
-  telecom?: unknown;
-  endpoint?: unknown;
 }
 

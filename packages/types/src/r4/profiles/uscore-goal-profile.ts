@@ -7,11 +7,8 @@ import type { Goal } from "../resources/goal.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal
  */
 export interface USCoreGoalProfile extends Goal {
-  lifecycleStatus?: unknown;
-  description?: unknown;
   subject?: Reference<"us-core-patient">;
   startDate?: FhirDate;
   startCodeableConcept?: CodeableConcept;
-  target?: unknown;
 }
 

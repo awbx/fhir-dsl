@@ -7,11 +7,6 @@ import type { Observation } from "../resources/observation.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-screening-assessment
  */
 export interface USCoreObservationScreeningAssessmentProfile extends Observation {
-  status?: unknown;
-  category: unknown;
-  category: unknown;
-  category?: unknown;
-  code?: unknown;
   subject: Reference<"us-core-patient">;
   effectiveDateTime?: FhirDateTime;
   effectivePeriod?: Period;
@@ -29,7 +24,6 @@ export interface USCoreObservationScreeningAssessmentProfile extends Observation
   valueTime?: FhirTime;
   valueDateTime?: FhirDateTime;
   valuePeriod?: Period;
-  dataAbsentReason?: unknown;
   hasMember?: Reference<"us-core-observation-screening-assessment" | "QuestionnaireResponse" | "MolecularSequence">;
   derivedFrom?: Reference<"us-core-observation-screening-assessment" | "us-core-questionnaireresponse" | "us-core-documentreference" | "ImagingStudy" | "Media" | "MolecularSequence">;
 }

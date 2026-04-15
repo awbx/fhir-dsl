@@ -7,12 +7,6 @@ import type { Condition } from "../resources/condition.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition-problems-health-concerns
  */
 export interface USCoreConditionProblemsHealthConcernsProfile extends Condition {
-  clinicalStatus?: unknown;
-  verificationStatus?: unknown;
-  category: unknown;
-  category: unknown;
-  category?: unknown;
-  code: unknown;
   subject?: Reference<"us-core-patient">;
   onsetDateTime?: FhirDateTime;
   onsetAge?: Age;
@@ -24,6 +18,5 @@ export interface USCoreConditionProblemsHealthConcernsProfile extends Condition 
   abatementPeriod?: Period;
   abatementRange?: Range;
   abatementString?: FhirString;
-  recordedDate?: unknown;
 }
 

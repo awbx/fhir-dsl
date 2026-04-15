@@ -7,11 +7,6 @@ import type { Condition } from "../resources/condition.js";
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition-encounter-diagnosis
  */
 export interface USCoreConditionEncounterDiagnosisProfile extends Condition {
-  clinicalStatus?: unknown;
-  verificationStatus?: unknown;
-  category: unknown;
-  category: unknown;
-  code: unknown;
   subject?: Reference<"us-core-patient">;
   encounter?: Reference<"us-core-encounter">;
   onsetDateTime?: FhirDateTime;
@@ -24,6 +19,5 @@ export interface USCoreConditionEncounterDiagnosisProfile extends Condition {
   abatementPeriod?: Period;
   abatementRange?: Range;
   abatementString?: FhirString;
-  recordedDate?: unknown;
 }
 
