@@ -221,10 +221,7 @@ describe("parseProfile", () => {
   it("falls back to snapshot when differential is missing", () => {
     const sd = makeSD({
       snapshot: {
-        element: [
-          makeElement("Observation"),
-          makeElement("Observation.status", { min: 1, type: [{ code: "code" }] }),
-        ],
+        element: [makeElement("Observation"), makeElement("Observation.status", { min: 1, type: [{ code: "code" }] })],
       },
     });
 

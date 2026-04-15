@@ -48,7 +48,7 @@ export async function loadLocalSpec(dir: string): Promise<DownloadedSpec> {
     if (content.resourceType === "Bundle") {
       const entries = extractEntries(content);
       for (const entry of entries) {
-        const rt = (entry as any).resourceType;
+        const rt = isRecord(entry) ? entry.resourceType : undefined;
         if (rt === "StructureDefinition") resourceDefinitions.push(entry);
         if (rt === "SearchParameter") searchParameters.push(entry);
       }
@@ -224,10 +224,16 @@ async function loadOrDownload(filePath: string, url: string): Promise<unknown> {
   return JSON.parse(text);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function extractEntries(bundle: unknown): unknown[] {
-  const b = bundle as any;
-  if (b?.resourceType === "Bundle" && Array.isArray(b.entry)) {
-    return b.entry.filter((e: any) => e.resource).map((e: any) => e.resource);
+  if (!isRecord(bundle)) return [bundle];
+  if (bundle.resourceType === "Bundle" && Array.isArray(bundle.entry)) {
+    return (bundle.entry as unknown[])
+      .filter((e) => isRecord(e) && e.resource)
+      .map((e) => (e as Record<string, unknown>).resource as unknown);
   }
   if (Array.isArray(bundle)) return bundle;
   return [bundle];

@@ -34,7 +34,7 @@ describe("unwrapBundle", () => {
 
     expect(result.data).toHaveLength(1);
     expect(result.included).toHaveLength(1);
-    expect((result.included[0] as any).resourceType).toBe("Practitioner");
+    expect((result as { included: { resourceType: string }[] }).included[0]?.resourceType).toBe("Practitioner");
   });
 
   it("handles empty bundle", () => {

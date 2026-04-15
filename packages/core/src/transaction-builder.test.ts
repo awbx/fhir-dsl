@@ -1,8 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
+import type { CompiledQuery } from "./compiled-query.js";
 import { TransactionBuilderImpl } from "./transaction-builder.js";
-import type { FhirSchema } from "./types.js";
 
-type TestSchema = FhirSchema;
+type TestSchema = {
+  resources: {
+    Patient: { resourceType: "Patient"; id?: string; name?: string[] };
+    Observation: { resourceType: "Observation"; id?: string };
+    Condition: { resourceType: "Condition"; id?: string };
+  };
+  searchParams: Record<string, never>;
+  includes: Record<string, never>;
+  profiles: Record<string, never>;
+};
 
 describe("TransactionBuilder", () => {
   describe("compile", () => {
@@ -107,12 +116,14 @@ describe("TransactionBuilder", () => {
         .execute();
 
       expect(executor).toHaveBeenCalledOnce();
-      const call = executor.mock.calls[0]![0]!;
+      const args = executor.mock.calls[0] as unknown as [CompiledQuery];
+      const call = args[0];
       expect(call.method).toBe("POST");
       expect(call.path).toBe("");
       expect(call.body).toBeDefined();
-      expect(call.body.resourceType).toBe("Bundle");
-      expect(call.body.type).toBe("transaction");
+      const body = call.body as Record<string, unknown>;
+      expect(body.resourceType).toBe("Bundle");
+      expect(body.type).toBe("transaction");
       expect(result).toEqual(responseBundle);
     });
   });

@@ -19,10 +19,7 @@ describe("paginate", () => {
     const bundle = {
       resourceType: "Bundle",
       type: "searchset",
-      entry: [
-        { resource: { resourceType: "Patient", id: "1" } },
-        { resource: { resourceType: "Patient", id: "2" } },
-      ],
+      entry: [{ resource: { resourceType: "Patient", id: "1" } }, { resource: { resourceType: "Patient", id: "2" } }],
     };
 
     const executor = createMockExecutor([]);
@@ -105,10 +102,7 @@ describe("fetchAllPages", () => {
     const page2 = {
       resourceType: "Bundle",
       type: "searchset",
-      entry: [
-        { resource: { resourceType: "Patient", id: "2" } },
-        { resource: { resourceType: "Patient", id: "3" } },
-      ],
+      entry: [{ resource: { resourceType: "Patient", id: "2" } }, { resource: { resourceType: "Patient", id: "3" } }],
     };
 
     const executor = createMockExecutor([page2]);

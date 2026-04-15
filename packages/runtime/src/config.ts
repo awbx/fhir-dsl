@@ -1,9 +1,6 @@
 export interface FhirClientConfig {
   baseUrl: string;
-  auth?: {
-    type: "bearer" | "basic";
-    credentials: string;
-  };
-  headers?: Record<string, string>;
-  fetch?: typeof globalThis.fetch;
+  auth?: { type: "bearer" | "basic"; credentials: string } | undefined;
+  headers?: Record<string, string> | undefined;
+  fetch?: typeof globalThis.fetch | undefined;
 }

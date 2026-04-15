@@ -4,12 +4,12 @@ export interface PropertyModel {
   isRequired: boolean;
   isArray: boolean;
   isChoiceType: boolean;
-  description?: string;
+  description?: string | undefined;
 }
 
 export interface TypeRef {
   code: string;
-  targetProfiles?: string[];
+  targetProfiles?: string[] | undefined;
 }
 
 export interface ResourceModel {
@@ -17,10 +17,10 @@ export interface ResourceModel {
   url: string;
   kind: "resource" | "complex-type" | "primitive-type";
   isAbstract: boolean;
-  baseType?: string;
+  baseType?: string | undefined;
   properties: PropertyModel[];
   backboneElements: BackboneElementModel[];
-  description?: string;
+  description?: string | undefined;
 }
 
 export interface BackboneElementModel {
@@ -33,9 +33,9 @@ export interface SearchParamModel {
   name: string;
   code: string;
   type: string;
-  description?: string;
-  expression?: string;
-  targets?: string[];
+  description?: string | undefined;
+  expression?: string | undefined;
+  targets?: string[] | undefined;
 }
 
 export interface ResourceSearchParams {

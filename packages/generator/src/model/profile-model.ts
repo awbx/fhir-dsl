@@ -14,5 +14,5 @@ export interface ProfileModel {
   /** Properties that are constrained (narrowed) relative to the base */
   constrainedProperties: PropertyModel[];
   /** Description from the StructureDefinition */
-  description?: string;
+  description?: string | undefined;
 }

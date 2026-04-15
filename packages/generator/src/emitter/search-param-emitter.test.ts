@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { emitSearchParamTypes, emitSearchParams } from "./search-param-emitter.js";
+import { emitSearchParams, emitSearchParamTypes } from "./search-param-emitter.js";
 
 describe("emitSearchParams", () => {
   it("generates interface per resource type", () => {
     const params = new Map([
-      ["Patient", { params: [{ code: "name", type: "string" }, { code: "birthdate", type: "date" }] }],
+      [
+        "Patient",
+        {
+          params: [
+            { code: "name", type: "string" },
+            { code: "birthdate", type: "date" },
+          ],
+        },
+      ],
     ]);
 
     const output = emitSearchParams(params as any);
@@ -29,7 +37,16 @@ describe("emitSearchParams", () => {
 
   it("sorts params alphabetically within each resource", () => {
     const params = new Map([
-      ["Patient", { params: [{ code: "name", type: "string" }, { code: "birthdate", type: "date" }, { code: "active", type: "token" }] }],
+      [
+        "Patient",
+        {
+          params: [
+            { code: "name", type: "string" },
+            { code: "birthdate", type: "date" },
+            { code: "active", type: "token" },
+          ],
+        },
+      ],
     ]);
 
     const output = emitSearchParams(params as any);
@@ -43,19 +60,22 @@ describe("emitSearchParams", () => {
 
   it("maps all search param types correctly", () => {
     const params = new Map([
-      ["Test", {
-        params: [
-          { code: "a", type: "string" },
-          { code: "b", type: "token" },
-          { code: "c", type: "date" },
-          { code: "d", type: "reference" },
-          { code: "e", type: "quantity" },
-          { code: "f", type: "number" },
-          { code: "g", type: "uri" },
-          { code: "h", type: "composite" },
-          { code: "i", type: "special" },
-        ],
-      }],
+      [
+        "Test",
+        {
+          params: [
+            { code: "a", type: "string" },
+            { code: "b", type: "token" },
+            { code: "c", type: "date" },
+            { code: "d", type: "reference" },
+            { code: "e", type: "quantity" },
+            { code: "f", type: "number" },
+            { code: "g", type: "uri" },
+            { code: "h", type: "composite" },
+            { code: "i", type: "special" },
+          ],
+        },
+      ],
     ]);
 
     const output = emitSearchParams(params as any);
@@ -73,7 +93,7 @@ describe("emitSearchParams", () => {
 
   it("imports search param type interfaces", () => {
     const output = emitSearchParams(new Map());
-    expect(output).toContain('import type { StringParam');
+    expect(output).toContain("import type { StringParam");
     expect(output).toContain('from "./search-param-types.js"');
   });
 

@@ -5,8 +5,11 @@ function makeResource(name: string) {
   return { name, properties: [], description: "" } as any;
 }
 
-function makeSearchParams(resourceType: string, params: Array<{ code: string; type: string; targets?: string[] }>) {
-  return [resourceType, { params }] as const;
+function makeSearchParams(
+  resourceType: string,
+  params: Array<{ name: string; code: string; type: string; targets?: string[] | undefined }>,
+) {
+  return [resourceType, { resourceType, params }] as const;
 }
 
 describe("emitRegistry", () => {
@@ -31,12 +34,12 @@ describe("emitRegistry", () => {
   it("imports resources from kebab-case paths", () => {
     const resources = [makeResource("MedicationRequest")];
     const output = emitRegistry(resources, new Map());
-    expect(output).toContain('./resources/medication-request.js');
+    expect(output).toContain("./resources/medication-request.js");
   });
 
   it("generates SearchParamRegistry with search param types", () => {
     const resources = [makeResource("Patient")];
-    const searchParams = new Map([makeSearchParams("Patient", [{ code: "name", type: "string" }])]);
+    const searchParams = new Map([makeSearchParams("Patient", [{ name: "name", code: "name", type: "string" }])]);
     const output = emitRegistry(resources, searchParams);
 
     expect(output).toContain("export interface SearchParamRegistry");
@@ -46,7 +49,7 @@ describe("emitRegistry", () => {
 
   it("imports search param types when they exist", () => {
     const resources = [makeResource("Patient")];
-    const searchParams = new Map([makeSearchParams("Patient", [{ code: "name", type: "string" }])]);
+    const searchParams = new Map([makeSearchParams("Patient", [{ name: "name", code: "name", type: "string" }])]);
     const output = emitRegistry(resources, searchParams);
 
     expect(output).toContain('from "./search-params.js"');
@@ -56,8 +59,8 @@ describe("emitRegistry", () => {
     const resources = [makeResource("Observation")];
     const searchParams = new Map([
       makeSearchParams("Observation", [
-        { code: "subject", type: "reference", targets: ["Patient", "Group"] },
-        { code: "performer", type: "reference", targets: ["Practitioner"] },
+        { name: "subject", code: "subject", type: "reference", targets: ["Patient", "Group"] },
+        { name: "performer", code: "performer", type: "reference", targets: ["Practitioner"] },
       ]),
     ]);
 
@@ -72,9 +75,7 @@ describe("emitRegistry", () => {
 
   it("skips non-reference params from IncludeRegistry", () => {
     const resources = [makeResource("Patient")];
-    const searchParams = new Map([
-      makeSearchParams("Patient", [{ code: "name", type: "string" }]),
-    ]);
+    const searchParams = new Map([makeSearchParams("Patient", [{ name: "name", code: "name", type: "string" }])]);
 
     const output = emitRegistry(resources, searchParams);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./profile-emitter.js";
 import type { ProfileModel } from "../model/profile-model.js";
+import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./profile-emitter.js";
 
 function makeProfile(overrides: Partial<ProfileModel> = {}): ProfileModel {
   return {
@@ -40,92 +40,124 @@ describe("emitProfile", () => {
   });
 
   it("emits required properties without question mark", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "status",
-        types: [{ code: "code" }],
-        isRequired: true,
-        isArray: false,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "status",
+            types: [{ code: "code" }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain("status: FhirCode;");
     expect(output).not.toContain("status?:");
   });
 
   it("emits optional properties with question mark", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "note",
-        types: [{ code: "Annotation" }],
-        isRequired: false,
-        isArray: false,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "note",
+            types: [{ code: "Annotation" }],
+            isRequired: false,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain("note?: Annotation;");
   });
 
   it("emits array properties", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "category",
-        types: [{ code: "CodeableConcept" }],
-        isRequired: true,
-        isArray: true,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "category",
+            types: [{ code: "CodeableConcept" }],
+            isRequired: true,
+            isArray: true,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain("category: CodeableConcept[];");
   });
 
   it("emits Reference with target profiles", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "subject",
-        types: [{ code: "Reference", targetProfiles: ["Patient", "Group"] }],
-        isRequired: true,
-        isArray: false,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "subject",
+            types: [{ code: "Reference", targetProfiles: ["Patient", "Group"] }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain('subject: Reference<"Patient" | "Group">');
   });
 
   it("emits union types", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "value",
-        types: [{ code: "Quantity" }, { code: "string" }],
-        isRequired: false,
-        isArray: false,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "value",
+            types: [{ code: "Quantity" }, { code: "string" }],
+            isRequired: false,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain("value?: Quantity | FhirString;");
   });
 
   it("imports primitives and datatypes separately", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [
-        { name: "status", types: [{ code: "code" }], isRequired: true, isArray: false, isChoiceType: false },
-        { name: "category", types: [{ code: "CodeableConcept" }], isRequired: true, isArray: false, isChoiceType: false },
-      ],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          { name: "status", types: [{ code: "code" }], isRequired: true, isArray: false, isChoiceType: false },
+          {
+            name: "category",
+            types: [{ code: "CodeableConcept" }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain('from "../primitives.js"');
     expect(output).toContain('from "../datatypes.js"');
   });
 
   it("imports Reference from datatypes when used", () => {
-    const output = emitProfile(makeProfile({
-      constrainedProperties: [{
-        name: "subject",
-        types: [{ code: "Reference", targetProfiles: ["Patient"] }],
-        isRequired: true,
-        isArray: false,
-        isChoiceType: false,
-      }],
-    }));
+    const output = emitProfile(
+      makeProfile({
+        constrainedProperties: [
+          {
+            name: "subject",
+            types: [{ code: "Reference", targetProfiles: ["Patient"] }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+          },
+        ],
+      }),
+    );
     expect(output).toContain("Reference");
     expect(output).toContain('from "../datatypes.js"');
   });
@@ -133,10 +165,7 @@ describe("emitProfile", () => {
 
 describe("emitProfileIndex", () => {
   it("exports all profiles sorted alphabetically", () => {
-    const profiles = [
-      makeProfile({ name: "USCorePatient" }),
-      makeProfile({ name: "BloodPressure" }),
-    ];
+    const profiles = [makeProfile({ name: "USCorePatient" }), makeProfile({ name: "BloodPressure" })];
 
     const output = emitProfileIndex(profiles);
 
@@ -158,9 +187,7 @@ describe("emitProfileIndex", () => {
 
 describe("emitProfileRegistry", () => {
   it("generates ProfileRegistry interface", () => {
-    const profiles = [
-      makeProfile({ baseResourceType: "Patient", name: "USCorePatient", slug: "us-core-patient" }),
-    ];
+    const profiles = [makeProfile({ baseResourceType: "Patient", name: "USCorePatient", slug: "us-core-patient" })];
 
     const output = emitProfileRegistry(profiles);
 

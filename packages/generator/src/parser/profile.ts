@@ -4,41 +4,38 @@ import type { PropertyModel, TypeRef } from "../model/resource-model.js";
 
 interface FhirTypeRef {
   code: string;
-  targetProfile?: string[];
-  profile?: string[];
+  targetProfile?: string[] | undefined;
+  profile?: string[] | undefined;
 }
 
 interface FhirElementDefinition {
-  id?: string;
+  id?: string | undefined;
   path: string;
-  min?: number;
-  max?: string;
-  type?: FhirTypeRef[];
-  short?: string;
-  definition?: string;
-  mustSupport?: boolean;
-  fixedCode?: string;
-  fixedUri?: string;
-  fixedString?: string;
-  patternCodeableConcept?: unknown;
-  binding?: {
-    strength?: string;
-    valueSet?: string;
-  };
+  min?: number | undefined;
+  max?: string | undefined;
+  type?: FhirTypeRef[] | undefined;
+  short?: string | undefined;
+  definition?: string | undefined;
+  mustSupport?: boolean | undefined;
+  fixedCode?: string | undefined;
+  fixedUri?: string | undefined;
+  fixedString?: string | undefined;
+  patternCodeableConcept?: unknown | undefined;
+  binding?: { strength?: string | undefined; valueSet?: string | undefined } | undefined;
 }
 
 interface FhirProfileSD {
   resourceType: "StructureDefinition";
   url: string;
   name: string;
-  title?: string;
+  title?: string | undefined;
   type: string;
   baseDefinition: string;
   derivation: "constraint";
   abstract: boolean;
   kind: string;
-  snapshot?: { element: FhirElementDefinition[] };
-  differential?: { element: FhirElementDefinition[] };
+  snapshot?: { element: FhirElementDefinition[] } | undefined;
+  differential?: { element: FhirElementDefinition[] } | undefined;
 }
 
 // FHIRPath system type URLs

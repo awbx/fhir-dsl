@@ -5,36 +5,32 @@ import type { BackboneElementModel, PropertyModel, ResourceModel, TypeRef } from
 
 interface FhirTypeRef {
   code: string;
-  targetProfile?: string[];
-  profile?: string[];
+  targetProfile?: string[] | undefined;
+  profile?: string[] | undefined;
 }
 
 interface FhirElementDefinition {
-  id?: string;
+  id?: string | undefined;
   path: string;
-  min?: number;
-  max?: string;
-  type?: FhirTypeRef[];
-  short?: string;
-  definition?: string;
-  contentReference?: string;
+  min?: number | undefined;
+  max?: string | undefined;
+  type?: FhirTypeRef[] | undefined;
+  short?: string | undefined;
+  definition?: string | undefined;
+  contentReference?: string | undefined;
 }
 
 interface FhirStructureDefinition {
   resourceType: "StructureDefinition";
-  id?: string;
+  id?: string | undefined;
   url: string;
   name: string;
   kind: string;
   abstract: boolean;
   type: string;
-  baseDefinition?: string;
-  snapshot?: {
-    element: FhirElementDefinition[];
-  };
-  differential?: {
-    element: FhirElementDefinition[];
-  };
+  baseDefinition?: string | undefined;
+  snapshot?: { element: FhirElementDefinition[] } | undefined;
+  differential?: { element: FhirElementDefinition[] } | undefined;
 }
 
 // Properties defined on Resource and DomainResource base types.

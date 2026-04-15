@@ -1,8 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
-import { FhirClient, FhirRequestError, createFhirClient } from "./fhir-client.js";
-import type { FhirSchema } from "./types.js";
+import { createFhirClient, FhirClient, FhirRequestError } from "./fhir-client.js";
 
-type TestSchema = FhirSchema;
+type TestSchema = {
+  resources: { Patient: { resourceType: "Patient"; id?: string } };
+  searchParams: {
+    Patient: {
+      family: { type: "string"; value: string };
+      birthdate: { type: "date"; value: string };
+    };
+  };
+  includes: Record<string, never>;
+  profiles: Record<string, never>;
+};
 
 function mockFetch(response: object, status = 200) {
   return vi.fn(async () => ({

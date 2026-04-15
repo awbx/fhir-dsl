@@ -37,7 +37,7 @@ export class FhirExecutor {
     const response = await this.#fetch(url.toString(), {
       method: query.method,
       headers,
-      body: query.body ? JSON.stringify(query.body) : undefined,
+      ...(query.body ? { body: JSON.stringify(query.body) } : {}),
     });
 
     if (!response.ok) {

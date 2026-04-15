@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
-import type { FhirSchema } from "./types.js";
 
-type TestSchema = FhirSchema;
+type TestSchema = {
+  resources: { Patient: { resourceType: "Patient"; id?: string } };
+  searchParams: Record<string, never>;
+  includes: Record<string, never>;
+  profiles: Record<string, never>;
+};
 
 describe("ReadQueryBuilder", () => {
   describe("compile", () => {

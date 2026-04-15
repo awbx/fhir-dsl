@@ -1,10 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CompiledQuery } from "./compiled-query.js";
 import { SearchQueryBuilderImpl } from "./search-query-builder.js";
-import type { FhirSchema } from "./types.js";
 
-// Minimal schema for testing
-type TestSchema = FhirSchema;
+// Concrete test schema
+type TestSchema = {
+  resources: {
+    Patient: { resourceType: "Patient"; id?: string };
+    Practitioner: { resourceType: "Practitioner"; id?: string };
+  };
+  searchParams: {
+    Patient: {
+      family: { type: "string"; value: string };
+      birthdate: { type: "date"; value: string };
+    };
+  };
+  includes: {
+    Patient: { general_practitioner: "Practitioner" };
+  };
+  profiles: Record<string, never>;
+};
 
 const noopExecutor = vi.fn(async () => ({
   resourceType: "Bundle",
@@ -12,8 +26,10 @@ const noopExecutor = vi.fn(async () => ({
   entry: [],
 }));
 
+type FlexibleSearchParams = Record<string, { type: "date"; value: string }>;
+
 function createBuilder(resourceType = "Patient") {
-  return new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>(resourceType, noopExecutor);
+  return new SearchQueryBuilderImpl<TestSchema, string, FlexibleSearchParams>(resourceType, noopExecutor);
 }
 
 describe("SearchQueryBuilder", () => {
@@ -45,7 +61,9 @@ describe("SearchQueryBuilder", () => {
     });
 
     it("compiles _include params", () => {
-      const query = createBuilder("Patient").include("general-practitioner" as any).compile();
+      const query = createBuilder("Patient")
+        .include("general-practitioner" as any)
+        .compile();
 
       expect(query.params).toContainEqual({
         name: "_include",
@@ -54,7 +72,9 @@ describe("SearchQueryBuilder", () => {
     });
 
     it("compiles sort params", () => {
-      const query = createBuilder("Patient").sort("birthdate" as any, "desc").compile();
+      const query = createBuilder("Patient")
+        .sort("birthdate" as any, "desc")
+        .compile();
 
       expect(query.params).toContainEqual({
         name: "_sort",
@@ -63,7 +83,9 @@ describe("SearchQueryBuilder", () => {
     });
 
     it("compiles ascending sort without prefix", () => {
-      const query = createBuilder("Patient").sort("name" as any, "asc").compile();
+      const query = createBuilder("Patient")
+        .sort("name" as any, "asc")
+        .compile();
 
       expect(query.params).toContainEqual({
         name: "_sort",
@@ -185,13 +207,13 @@ describe("SearchQueryBuilder", () => {
         ],
       }));
 
-      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>("Patient", executor);
+      const builder = new SearchQueryBuilderImpl<TestSchema, "Patient", FlexibleSearchParams>("Patient", executor);
       const result = await builder.execute();
 
       expect(result.data).toHaveLength(1);
-      expect(result.data[0]!.resourceType).toBe("Patient");
+      expect(result.data[0]?.resourceType).toBe("Patient");
       expect(result.included).toHaveLength(1);
-      expect((result.included[0] as any).resourceType).toBe("Practitioner");
+      expect((result as { included: { resourceType: string }[] }).included[0]?.resourceType).toBe("Practitioner");
     });
 
     it("handles empty bundle", async () => {

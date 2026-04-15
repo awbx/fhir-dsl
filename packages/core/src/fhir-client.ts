@@ -9,12 +9,9 @@ import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
 
 export interface FhirClientConfig {
   baseUrl: string;
-  auth?: {
-    type: "bearer" | "basic";
-    credentials: string;
-  };
-  headers?: Record<string, string>;
-  fetch?: typeof globalThis.fetch;
+  auth?: { type: "bearer" | "basic"; credentials: string } | undefined;
+  headers?: Record<string, string> | undefined;
+  fetch?: typeof globalThis.fetch | undefined;
 }
 
 // --- Default executor using fetch ---
@@ -47,7 +44,7 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
     const response = await fetchFn(url.toString(), {
       method: query.method,
       headers,
-      body: query.body ? JSON.stringify(query.body) : undefined,
+      ...(query.body ? { body: JSON.stringify(query.body) } : {}),
     });
 
     if (!response.ok) {

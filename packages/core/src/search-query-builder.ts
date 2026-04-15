@@ -1,6 +1,6 @@
-import type { Resource } from "@fhir-dsl/types";
+import type { Bundle, Resource } from "@fhir-dsl/types";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
-import type { BundleLink, SearchQueryBuilder, SearchResult } from "./query-builder.js";
+import type { BundleLink, ResolveIncluded, SearchQueryBuilder, SearchResult } from "./query-builder.js";
 import type { FhirSchema, IncludeFor, ResolveProfile, SearchPrefixFor, SortDirection } from "./types.js";
 
 // --- Internal query state ---
@@ -10,9 +10,9 @@ interface QueryState {
   params: CompiledSearchParam[];
   includes: string[];
   sorts: Array<{ param: string; direction: SortDirection }>;
-  count?: number;
-  offset?: number;
-  profile?: string;
+  count?: number | undefined;
+  offset?: number | undefined;
+  profile?: string | undefined;
 }
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
@@ -123,32 +123,42 @@ export class SearchQueryBuilderImpl<
     };
   }
 
-  async execute(): Promise<SearchResult<ResolveProfile<S, RT, Prof> & Resource, [Inc] extends [never] ? never : any>> {
+  async execute(): Promise<
+    SearchResult<
+      ResolveProfile<S, RT, Prof> & Resource,
+      [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
+    >
+  > {
     const query = this.compile();
-    const bundle = (await this.#executor(query)) as any;
+    const bundle = (await this.#executor(query)) as Bundle;
 
-    const entries: Array<{ resource?: any; search?: { mode?: string } }> = bundle.entry ?? [];
+    const entries = bundle.entry ?? [];
 
     const data: Array<ResolveProfile<S, RT, Prof> & Resource> = [];
-    const included: Array<Resource> = [];
+    const included: Resource[] = [];
 
     for (const entry of entries) {
       if (!entry.resource) continue;
       if (entry.search?.mode === "include") {
         included.push(entry.resource);
       } else {
-        data.push(entry.resource);
+        data.push(entry.resource as ResolveProfile<S, RT, Prof> & Resource);
       }
     }
 
     const links: BundleLink[] | undefined = bundle.link;
 
+    type ResultType = SearchResult<
+      ResolveProfile<S, RT, Prof> & Resource,
+      [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
+    >;
+
     return {
       data,
-      included: included as any,
+      included,
       total: bundle.total,
       link: links,
       raw: bundle,
-    };
+    } as ResultType;
   }
 }

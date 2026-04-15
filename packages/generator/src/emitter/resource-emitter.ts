@@ -1,5 +1,5 @@
 import { fhirTypeToTs, isComplexType, isPrimitive } from "@fhir-dsl/utils";
-import type { BackboneElementModel, PropertyModel, ResourceModel } from "../model/resource-model.js";
+import type { BackboneElementModel, PropertyModel, ResourceModel, TypeRef } from "../model/resource-model.js";
 
 export function emitResource(model: ResourceModel): string {
   const lines: string[] = [];
@@ -88,7 +88,7 @@ function formatPropertyType(prop: PropertyModel): string {
   return prop.types.map(formatTypeRef).join(" | ");
 }
 
-function formatTypeRef(typeRef: { code: string; targetProfiles?: string[] }): string {
+function formatTypeRef(typeRef: TypeRef): string {
   if (typeRef.code === "Reference" && typeRef.targetProfiles?.length) {
     const targets = typeRef.targetProfiles.map((t) => `"${t}"`).join(" | ");
     return `Reference<${targets}>`;

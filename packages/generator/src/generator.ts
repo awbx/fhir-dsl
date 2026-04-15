@@ -8,18 +8,43 @@ import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
 import type { ProfileModel } from "./model/profile-model.js";
-import type { ResourceModel } from "./model/resource-model.js";
+import type { ResourceModel, ResourceSearchParams } from "./model/resource-model.js";
 import { parseProfile } from "./parser/profile.js";
 import { parseSearchParameters } from "./parser/search-parameter.js";
 import { parseStructureDefinition } from "./parser/structure-definition.js";
 
+interface FhirStructureDefinition {
+  resourceType: "StructureDefinition";
+  url: string;
+  name: string;
+  kind: string;
+  abstract: boolean;
+  type: string;
+  baseDefinition?: string | undefined;
+  derivation?: string | undefined;
+  snapshot?: { element: unknown[] } | undefined;
+  differential?: { element: unknown[] } | undefined;
+  [key: string]: unknown;
+}
+
+function isStructureDefinition(value: unknown): value is FhirStructureDefinition {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    record.resourceType === "StructureDefinition" &&
+    typeof record.name === "string" &&
+    typeof record.url === "string" &&
+    typeof record.type === "string"
+  );
+}
+
 export interface GeneratorOptions {
   version: string;
   outDir: string;
-  resources?: string[];
-  cacheDir?: string;
-  localSpecDir?: string;
-  ig?: string[];
+  resources?: string[] | undefined;
+  cacheDir?: string | undefined;
+  localSpecDir?: string | undefined;
+  ig?: string[] | undefined;
 }
 
 export async function generate(options: GeneratorOptions): Promise<void> {
@@ -43,17 +68,16 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   // Parse StructureDefinitions
   let resourceModels: ResourceModel[] = [];
   for (const sd of spec.resourceDefinitions) {
-    const sdAny = sd as any;
-    if (sdAny.resourceType !== "StructureDefinition") continue;
-    if (sdAny.kind !== "resource") continue;
-    if (sdAny.abstract) continue;
-    if (!sdAny.snapshot?.element?.length) continue;
+    if (!isStructureDefinition(sd)) continue;
+    if (sd.kind !== "resource") continue;
+    if (sd.abstract) continue;
+    if (!sd.snapshot?.element?.length) continue;
 
     try {
-      const model = parseStructureDefinition(sdAny);
+      const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
       resourceModels.push(model);
     } catch (err) {
-      console.warn(`Failed to parse ${sdAny.name}: ${err}`);
+      console.warn(`Failed to parse ${sd.name}: ${err}`);
     }
   }
 
@@ -66,7 +90,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   console.info(`Generating types for ${resourceModels.length} resources`);
 
   // Parse SearchParameters
-  const searchParamsMap = parseSearchParameters(spec.searchParameters as any[]);
+  const searchParamsMap = parseSearchParameters(spec.searchParameters);
 
   // Create output directories
   const versionDir = join(outDir, version.toLowerCase());
@@ -94,7 +118,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   }
 
   // Emit search params
-  const filteredSearchParams = new Map<string, any>();
+  const filteredSearchParams = new Map<string, ResourceSearchParams>();
   for (const model of resourceModels) {
     const sp = searchParamsMap.get(model.name);
     if (sp) filteredSearchParams.set(model.name, sp);
@@ -112,11 +136,12 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       const ig = await downloadIG(igRef, join(cache, "igs"));
 
       for (const sd of ig.profiles) {
+        if (!isStructureDefinition(sd)) continue;
         try {
-          const profile = parseProfile(sd as any, ig.name);
+          const profile = parseProfile(sd as Parameters<typeof parseProfile>[0], ig.name);
           allProfiles.push(profile);
         } catch (err) {
-          console.warn(`Failed to parse profile ${(sd as any).name}: ${err}`);
+          console.warn(`Failed to parse profile ${sd.name}: ${err}`);
         }
       }
     }

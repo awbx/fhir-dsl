@@ -71,7 +71,7 @@ describe("emitClient", () => {
 
   it("uses empty record for profiles when hasProfiles is false", () => {
     const output = emitClient(false);
-    expect(output).toContain('Record<string, never>');
+    expect(output).toContain("Record<string, never>");
     expect(output).not.toContain("profile-registry.js");
   });
 

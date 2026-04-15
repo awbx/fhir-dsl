@@ -46,7 +46,13 @@ describe("emitResource", () => {
     const output = emitResource(
       makeModel({
         properties: [
-          { name: "identifier", types: [{ code: "Identifier" }], isRequired: false, isArray: true, isChoiceType: false },
+          {
+            name: "identifier",
+            types: [{ code: "Identifier" }],
+            isRequired: false,
+            isArray: true,
+            isChoiceType: false,
+          },
         ],
       }),
     );

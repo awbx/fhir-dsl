@@ -1,6 +1,6 @@
 import { fhirTypeToTs, isComplexType, isPrimitive, toKebabCase } from "@fhir-dsl/utils";
 import type { ProfileModel } from "../model/profile-model.js";
-import type { PropertyModel } from "../model/resource-model.js";
+import type { PropertyModel, TypeRef } from "../model/resource-model.js";
 
 export function emitProfile(model: ProfileModel): string {
   const lines: string[] = [];
@@ -111,7 +111,7 @@ function formatPropertyType(prop: PropertyModel): string {
   return prop.types.map(formatTypeRef).join(" | ");
 }
 
-function formatTypeRef(typeRef: { code: string; targetProfiles?: string[] }): string {
+function formatTypeRef(typeRef: TypeRef): string {
   if (typeRef.code === "Reference" && typeRef.targetProfiles?.length) {
     const targets = typeRef.targetProfiles.map((t) => `"${t}"`).join(" | ");
     return `Reference<${targets}>`;

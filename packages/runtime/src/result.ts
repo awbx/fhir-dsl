@@ -3,9 +3,9 @@ import type { Bundle, Resource } from "@fhir-dsl/types";
 export interface SearchResult<Primary extends Resource, Included extends Resource = never> {
   data: Primary[];
   included: [Included] extends [never] ? [] : Included[];
-  total?: number;
+  total?: number | undefined;
   hasNext: boolean;
-  nextUrl?: string;
+  nextUrl?: string | undefined;
   raw: Bundle;
 }
 
@@ -27,9 +27,11 @@ export function unwrapBundle<Primary extends Resource, Included extends Resource
 
   const nextLink = bundle.link?.find((l) => l.relation === "next");
 
+  type IncludedArray = [Included] extends [never] ? [] : Included[];
+
   return {
     data,
-    included: included as any,
+    included: included as IncludedArray,
     total: bundle.total,
     hasNext: !!nextLink,
     nextUrl: nextLink?.url,

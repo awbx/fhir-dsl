@@ -1,4 +1,4 @@
-import type { Resource } from "@fhir-dsl/types";
+import type { Resource, SearchParam } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import type { FhirSchema, IncludeFor, ResolveProfile, SearchPrefixFor, SortDirection } from "./types.js";
 
@@ -12,23 +12,24 @@ export interface BundleLink {
 export interface SearchResult<Primary extends Resource, Included extends Resource = never> {
   data: Primary[];
   included: [Included] extends [never] ? [] : Included[];
-  total?: number;
-  link?: BundleLink[];
+  total?: number | undefined;
+  link?: BundleLink[] | undefined;
   raw: unknown;
 }
 
 // --- Resolve included resource types from the resource map ---
 
-type ResolveIncluded<S extends FhirSchema, IncludedTypes extends string> = IncludedTypes extends keyof S["resources"]
-  ? S["resources"][IncludedTypes]
-  : never;
+export type ResolveIncluded<
+  S extends FhirSchema,
+  IncludedTypes extends string,
+> = IncludedTypes extends keyof S["resources"] ? S["resources"][IncludedTypes] : never;
 
 // --- Search Query Builder Interface ---
 
 export interface SearchQueryBuilder<
   S extends FhirSchema,
   RT extends string,
-  SP = Record<string, any>,
+  SP = Record<string, SearchParam>,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
 > {
