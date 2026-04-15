@@ -243,6 +243,29 @@ export interface DomainResource extends Resource {
   modifierExtension?: Extension[];
 }
 
+// --- Bundle (infrastructure type used by transactions, search results, etc.) ---
+
+export interface Bundle extends Resource {
+  resourceType: "Bundle";
+  type: string;
+  total?: number;
+  link?: BundleLink[];
+  entry?: BundleEntry[];
+}
+
+export interface BundleLink {
+  relation: string;
+  url: string;
+}
+
+export interface BundleEntry {
+  fullUrl?: string;
+  resource?: Resource;
+  search?: { mode?: string; score?: number };
+  request?: { method: string; url: string };
+  response?: { status: string; location?: string; etag?: string; lastModified?: string };
+}
+
 // --- BackboneElement ---
 
 export interface BackboneElement extends Element {
@@ -417,59 +440,4 @@ export interface ElementDefinition extends BackboneElement {
   isSummary?: FhirBoolean;
   binding?: Element;
   mapping?: Element[];
-}
-
-// --- R5-specific Datatypes ---
-
-export interface CodeableReference extends Element {
-  concept?: CodeableConcept;
-  reference?: Reference;
-}
-
-export interface RatioRange extends Element {
-  lowNumerator?: Quantity;
-  highNumerator?: Quantity;
-  denominator?: Quantity;
-}
-
-export interface Availability extends BackboneElement {
-  availableTime?: AvailabilityAvailableTime[];
-  notAvailableTime?: AvailabilityNotAvailableTime[];
-}
-
-export interface AvailabilityAvailableTime extends Element {
-  daysOfWeek?: FhirCode[];
-  allDay?: FhirBoolean;
-  availableStartTime?: FhirTime;
-  availableEndTime?: FhirTime;
-}
-
-export interface AvailabilityNotAvailableTime extends Element {
-  description?: FhirString;
-  during?: Period;
-}
-
-export interface ExtendedContactDetail extends Element {
-  purpose?: CodeableConcept;
-  name?: HumanName[];
-  telecom?: ContactPoint[];
-  address?: Address;
-  organization?: Reference<"Organization">;
-  period?: Period;
-}
-
-export interface VirtualServiceDetail extends Element {
-  channelType?: Coding;
-  addressUrl?: FhirUrl;
-  addressString?: FhirString;
-  additionalInfo?: FhirUrl[];
-  maxParticipants?: FhirPositiveInt;
-  sessionKey?: FhirString;
-}
-
-export interface MonetaryComponent extends Element {
-  type: FhirCode<"base" | "surcharge" | "deduction" | "discount" | "tax" | "informational">;
-  code?: CodeableConcept;
-  factor?: FhirDecimal;
-  amount?: Money;
 }
