@@ -53,7 +53,16 @@ const FHIRPATH_SYSTEM_TYPES: Record<string, string> = {
 };
 
 // Properties inherited from Resource/DomainResource that shouldn't be re-emitted
-const BASE_PROPS = new Set(["id", "meta", "implicitRules", "language", "text", "contained", "extension", "modifierExtension"]);
+const BASE_PROPS = new Set([
+  "id",
+  "meta",
+  "implicitRules",
+  "language",
+  "text",
+  "contained",
+  "extension",
+  "modifierExtension",
+]);
 
 export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
   // Always use sd.type for the base resource type — it's the root FHIR resource (e.g., "Observation")
@@ -82,12 +91,12 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
     // Skip base inherited properties unless they're being constrained with min > 0
     if (BASE_PROPS.has(propName) && !(element.min && element.min > 0)) continue;
 
-    // Build types list
-    const types: TypeRef[] = (element.type ?? []).map(fhirTypeRefToTypeRef);
+    // Build types list, filtering out Reference-only types (profile URL narrowing
+    // produces Reference<"us-core-patient"> which isn't assignable to Reference<"Patient">)
+    const rawTypes: TypeRef[] = (element.type ?? []).map(fhirTypeRefToTypeRef);
+    const types = rawTypes.filter((t) => t.code !== "Reference");
 
-    // Skip properties with no types — they just inherit from the base interface.
-    // Even cardinality-only constraints (min > 0) don't need re-emission since we can't
-    // narrow the type without knowing the base type from the full StructureDefinition.
+    // Skip properties with no usable types — they just inherit from the base interface
     if (types.length === 0) continue;
 
     // Avoid duplicate property names
@@ -115,10 +124,16 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
       continue;
     }
 
+    // For non-choice properties: only emit if the property has non-Reference types
+    // and the profile makes it required (min > 0). Don't re-emit optional properties
+    // since we can't guarantee they're compatible with the base type's required status.
+    const isRequired = (element.min ?? 0) > 0;
+    if (!isRequired) continue;
+
     constrainedProperties.push({
       name: propName,
       types,
-      isRequired: (element.min ?? 0) > 0,
+      isRequired: true,
       isArray: element.max === "*" || (element.max !== undefined && Number.parseInt(element.max) > 1),
       isChoiceType: false,
       description: element.short,

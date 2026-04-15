@@ -2,10 +2,16 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const FHIR_SPEC_URLS: Record<string, string> = {
-  r4: "https://hl7.org/fhir/R4/definitions.json.zip",
-  r4b: "https://hl7.org/fhir/R4B/definitions.json.zip",
-  r5: "https://hl7.org/fhir/R5/definitions.json.zip",
+  r4: "https://hl7.org/fhir/R4",
+  r4b: "https://hl7.org/fhir/R4B",
+  r5: "https://hl7.org/fhir/R5",
+  // R6 is not yet published — use the CI build (latest draft)
+  r6: "https://build.fhir.org",
 };
+
+function resolveSpecBaseUrl(version: string): string {
+  return FHIR_SPEC_URLS[version.toLowerCase()] ?? `https://hl7.org/fhir/${version.toUpperCase()}`;
+}
 
 export interface DownloadedSpec {
   resourceDefinitions: unknown[];
@@ -13,25 +19,16 @@ export interface DownloadedSpec {
 }
 
 export async function downloadSpec(version: string, cacheDir: string): Promise<DownloadedSpec> {
-  const specUrl = FHIR_SPEC_URLS[version];
-  if (!specUrl) {
-    throw new Error(`Unsupported FHIR version: ${version}. Supported: ${Object.keys(FHIR_SPEC_URLS).join(", ")}`);
-  }
+  const baseUrl = resolveSpecBaseUrl(version);
 
   await mkdir(cacheDir, { recursive: true });
 
   const profilesPath = join(cacheDir, "profiles-resources.json");
   const searchParamsPath = join(cacheDir, "search-parameters.json");
 
-  const resourceDefinitions = await loadOrDownload(
-    profilesPath,
-    specUrl.replace("definitions.json.zip", "profiles-resources.json"),
-  );
+  const resourceDefinitions = await loadOrDownload(profilesPath, `${baseUrl}/profiles-resources.json`);
 
-  const searchParameters = await loadOrDownload(
-    searchParamsPath,
-    specUrl.replace("definitions.json.zip", "search-parameters.json"),
-  );
+  const searchParameters = await loadOrDownload(searchParamsPath, `${baseUrl}/search-parameters.json`);
 
   return {
     resourceDefinitions: extractEntries(resourceDefinitions),
@@ -105,7 +102,12 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
     if (!file.endsWith(".json") || file === ".index.json" || file === "package.json") continue;
     try {
       const content = JSON.parse(await readFile(join(igDir, file), "utf-8"));
-      if (content.resourceType === "StructureDefinition" && content.derivation === "constraint" && content.kind === "resource" && !content.abstract) {
+      if (
+        content.resourceType === "StructureDefinition" &&
+        content.derivation === "constraint" &&
+        content.kind === "resource" &&
+        !content.abstract
+      ) {
         profiles.push(content);
       }
     } catch {
