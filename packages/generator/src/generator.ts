@@ -2,7 +2,7 @@ import { access, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
-import { emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
+import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/profile-emitter.js";
 import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
@@ -162,7 +162,10 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     "utf-8",
   );
 
-  // Emit index files
+  // Emit typed client helper
+  await writeFile(join(versionDir, "client.ts"), emitClient(hasProfilesDir), "utf-8");
+
+  // Emit index files (include client export)
   await writeFile(join(versionDir, "index.ts"), emitResourceIndex(resourceModels, extraExports), "utf-8");
 
   // Only write root index if it doesn't already exist (user manages this file)
@@ -205,7 +208,7 @@ export type FhirTime = string;
 export type FhirXhtml = string;
 `;
 
-const DATATYPES_STUB = `// Generated datatypes stub
-// In a full implementation, complex datatypes would be generated from StructureDefinitions
-export { type Element, type Extension, type Coding, type CodeableConcept, type Identifier, type Period, type HumanName, type Address, type ContactPoint, type Quantity, type Range, type Ratio, type Attachment, type Annotation, type SampledData, type Duration, type Age, type SimpleQuantity, type Reference, type Narrative, type Meta, type Resource, type DomainResource, type BackboneElement, type Timing, type Dosage } from "@fhir-dsl/types";
+const DATATYPES_STUB = `// Re-exports base FHIR datatypes from @fhir-dsl/types
+// Bundle/BundleEntry/BundleLink are omitted here — they come from the generated resources/bundle.ts
+export { type Element, type Extension, type Coding, type CodeableConcept, type Identifier, type Period, type HumanName, type Address, type ContactPoint, type Quantity, type Range, type Ratio, type Attachment, type Annotation, type SampledData, type Duration, type Age, type SimpleQuantity, type Reference, type Narrative, type Meta, type Resource, type DomainResource, type BackboneElement, type Timing, type Dosage, type Money, type ContactDetail, type UsageContext, type RelatedArtifact, type Expression, type DataRequirement, type TriggerDefinition, type Signature, type Distance, type Count, type SubstanceAmount, type Contributor, type ParameterDefinition, type Population, type ProdCharacteristic, type ProductShelfLife, type MarketingStatus, type ElementDefinition } from "@fhir-dsl/types";
 `;
