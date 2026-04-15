@@ -26,8 +26,8 @@
     "@biomejs/biome": "^2.4.12",
     "@types/node": "^25.6.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "@fhir-dsl/core": "workspace:*",

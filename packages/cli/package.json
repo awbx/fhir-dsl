@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@fhir-dsl/generator": "workspace:*",
-    "commander": "^13.0.0"
+    "commander": "^14.0.3"
   },
   "files": [
     "dist"
