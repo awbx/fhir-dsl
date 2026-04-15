@@ -43,6 +43,7 @@
       "!**/dist",
       "!**/node_modules",
       "!**/.cache",
+      "!**/.docusaurus",
       "!**/generated",
       "!**/pnpm-lock.yaml"
     ]

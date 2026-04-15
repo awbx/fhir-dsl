@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CompiledQuery } from "./compiled-query.js";
 import { SearchQueryBuilderImpl } from "./search-query-builder.js";
 
 // Concrete test schema
