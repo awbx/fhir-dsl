@@ -1,5 +1,13 @@
+import type {
+  Annotation,
+  Attachment,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirDecimal, FhirInstant, FhirPositiveInt, FhirString } from "../primitives.js";
-import type { Annotation, Attachment, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface Media extends DomainResource {
   resourceType: "Media";
@@ -15,7 +23,9 @@ export interface Media extends DomainResource {
   createdDateTime?: FhirDateTime;
   createdPeriod?: Period;
   issued?: FhirInstant;
-  operator?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson">;
+  operator?: Reference<
+    "Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson"
+  >;
   reasonCode?: CodeableConcept[];
   bodySite?: CodeableConcept;
   deviceName?: FhirString;

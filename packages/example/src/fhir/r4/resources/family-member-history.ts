@@ -1,5 +1,23 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
-import type { Age, Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Range, Reference } from "../datatypes.js";
+import type {
+  Age,
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Range,
+  Reference,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface FamilyMemberHistoryCondition extends BackboneElement {
   code: CodeableConcept;
@@ -37,7 +55,14 @@ export interface FamilyMemberHistory extends DomainResource {
   deceasedDate?: FhirDate;
   deceasedString?: FhirString;
   reasonCode?: CodeableConcept[];
-  reasonReference?: Reference<"Condition" | "Observation" | "AllergyIntolerance" | "QuestionnaireResponse" | "DiagnosticReport" | "DocumentReference">[];
+  reasonReference?: Reference<
+    | "Condition"
+    | "Observation"
+    | "AllergyIntolerance"
+    | "QuestionnaireResponse"
+    | "DiagnosticReport"
+    | "DocumentReference"
+  >[];
   note?: Annotation[];
   condition?: FamilyMemberHistoryCondition[];
 }

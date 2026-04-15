@@ -1,5 +1,22 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirMarkdown, FhirString, FhirUnsignedInt, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, Coding, ContactDetail, DomainResource, Identifier, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUnsignedInt,
+  FhirUri,
+} from "../primitives.js";
 
 export interface MessageDefinitionFocus extends BackboneElement {
   code: FhirCode;

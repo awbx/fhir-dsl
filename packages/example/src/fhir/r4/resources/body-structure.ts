@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirString } from "../primitives.js";
 import type { Attachment, CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirString } from "../primitives.js";
 
 export interface BodyStructure extends DomainResource {
   resourceType: "BodyStructure";

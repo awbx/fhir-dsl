@@ -1,5 +1,5 @@
-import type { FhirDate } from "../primitives.js";
 import type { CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirDate } from "../primitives.js";
 
 export interface Basic extends DomainResource {
   resourceType: "Basic";

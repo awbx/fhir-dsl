@@ -1,5 +1,5 @@
-import type { FhirDateTime } from "../primitives.js";
 import type { Period, Timing } from "../datatypes.js";
+import type { FhirDateTime } from "../primitives.js";
 import type { ServiceRequest } from "../resources/service-request.js";
 
 /**
@@ -11,4 +11,3 @@ export interface USCoreServiceRequestProfile extends ServiceRequest {
   occurrenceDateTime?: FhirDateTime;
   occurrenceTiming?: Timing;
 }
-

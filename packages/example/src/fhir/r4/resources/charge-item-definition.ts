@@ -1,5 +1,25 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, Identifier, Money, Period, Reference, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Reference,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ChargeItemDefinitionApplicability extends BackboneElement {
   description?: FhirString;

@@ -1,5 +1,14 @@
+import type {
+  Address,
+  Attachment,
+  BackboneElement,
+  ContactPoint,
+  DomainResource,
+  HumanName,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDate } from "../primitives.js";
-import type { Address, Attachment, BackboneElement, ContactPoint, DomainResource, HumanName, Identifier, Reference } from "../datatypes.js";
 
 export interface PersonLink extends BackboneElement {
   target: Reference<"Patient" | "Practitioner" | "RelatedPerson" | "Person">;

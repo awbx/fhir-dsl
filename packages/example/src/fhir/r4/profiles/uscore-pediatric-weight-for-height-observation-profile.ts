@@ -8,4 +8,3 @@ import type { Observation } from "../resources/observation.js";
 export interface USCorePediatricWeightForHeightObservationProfile extends Observation {
   code: CodeableConcept;
 }
-

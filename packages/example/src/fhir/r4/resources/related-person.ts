@@ -1,5 +1,16 @@
+import type {
+  Address,
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  HumanName,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDate } from "../primitives.js";
-import type { Address, Attachment, BackboneElement, CodeableConcept, ContactPoint, DomainResource, HumanName, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface RelatedPersonCommunication extends BackboneElement {
   language: CodeableConcept;

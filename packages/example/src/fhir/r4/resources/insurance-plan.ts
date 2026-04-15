@@ -1,5 +1,17 @@
+import type {
+  Address,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  HumanName,
+  Identifier,
+  Money,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirPositiveInt, FhirString } from "../primitives.js";
-import type { Address, BackboneElement, CodeableConcept, ContactPoint, DomainResource, HumanName, Identifier, Money, Period, Quantity, Reference } from "../datatypes.js";
 
 export interface InsurancePlanContact extends BackboneElement {
   purpose?: CodeableConcept;

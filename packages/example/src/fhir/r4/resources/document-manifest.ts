@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
 
 export interface DocumentManifestRelated extends BackboneElement {
   identifier?: Identifier;

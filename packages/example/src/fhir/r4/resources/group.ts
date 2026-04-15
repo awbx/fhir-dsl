@@ -1,5 +1,14 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirString, FhirUnsignedInt } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Range, Reference } from "../datatypes.js";
 
 export interface GroupCharacteristic extends BackboneElement {
   code: CodeableConcept;

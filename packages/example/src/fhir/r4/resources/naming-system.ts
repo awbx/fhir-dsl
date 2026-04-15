@@ -1,5 +1,12 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Period,
+  UsageContext,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDateTime, FhirMarkdown, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, Period, UsageContext } from "../datatypes.js";
 
 export interface NamingSystemUniqueId extends BackboneElement {
   type: FhirCode;

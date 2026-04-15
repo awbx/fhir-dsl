@@ -1,3 +1,4 @@
+export * from "./profile-registry.js";
 export * from "./uscore-allergy-intolerance.js";
 export * from "./uscore-blood-pressure-profile.js";
 export * from "./uscore-bmiprofile.js";
@@ -47,5 +48,3 @@ export * from "./uscore-simple-observation-profile.js";
 export * from "./uscore-smoking-status-profile.js";
 export * from "./uscore-specimen-profile.js";
 export * from "./uscore-vital-signs-profile.js";
-export * from "./profile-registry.js";
-

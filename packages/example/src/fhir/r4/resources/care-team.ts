@@ -1,5 +1,14 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, ContactPoint, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface CareTeamParticipant extends BackboneElement {
   role?: CodeableConcept[];

@@ -9,4 +9,3 @@ export interface USCoreImmunizationProfile extends Immunization {
   occurrenceDateTime?: FhirDateTime;
   occurrenceString?: FhirString;
 }
-

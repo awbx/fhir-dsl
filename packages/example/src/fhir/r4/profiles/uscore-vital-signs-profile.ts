@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirDateTime, FhirInteger, FhirString, FhirTime } from "../primitives.js";
 import type { CodeableConcept, Period, Quantity, Range, Ratio, SampledData } from "../datatypes.js";
+import type { FhirBoolean, FhirDateTime, FhirInteger, FhirString, FhirTime } from "../primitives.js";
 import type { Observation } from "../resources/observation.js";
 
 /**
@@ -22,4 +22,3 @@ export interface USCoreVitalSignsProfile extends Observation {
   valueDateTime?: FhirDateTime;
   valuePeriod?: Period;
 }
-

@@ -1,5 +1,14 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Reference, Timing } from "../datatypes.js";
 
 export interface SupplyDeliverySuppliedItem extends BackboneElement {
   quantity?: Quantity;

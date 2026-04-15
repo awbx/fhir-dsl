@@ -1,5 +1,5 @@
-import type { FhirInteger, FhirString } from "../primitives.js";
 import type { Attachment, BackboneElement, CodeableConcept, DomainResource, Identifier } from "../datatypes.js";
+import type { FhirInteger, FhirString } from "../primitives.js";
 
 export interface SubstanceProteinSubunit extends BackboneElement {
   subunit?: FhirInteger;

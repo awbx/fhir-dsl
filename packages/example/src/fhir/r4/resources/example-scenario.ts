@@ -1,5 +1,20 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, Identifier, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ExampleScenarioActor extends BackboneElement {
   actorId: FhirString;

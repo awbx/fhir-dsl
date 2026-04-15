@@ -1,5 +1,14 @@
+import type {
+  Annotation,
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDateTime, FhirString } from "../primitives.js";
-import type { Annotation, Attachment, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface CommunicationRequestPayload extends BackboneElement {
   contentString?: FhirString;
@@ -27,8 +36,20 @@ export interface CommunicationRequest extends DomainResource {
   occurrencePeriod?: Period;
   authoredOn?: FhirDateTime;
   requester?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "RelatedPerson" | "Device">;
-  recipient?: Reference<"Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson" | "Group" | "CareTeam" | "HealthcareService">[];
-  sender?: Reference<"Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson" | "HealthcareService">;
+  recipient?: Reference<
+    | "Device"
+    | "Organization"
+    | "Patient"
+    | "Practitioner"
+    | "PractitionerRole"
+    | "RelatedPerson"
+    | "Group"
+    | "CareTeam"
+    | "HealthcareService"
+  >[];
+  sender?: Reference<
+    "Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson" | "HealthcareService"
+  >;
   reasonCode?: CodeableConcept[];
   reasonReference?: Reference<"Condition" | "Observation" | "DiagnosticReport" | "DocumentReference">[];
   note?: Annotation[];

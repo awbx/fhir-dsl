@@ -1,5 +1,13 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirDecimal, FhirInteger, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Reference } from "../datatypes.js";
 
 export interface VisionPrescriptionLensSpecificationPrism extends BackboneElement {
   amount: FhirDecimal;

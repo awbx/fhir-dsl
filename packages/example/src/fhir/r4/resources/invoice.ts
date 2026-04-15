@@ -1,5 +1,13 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirDecimal, FhirMarkdown, FhirPositiveInt, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Reference } from "../datatypes.js";
 
 export interface InvoiceParticipant extends BackboneElement {
   role?: CodeableConcept;

@@ -1,9 +1,22 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Quantity,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirDateTime, FhirDecimal, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Period, Quantity, Reference, Timing } from "../datatypes.js";
 
 export interface ChargeItemPerformer extends BackboneElement {
   function?: CodeableConcept;
-  actor: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson">;
+  actor: Reference<
+    "Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson"
+  >;
 }
 
 export interface ChargeItem extends DomainResource {
@@ -31,7 +44,16 @@ export interface ChargeItem extends DomainResource {
   enterer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "Device" | "RelatedPerson">;
   enteredDate?: FhirDateTime;
   reason?: CodeableConcept[];
-  service?: Reference<"DiagnosticReport" | "ImagingStudy" | "Immunization" | "MedicationAdministration" | "MedicationDispense" | "Observation" | "Procedure" | "SupplyDelivery">[];
+  service?: Reference<
+    | "DiagnosticReport"
+    | "ImagingStudy"
+    | "Immunization"
+    | "MedicationAdministration"
+    | "MedicationDispense"
+    | "Observation"
+    | "Procedure"
+    | "SupplyDelivery"
+  >[];
   productReference?: Reference<"Device" | "Medication" | "Substance">;
   productCodeableConcept?: CodeableConcept;
   account?: Reference<"Account">[];

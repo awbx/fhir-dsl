@@ -1,5 +1,5 @@
-import type { FhirBoolean } from "../primitives.js";
 import type { CodeableConcept } from "../datatypes.js";
+import type { FhirBoolean } from "../primitives.js";
 import type { MedicationRequest } from "../resources/medication-request.js";
 
 /**
@@ -10,4 +10,3 @@ export interface USCoreMedicationRequestProfile extends MedicationRequest {
   reportedBoolean?: FhirBoolean;
   medicationCodeableConcept?: CodeableConcept;
 }
-

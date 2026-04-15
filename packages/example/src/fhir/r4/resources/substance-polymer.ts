@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirInteger, FhirString } from "../primitives.js";
 import type { Attachment, BackboneElement, CodeableConcept, DomainResource, SubstanceAmount } from "../datatypes.js";
+import type { FhirBoolean, FhirInteger, FhirString } from "../primitives.js";
 
 export interface SubstancePolymerMonomerSetStartingMaterial extends BackboneElement {
   material?: CodeableConcept;

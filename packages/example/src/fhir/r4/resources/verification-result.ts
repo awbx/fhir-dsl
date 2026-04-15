@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDate, FhirDateTime, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Reference, Signature, Timing } from "../datatypes.js";
+import type { FhirCode, FhirDate, FhirDateTime, FhirString } from "../primitives.js";
 
 export interface VerificationResultPrimarySource extends BackboneElement {
   who?: Reference<"Organization" | "Practitioner" | "PractitionerRole">;

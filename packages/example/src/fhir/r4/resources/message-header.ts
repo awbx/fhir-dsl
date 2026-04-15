@@ -1,5 +1,12 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactPoint,
+  DomainResource,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirId, FhirString, FhirUri, FhirUrl } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, Coding, ContactPoint, DomainResource, Reference } from "../datatypes.js";
 
 export interface MessageHeaderDestination extends BackboneElement {
   name?: FhirString;

@@ -1,5 +1,14 @@
+import type {
+  Address,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactPoint,
+  DomainResource,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDecimal, FhirString, FhirTime } from "../primitives.js";
-import type { Address, BackboneElement, CodeableConcept, Coding, ContactPoint, DomainResource, Identifier, Reference } from "../datatypes.js";
 
 export interface LocationPosition extends BackboneElement {
   longitude: FhirDecimal;

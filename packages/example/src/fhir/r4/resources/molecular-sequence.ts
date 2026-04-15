@@ -1,5 +1,12 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDecimal, FhirInteger, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Reference } from "../datatypes.js";
 
 export interface MolecularSequenceReferenceSeq extends BackboneElement {
   chromosome?: CodeableConcept;

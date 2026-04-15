@@ -1,5 +1,15 @@
+import type {
+  Age,
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
-import type { Age, Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Range, Reference } from "../datatypes.js";
 
 export interface ProcedurePerformer extends BackboneElement {
   function?: CodeableConcept;

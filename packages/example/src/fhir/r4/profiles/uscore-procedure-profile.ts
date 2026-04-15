@@ -1,5 +1,5 @@
-import type { FhirDateTime, FhirString } from "../primitives.js";
 import type { Age, Period, Range } from "../datatypes.js";
+import type { FhirDateTime, FhirString } from "../primitives.js";
 import type { Procedure } from "../resources/procedure.js";
 
 /**
@@ -13,4 +13,3 @@ export interface USCoreProcedureProfile extends Procedure {
   performedAge?: Age;
   performedRange?: Range;
 }
-

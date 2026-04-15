@@ -1,5 +1,15 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDateTime } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Range, Reference, Timing } from "../datatypes.js";
 
 export interface SupplyRequestParameter extends BackboneElement {
   code?: CodeableConcept;

@@ -1,12 +1,22 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Duration,
+  Identifier,
+  Quantity,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Duration, Identifier, Quantity, Ratio, Reference } from "../datatypes.js";
 
 export interface MedicinalProductPharmaceuticalCharacteristics extends BackboneElement {
   code: CodeableConcept;
   status?: CodeableConcept;
 }
 
-export interface MedicinalProductPharmaceuticalRouteOfAdministrationTargetSpeciesWithdrawalPeriod extends BackboneElement {
+export interface MedicinalProductPharmaceuticalRouteOfAdministrationTargetSpeciesWithdrawalPeriod
+  extends BackboneElement {
   tissue: CodeableConcept;
   value: Quantity;
   supportingInformation?: FhirString;

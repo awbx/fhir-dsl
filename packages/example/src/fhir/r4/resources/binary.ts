@@ -1,5 +1,5 @@
-import type { FhirBase64Binary, FhirCode } from "../primitives.js";
 import type { Reference, Resource } from "../datatypes.js";
+import type { FhirBase64Binary, FhirCode } from "../primitives.js";
 
 export interface Binary extends Resource {
   resourceType: "Binary";

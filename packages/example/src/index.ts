@@ -44,10 +44,7 @@ async function searchPatients() {
 
 async function searchUSCorePatients() {
   // Second arg selects a profile — autocompletes from ProfileRegistry
-  const result = await fhir
-    .search("Patient", "us-core-patient")
-    .where("name", "eq", "Smith")
-    .execute();
+  const result = await fhir.search("Patient", "us-core-patient").where("name", "eq", "Smith").execute();
 
   for (const patient of result.data) {
     // Type is USCorePatientProfile — gender is narrowed to FhirCode (required)

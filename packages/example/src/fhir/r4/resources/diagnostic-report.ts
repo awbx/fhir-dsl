@@ -1,5 +1,13 @@
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirInstant, FhirString } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface DiagnosticReportMedia extends BackboneElement {
   comment?: FhirString;
@@ -9,7 +17,9 @@ export interface DiagnosticReportMedia extends BackboneElement {
 export interface DiagnosticReport extends DomainResource {
   resourceType: "DiagnosticReport";
   identifier?: Identifier[];
-  basedOn?: Reference<"CarePlan" | "ImmunizationRecommendation" | "MedicationRequest" | "NutritionOrder" | "ServiceRequest">[];
+  basedOn?: Reference<
+    "CarePlan" | "ImmunizationRecommendation" | "MedicationRequest" | "NutritionOrder" | "ServiceRequest"
+  >[];
   status: FhirCode;
   category?: CodeableConcept[];
   code: CodeableConcept;

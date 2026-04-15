@@ -1,5 +1,5 @@
-import type { FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier } from "../datatypes.js";
+import type { FhirString } from "../primitives.js";
 
 export interface SubstanceSourceMaterialFractionDescription extends BackboneElement {
   fraction?: FhirString;

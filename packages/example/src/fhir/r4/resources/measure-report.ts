@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirDateTime, FhirInteger } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Reference } from "../datatypes.js";
 
 export interface MeasureReportGroupPopulation extends BackboneElement {
   code?: CodeableConcept;
@@ -43,7 +51,9 @@ export interface MeasureReport extends DomainResource {
   status: FhirCode;
   type: FhirCode;
   measure: FhirCanonical;
-  subject?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "Location" | "Device" | "RelatedPerson" | "Group">;
+  subject?: Reference<
+    "Patient" | "Practitioner" | "PractitionerRole" | "Location" | "Device" | "RelatedPerson" | "Group"
+  >;
   date?: FhirDateTime;
   reporter?: Reference<"Practitioner" | "PractitionerRole" | "Location" | "Organization">;
   period: Period;

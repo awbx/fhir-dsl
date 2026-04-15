@@ -1,11 +1,21 @@
+import type {
+  Annotation,
+  CodeableConcept,
+  DomainResource,
+  Dosage,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime } from "../primitives.js";
-import type { Annotation, CodeableConcept, DomainResource, Dosage, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface MedicationStatement extends DomainResource {
   resourceType: "MedicationStatement";
   identifier?: Identifier[];
   basedOn?: Reference<"MedicationRequest" | "CarePlan" | "ServiceRequest">[];
-  partOf?: Reference<"MedicationAdministration" | "MedicationDispense" | "MedicationStatement" | "Procedure" | "Observation">[];
+  partOf?: Reference<
+    "MedicationAdministration" | "MedicationDispense" | "MedicationStatement" | "Procedure" | "Observation"
+  >[];
   status: FhirCode;
   statusReason?: CodeableConcept[];
   category?: CodeableConcept;

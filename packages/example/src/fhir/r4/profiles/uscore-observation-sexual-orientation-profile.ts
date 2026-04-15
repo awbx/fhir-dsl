@@ -1,5 +1,5 @@
-import type { FhirDateTime, FhirInstant } from "../primitives.js";
 import type { Period, Timing } from "../datatypes.js";
+import type { FhirDateTime, FhirInstant } from "../primitives.js";
 import type { Observation } from "../resources/observation.js";
 
 /**
@@ -12,4 +12,3 @@ export interface USCoreObservationSexualOrientationProfile extends Observation {
   effectiveTiming?: Timing;
   effectiveInstant?: FhirInstant;
 }
-

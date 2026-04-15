@@ -1,5 +1,5 @@
-import type { FhirBoolean } from "../primitives.js";
 import type { CodeableConcept, ContactPoint, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
+import type { FhirBoolean } from "../primitives.js";
 
 export interface OrganizationAffiliation extends DomainResource {
   resourceType: "OrganizationAffiliation";

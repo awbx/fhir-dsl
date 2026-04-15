@@ -1,5 +1,5 @@
-import type { FhirDateTime, FhirPositiveInt, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirDateTime, FhirPositiveInt, FhirString } from "../primitives.js";
 
 export interface ImmunizationRecommendationRecommendationDateCriterion extends BackboneElement {
   code: CodeableConcept;

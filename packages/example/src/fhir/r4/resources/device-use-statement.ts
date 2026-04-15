@@ -1,5 +1,13 @@
+import type {
+  Annotation,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime } from "../primitives.js";
-import type { Annotation, CodeableConcept, DomainResource, Identifier, Period, Reference, Timing } from "../datatypes.js";
 
 export interface DeviceUseStatement extends DomainResource {
   resourceType: "DeviceUseStatement";
@@ -7,7 +15,9 @@ export interface DeviceUseStatement extends DomainResource {
   basedOn?: Reference<"ServiceRequest">[];
   status: FhirCode;
   subject: Reference<"Patient" | "Group">;
-  derivedFrom?: Reference<"ServiceRequest" | "Procedure" | "Claim" | "Observation" | "QuestionnaireResponse" | "DocumentReference">[];
+  derivedFrom?: Reference<
+    "ServiceRequest" | "Procedure" | "Claim" | "Observation" | "QuestionnaireResponse" | "DocumentReference"
+  >[];
   timingTiming?: Timing;
   timingPeriod?: Period;
   timingDateTime?: FhirDateTime;

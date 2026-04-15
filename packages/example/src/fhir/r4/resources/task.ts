@@ -1,5 +1,59 @@
-import type { FhirBase64Binary, FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirId, FhirInstant, FhirInteger, FhirMarkdown, FhirOid, FhirPositiveInt, FhirString, FhirTime, FhirUnsignedInt, FhirUri, FhirUrl, FhirUuid } from "../primitives.js";
-import type { Address, Age, Annotation, Attachment, BackboneElement, CodeableConcept, Coding, ContactDetail, ContactPoint, Contributor, Count, DataRequirement, Distance, DomainResource, Dosage, Duration, Expression, HumanName, Identifier, Meta, Money, ParameterDefinition, Period, Quantity, Range, Ratio, Reference, RelatedArtifact, SampledData, Signature, Timing, TriggerDefinition, UsageContext } from "../datatypes.js";
+import type {
+  Address,
+  Age,
+  Annotation,
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactDetail,
+  ContactPoint,
+  Contributor,
+  Count,
+  DataRequirement,
+  Distance,
+  DomainResource,
+  Dosage,
+  Duration,
+  Expression,
+  HumanName,
+  Identifier,
+  Meta,
+  Money,
+  ParameterDefinition,
+  Period,
+  Quantity,
+  Range,
+  Ratio,
+  Reference,
+  RelatedArtifact,
+  SampledData,
+  Signature,
+  Timing,
+  TriggerDefinition,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBase64Binary,
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirId,
+  FhirInstant,
+  FhirInteger,
+  FhirMarkdown,
+  FhirOid,
+  FhirPositiveInt,
+  FhirString,
+  FhirTime,
+  FhirUnsignedInt,
+  FhirUri,
+  FhirUrl,
+  FhirUuid,
+} from "../primitives.js";
 
 export interface TaskRestriction extends BackboneElement {
   repetitions?: FhirPositiveInt;
@@ -138,7 +192,16 @@ export interface Task extends DomainResource {
   lastModified?: FhirDateTime;
   requester?: Reference<"Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson">;
   performerType?: CodeableConcept[];
-  owner?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "HealthcareService" | "Patient" | "Device" | "RelatedPerson">;
+  owner?: Reference<
+    | "Practitioner"
+    | "PractitionerRole"
+    | "Organization"
+    | "CareTeam"
+    | "HealthcareService"
+    | "Patient"
+    | "Device"
+    | "RelatedPerson"
+  >;
   location?: Reference<"Location">;
   reasonCode?: CodeableConcept;
   reasonReference?: Reference<"Resource">;

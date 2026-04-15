@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Identifier,
+  MarketingStatus,
+  Reference,
+} from "../datatypes.js";
 import type { FhirDateTime, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, Coding, DomainResource, Identifier, MarketingStatus, Reference } from "../datatypes.js";
 
 export interface MedicinalProductNameNamePart extends BackboneElement {
   part: FhirString;

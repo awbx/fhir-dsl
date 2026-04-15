@@ -8,4 +8,3 @@ import type { Patient } from "../resources/patient.js";
 export interface USCorePatientProfile extends Patient {
   gender: FhirCode;
 }
-

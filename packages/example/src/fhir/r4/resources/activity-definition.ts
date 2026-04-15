@@ -1,5 +1,31 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Age, BackboneElement, CodeableConcept, ContactDetail, DomainResource, Dosage, Duration, Expression, Identifier, Period, Quantity, Range, Reference, RelatedArtifact, Timing, UsageContext } from "../datatypes.js";
+import type {
+  Age,
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Dosage,
+  Duration,
+  Expression,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Reference,
+  RelatedArtifact,
+  Timing,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ActivityDefinitionParticipant extends BackboneElement {
   type: FhirCode;

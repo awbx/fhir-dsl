@@ -1,5 +1,14 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Duration,
+  Identifier,
+  Quantity,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Duration, Identifier, Quantity, Range, Reference } from "../datatypes.js";
 
 export interface SpecimenDefinitionTypeTestedContainerAdditive extends BackboneElement {
   additiveCodeableConcept?: CodeableConcept;

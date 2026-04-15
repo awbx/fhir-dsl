@@ -1,5 +1,19 @@
+import type {
+  Age,
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Duration,
+  Expression,
+  Identifier,
+  Period,
+  Range,
+  Reference,
+  RelatedArtifact,
+  Timing,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirDateTime, FhirId, FhirString, FhirUri } from "../primitives.js";
-import type { Age, Annotation, BackboneElement, CodeableConcept, DomainResource, Duration, Expression, Identifier, Period, Range, Reference, RelatedArtifact, Timing } from "../datatypes.js";
 
 export interface RequestGroupActionCondition extends BackboneElement {
   kind: FhirCode;

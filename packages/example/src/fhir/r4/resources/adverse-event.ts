@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
 
 export interface AdverseEventSuspectEntityCausality extends BackboneElement {
   assessment?: CodeableConcept;
@@ -9,7 +9,15 @@ export interface AdverseEventSuspectEntityCausality extends BackboneElement {
 }
 
 export interface AdverseEventSuspectEntity extends BackboneElement {
-  instance: Reference<"Immunization" | "Procedure" | "Substance" | "Medication" | "MedicationAdministration" | "MedicationStatement" | "Device">;
+  instance: Reference<
+    | "Immunization"
+    | "Procedure"
+    | "Substance"
+    | "Medication"
+    | "MedicationAdministration"
+    | "MedicationStatement"
+    | "Device"
+  >;
   causality?: AdverseEventSuspectEntityCausality[];
 }
 
@@ -32,7 +40,16 @@ export interface AdverseEvent extends DomainResource {
   recorder?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson">;
   contributor?: Reference<"Practitioner" | "PractitionerRole" | "Device">[];
   suspectEntity?: AdverseEventSuspectEntity[];
-  subjectMedicalHistory?: Reference<"Condition" | "Observation" | "AllergyIntolerance" | "FamilyMemberHistory" | "Immunization" | "Procedure" | "Media" | "DocumentReference">[];
+  subjectMedicalHistory?: Reference<
+    | "Condition"
+    | "Observation"
+    | "AllergyIntolerance"
+    | "FamilyMemberHistory"
+    | "Immunization"
+    | "Procedure"
+    | "Media"
+    | "DocumentReference"
+  >[];
   referenceDocument?: Reference<"DocumentReference">[];
   study?: Reference<"ResearchStudy">[];
 }

@@ -1,5 +1,14 @@
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDateTime, FhirUri } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, Coding, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface ConsentPolicy extends BackboneElement {
   authority?: FhirUri;
@@ -14,7 +23,9 @@ export interface ConsentVerification extends BackboneElement {
 
 export interface ConsentProvisionActor extends BackboneElement {
   role: CodeableConcept;
-  reference: Reference<"Device" | "Group" | "CareTeam" | "Organization" | "Patient" | "Practitioner" | "RelatedPerson" | "PractitionerRole">;
+  reference: Reference<
+    "Device" | "Group" | "CareTeam" | "Organization" | "Patient" | "Practitioner" | "RelatedPerson" | "PractitionerRole"
+  >;
 }
 
 export interface ConsentProvisionData extends BackboneElement {

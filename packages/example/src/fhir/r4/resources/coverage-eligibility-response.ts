@@ -1,5 +1,21 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirString, FhirUnsignedInt, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Period, Reference } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Reference,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirString,
+  FhirUnsignedInt,
+  FhirUri,
+} from "../primitives.js";
 
 export interface CoverageEligibilityResponseInsuranceItemBenefit extends BackboneElement {
   type: CodeableConcept;

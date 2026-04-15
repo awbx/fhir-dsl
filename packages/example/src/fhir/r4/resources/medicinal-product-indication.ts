@@ -1,4 +1,11 @@
-import type { BackboneElement, CodeableConcept, DomainResource, Population, Quantity, Reference } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Population,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 
 export interface MedicinalProductIndicationOtherTherapy extends BackboneElement {
   therapyRelationshipType: CodeableConcept;

@@ -1,5 +1,15 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Reference, Timing } from "../datatypes.js";
 
 export interface CarePlanActivityDetail extends BackboneElement {
   kind?: FhirCode;
@@ -16,7 +26,16 @@ export interface CarePlanActivityDetail extends BackboneElement {
   scheduledPeriod?: Period;
   scheduledString?: FhirString;
   location?: Reference<"Location">;
-  performer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "RelatedPerson" | "Patient" | "CareTeam" | "HealthcareService" | "Device">[];
+  performer?: Reference<
+    | "Practitioner"
+    | "PractitionerRole"
+    | "Organization"
+    | "RelatedPerson"
+    | "Patient"
+    | "CareTeam"
+    | "HealthcareService"
+    | "Device"
+  >[];
   productCodeableConcept?: CodeableConcept;
   productReference?: Reference<"Medication" | "Substance">;
   dailyAmount?: Quantity;
@@ -28,7 +47,17 @@ export interface CarePlanActivity extends BackboneElement {
   outcomeCodeableConcept?: CodeableConcept[];
   outcomeReference?: Reference<"Resource">[];
   progress?: Annotation[];
-  reference?: Reference<"Appointment" | "CommunicationRequest" | "DeviceRequest" | "MedicationRequest" | "NutritionOrder" | "Task" | "ServiceRequest" | "VisionPrescription" | "RequestGroup">;
+  reference?: Reference<
+    | "Appointment"
+    | "CommunicationRequest"
+    | "DeviceRequest"
+    | "MedicationRequest"
+    | "NutritionOrder"
+    | "Task"
+    | "ServiceRequest"
+    | "VisionPrescription"
+    | "RequestGroup"
+  >;
   detail?: CarePlanActivityDetail;
 }
 
@@ -49,8 +78,12 @@ export interface CarePlan extends DomainResource {
   encounter?: Reference<"Encounter">;
   period?: Period;
   created?: FhirDateTime;
-  author?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "Device" | "RelatedPerson" | "Organization" | "CareTeam">;
-  contributor?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "Device" | "RelatedPerson" | "Organization" | "CareTeam">[];
+  author?: Reference<
+    "Patient" | "Practitioner" | "PractitionerRole" | "Device" | "RelatedPerson" | "Organization" | "CareTeam"
+  >;
+  contributor?: Reference<
+    "Patient" | "Practitioner" | "PractitionerRole" | "Device" | "RelatedPerson" | "Organization" | "CareTeam"
+  >[];
   careTeam?: Reference<"CareTeam">[];
   addresses?: Reference<"Condition">[];
   supportingInfo?: Reference<"Resource">[];

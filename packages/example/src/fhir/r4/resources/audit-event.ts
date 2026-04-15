@@ -1,5 +1,5 @@
-import type { FhirBase64Binary, FhirBoolean, FhirCode, FhirInstant, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, Coding, DomainResource, Period, Reference } from "../datatypes.js";
+import type { FhirBase64Binary, FhirBoolean, FhirCode, FhirInstant, FhirString, FhirUri } from "../primitives.js";
 
 export interface AuditEventAgentNetwork extends BackboneElement {
   address?: FhirString;

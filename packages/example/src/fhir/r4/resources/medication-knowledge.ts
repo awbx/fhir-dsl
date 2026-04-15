@@ -1,5 +1,15 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Dosage,
+  Duration,
+  Money,
+  Quantity,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBase64Binary, FhirBoolean, FhirCode, FhirMarkdown, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Dosage, Duration, Money, Quantity, Ratio, Reference } from "../datatypes.js";
 
 export interface MedicationKnowledgeRelatedMedicationKnowledge extends BackboneElement {
   type: CodeableConcept;

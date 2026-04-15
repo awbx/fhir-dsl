@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Ratio, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirString } from "../primitives.js";
 
 export interface MedicinalProductIngredientSpecifiedSubstanceStrengthReferenceStrength extends BackboneElement {
   substance?: CodeableConcept;

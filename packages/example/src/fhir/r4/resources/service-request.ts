@@ -1,5 +1,16 @@
+import type {
+  Annotation,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Ratio,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, CodeableConcept, DomainResource, Identifier, Period, Quantity, Range, Ratio, Reference, Timing } from "../datatypes.js";
 
 export interface ServiceRequest extends DomainResource {
   resourceType: "ServiceRequest";
@@ -29,7 +40,16 @@ export interface ServiceRequest extends DomainResource {
   authoredOn?: FhirDateTime;
   requester?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "RelatedPerson" | "Device">;
   performerType?: CodeableConcept;
-  performer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "HealthcareService" | "Patient" | "Device" | "RelatedPerson">[];
+  performer?: Reference<
+    | "Practitioner"
+    | "PractitionerRole"
+    | "Organization"
+    | "CareTeam"
+    | "HealthcareService"
+    | "Patient"
+    | "Device"
+    | "RelatedPerson"
+  >[];
   locationCode?: CodeableConcept[];
   locationReference?: Reference<"Location">[];
   reasonCode?: CodeableConcept[];

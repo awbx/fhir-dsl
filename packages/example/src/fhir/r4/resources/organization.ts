@@ -1,5 +1,14 @@
+import type {
+  Address,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  HumanName,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirString } from "../primitives.js";
-import type { Address, BackboneElement, CodeableConcept, ContactPoint, DomainResource, HumanName, Identifier, Reference } from "../datatypes.js";
 
 export interface OrganizationContact extends BackboneElement {
   purpose?: CodeableConcept;

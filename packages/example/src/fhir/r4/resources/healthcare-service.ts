@@ -1,5 +1,14 @@
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirMarkdown, FhirString, FhirTime } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, ContactPoint, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface HealthcareServiceEligibility extends BackboneElement {
   code?: CodeableConcept;

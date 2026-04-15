@@ -1,5 +1,5 @@
-import type { FhirCode, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource } from "../datatypes.js";
+import type { FhirCode, FhirString } from "../primitives.js";
 
 export interface OperationOutcomeIssue extends BackboneElement {
   severity: FhirCode;

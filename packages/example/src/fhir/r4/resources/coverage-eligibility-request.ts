@@ -1,5 +1,14 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirPositiveInt, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Period, Quantity, Reference } from "../datatypes.js";
 
 export interface CoverageEligibilityRequestSupportingInfo extends BackboneElement {
   sequence: FhirPositiveInt;

@@ -1,5 +1,12 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDateTime, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
 
 export interface ListEntry extends BackboneElement {
   flag?: CodeableConcept;

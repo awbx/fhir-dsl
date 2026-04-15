@@ -1,5 +1,29 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirInteger, FhirMarkdown, FhirString, FhirTime, FhirUri } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, Coding, ContactDetail, DomainResource, Identifier, Period, Quantity, Reference, UsageContext } from "../datatypes.js";
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirInteger,
+  FhirMarkdown,
+  FhirString,
+  FhirTime,
+  FhirUri,
+} from "../primitives.js";
 
 export interface QuestionnaireItemEnableWhen extends BackboneElement {
   question: FhirString;

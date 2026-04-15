@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
 import type { DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
 
 export interface EnrollmentResponse extends DomainResource {
   resourceType: "EnrollmentResponse";

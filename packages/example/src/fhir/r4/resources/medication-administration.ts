@@ -1,5 +1,15 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Ratio, Reference } from "../datatypes.js";
 
 export interface MedicationAdministrationPerformer extends BackboneElement {
   function?: CodeableConcept;

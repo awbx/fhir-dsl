@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirPositiveInt, FhirString } from "../primitives.js";
 import type { CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirPositiveInt, FhirString } from "../primitives.js";
 
 export interface ImmunizationEvaluation extends DomainResource {
   resourceType: "ImmunizationEvaluation";

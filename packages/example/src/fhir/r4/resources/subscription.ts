@@ -1,5 +1,5 @@
-import type { FhirCode, FhirInstant, FhirString, FhirUrl } from "../primitives.js";
 import type { BackboneElement, ContactPoint, DomainResource } from "../datatypes.js";
+import type { FhirCode, FhirInstant, FhirString, FhirUrl } from "../primitives.js";
 
 export interface SubscriptionChannel extends BackboneElement {
   type: FhirCode;

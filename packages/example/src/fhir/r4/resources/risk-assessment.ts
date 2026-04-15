@@ -1,5 +1,14 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirDecimal, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Range, Reference } from "../datatypes.js";
 
 export interface RiskAssessmentPrediction extends BackboneElement {
   outcome?: CodeableConcept;

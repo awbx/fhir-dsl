@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDate, FhirDateTime } from "../primitives.js";
 import type { CodeableConcept, DomainResource, Identifier, Money, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDate, FhirDateTime } from "../primitives.js";
 
 export interface PaymentNotice extends DomainResource {
   resourceType: "PaymentNotice";

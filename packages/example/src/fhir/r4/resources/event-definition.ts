@@ -1,5 +1,23 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { CodeableConcept, ContactDetail, DomainResource, Identifier, Period, Reference, RelatedArtifact, TriggerDefinition, UsageContext } from "../datatypes.js";
+import type {
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  TriggerDefinition,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface EventDefinition extends DomainResource {
   resourceType: "EventDefinition";

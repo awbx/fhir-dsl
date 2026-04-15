@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirCode, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, ContactDetail, DomainResource, UsageContext } from "../datatypes.js";
+import type { FhirBoolean, FhirCode, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 
 export interface CompartmentDefinitionResource extends BackboneElement {
   code: FhirCode;

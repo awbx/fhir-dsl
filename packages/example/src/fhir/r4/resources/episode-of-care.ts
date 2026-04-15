@@ -1,5 +1,5 @@
-import type { FhirCode, FhirPositiveInt } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
+import type { FhirCode, FhirPositiveInt } from "../primitives.js";
 
 export interface EpisodeOfCareStatusHistory extends BackboneElement {
   status: FhirCode;

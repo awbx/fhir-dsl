@@ -1,6 +1,6 @@
 import { createFhirClient, type FhirClientConfig } from "@fhir-dsl/core";
-import type { FhirResourceMap, IncludeRegistry, SearchParamRegistry } from "./registry.js";
 import type { ProfileRegistry } from "./profiles/profile-registry.js";
+import type { FhirResourceMap, IncludeRegistry, SearchParamRegistry } from "./registry.js";
 
 export type GeneratedSchema = {
   resources: FhirResourceMap;
@@ -12,4 +12,3 @@ export type GeneratedSchema = {
 export function createClient(config: FhirClientConfig) {
   return createFhirClient<GeneratedSchema>(config);
 }
-

@@ -1,5 +1,28 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactDetail, DataRequirement, DomainResource, Duration, Expression, Identifier, Period, Reference, RelatedArtifact, Timing, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DataRequirement,
+  DomainResource,
+  Duration,
+  Expression,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  Timing,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ResearchElementDefinitionCharacteristic extends BackboneElement {
   definitionCodeableConcept?: CodeableConcept;

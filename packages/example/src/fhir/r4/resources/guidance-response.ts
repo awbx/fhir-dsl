@@ -1,5 +1,12 @@
+import type {
+  Annotation,
+  CodeableConcept,
+  DataRequirement,
+  DomainResource,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCanonical, FhirCode, FhirDateTime, FhirUri } from "../primitives.js";
-import type { Annotation, CodeableConcept, DataRequirement, DomainResource, Identifier, Reference } from "../datatypes.js";
 
 export interface GuidanceResponse extends DomainResource {
   resourceType: "GuidanceResponse";

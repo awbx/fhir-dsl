@@ -1,5 +1,5 @@
-import type { FhirDateTime, FhirString } from "../primitives.js";
 import type { Age, Period, Range } from "../datatypes.js";
+import type { FhirDateTime, FhirString } from "../primitives.js";
 import type { Condition } from "../resources/condition.js";
 
 /**
@@ -18,4 +18,3 @@ export interface USCoreConditionEncounterDiagnosisProfile extends Condition {
   abatementRange?: Range;
   abatementString?: FhirString;
 }
-

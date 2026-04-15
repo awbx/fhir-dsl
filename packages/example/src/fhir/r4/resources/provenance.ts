@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirInstant, FhirUri } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Period, Reference, Signature } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirInstant, FhirUri } from "../primitives.js";
 
 export interface ProvenanceAgent extends BackboneElement {
   type?: CodeableConcept;

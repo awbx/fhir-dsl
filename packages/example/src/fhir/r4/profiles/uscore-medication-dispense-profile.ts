@@ -8,4 +8,3 @@ import type { MedicationDispense } from "../resources/medication-dispense.js";
 export interface USCoreMedicationDispenseProfile extends MedicationDispense {
   medicationCodeableConcept?: CodeableConcept;
 }
-

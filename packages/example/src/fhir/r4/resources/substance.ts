@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Ratio, Reference } from "../datatypes.js";
 
 export interface SubstanceInstance extends BackboneElement {
   identifier?: Identifier;

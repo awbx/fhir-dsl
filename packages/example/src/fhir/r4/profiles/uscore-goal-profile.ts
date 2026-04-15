@@ -1,5 +1,5 @@
-import type { FhirDate } from "../primitives.js";
 import type { CodeableConcept } from "../datatypes.js";
+import type { FhirDate } from "../primitives.js";
 import type { Goal } from "../resources/goal.js";
 
 /**
@@ -10,4 +10,3 @@ export interface USCoreGoalProfile extends Goal {
   startDate?: FhirDate;
   startCodeableConcept?: CodeableConcept;
 }
-

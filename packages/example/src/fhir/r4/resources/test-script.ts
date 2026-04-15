@@ -1,5 +1,24 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirId, FhirInteger, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, Coding, ContactDetail, DomainResource, Identifier, Reference, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Reference,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDateTime,
+  FhirId,
+  FhirInteger,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface TestScriptOrigin extends BackboneElement {
   index: FhirInteger;

@@ -1,5 +1,30 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, ContactDetail, DataRequirement, DomainResource, Duration, Expression, Identifier, Period, Reference, RelatedArtifact, Timing, TriggerDefinition, UsageContext } from "../datatypes.js";
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DataRequirement,
+  DomainResource,
+  Duration,
+  Expression,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  Timing,
+  TriggerDefinition,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface EvidenceVariableCharacteristic extends BackboneElement {
   description?: FhirString;

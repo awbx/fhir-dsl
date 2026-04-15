@@ -1,5 +1,5 @@
-import type { FhirDateTime } from "../primitives.js";
 import type { Period } from "../datatypes.js";
+import type { FhirDateTime } from "../primitives.js";
 import type { DiagnosticReport } from "../resources/diagnostic-report.js";
 
 /**
@@ -10,4 +10,3 @@ export interface USCoreDiagnosticReportProfileNoteExchange extends DiagnosticRep
   effectiveDateTime?: FhirDateTime;
   effectivePeriod?: Period;
 }
-

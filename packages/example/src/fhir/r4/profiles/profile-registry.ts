@@ -151,4 +151,3 @@ export interface ProfileRegistry {
     "us-core-specimen": USCoreSpecimenProfile;
   };
 }
-

@@ -1,5 +1,31 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirInteger, FhirMarkdown, FhirString, FhirTime, FhirUnsignedInt, FhirUri } from "../primitives.js";
-import type { Annotation, Attachment, BackboneElement, CodeableConcept, Coding, DomainResource, Identifier, Money, Period, Quantity, Reference, Signature, Timing } from "../datatypes.js";
+import type {
+  Annotation,
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Quantity,
+  Reference,
+  Signature,
+  Timing,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirInteger,
+  FhirMarkdown,
+  FhirString,
+  FhirTime,
+  FhirUnsignedInt,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ContractContentDefinition extends BackboneElement {
   type: CodeableConcept;
@@ -18,7 +44,9 @@ export interface ContractTermSecurityLabel extends BackboneElement {
 }
 
 export interface ContractTermOfferParty extends BackboneElement {
-  reference: Reference<"Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization">[];
+  reference: Reference<
+    "Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization"
+  >[];
   role: CodeableConcept;
 }
 
@@ -93,7 +121,9 @@ export interface ContractTermAsset extends BackboneElement {
 }
 
 export interface ContractTermActionSubject extends BackboneElement {
-  reference: Reference<"Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization">[];
+  reference: Reference<
+    "Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization"
+  >[];
   role?: CodeableConcept;
 }
 
@@ -109,14 +139,28 @@ export interface ContractTermAction extends BackboneElement {
   occurrenceDateTime?: FhirDateTime;
   occurrencePeriod?: Period;
   occurrenceTiming?: Timing;
-  requester?: Reference<"Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization">[];
+  requester?: Reference<
+    "Patient" | "RelatedPerson" | "Practitioner" | "PractitionerRole" | "Device" | "Group" | "Organization"
+  >[];
   requesterLinkId?: FhirString[];
   performerType?: CodeableConcept[];
   performerRole?: CodeableConcept;
-  performer?: Reference<"RelatedPerson" | "Patient" | "Practitioner" | "PractitionerRole" | "CareTeam" | "Device" | "Substance" | "Organization" | "Location">;
+  performer?: Reference<
+    | "RelatedPerson"
+    | "Patient"
+    | "Practitioner"
+    | "PractitionerRole"
+    | "CareTeam"
+    | "Device"
+    | "Substance"
+    | "Organization"
+    | "Location"
+  >;
   performerLinkId?: FhirString[];
   reasonCode?: CodeableConcept[];
-  reasonReference?: Reference<"Condition" | "Observation" | "DiagnosticReport" | "DocumentReference" | "Questionnaire" | "QuestionnaireResponse">[];
+  reasonReference?: Reference<
+    "Condition" | "Observation" | "DiagnosticReport" | "DocumentReference" | "Questionnaire" | "QuestionnaireResponse"
+  >[];
   reason?: FhirString[];
   reasonLinkId?: FhirString[];
   note?: Annotation[];

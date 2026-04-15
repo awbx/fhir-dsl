@@ -1,5 +1,16 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Duration,
+  Identifier,
+  Quantity,
+  Range,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirDate, FhirInteger, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Duration, Identifier, Quantity, Range, Ratio, Reference } from "../datatypes.js";
 
 export interface GoalTarget extends BackboneElement {
   measure?: CodeableConcept;
@@ -29,7 +40,9 @@ export interface Goal extends DomainResource {
   statusDate?: FhirDate;
   statusReason?: FhirString;
   expressedBy?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson">;
-  addresses?: Reference<"Condition" | "Observation" | "MedicationStatement" | "NutritionOrder" | "ServiceRequest" | "RiskAssessment">[];
+  addresses?: Reference<
+    "Condition" | "Observation" | "MedicationStatement" | "NutritionOrder" | "ServiceRequest" | "RiskAssessment"
+  >[];
   note?: Annotation[];
   outcomeCode?: CodeableConcept[];
   outcomeReference?: Reference<"Observation">[];

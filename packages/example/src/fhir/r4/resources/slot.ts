@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirCode, FhirInstant, FhirString } from "../primitives.js";
 import type { CodeableConcept, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirCode, FhirInstant, FhirString } from "../primitives.js";
 
 export interface Slot extends DomainResource {
   resourceType: "Slot";

@@ -1,5 +1,15 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Duration,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Duration, Identifier, Period, Quantity, Reference } from "../datatypes.js";
 
 export interface SpecimenCollection extends BackboneElement {
   collector?: Reference<"Practitioner" | "PractitionerRole">;

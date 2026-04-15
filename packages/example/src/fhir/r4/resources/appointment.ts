@@ -1,9 +1,18 @@
-import type { FhirCode, FhirDateTime, FhirInstant, FhirPositiveInt, FhirString, FhirUnsignedInt } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
+import type {
+  FhirCode,
+  FhirDateTime,
+  FhirInstant,
+  FhirPositiveInt,
+  FhirString,
+  FhirUnsignedInt,
+} from "../primitives.js";
 
 export interface AppointmentParticipant extends BackboneElement {
   type?: CodeableConcept[];
-  actor?: Reference<"Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson" | "Device" | "HealthcareService" | "Location">;
+  actor?: Reference<
+    "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson" | "Device" | "HealthcareService" | "Location"
+  >;
   required?: FhirCode;
   status: FhirCode;
   period?: Period;

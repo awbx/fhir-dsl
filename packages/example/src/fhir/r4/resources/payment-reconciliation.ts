@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDate, FhirDateTime, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Period, Reference } from "../datatypes.js";
 
 export interface PaymentReconciliationDetail extends BackboneElement {
   identifier?: Identifier;

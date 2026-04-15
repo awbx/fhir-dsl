@@ -1,5 +1,15 @@
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Range,
+  Ratio,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirDateTime, FhirString } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Range, Ratio, Reference } from "../datatypes.js";
 
 export interface SubstanceSpecificationMoiety extends BackboneElement {
   role?: CodeableConcept;

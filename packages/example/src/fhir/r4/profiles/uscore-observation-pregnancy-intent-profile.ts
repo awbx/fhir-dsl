@@ -8,4 +8,3 @@ import type { Observation } from "../resources/observation.js";
 export interface USCoreObservationPregnancyIntentProfile extends Observation {
   valueCodeableConcept: CodeableConcept;
 }
-

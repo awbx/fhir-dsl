@@ -1,5 +1,16 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Dosage,
+  Duration,
+  Identifier,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirUnsignedInt, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Dosage, Duration, Identifier, Period, Quantity, Reference } from "../datatypes.js";
 
 export interface MedicationRequestDispenseRequestInitialFill extends BackboneElement {
   quantity?: Quantity;
@@ -40,7 +51,9 @@ export interface MedicationRequest extends DomainResource {
   supportingInformation?: Reference<"Resource">[];
   authoredOn?: FhirDateTime;
   requester?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "RelatedPerson" | "Device">;
-  performer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "Device" | "RelatedPerson" | "CareTeam">;
+  performer?: Reference<
+    "Practitioner" | "PractitionerRole" | "Organization" | "Patient" | "Device" | "RelatedPerson" | "CareTeam"
+  >;
   performerType?: CodeableConcept;
   recorder?: Reference<"Practitioner" | "PractitionerRole">;
   reasonCode?: CodeableConcept[];

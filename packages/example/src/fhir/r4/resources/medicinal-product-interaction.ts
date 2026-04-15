@@ -1,5 +1,5 @@
-import type { FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Reference } from "../datatypes.js";
+import type { FhirString } from "../primitives.js";
 
 export interface MedicinalProductInteractionInteractant extends BackboneElement {
   itemReference?: Reference<"MedicinalProduct" | "Medication" | "Substance" | "ObservationDefinition">;

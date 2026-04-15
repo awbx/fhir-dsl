@@ -1,5 +1,14 @@
+import type {
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirInstant, FhirString } from "../primitives.js";
-import type { Attachment, BackboneElement, CodeableConcept, Coding, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface DocumentReferenceRelatesTo extends BackboneElement {
   code: FhirCode;

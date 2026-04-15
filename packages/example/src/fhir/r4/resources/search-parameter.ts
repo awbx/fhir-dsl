@@ -1,5 +1,13 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, UsageContext } from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface SearchParameterComponent extends BackboneElement {
   definition: FhirCanonical;

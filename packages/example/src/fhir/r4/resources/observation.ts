@@ -1,5 +1,26 @@
-import type { FhirBoolean, FhirCode, FhirDateTime, FhirInstant, FhirInteger, FhirString, FhirTime } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Range, Ratio, Reference, SampledData, Timing } from "../datatypes.js";
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Ratio,
+  Reference,
+  SampledData,
+  Timing,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDateTime,
+  FhirInstant,
+  FhirInteger,
+  FhirString,
+  FhirTime,
+} from "../primitives.js";
 
 export interface ObservationReferenceRange extends BackboneElement {
   low?: Quantity;
@@ -31,8 +52,22 @@ export interface ObservationComponent extends BackboneElement {
 export interface Observation extends DomainResource {
   resourceType: "Observation";
   identifier?: Identifier[];
-  basedOn?: Reference<"CarePlan" | "DeviceRequest" | "ImmunizationRecommendation" | "MedicationRequest" | "NutritionOrder" | "ServiceRequest">[];
-  partOf?: Reference<"MedicationAdministration" | "MedicationDispense" | "MedicationStatement" | "Procedure" | "Immunization" | "ImagingStudy">[];
+  basedOn?: Reference<
+    | "CarePlan"
+    | "DeviceRequest"
+    | "ImmunizationRecommendation"
+    | "MedicationRequest"
+    | "NutritionOrder"
+    | "ServiceRequest"
+  >[];
+  partOf?: Reference<
+    | "MedicationAdministration"
+    | "MedicationDispense"
+    | "MedicationStatement"
+    | "Procedure"
+    | "Immunization"
+    | "ImagingStudy"
+  >[];
   status: FhirCode;
   category?: CodeableConcept[];
   code: CodeableConcept;
@@ -44,7 +79,9 @@ export interface Observation extends DomainResource {
   effectiveTiming?: Timing;
   effectiveInstant?: FhirInstant;
   issued?: FhirInstant;
-  performer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "RelatedPerson">[];
+  performer?: Reference<
+    "Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "RelatedPerson"
+  >[];
   valueQuantity?: Quantity;
   valueCodeableConcept?: CodeableConcept;
   valueString?: FhirString;
@@ -65,6 +102,8 @@ export interface Observation extends DomainResource {
   device?: Reference<"Device" | "DeviceMetric">;
   referenceRange?: ObservationReferenceRange[];
   hasMember?: Reference<"Observation" | "QuestionnaireResponse" | "MolecularSequence">[];
-  derivedFrom?: Reference<"DocumentReference" | "ImagingStudy" | "Media" | "QuestionnaireResponse" | "Observation" | "MolecularSequence">[];
+  derivedFrom?: Reference<
+    "DocumentReference" | "ImagingStudy" | "Media" | "QuestionnaireResponse" | "Observation" | "MolecularSequence"
+  >[];
   component?: ObservationComponent[];
 }

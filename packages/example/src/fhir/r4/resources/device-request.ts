@@ -1,5 +1,16 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Reference,
+  Timing,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Quantity, Range, Reference, Timing } from "../datatypes.js";
 
 export interface DeviceRequestParameter extends BackboneElement {
   code?: CodeableConcept;
@@ -31,7 +42,16 @@ export interface DeviceRequest extends DomainResource {
   authoredOn?: FhirDateTime;
   requester?: Reference<"Device" | "Practitioner" | "PractitionerRole" | "Organization">;
   performerType?: CodeableConcept;
-  performer?: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "HealthcareService" | "Patient" | "Device" | "RelatedPerson">;
+  performer?: Reference<
+    | "Practitioner"
+    | "PractitionerRole"
+    | "Organization"
+    | "CareTeam"
+    | "HealthcareService"
+    | "Patient"
+    | "Device"
+    | "RelatedPerson"
+  >;
   reasonCode?: CodeableConcept[];
   reasonReference?: Reference<"Condition" | "Observation" | "DiagnosticReport" | "DocumentReference">[];
   insurance?: Reference<"Coverage" | "ClaimResponse">[];

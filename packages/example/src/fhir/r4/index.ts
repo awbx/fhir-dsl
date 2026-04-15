@@ -1,11 +1,8 @@
-export * from "./primitives.js";
-export * from "./datatypes.js";
-export * from "./search-param-types.js";
-export * from "./search-params.js";
-export * from "./registry.js";
 export * from "./client.js";
+export * from "./datatypes.js";
+export * from "./primitives.js";
 export * from "./profiles/index.js";
-
+export * from "./registry.js";
 export * from "./resources/account.js";
 export * from "./resources/activity-definition.js";
 export * from "./resources/adverse-event.js";
@@ -152,4 +149,5 @@ export * from "./resources/test-script.js";
 export * from "./resources/value-set.js";
 export * from "./resources/verification-result.js";
 export * from "./resources/vision-prescription.js";
-
+export * from "./search-param-types.js";
+export * from "./search-params.js";

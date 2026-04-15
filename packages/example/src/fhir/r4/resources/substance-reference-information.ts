@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Range, Reference } from "../datatypes.js";
 
 export interface SubstanceReferenceInformationGene extends BackboneElement {
   geneSequenceOrigin?: CodeableConcept;

@@ -1,5 +1,14 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDateTime, FhirInteger, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, UsageContext } from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDateTime,
+  FhirInteger,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface OperationDefinitionParameterBinding extends BackboneElement {
   strength: FhirCode;

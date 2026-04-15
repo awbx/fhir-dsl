@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDecimal, FhirInstant, FhirString, FhirUnsignedInt, FhirUri } from "../primitives.js";
 import type { BackboneElement, Identifier, Resource, Signature } from "../datatypes.js";
+import type { FhirCode, FhirDecimal, FhirInstant, FhirString, FhirUnsignedInt, FhirUri } from "../primitives.js";
 
 export interface BundleLink extends BackboneElement {
   relation: FhirString;

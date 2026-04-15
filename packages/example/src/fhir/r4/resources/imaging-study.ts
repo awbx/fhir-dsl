@@ -1,9 +1,19 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Identifier,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirId, FhirString, FhirUnsignedInt } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, Coding, DomainResource, Identifier, Reference } from "../datatypes.js";
 
 export interface ImagingStudySeriesPerformer extends BackboneElement {
   function?: CodeableConcept;
-  actor: Reference<"Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson">;
+  actor: Reference<
+    "Practitioner" | "PractitionerRole" | "Organization" | "CareTeam" | "Patient" | "Device" | "RelatedPerson"
+  >;
 }
 
 export interface ImagingStudySeriesInstance extends BackboneElement {

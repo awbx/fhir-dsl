@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirDecimal, FhirInteger, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirDecimal, FhirInteger, FhirString } from "../primitives.js";
 
 export interface BiologicallyDerivedProductCollection extends BackboneElement {
   collector?: Reference<"Practitioner" | "PractitionerRole">;

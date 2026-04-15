@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Narrative,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirDateTime, FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Narrative, Period, Reference } from "../datatypes.js";
 
 export interface CompositionAttester extends BackboneElement {
   mode: FhirCode;

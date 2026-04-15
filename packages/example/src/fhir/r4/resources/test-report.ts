@@ -1,5 +1,5 @@
-import type { FhirCode, FhirDateTime, FhirDecimal, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 import type { BackboneElement, DomainResource, Identifier, Reference } from "../datatypes.js";
+import type { FhirCode, FhirDateTime, FhirDecimal, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
 
 export interface TestReportParticipant extends BackboneElement {
   type: FhirCode;

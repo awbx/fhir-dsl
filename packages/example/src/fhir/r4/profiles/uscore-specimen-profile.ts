@@ -4,6 +4,4 @@ import type { Specimen } from "../resources/specimen.js";
  * US Core Specimen Profile
  * http://hl7.org/fhir/us/core/StructureDefinition/us-core-specimen
  */
-export interface USCoreSpecimenProfile extends Specimen {
-}
-
+export interface USCoreSpecimenProfile extends Specimen {}

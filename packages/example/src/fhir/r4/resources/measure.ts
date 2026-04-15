@@ -1,5 +1,25 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactDetail, DomainResource, Expression, Identifier, Period, Reference, RelatedArtifact, UsageContext } from "../datatypes.js";
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Expression,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface MeasureGroupPopulation extends BackboneElement {
   code?: CodeableConcept;

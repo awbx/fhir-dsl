@@ -1,5 +1,15 @@
+import type {
+  Age,
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Period,
+  Range,
+  Reference,
+} from "../datatypes.js";
 import type { FhirDateTime, FhirString } from "../primitives.js";
-import type { Age, Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Range, Reference } from "../datatypes.js";
 
 export interface ConditionStage extends BackboneElement {
   summary?: CodeableConcept;

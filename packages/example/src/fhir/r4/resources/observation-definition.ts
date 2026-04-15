@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirCode, FhirDecimal, FhirInteger, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Range, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirCode, FhirDecimal, FhirInteger, FhirString } from "../primitives.js";
 
 export interface ObservationDefinitionQuantitativeDetails extends BackboneElement {
   customaryUnit?: CodeableConcept;

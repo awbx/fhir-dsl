@@ -1,5 +1,15 @@
+import type {
+  Annotation,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  UsageContext,
+} from "../datatypes.js";
 import type { FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, CodeableConcept, ContactDetail, DomainResource, Identifier, Period, Reference, RelatedArtifact, UsageContext } from "../datatypes.js";
 
 export interface Evidence extends DomainResource {
   resourceType: "Evidence";

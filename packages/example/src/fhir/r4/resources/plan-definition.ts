@@ -1,5 +1,33 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirId, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Age, BackboneElement, CodeableConcept, ContactDetail, DataRequirement, DomainResource, Duration, Expression, Identifier, Period, Quantity, Range, Reference, RelatedArtifact, Timing, TriggerDefinition, UsageContext } from "../datatypes.js";
+import type {
+  Age,
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DataRequirement,
+  DomainResource,
+  Duration,
+  Expression,
+  Identifier,
+  Period,
+  Quantity,
+  Range,
+  Reference,
+  RelatedArtifact,
+  Timing,
+  TriggerDefinition,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirId,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface PlanDefinitionGoalTarget extends BackboneElement {
   measure?: CodeableConcept;

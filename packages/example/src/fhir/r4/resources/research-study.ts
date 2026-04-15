@@ -1,5 +1,15 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+} from "../datatypes.js";
 import type { FhirCode, FhirMarkdown, FhirString } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, ContactDetail, DomainResource, Identifier, Period, Reference, RelatedArtifact } from "../datatypes.js";
 
 export interface ResearchStudyArm extends BackboneElement {
   name: FhirString;

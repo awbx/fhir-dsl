@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirCode } from "../primitives.js";
 import type { BackboneElement, DomainResource, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirCode } from "../primitives.js";
 
 export interface LinkageItem extends BackboneElement {
   type: FhirCode;

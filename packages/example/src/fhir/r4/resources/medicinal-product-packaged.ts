@@ -1,5 +1,15 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  MarketingStatus,
+  ProdCharacteristic,
+  ProductShelfLife,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirString } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, DomainResource, Identifier, MarketingStatus, ProdCharacteristic, ProductShelfLife, Quantity, Reference } from "../datatypes.js";
 
 export interface MedicinalProductPackagedBatchIdentifier extends BackboneElement {
   outerPackaging: Identifier;

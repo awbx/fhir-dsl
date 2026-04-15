@@ -1,5 +1,25 @@
-import type { FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirInteger, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, ContactDetail, DomainResource, Identifier, Period, Reference, RelatedArtifact, UsageContext } from "../datatypes.js";
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirInteger,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface RiskEvidenceSynthesisSampleSize extends BackboneElement {
   description?: FhirString;

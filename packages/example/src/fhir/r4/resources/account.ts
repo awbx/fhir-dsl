@@ -1,5 +1,5 @@
-import type { FhirBoolean, FhirCode, FhirPositiveInt, FhirString } from "../primitives.js";
 import type { BackboneElement, CodeableConcept, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
+import type { FhirBoolean, FhirCode, FhirPositiveInt, FhirString } from "../primitives.js";
 
 export interface AccountCoverage extends BackboneElement {
   coverage: Reference<"Coverage">;
@@ -18,7 +18,9 @@ export interface Account extends DomainResource {
   status: FhirCode;
   type?: CodeableConcept;
   name?: FhirString;
-  subject?: Reference<"Patient" | "Device" | "Practitioner" | "PractitionerRole" | "Location" | "HealthcareService" | "Organization">[];
+  subject?: Reference<
+    "Patient" | "Device" | "Practitioner" | "PractitionerRole" | "Location" | "HealthcareService" | "Organization"
+  >[];
   servicePeriod?: Period;
   coverage?: AccountCoverage[];
   owner?: Reference<"Organization">;

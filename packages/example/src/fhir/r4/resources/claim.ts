@@ -1,5 +1,24 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirDecimal, FhirPositiveInt, FhirString } from "../primitives.js";
-import type { Address, Attachment, BackboneElement, CodeableConcept, DomainResource, Identifier, Money, Period, Quantity, Reference } from "../datatypes.js";
+import type {
+  Address,
+  Attachment,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Money,
+  Period,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirDecimal,
+  FhirPositiveInt,
+  FhirString,
+} from "../primitives.js";
 
 export interface ClaimRelated extends BackboneElement {
   claim?: Reference<"Claim">;

@@ -1,5 +1,23 @@
-import type { FhirBoolean, FhirCanonical, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { CodeableConcept, ContactDetail, DomainResource, Identifier, Period, Reference, RelatedArtifact, UsageContext } from "../datatypes.js";
+import type {
+  CodeableConcept,
+  ContactDetail,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+  RelatedArtifact,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCanonical,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ResearchDefinition extends DomainResource {
   resourceType: "ResearchDefinition";

@@ -1,5 +1,25 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirMarkdown, FhirString, FhirUri } from "../primitives.js";
-import type { Attachment, CodeableConcept, ContactDetail, DataRequirement, DomainResource, Identifier, ParameterDefinition, Period, Reference, RelatedArtifact, UsageContext } from "../datatypes.js";
+import type {
+  Attachment,
+  CodeableConcept,
+  ContactDetail,
+  DataRequirement,
+  DomainResource,
+  Identifier,
+  ParameterDefinition,
+  Period,
+  Reference,
+  RelatedArtifact,
+  UsageContext,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirMarkdown,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface Library extends DomainResource {
   resourceType: "Library";

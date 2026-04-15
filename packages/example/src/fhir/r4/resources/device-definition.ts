@@ -1,5 +1,16 @@
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  Identifier,
+  ProdCharacteristic,
+  ProductShelfLife,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, ContactPoint, DomainResource, Identifier, ProdCharacteristic, ProductShelfLife, Quantity, Reference } from "../datatypes.js";
 
 export interface DeviceDefinitionUdiDeviceIdentifier extends BackboneElement {
   deviceIdentifier: FhirString;

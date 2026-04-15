@@ -1,5 +1,21 @@
-import type { FhirBoolean, FhirCode, FhirDate, FhirDateTime, FhirPositiveInt, FhirString, FhirUri } from "../primitives.js";
-import type { Annotation, BackboneElement, CodeableConcept, DomainResource, Identifier, Quantity, Reference } from "../datatypes.js";
+import type {
+  Annotation,
+  BackboneElement,
+  CodeableConcept,
+  DomainResource,
+  Identifier,
+  Quantity,
+  Reference,
+} from "../datatypes.js";
+import type {
+  FhirBoolean,
+  FhirCode,
+  FhirDate,
+  FhirDateTime,
+  FhirPositiveInt,
+  FhirString,
+  FhirUri,
+} from "../primitives.js";
 
 export interface ImmunizationPerformer extends BackboneElement {
   function?: CodeableConcept;

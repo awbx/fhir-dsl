@@ -1,5 +1,14 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  Coding,
+  DomainResource,
+  Duration,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirCode, FhirPositiveInt } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, Coding, DomainResource, Duration, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface EncounterStatusHistory extends BackboneElement {
   status: FhirCode;

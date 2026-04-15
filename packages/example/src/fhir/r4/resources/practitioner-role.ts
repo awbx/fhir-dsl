@@ -1,5 +1,13 @@
+import type {
+  BackboneElement,
+  CodeableConcept,
+  ContactPoint,
+  DomainResource,
+  Identifier,
+  Period,
+  Reference,
+} from "../datatypes.js";
 import type { FhirBoolean, FhirCode, FhirString, FhirTime } from "../primitives.js";
-import type { BackboneElement, CodeableConcept, ContactPoint, DomainResource, Identifier, Period, Reference } from "../datatypes.js";
 
 export interface PractitionerRoleAvailableTime extends BackboneElement {
   daysOfWeek?: FhirCode[];
