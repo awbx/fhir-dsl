@@ -170,6 +170,63 @@ const bundle = await fhir
   .execute();
 ```
 
+## Reverse Includes and Chained Searches
+
+### Patient with All Their Observations (`_revinclude`)
+
+```typescript
+const result = await fhir
+  .search("Patient")
+  .where("family", "eq", "Johnson")
+  .revinclude("Observation", "subject")
+  .execute();
+
+// result.data: Patient[]
+// result.included: Observation[] referencing these patients
+for (const obs of result.included) {
+  console.log(obs.resourceType, obs.code?.text);
+}
+```
+
+### Search Through References (Chained Parameters)
+
+```typescript
+// Find observations where the patient's name is "Smith"
+const result = await fhir
+  .search("Observation")
+  .whereChained("subject", "Patient", "family", "eq", "Smith")
+  .where("status", "eq", "final")
+  .execute();
+```
+
+```typescript
+// Find encounters where the practitioner is in a specific organization
+const result = await fhir
+  .search("Encounter")
+  .whereChained("participant", "Practitioner", "name", "eq", "Dr. Jones")
+  .sort("date", "desc")
+  .execute();
+```
+
+### Filter by Referencing Resources (`_has`)
+
+```typescript
+// Find patients who have at least one blood pressure observation
+const result = await fhir
+  .search("Patient")
+  .has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
+  .where("active", "eq", "true")
+  .execute();
+```
+
+```typescript
+// Find patients with recent encounters
+const result = await fhir
+  .search("Patient")
+  .has("Encounter", "subject", "date", "ge", "2024-01-01")
+  .execute();
+```
+
 ## Composing Reusable Queries
 
 Because builders are immutable, you can create reusable base queries:

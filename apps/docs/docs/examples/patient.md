@@ -191,6 +191,36 @@ const result = await fhir
   .execute();
 ```
 
+### Patient with Their Observations (Reverse Include)
+
+```typescript
+const result = await fhir
+  .search("Patient")
+  .where("family", "eq", "Johnson")
+  .revinclude("Observation", "subject")
+  .execute();
+
+for (const patient of result.data) {
+  console.log(patient.name?.[0]?.family);
+}
+
+// Observations that reference these patients
+for (const obs of result.included) {
+  console.log(obs.resourceType, obs.code?.text);
+}
+```
+
+### Patients with Recent Observations (`_has`)
+
+```typescript
+// Only patients who have a final observation after 2024-01-01
+const result = await fhir
+  .search("Patient")
+  .has("Observation", "subject", "date", "ge", "2024-01-01")
+  .where("active", "eq", "true")
+  .execute();
+```
+
 ## Update a Patient
 
 ```typescript

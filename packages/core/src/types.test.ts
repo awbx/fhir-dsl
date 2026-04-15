@@ -10,6 +10,7 @@ import type {
   QuantityPrefix,
   ReferenceModifier,
   ResolveProfile,
+  RevIncludeFor,
   SearchParamFor,
   SearchPrefixFor,
   SortDirection,
@@ -42,6 +43,14 @@ type TestSchema = {
       performer: "Practitioner";
     };
   };
+  revIncludes: {
+    Patient: {
+      Observation: "subject";
+    };
+    Practitioner: {
+      Observation: "performer";
+    };
+  };
   profiles: {
     Observation: {
       "vital-signs": { resourceType: "Observation"; id: string; code: string; category: string[] };
@@ -68,6 +77,28 @@ describe("type-level tests", () => {
 
     it("falls back to generic record for unknown resource", () => {
       type Result = IncludeFor<TestSchema, "Patient">;
+      expectTypeOf<Result>().toEqualTypeOf<Record<string, string>>();
+    });
+  });
+
+  describe("RevIncludeFor", () => {
+    it("resolves rev-includes for a known target resource", () => {
+      expectTypeOf<RevIncludeFor<TestSchema, "Patient">>().toEqualTypeOf<{ Observation: "subject" }>();
+    });
+
+    it("falls back to generic record for unknown resource", () => {
+      type Result = RevIncludeFor<TestSchema, "Unknown">;
+      expectTypeOf<Result>().toEqualTypeOf<Record<string, string>>();
+    });
+
+    it("falls back to generic record when revIncludes is undefined", () => {
+      type SchemaWithout = {
+        resources: { Patient: { resourceType: "Patient" } };
+        searchParams: {};
+        includes: {};
+        profiles: {};
+      };
+      type Result = RevIncludeFor<SchemaWithout, "Patient">;
       expectTypeOf<Result>().toEqualTypeOf<Record<string, string>>();
     });
   });

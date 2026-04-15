@@ -6,15 +6,25 @@ type TestSchema = {
   resources: {
     Patient: { resourceType: "Patient"; id?: string };
     Practitioner: { resourceType: "Practitioner"; id?: string };
+    Observation: { resourceType: "Observation"; id?: string };
   };
   searchParams: {
     Patient: {
       family: { type: "string"; value: string };
       birthdate: { type: "date"; value: string };
     };
+    Observation: {
+      code: { type: "token"; value: string };
+      date: { type: "date"; value: string };
+      subject: { type: "reference"; value: string };
+    };
   };
   includes: {
     Patient: { general_practitioner: "Practitioner" };
+    Observation: { subject: "Patient" };
+  };
+  revIncludes: {
+    Patient: { Observation: "subject" };
   };
   profiles: Record<string, never>;
 };
@@ -145,6 +155,92 @@ describe("SearchQueryBuilder", () => {
       expect(query.method).toBe("GET");
       expect(query.path).toBe("Observation");
       expect(query.params).toHaveLength(6);
+    });
+  });
+
+  describe("revinclude", () => {
+    it("compiles _revinclude params", () => {
+      const query = createBuilder("Patient")
+        .revinclude("Observation" as any, "subject" as any)
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_revinclude",
+        value: "Observation:subject",
+      });
+    });
+
+    it("supports multiple revincludes", () => {
+      const query = createBuilder("Patient")
+        .revinclude("Observation" as any, "subject" as any)
+        .revinclude("Account" as any, "patient" as any)
+        .compile();
+
+      const revIncludes = query.params.filter((p) => p.name === "_revinclude");
+      expect(revIncludes).toHaveLength(2);
+      expect(revIncludes[0]).toEqual({ name: "_revinclude", value: "Observation:subject" });
+      expect(revIncludes[1]).toEqual({ name: "_revinclude", value: "Account:patient" });
+    });
+  });
+
+  describe("whereChained", () => {
+    it("compiles chained parameter", () => {
+      const query = createBuilder("Observation")
+        .whereChained("subject" as any, "Patient" as any, "name" as any, "eq", "Smith")
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "subject:Patient.name",
+        value: "Smith",
+      });
+    });
+
+    it("compiles chained parameter with prefix", () => {
+      const query = createBuilder("Observation")
+        .whereChained("subject" as any, "Patient" as any, "birthdate" as any, "ge", "1990-01-01")
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "subject:Patient.birthdate",
+        prefix: "ge",
+        value: "1990-01-01",
+      });
+    });
+
+    it("combines chained params with regular where clauses", () => {
+      const query = createBuilder("Observation")
+        .where("status" as any, "eq", "final")
+        .whereChained("subject" as any, "Patient" as any, "name" as any, "eq", "Smith")
+        .compile();
+
+      expect(query.params).toHaveLength(2);
+      expect(query.params[0]).toEqual({ name: "status", value: "final" });
+      expect(query.params[1]).toEqual({ name: "subject:Patient.name", value: "Smith" });
+    });
+  });
+
+  describe("has", () => {
+    it("compiles _has parameter", () => {
+      const query = createBuilder("Patient")
+        .has("Observation" as any, "subject" as any, "code" as any, "eq", "1234")
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_has:Observation:subject:code",
+        value: "1234",
+      });
+    });
+
+    it("compiles _has with prefix operator", () => {
+      const query = createBuilder("Patient")
+        .has("Observation" as any, "subject" as any, "date" as any, "ge", "2024-01-01")
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_has:Observation:subject:date",
+        prefix: "ge",
+        value: "2024-01-01",
+      });
     });
   });
 

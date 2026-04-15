@@ -84,6 +84,40 @@ describe("emitRegistry", () => {
     expect(output).not.toMatch(/IncludeRegistry[\s\S]*Patient:/);
   });
 
+  it("generates RevIncludeRegistry from reference param targets", () => {
+    const resources = [makeResource("Patient"), makeResource("Group"), makeResource("Observation")];
+    const searchParams = new Map([
+      makeSearchParams("Observation", [
+        { name: "subject", code: "subject", type: "reference", targets: ["Patient", "Group"] },
+        { name: "performer", code: "performer", type: "reference", targets: ["Practitioner"] },
+      ]),
+    ]);
+
+    const output = emitRegistry(resources, searchParams);
+
+    expect(output).toContain("export interface RevIncludeRegistry");
+    expect(output).toContain("Patient: {");
+    expect(output).toContain('Observation: "subject"');
+    expect(output).toContain("Group: {");
+  });
+
+  it("aggregates multiple source params in RevIncludeRegistry", () => {
+    const resources = [makeResource("Patient"), makeResource("Observation"), makeResource("Account")];
+    const searchParams = new Map([
+      makeSearchParams("Observation", [{ name: "subject", code: "subject", type: "reference", targets: ["Patient"] }]),
+      makeSearchParams("Account", [
+        { name: "patient", code: "patient", type: "reference", targets: ["Patient"] },
+        { name: "subject", code: "subject", type: "reference", targets: ["Patient"] },
+      ]),
+    ]);
+
+    const output = emitRegistry(resources, searchParams);
+
+    // Patient should have entries for both Observation and Account
+    expect(output).toMatch(/RevIncludeRegistry[\s\S]*Patient:[\s\S]*Account:[\s\S]*"patient" \| "subject"/);
+    expect(output).toMatch(/RevIncludeRegistry[\s\S]*Patient:[\s\S]*Observation: "subject"/);
+  });
+
   it("generates empty ProfileRegistry by default", () => {
     const output = emitRegistry([], new Map());
     expect(output).toContain("export interface ProfileRegistry {}");

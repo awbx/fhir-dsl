@@ -136,6 +136,7 @@ export type GeneratedSchema = {
   resources: FhirResourceMap;
   searchParams: SearchParamRegistry;
   includes: IncludeRegistry;
+  revIncludes: RevIncludeRegistry;
   profiles: ProfileRegistry;
 };
 ```
@@ -187,6 +188,15 @@ export interface IncludeRegistry {
   Patient: {
     "general-practitioner": "Practitioner" | "PractitionerRole";
     organization: "Organization";
+  };
+  // ...
+}
+
+export interface RevIncludeRegistry {
+  Patient: {
+    Observation: "subject" | "performer";
+    Encounter: "subject";
+    // ... every resource+param that targets Patient
   };
   // ...
 }

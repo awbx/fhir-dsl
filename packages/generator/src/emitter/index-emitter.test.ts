@@ -87,5 +87,11 @@ describe("emitClient", () => {
     expect(output).toContain("resources: FhirResourceMap");
     expect(output).toContain("searchParams: SearchParamRegistry");
     expect(output).toContain("includes: IncludeRegistry");
+    expect(output).toContain("revIncludes: RevIncludeRegistry");
+  });
+
+  it("imports RevIncludeRegistry from registry", () => {
+    const output = emitClient(false);
+    expect(output).toContain("RevIncludeRegistry");
   });
 });

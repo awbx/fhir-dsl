@@ -20,6 +20,14 @@ What's available today:
 - Dual ESM/CJS builds
 - CLI for type generation
 
+## Recently Added
+
+### Query Features (v0.5.0)
+
+- **`_revinclude`** -- Reverse include support in search queries via `.revinclude()`
+- **Chained parameters** -- Type-safe chained search via `.whereChained()` (e.g., `subject:Patient.name=Smith`)
+- **`_has`** -- Reverse chaining for filtering via `.has()` (e.g., `_has:Observation:subject:code=1234`)
+
 ## Planned
 
 ### FHIR Operations
@@ -30,10 +38,7 @@ What's available today:
 
 ### Query Features
 
-- **`_revinclude`** -- Reverse include support in search queries
-- **Chained parameters** -- Support for `patient.name` style chained search params
 - **Composite parameters** -- Support for multi-value composite search params
-- **`_has`** -- Reverse chaining for filtering by related resources
 
 ### Developer Experience
 

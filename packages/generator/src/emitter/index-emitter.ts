@@ -37,7 +37,9 @@ export function emitClient(hasProfiles: boolean): string {
   const lines: string[] = [];
 
   lines.push('import { createFhirClient, type FhirClientConfig } from "@fhir-dsl/core";');
-  lines.push('import type { FhirResourceMap, IncludeRegistry, SearchParamRegistry } from "./registry.js";');
+  lines.push(
+    'import type { FhirResourceMap, IncludeRegistry, RevIncludeRegistry, SearchParamRegistry } from "./registry.js";',
+  );
   if (hasProfiles) {
     lines.push('import type { ProfileRegistry } from "./profiles/profile-registry.js";');
   }
@@ -47,6 +49,7 @@ export function emitClient(hasProfiles: boolean): string {
   lines.push("  resources: FhirResourceMap;");
   lines.push("  searchParams: SearchParamRegistry;");
   lines.push("  includes: IncludeRegistry;");
+  lines.push("  revIncludes: RevIncludeRegistry;");
   lines.push(`  profiles: ${hasProfiles ? "ProfileRegistry" : "Record<string, never>"};`);
   lines.push("};");
   lines.push("");

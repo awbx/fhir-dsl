@@ -1,7 +1,15 @@
 import type { Bundle, Resource } from "@fhir-dsl/types";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import type { BundleLink, ResolveIncluded, SearchQueryBuilder, SearchResult } from "./query-builder.js";
-import type { FhirSchema, IncludeFor, ResolveProfile, SearchPrefixFor, SortDirection } from "./types.js";
+import type {
+  FhirSchema,
+  IncludeFor,
+  ResolveProfile,
+  RevIncludeFor,
+  SearchParamFor,
+  SearchPrefixFor,
+  SortDirection,
+} from "./types.js";
 
 // --- Internal query state ---
 
@@ -9,6 +17,7 @@ interface QueryState {
   resourceType: string;
   params: CompiledSearchParam[];
   includes: string[];
+  revIncludes: string[];
   sorts: Array<{ param: string; direction: SortDirection }>;
   count?: number | undefined;
   offset?: number | undefined;
@@ -36,6 +45,7 @@ export class SearchQueryBuilderImpl<
       resourceType,
       params: [],
       includes: [],
+      revIncludes: [],
       sorts: [],
       profile,
     };
@@ -65,6 +75,66 @@ export class SearchQueryBuilderImpl<
     return new SearchQueryBuilderImpl(this.#state.resourceType, this.#executor, {
       ...this.#state,
       includes: [...this.#state.includes, param],
+    });
+  }
+
+  revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
+    sourceResource: SrcRT,
+    param: Param,
+  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof> {
+    return new SearchQueryBuilderImpl(this.#state.resourceType, this.#executor, {
+      ...this.#state,
+      revIncludes: [...this.#state.revIncludes, `${sourceResource}:${param}`],
+    });
+  }
+
+  whereChained<
+    RefParam extends string & keyof IncludeFor<S, RT>,
+    TargetRT extends string & (IncludeFor<S, RT>[RefParam] extends string ? IncludeFor<S, RT>[RefParam] : never),
+    K extends string & keyof SearchParamFor<S, TargetRT>,
+  >(
+    refParam: RefParam,
+    targetResource: TargetRT,
+    targetParam: K,
+    op: SearchPrefixFor<SearchParamFor<S, TargetRT>[K]>,
+    value: SearchParamFor<S, TargetRT>[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    const name = `${refParam}:${targetResource}.${targetParam}`;
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+      ...this.#state,
+      params: [
+        ...this.#state.params,
+        {
+          name,
+          prefix: op === "eq" ? undefined : (op as string),
+          value: value as string | number,
+        },
+      ],
+    });
+  }
+
+  has<
+    SrcRT extends string & keyof RevIncludeFor<S, RT>,
+    RefParam extends string & RevIncludeFor<S, RT>[SrcRT],
+    K extends string & keyof SearchParamFor<S, SrcRT>,
+  >(
+    sourceResource: SrcRT,
+    refParam: RefParam,
+    searchParam: K,
+    op: SearchPrefixFor<SearchParamFor<S, SrcRT>[K]>,
+    value: SearchParamFor<S, SrcRT>[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    const name = `_has:${sourceResource}:${refParam}:${searchParam}`;
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(this.#state.resourceType, this.#executor, {
+      ...this.#state,
+      params: [
+        ...this.#state.params,
+        {
+          name,
+          prefix: op === "eq" ? undefined : (op as string),
+          value: value as string | number,
+        },
+      ],
     });
   }
 
@@ -100,6 +170,13 @@ export class SearchQueryBuilderImpl<
       params.push({
         name: "_include",
         value: `${this.#state.resourceType}:${inc}`,
+      });
+    }
+
+    for (const revInc of this.#state.revIncludes) {
+      params.push({
+        name: "_revinclude",
+        value: revInc,
       });
     }
 

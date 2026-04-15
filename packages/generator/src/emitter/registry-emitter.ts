@@ -62,6 +62,43 @@ export function emitRegistry(
   lines.push("}");
   lines.push("");
 
+  // RevIncludeRegistry (inverse of IncludeRegistry: target → { source: paramCodes })
+  const revIncludeMap = new Map<string, Map<string, Set<string>>>();
+  for (const r of sorted) {
+    const spEntry = searchParams.get(r.name);
+    if (!spEntry) continue;
+
+    const refParams = spEntry.params.filter((p) => p.type === "reference" && p.targets?.length);
+    for (const param of refParams) {
+      for (const target of param.targets!) {
+        if (!revIncludeMap.has(target)) {
+          revIncludeMap.set(target, new Map());
+        }
+        const sourceMap = revIncludeMap.get(target)!;
+        if (!sourceMap.has(r.name)) {
+          sourceMap.set(r.name, new Set());
+        }
+        sourceMap.get(r.name)!.add(param.code);
+      }
+    }
+  }
+
+  lines.push("export interface RevIncludeRegistry {");
+  const sortedTargets = [...revIncludeMap.keys()].sort();
+  for (const target of sortedTargets) {
+    const sourceMap = revIncludeMap.get(target)!;
+    lines.push(`  ${target}: {`);
+    const sortedSources = [...sourceMap.keys()].sort();
+    for (const source of sortedSources) {
+      const params = [...sourceMap.get(source)!].sort();
+      const paramUnion = params.map((p) => `"${p}"`).join(" | ");
+      lines.push(`    ${source}: ${paramUnion};`);
+    }
+    lines.push("  };");
+  }
+  lines.push("}");
+  lines.push("");
+
   if (!options?.skipProfileRegistry) {
     lines.push("export interface ProfileRegistry {}");
     lines.push("");

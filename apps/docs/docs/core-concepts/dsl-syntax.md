@@ -76,6 +76,83 @@ const result = await fhir
 
 Valid include parameters are derived from the resource's reference fields.
 
+### `revinclude(sourceResource, param)`
+
+Includes resources that **reference** the search results (the reverse of `include`):
+
+```typescript
+const result = await fhir
+  .search("Patient")
+  .where("family", "eq", "Smith")
+  .revinclude("Observation", "subject")
+  .execute();
+
+// result.data: Patient[]
+// result.included: Observation[] (observations referencing these patients)
+```
+
+Both arguments are type-checked: `"Observation"` must be a resource that has a reference param targeting `Patient`, and `"subject"` must be that specific param.
+
+### `whereChained(refParam, targetResource, targetParam, op, value)`
+
+Searches through a reference to filter by properties of the referenced resource:
+
+```typescript
+// Find observations where the referenced patient's name is "Smith"
+const result = await fhir
+  .search("Observation")
+  .whereChained("subject", "Patient", "name", "eq", "Smith")
+  .execute();
+
+// Compiles to: Observation?subject:Patient.name=Smith
+```
+
+All five arguments are type-checked:
+1. `"subject"` must be a reference param on Observation
+2. `"Patient"` must be a valid target of that reference
+3. `"name"` must be a valid search param on Patient
+4. `"eq"` must be a valid operator for string params
+5. The value type matches the param type
+
+```typescript
+// Chain through with non-eq operators
+.whereChained("subject", "Patient", "birthdate", "ge", "1990-01-01")
+// Compiles to: subject:Patient.birthdate=ge1990-01-01
+```
+
+### `has(sourceResource, refParam, searchParam, op, value)`
+
+Filters results based on properties of resources that **reference** them (reverse chaining):
+
+```typescript
+// Find patients that have at least one final observation with a specific code
+const result = await fhir
+  .search("Patient")
+  .has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
+  .execute();
+
+// Compiles to: Patient?_has:Observation:subject:code=http://loinc.org|85354-9
+```
+
+All arguments are type-checked:
+1. `"Observation"` must be a resource with a reference param targeting Patient
+2. `"subject"` must be that reference param
+3. `"code"` must be a valid search param on Observation
+4. Operator and value are validated against the param type
+
+```typescript
+// Combine _has with regular where clauses
+const result = await fhir
+  .search("Patient")
+  .where("active", "eq", "true")
+  .has("Observation", "subject", "date", "ge", "2024-01-01")
+  .execute();
+```
+
+:::note
+`_has` filters the primary results — it doesn't add included resources. Use `revinclude` if you want the referencing resources in the response.
+:::
+
 ### `sort(param, direction?)`
 
 Sorts results by a search parameter:

@@ -13121,3 +13121,182 @@ export interface IncludeRegistry {
     prescriber: "Practitioner" | "PractitionerRole";
   };
 }
+
+export interface RevIncludeRegistry {
+  ActivityDefinition: {
+    DeviceRequest: "instantiates-canonical";
+    NutritionOrder: "instantiates-canonical";
+    ServiceRequest: "instantiates-canonical";
+  };
+  CarePlan: {
+    CarePlan: "based-on" | "part-of";
+    DiagnosticReport: "based-on";
+    Media: "based-on";
+    Procedure: "based-on";
+    QuestionnaireResponse: "based-on";
+    ServiceRequest: "based-on";
+  };
+  CareTeam: {
+    CarePlan: "care-team";
+    DiagnosticReport: "results-interpreter";
+  };
+  Composition: {
+    Composition: "related-ref";
+  };
+  Condition: {
+    Appointment: "reason-reference";
+    ClinicalImpression: "finding-ref";
+    Encounter: "reason-reference";
+    Immunization: "reason-reference";
+    Procedure: "reason-reference";
+  };
+  Consent: {
+    Consent: "source-reference";
+  };
+  Contract: {
+    Consent: "source-reference";
+  };
+  Device: {
+    Claim: "detail-udi" | "item-udi" | "procedure-udi" | "subdetail-udi";
+    ExplanationOfBenefit: "detail-udi" | "item-udi" | "procedure-udi" | "subdetail-udi";
+  };
+  DiagnosticReport: {
+    Immunization: "reason-reference";
+    Procedure: "reason-reference";
+  };
+  DocumentReference: {
+    Consent: "source-reference";
+    Procedure: "reason-reference";
+  };
+  Encounter: {
+    Encounter: "part-of";
+  };
+  EpisodeOfCare: {
+    Encounter: "episode-of-care";
+  };
+  Immunization: {
+    ImmunizationEvaluation: "immunization-event";
+  };
+  ImmunizationRecommendation: {
+    Appointment: "reason-reference";
+    DiagnosticReport: "based-on";
+    Encounter: "reason-reference";
+  };
+  ImplementationGuide: {
+    ImplementationGuide: "depends-on";
+  };
+  Location: {
+    HealthcareService: "coverage-area";
+  };
+  Media: {
+    ClinicalImpression: "finding-ref";
+  };
+  MedicationAdministration: {
+    MedicationStatement: "part-of";
+    Procedure: "part-of";
+  };
+  MedicationDispense: {
+    MedicationStatement: "part-of";
+  };
+  MedicationRequest: {
+    DiagnosticReport: "based-on";
+    ServiceRequest: "based-on";
+  };
+  MedicationStatement: {
+    MedicationStatement: "part-of";
+  };
+  MolecularSequence: {
+    Observation: "has-member";
+  };
+  NutritionOrder: {
+    DiagnosticReport: "based-on";
+  };
+  Observation: {
+    Appointment: "reason-reference";
+    ClinicalImpression: "finding-ref";
+    Encounter: "reason-reference";
+    Immunization: "reason-reference";
+    MedicationStatement: "part-of";
+    Observation: "has-member";
+    Procedure: "part-of" | "reason-reference";
+    QuestionnaireResponse: "part-of";
+  };
+  Organization: {
+    ChargeItem: "performing-organization" | "requesting-organization";
+    Claim: "care-team";
+    Coverage: "policy-holder";
+    DiagnosticReport: "results-interpreter";
+    Encounter: "service-provider";
+    ExplanationOfBenefit: "care-team";
+    Group: "managing-entity";
+    InsurancePlan: "administered-by" | "owned-by";
+    MedicationRequest: "intended-dispenser";
+    OrganizationAffiliation: "participating-organization" | "primary-organization";
+    Patient: "general-practitioner";
+    PaymentReconciliation: "payment-issuer";
+  };
+  Patient: {
+    Coverage: "policy-holder";
+  };
+  PlanDefinition: {
+    DeviceRequest: "instantiates-canonical";
+    NutritionOrder: "instantiates-canonical";
+    ServiceRequest: "instantiates-canonical";
+  };
+  Practitioner: {
+    Claim: "care-team";
+    DiagnosticReport: "results-interpreter";
+    EpisodeOfCare: "care-manager";
+    ExplanationOfBenefit: "care-team";
+    Group: "managing-entity";
+    Patient: "general-practitioner";
+  };
+  PractitionerRole: {
+    Claim: "care-team";
+    DiagnosticReport: "results-interpreter";
+    ExplanationOfBenefit: "care-team";
+    Group: "managing-entity";
+    Patient: "general-practitioner";
+  };
+  Procedure: {
+    Appointment: "reason-reference";
+    Encounter: "reason-reference";
+    MedicationStatement: "part-of";
+    Procedure: "part-of" | "reason-reference";
+    QuestionnaireResponse: "part-of";
+  };
+  QuestionnaireResponse: {
+    Consent: "source-reference";
+    Observation: "has-member";
+  };
+  RelatedPerson: {
+    Coverage: "policy-holder";
+    Group: "managing-entity";
+  };
+  SearchParameter: {
+    SearchParameter: "derived-from";
+  };
+  ServiceRequest: {
+    Appointment: "based-on";
+    DiagnosticReport: "based-on";
+    Encounter: "based-on";
+    EpisodeOfCare: "incoming-referral";
+    Media: "based-on";
+    Procedure: "based-on";
+    QuestionnaireResponse: "based-on";
+    ServiceRequest: "based-on";
+  };
+  StructureDefinition: {
+    CapabilityStatement: "resource-profile" | "supported-profile";
+    OperationDefinition: "input-profile" | "output-profile";
+  };
+  Substance: {
+    Substance: "substance-reference";
+  };
+  Task: {
+    Task: "part-of";
+  };
+  ValueSet: {
+    ConceptMap: "source-uri" | "target-uri";
+  };
+}

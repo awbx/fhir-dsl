@@ -13,6 +13,7 @@ export interface FhirSchema {
   resources: any;
   searchParams: any;
   includes: any;
+  revIncludes?: any;
   profiles: any;
 }
 
@@ -27,6 +28,14 @@ export type SearchParamFor<S extends FhirSchema, RT extends string> = RT extends
 export type IncludeFor<S extends FhirSchema, RT extends string> = RT extends keyof S["includes"]
   ? S["includes"][RT]
   : Record<string, string>;
+
+// --- Extract reverse includes for a given resource type ---
+
+export type RevIncludeFor<S extends FhirSchema, RT extends string> = S["revIncludes"] extends undefined
+  ? Record<string, string>
+  : RT extends keyof S["revIncludes"]
+    ? S["revIncludes"][RT]
+    : Record<string, string>;
 
 // --- Extract profiles for a given resource type ---
 

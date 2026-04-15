@@ -14,7 +14,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 
 ## Features
 
-- **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, and includes. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
+- **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 - **Immutable builders** — Every query method returns a new builder instance, safe to reuse, fork, and compose.
@@ -83,6 +83,29 @@ const result = await fhir
 for (const patient of result.data) {
   console.log(patient.name?.[0]?.family); // fully typed
 }
+```
+
+### Advanced queries — chained params, reverse includes, `_has`
+
+```ts
+// Search through references: find observations where patient name is "Smith"
+const obs = await fhir
+  .search("Observation")
+  .whereChained("subject", "Patient", "family", "eq", "Smith")
+  .execute();
+
+// Reverse include: get patients with their observations
+const patientsWithObs = await fhir
+  .search("Patient")
+  .revinclude("Observation", "subject")
+  .execute();
+// patientsWithObs.included has the Observation resources
+
+// _has: find patients who have a specific observation
+const filtered = await fhir
+  .search("Patient")
+  .has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
+  .execute();
 ```
 
 ### Read a single resource
