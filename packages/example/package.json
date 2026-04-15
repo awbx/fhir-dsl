@@ -1,0 +1,14 @@
+{
+  "name": "@fhir-dsl/example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node --input-type=module -e \"import { generate } from '@fhir-dsl/generator'; generate({ version: 'r4', outDir: 'packages/example/src/fhir', cacheDir: '.cache/r4', ig: ['hl7.fhir.us.core@6.1.0'] });\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fhir-dsl/core": "workspace:*",
+    "@fhir-dsl/types": "workspace:*"
+  }
+}
