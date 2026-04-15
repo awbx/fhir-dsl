@@ -1,20 +1,28 @@
 {
   "name": "@fhir-dsl/runtime",
   "version": "0.1.0",
-  "private": true,
+  "description": "Runtime execution layer for FHIR DSL queries with pagination and error handling",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@fhir-dsl/core": "workspace:*",
@@ -22,5 +30,21 @@
   },
   "files": [
     "dist"
+  ],
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abellaismail7/fhir-dsl.git",
+    "directory": "packages/runtime"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "fhir",
+    "runtime",
+    "typescript",
+    "healthcare"
   ]
 }

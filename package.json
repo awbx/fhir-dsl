@@ -18,8 +18,8 @@
     "type-safe",
     "dsl"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
     "@biomejs/biome": "^2.4.12",

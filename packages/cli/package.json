@@ -1,7 +1,7 @@
 {
   "name": "@fhir-dsl/cli",
   "version": "0.1.0",
-  "private": true,
+  "description": "CLI tool for generating type-safe FHIR TypeScript types from HL7 specs and profiles",
   "type": "module",
   "bin": {
     "fhir-gen": "./dist/index.js"
@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@fhir-dsl/generator": "workspace:*",
@@ -17,5 +18,23 @@
   },
   "files": [
     "dist"
+  ],
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abellaismail7/fhir-dsl.git",
+    "directory": "packages/cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "fhir",
+    "cli",
+    "codegen",
+    "typescript",
+    "hl7",
+    "healthcare"
   ]
 }
