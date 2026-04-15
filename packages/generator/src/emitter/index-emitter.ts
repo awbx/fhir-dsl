@@ -48,7 +48,7 @@ export function emitClient(hasProfiles: boolean): string {
   lines.push("  searchParams: SearchParamRegistry;");
   lines.push("  includes: IncludeRegistry;");
   lines.push(`  profiles: ${hasProfiles ? "ProfileRegistry" : "Record<string, never>"};`);
-  lines.push("};")
+  lines.push("};");
   lines.push("");
 
   lines.push("export function createClient(config: FhirClientConfig) {");

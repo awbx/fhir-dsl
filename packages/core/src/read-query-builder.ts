@@ -1,12 +1,10 @@
 import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import type { ReadQueryBuilder } from "./query-builder.js";
-import type { FhirSchema } from "./types.js";
 import type { Executor } from "./search-query-builder.js";
+import type { FhirSchema } from "./types.js";
 
-export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string>
-  implements ReadQueryBuilder<S, RT>
-{
+export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string> implements ReadQueryBuilder<S, RT> {
   readonly #resourceType: string;
   readonly #id: string;
   readonly #executor: Executor;

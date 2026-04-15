@@ -1,6 +1,6 @@
 import type { Bundle, BundleEntry, Resource } from "@fhir-dsl/types";
-import type { FhirSchema } from "./types.js";
 import type { Executor } from "./search-query-builder.js";
+import type { FhirSchema } from "./types.js";
 
 // --- Transaction Entry Builder ---
 

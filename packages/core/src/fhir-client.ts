@@ -81,9 +81,7 @@ export class FhirClient<S extends FhirSchema> {
     this.#executor = createFetchExecutor(config);
   }
 
-  search<RT extends string & keyof S["resources"]>(
-    resourceType: RT,
-  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
+  search<RT extends string & keyof S["resources"]>(resourceType: RT): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
   search<RT extends string & keyof S["resources"], P extends ProfileNames<S, RT>>(
     resourceType: RT,
     profile: P,
@@ -93,12 +91,7 @@ export class FhirClient<S extends FhirSchema> {
     profile?: string,
   ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>> {
     if (profile) {
-      return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
-        resourceType,
-        this.#executor,
-        undefined,
-        profile,
-      );
+      return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(resourceType, this.#executor, undefined, profile);
     }
     return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(resourceType, this.#executor);
   }
