@@ -134,7 +134,7 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
       name: propName,
       types,
       isRequired: true,
-      isArray: element.max === "*" || (element.max !== undefined && Number.parseInt(element.max) > 1),
+      isArray: element.max === "*" || (element.max !== undefined && Number.parseInt(element.max, 10) > 1),
       isChoiceType: false,
       description: element.short,
     });
@@ -184,7 +184,7 @@ function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9]/g, "");
 }
 
-function deriveSlug(name: string, url: string, igName: string): string {
+function deriveSlug(name: string, url: string, _igName: string): string {
   // Try to derive a short, readable slug from the profile name
   // e.g., "USCorePatientProfile" -> "us-core-patient"
   // e.g., "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" -> "us-core-patient"

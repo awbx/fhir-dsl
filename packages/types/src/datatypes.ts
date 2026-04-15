@@ -201,7 +201,7 @@ export interface DataRequirement extends Element {
 
 // --- Reference ---
 
-export interface Reference<T extends string = string> extends Element {
+export interface Reference<_T extends string = string> extends Element {
   reference?: FhirString;
   type?: FhirUri;
   identifier?: Identifier;

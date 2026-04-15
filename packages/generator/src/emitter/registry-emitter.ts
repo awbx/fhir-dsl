@@ -63,7 +63,6 @@ export function emitRegistry(
   lines.push("");
 
   if (!options?.skipProfileRegistry) {
-    // biome-ignore lint/complexity/useLiteralKeys: intentional empty interface
     lines.push("export interface ProfileRegistry {}");
     lines.push("");
   }

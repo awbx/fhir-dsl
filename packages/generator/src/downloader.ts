@@ -80,7 +80,7 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
   const igDir = join(cacheDir, `${name}#${version}`);
   await mkdir(igDir, { recursive: true });
 
-  const manifestPath = join(igDir, ".index.json");
+  const _manifestPath = join(igDir, ".index.json");
 
   // Check if already downloaded
   let files: string[];
