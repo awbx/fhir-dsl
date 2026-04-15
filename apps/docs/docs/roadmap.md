@@ -8,7 +8,7 @@ sidebar_label: Roadmap
 
 The current priorities and future direction for fhir-dsl.
 
-## Current State (v0.4.0)
+## Current State (v0.5.0)
 
 What's available today:
 
