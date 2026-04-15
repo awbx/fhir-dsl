@@ -33,5 +33,10 @@
     "@fhir-dsl/core": "workspace:*",
     "@fhir-dsl/runtime": "workspace:*",
     "@fhir-dsl/types": "workspace:*"
+  },
+  "pnpm": {
+    "overrides": {
+      "webpack": "~5.105.0"
+    }
   }
 }
