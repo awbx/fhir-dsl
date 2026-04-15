@@ -11,7 +11,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "version:bump": "node scripts/bump-version.mjs"
+    "version:bump": "node scripts/bump-version.mjs",
+    "prepare": "husky"
   },
   "keywords": [
     "fhir",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.12",
     "@types/node": "^25.6.0",
+    "husky": "^9.1.7",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.4"
