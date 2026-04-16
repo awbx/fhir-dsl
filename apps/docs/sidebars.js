@@ -57,6 +57,7 @@ const sidebars = {
     },
     'contributing',
     'roadmap',
+    'changelog',
   ],
 };
 

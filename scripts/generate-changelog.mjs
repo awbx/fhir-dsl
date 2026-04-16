@@ -4,6 +4,15 @@ import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
 const changelogPath = join(root, "CHANGELOG.md");
+const docsChangelogPath = join(root, "apps", "docs", "docs", "changelog.md");
+
+const DOCS_FRONTMATTER = `---
+id: changelog
+title: Changelog
+sidebar_label: Changelog
+---
+
+`;
 
 /**
  * Get all version tags sorted by version descending.
@@ -117,17 +126,22 @@ export function generateChangelog(newVersion) {
 export function writeChangelog(newVersion) {
   const content = generateChangelog(newVersion);
   writeFileSync(changelogPath, content);
+  writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + content);
   console.log(`  changelog: CHANGELOG.md`);
+  console.log(`  changelog: apps/docs/docs/changelog.md`);
 }
 
-// Allow standalone execution: node scripts/generate-changelog.mjs [newVersion]
+// Allow standalone execution: node scripts/generate-changelog.mjs [--write] [newVersion]
 const isMain = process.argv[1]?.endsWith("generate-changelog.mjs");
 if (isMain) {
-  const version = process.argv[2];
+  const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+  const flags = process.argv.slice(2).filter((a) => a.startsWith("--"));
+  const version = args[0];
   const content = generateChangelog(version);
-  if (process.argv.includes("--write")) {
+  if (flags.includes("--write")) {
     writeFileSync(changelogPath, content);
-    console.log("Wrote CHANGELOG.md");
+    writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + content);
+    console.log("Wrote CHANGELOG.md and docs/changelog.md");
   } else {
     process.stdout.write(content);
   }

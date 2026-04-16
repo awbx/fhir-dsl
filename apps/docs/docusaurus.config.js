@@ -72,6 +72,7 @@ const config = {
               { label: 'Introduction', to: '/docs' },
               { label: 'Quick Start', to: '/docs/getting-started/quick-start' },
               { label: 'CLI', to: '/docs/cli/usage' },
+              { label: 'Changelog', to: '/docs/changelog' },
             ],
           },
           {
