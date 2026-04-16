@@ -59,6 +59,41 @@ Adds a search parameter with a typed operator and value:
 
 The operator is constrained by the parameter type -- TypeScript won't let you use `"contains"` on a date parameter.
 
+### `whereComposite(param, values)`
+
+Searches using composite (multi-value) search parameters. Composite params combine multiple component values joined by `$` in the FHIR wire format:
+
+```typescript
+// Find observations with a specific code AND quantity value
+const result = await fhir
+  .search("Observation")
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "60",
+  })
+  .execute();
+
+// Compiles to: Observation?code-value-quantity=http://loinc.org|8480-6$60
+```
+
+Each component key and value type is validated at compile time. The generated types carry component metadata, so only valid component names are accepted and each value is typed according to its underlying search param type.
+
+```typescript
+// Combine composite with regular where clauses
+const result = await fhir
+  .search("Observation")
+  .where("status", "eq", "final")
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "5.4|http://unitsofmeasure.org|mg",
+  })
+  .execute();
+```
+
+:::note
+You can still use `.where()` with composite parameters by passing the pre-formatted `$`-separated string directly. `whereComposite` provides a structured, type-safe alternative.
+:::
+
 ### `include(param)`
 
 Includes related resources in the response:
@@ -315,6 +350,7 @@ This uses the `ProfileRegistry` in your generated schema to resolve the correct 
 | `quantity` | `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap` |
 | `reference` | `eq` |
 | `uri` | `eq`, `above`, `below` |
+| `composite` | N/A (use `whereComposite` with structured component values) |
 
 :::note
 Operators `sa` (starts after) and `eb` (ends before) are FHIR-specific date/quantity operators for interval comparisons. `ap` means approximately equal.

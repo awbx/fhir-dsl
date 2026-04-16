@@ -227,6 +227,42 @@ const result = await fhir
   .execute();
 ```
 
+## Composite Search Parameters
+
+Composite parameters let you search on multiple values simultaneously, ensuring they apply to the same logical record:
+
+### Observation by Code and Quantity
+
+```typescript
+// Find observations with systolic blood pressure > 140
+const result = await fhir
+  .search("Observation")
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "gt140",
+  })
+  .execute();
+```
+
+### Combine Composite with Other Params
+
+```typescript
+const result = await fhir
+  .search("Observation")
+  .where("patient", "eq", "Patient/123")
+  .where("status", "eq", "final")
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "5.4|http://unitsofmeasure.org|mg",
+  })
+  .sort("date", "desc")
+  .execute();
+```
+
+:::tip
+Composite parameters are different from using multiple `.where()` calls. Multiple `.where()` calls act as independent filters (AND), while a composite parameter ensures the component values match on the same element within a resource.
+:::
+
 ## Composing Reusable Queries
 
 Because builders are immutable, you can create reusable base queries:

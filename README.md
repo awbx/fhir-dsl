@@ -14,7 +14,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 
 ## Features
 
-- **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
+- **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, composite parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
 - **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers ~85% of the official FHIRPath spec including 60+ functions, expression predicates, and operators.
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
@@ -108,6 +108,16 @@ const filtered = await fhir
   .search("Patient")
   .has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
   .execute();
+
+// Composite params: search on multiple values simultaneously
+const bpReadings = await fhir
+  .search("Observation")
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "60",
+  })
+  .execute();
+// Compiles to: Observation?code-value-quantity=http://loinc.org|8480-6$60
 ```
 
 ### Read a single resource
@@ -181,6 +191,7 @@ Operators are constrained by parameter type — TypeScript won't let you use `"c
 | `quantity` | `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap` |
 | `reference` | `eq` |
 | `uri` | `eq`, `above`, `below` |
+| `composite` | N/A (use `whereComposite` with structured component values) |
 
 ## CLI Reference
 

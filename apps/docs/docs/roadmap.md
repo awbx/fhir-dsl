@@ -43,6 +43,7 @@ What's available today:
 - **`_revinclude`** -- Reverse include support in search queries via `.revinclude()`
 - **Chained parameters** -- Type-safe chained search via `.whereChained()` (e.g., `subject:Patient.name=Smith`)
 - **`_has`** -- Reverse chaining for filtering via `.has()` (e.g., `_has:Observation:subject:code=1234`)
+- **Composite parameters** -- Type-safe `.whereComposite()` for multi-value composite search params with typed components (e.g., `code-value-quantity`)
 
 ## Planned
 
@@ -51,10 +52,6 @@ What's available today:
 - **`$everything`** -- Patient/Encounter everything operations
 - **`$validate`** -- Resource validation against profiles
 - **Custom operations** -- Type-safe builder for arbitrary FHIR operations
-
-### Query Features
-
-- **Composite parameters** -- Support for multi-value composite search params
 
 ### Developer Experience
 
