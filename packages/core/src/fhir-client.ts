@@ -1,7 +1,7 @@
 import type { CompiledQuery } from "./compiled-query.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
-import { type Executor, SearchQueryBuilderImpl } from "./search-query-builder.js";
+import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
 import { type TransactionBuilder, TransactionBuilderImpl } from "./transaction-builder.js";
 import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
 
@@ -56,6 +56,36 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
   };
 }
 
+// --- URL executor for following pagination links ---
+
+function createUrlExecutor(config: FhirClientConfig): UrlExecutor {
+  const fetchFn = config.fetch ?? globalThis.fetch;
+
+  return async (url: string): Promise<unknown> => {
+    const headers: Record<string, string> = {
+      Accept: "application/fhir+json",
+      ...config.headers,
+    };
+
+    if (config.auth) {
+      if (config.auth.type === "bearer") {
+        headers.Authorization = `Bearer ${config.auth.credentials}`;
+      } else if (config.auth.type === "basic") {
+        headers.Authorization = `Basic ${config.auth.credentials}`;
+      }
+    }
+
+    const response = await fetchFn(url, { method: "GET", headers });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
+      throw new FhirRequestError(response.status, response.statusText, errorBody);
+    }
+
+    return response.json();
+  };
+}
+
 // --- Error class ---
 
 export class FhirRequestError extends Error {
@@ -73,9 +103,11 @@ export class FhirRequestError extends Error {
 
 export class FhirClient<S extends FhirSchema> {
   readonly #executor: Executor;
+  readonly #urlExecutor: UrlExecutor;
 
   constructor(config: FhirClientConfig) {
     this.#executor = createFetchExecutor(config);
+    this.#urlExecutor = createUrlExecutor(config);
   }
 
   search<RT extends string & keyof S["resources"]>(resourceType: RT): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
@@ -88,9 +120,21 @@ export class FhirClient<S extends FhirSchema> {
     profile?: string,
   ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>> {
     if (profile) {
-      return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(resourceType, this.#executor, undefined, profile);
+      return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
+        resourceType,
+        this.#executor,
+        undefined,
+        profile,
+        this.#urlExecutor,
+      );
     }
-    return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(resourceType, this.#executor);
+    return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
+      resourceType,
+      this.#executor,
+      undefined,
+      undefined,
+      this.#urlExecutor,
+    );
   }
 
   read<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): ReadQueryBuilder<S, RT> {

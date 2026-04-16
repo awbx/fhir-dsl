@@ -25,6 +25,12 @@ export interface SearchResult<Primary extends Resource, Included extends Resourc
   raw: unknown;
 }
 
+// --- Stream Options ---
+
+export interface StreamOptions {
+  signal?: AbortSignal;
+}
+
 // --- Resolve included resource types from the resource map ---
 
 export type ResolveIncluded<
@@ -94,6 +100,8 @@ export interface SearchQueryBuilder<
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
     >
   >;
+
+  stream(options?: StreamOptions): AsyncIterable<ResolveProfile<S, RT, Prof> & Resource>;
 }
 
 // --- Read Query Builder Interface ---
