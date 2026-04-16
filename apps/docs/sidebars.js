@@ -40,6 +40,7 @@ const sidebars = {
       items: [
         'examples/patient',
         'examples/queries',
+        'examples/complete-workflow',
       ],
     },
     {
