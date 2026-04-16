@@ -41,6 +41,8 @@ fhir-gen generate [options]
 | `--resources <list>` | Comma-separated list of resource names | No |
 | `--src <path>` | Local FHIR definitions directory (skips download) | No |
 | `--cache <dir>` | Cache directory for downloaded specs | No |
+| `--expand-valuesets` | Generate typed unions from FHIR ValueSet bindings | No |
+| `--resolve-codesystems` | Generate CodeSystem namespace objects for IntelliSense | No |
 
 ## Examples
 
@@ -77,6 +79,20 @@ fhir-gen generate \
 ```
 
 This significantly reduces the size of generated output when you only need a few resource types.
+
+### With Terminology Types
+
+Generate types with compile-time coded value validation:
+
+```bash
+fhir-gen generate \
+  --version r4 \
+  --expand-valuesets \
+  --resolve-codesystems \
+  --out ./src/fhir
+```
+
+This generates a `terminology/` directory with literal union types (e.g., `AdministrativeGender = "male" | "female" | "other" | "unknown"`) and parameterizes bound fields like `Patient.gender` as `FhirCode<AdministrativeGender>`. See [Terminology Engine](/docs/guides/terminology) for details.
 
 ### Using Local Definitions
 
@@ -117,6 +133,10 @@ src/fhir/
       observation.ts        # Observation interface
       encounter.ts          # Encounter interface
       ...                   # One file per resource
+    terminology/            # Only when --expand-valuesets is used
+      valuesets.ts          # Literal union types for ValueSet bindings
+      codesystems.ts        # CodeSystem const objects (with --resolve-codesystems)
+      index.ts
     profiles/               # Only when --ig is used
       uscore-patient-profile.ts
       uscore-vital-signs-profile.ts

@@ -52,11 +52,15 @@ FHIR primitives map to branded TypeScript types, not raw `string` or `number`:
 | `integer` | `FhirInteger` | `number` |
 | `decimal` | `FhirDecimal` | `number` |
 | `uri` | `FhirUri` | `string` |
-| `code` | `FhirCode` | `string` |
+| `code` | `FhirCode` / `FhirCode<T>` | `string` |
 | `id` | `FhirId` | `string` |
 | `instant` | `FhirInstant` | `string` |
 
 These types are compatible with their underlying JavaScript types, so you can assign plain strings and numbers directly.
+
+:::tip
+With `--expand-valuesets`, `FhirCode` fields with required bindings become `FhirCode<T>` where `T` is a literal union (e.g., `FhirCode<"male" | "female" | "other" | "unknown">`). See [Terminology Engine](/docs/guides/terminology) for details.
+:::
 
 ## Complex Data Types
 

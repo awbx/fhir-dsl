@@ -24,6 +24,7 @@ const sidebars = {
       label: 'Guides',
       items: [
         'guides/streaming',
+        'guides/terminology',
       ],
     },
     {

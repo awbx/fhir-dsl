@@ -8,7 +8,7 @@ sidebar_label: Roadmap
 
 The current priorities and future direction for fhir-dsl.
 
-## Current State (v0.8.0)
+## Current State (v0.9.0)
 
 What's available today:
 
@@ -18,10 +18,19 @@ What's available today:
 - Profile-aware queries with type narrowing
 - HTTP executor with pagination and error handling
 - Streaming and lazy loading for large datasets
+- Terminology Engine with compile-time coded value validation
 - Dual ESM/CJS builds
 - CLI for type generation
 
 ## Recently Added
+
+### Terminology Engine (v0.9.0)
+
+- **`--expand-valuesets`** -- Resolves FHIR ValueSet bindings into TypeScript literal unions, turning `FhirCode` into `FhirCode<"male" | "female" | "other" | "unknown">` for required bindings
+- **`--resolve-codesystems`** -- Generates CodeSystem namespace objects (`AdministrativeGender.Female`) for IntelliSense
+- **Generic data types** -- `Coding<T>` and `CodeableConcept<T>` support generic constraints while remaining backward-compatible
+- **Offline resolution** -- Pre-expanded ValueSets from the FHIR spec are downloaded and cached; no terminology server required
+- **Binding strength awareness** -- Required bindings produce closed unions, extensible bindings use `(string & {})` for autocomplete with fallback, preferred/example bindings are left unconstrained
 
 ### Streaming & Lazy Loading (v0.8.0)
 

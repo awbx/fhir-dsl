@@ -8,6 +8,19 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2026-04-16
+
+### Features
+
+- Add Terminology Engine for compile-time coded value validation
+- New `@fhir-dsl/terminology` package for offline ValueSet/CodeSystem resolution
+- `--expand-valuesets` CLI flag generates literal union types from FHIR ValueSet bindings
+- `--resolve-codesystems` CLI flag generates CodeSystem namespace objects for IntelliSense
+- Make `Coding<T>` and `CodeableConcept<T>` generic with backward-compatible defaults
+- Parse binding info from FHIR StructureDefinitions
+- Download and cache pre-expanded ValueSets from FHIR spec (`expansions.json`)
+- Collect ValueSet and CodeSystem resources from Implementation Guide packages
+
 ## [0.8.0] - 2026-04-16
 
 ### Features
