@@ -8,7 +8,7 @@ sidebar_label: Roadmap
 
 The current priorities and future direction for fhir-dsl.
 
-## Current State (v0.7.0)
+## Current State (v0.8.0)
 
 What's available today:
 
@@ -23,14 +23,14 @@ What's available today:
 
 ## Recently Added
 
-### Streaming & Lazy Loading (v0.7.0)
+### Streaming & Lazy Loading (v0.8.0)
 
 - **`.stream()`** -- Lazy `AsyncIterable` that yields resources across all pages, automatically following Bundle pagination links
 - **Cancellation** -- `AbortSignal` support via `stream({ signal })` for timeouts and user-initiated cancellation
 - **Memory efficient** -- Processes resources page-by-page without loading full datasets into memory
 - **Type-safe** -- Streaming preserves full type inference including profile-narrowed types
 
-### FHIRPath Expression Builder (v0.7.0)
+### FHIRPath Expression Builder (v0.8.0)
 
 - **`@fhir-dsl/fhirpath`** -- New package: type-safe FHIRPath expression builder with ~85% spec coverage
 - **Expression system** -- Predicate callbacks with `$this` proxy for `where()`, `select()`, `all()`, `exists()`, `iif()`
@@ -38,7 +38,7 @@ What's available today:
 - **`ofType()` narrowing** -- Type-safe polymorphic field handling via extensible `FhirTypeMap`
 - **Compile + evaluate** -- Build FHIRPath strings and evaluate against resources at runtime
 
-### Query Features (v0.7.0)
+### Query Features (v0.8.0)
 
 - **`_revinclude`** -- Reverse include support in search queries via `.revinclude()`
 - **Chained parameters** -- Type-safe chained search via `.whereChained()` (e.g., `subject:Patient.name=Smith`)

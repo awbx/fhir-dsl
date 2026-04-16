@@ -8,6 +8,18 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-04-16
+
+### Features
+
+- Add composite parameter documentation and update roadmap (`0f5b41f`)
+- Add type-safe composite search parameter support (`d85679b`)
+- Add README for each package for npm (`0e9414a`)
+
+### Bug Fixes
+
+- Fix biome lint warnings in type tests (`003a3cb`)
+
 ## [0.7.0] - 2026-04-16
 
 ### Features
