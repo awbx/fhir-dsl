@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CompiledQuery } from "./compiled-query.js";
-import { TransactionBuilderImpl } from "./transaction-builder.js";
+import { BatchBuilderImpl, TransactionBuilderImpl } from "./transaction-builder.js";
 
 type TestSchema = {
   resources: {
@@ -124,6 +124,61 @@ describe("TransactionBuilder", () => {
       const body = call.body as Record<string, unknown>;
       expect(body.resourceType).toBe("Bundle");
       expect(body.type).toBe("transaction");
+      expect(result).toEqual(responseBundle);
+    });
+  });
+});
+
+describe("BatchBuilder", () => {
+  describe("compile", () => {
+    it("compiles an empty batch", () => {
+      const executor = vi.fn();
+      const bundle = new BatchBuilderImpl<TestSchema>(executor).compile();
+
+      expect(bundle.resourceType).toBe("Bundle");
+      expect(bundle.type).toBe("batch");
+      expect(bundle.entry).toEqual([]);
+    });
+
+    it("compiles batch entries with the same fluent API", () => {
+      const executor = vi.fn();
+      const patient = { resourceType: "Patient" as const, name: [{ family: "Smith" }] };
+
+      const bundle = new BatchBuilderImpl<TestSchema>(executor)
+        .create(patient as any)
+        .delete("Observation", "456")
+        .compile();
+
+      expect(bundle.entry).toHaveLength(2);
+      expect(bundle.entry![0]!.request).toEqual({
+        method: "POST",
+        url: "Patient",
+      });
+      expect(bundle.entry![1]!.request).toEqual({
+        method: "DELETE",
+        url: "Observation/456",
+      });
+    });
+  });
+
+  describe("execute", () => {
+    it("sends the batch bundle via POST to root", async () => {
+      const responseBundle = { resourceType: "Bundle", type: "batch-response", entry: [] };
+      const executor = vi.fn(async () => responseBundle);
+
+      const result = await new BatchBuilderImpl<TestSchema>(executor)
+        .create({ resourceType: "Patient" as const } as any)
+        .execute();
+
+      expect(executor).toHaveBeenCalledOnce();
+      const args = executor.mock.calls[0] as unknown as [CompiledQuery];
+      const call = args[0];
+      expect(call.method).toBe("POST");
+      expect(call.path).toBe("");
+      expect(call.body).toBeDefined();
+      const body = call.body as Record<string, unknown>;
+      expect(body.resourceType).toBe("Bundle");
+      expect(body.type).toBe("batch");
       expect(result).toEqual(responseBundle);
     });
   });

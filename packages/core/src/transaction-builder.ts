@@ -12,6 +12,8 @@ interface TransactionEntry {
   };
 }
 
+type MutationBundleType = "transaction" | "batch";
+
 // --- Transaction Builder ---
 
 export interface TransactionBuilder<S extends FhirSchema> {
@@ -26,19 +28,33 @@ export interface TransactionBuilder<S extends FhirSchema> {
   execute(): Promise<Bundle>;
 }
 
-// --- Transaction Builder Implementation ---
+export interface BatchBuilder<S extends FhirSchema> {
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): BatchBuilder<S>;
 
-export class TransactionBuilderImpl<S extends FhirSchema> implements TransactionBuilder<S> {
+  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): BatchBuilder<S>;
+
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): BatchBuilder<S>;
+
+  compile(): Bundle;
+
+  execute(): Promise<Bundle>;
+}
+
+abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
   readonly #entries: TransactionEntry[];
   readonly #executor: Executor;
+  readonly #bundleType: MutationBundleType;
 
-  constructor(executor: Executor, entries?: TransactionEntry[]) {
+  constructor(executor: Executor, bundleType: MutationBundleType, entries?: TransactionEntry[]) {
     this.#executor = executor;
+    this.#bundleType = bundleType;
     this.#entries = entries ?? [];
   }
 
-  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
-    return new TransactionBuilderImpl<S>(this.#executor, [
+  protected abstract clone(entries: TransactionEntry[]): TBuilder;
+
+  protected createEntry<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TBuilder {
+    return this.clone([
       ...this.#entries,
       {
         resource,
@@ -50,12 +66,13 @@ export class TransactionBuilderImpl<S extends FhirSchema> implements Transaction
     ]);
   }
 
-  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
+  protected updateEntry<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TBuilder {
     const id = resource.id;
     if (!id) {
       throw new Error("Resource must have an id for update operations");
     }
-    return new TransactionBuilderImpl<S>(this.#executor, [
+
+    return this.clone([
       ...this.#entries,
       {
         resource,
@@ -67,8 +84,8 @@ export class TransactionBuilderImpl<S extends FhirSchema> implements Transaction
     ]);
   }
 
-  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TransactionBuilder<S> {
-    return new TransactionBuilderImpl<S>(this.#executor, [
+  protected deleteEntry<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TBuilder {
+    return this.clone([
       ...this.#entries,
       {
         request: {
@@ -82,7 +99,7 @@ export class TransactionBuilderImpl<S extends FhirSchema> implements Transaction
   compile(): Bundle {
     return {
       resourceType: "Bundle",
-      type: "transaction",
+      type: this.#bundleType,
       entry: this.#entries.map((e) => ({
         resource: e.resource,
         request: {
@@ -101,5 +118,63 @@ export class TransactionBuilderImpl<S extends FhirSchema> implements Transaction
       params: [],
       body: bundle,
     })) as Bundle;
+  }
+}
+
+// --- Transaction Builder Implementation ---
+
+export class TransactionBuilderImpl<S extends FhirSchema>
+  extends MutationBundleBuilderBase<S, TransactionBuilder<S>>
+  implements TransactionBuilder<S>
+{
+  readonly #executor: Executor;
+
+  constructor(executor: Executor, entries?: TransactionEntry[]) {
+    super(executor, "transaction", entries);
+    this.#executor = executor;
+  }
+
+  protected clone(entries: TransactionEntry[]): TransactionBuilder<S> {
+    return new TransactionBuilderImpl<S>(this.#executor, entries);
+  }
+
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
+    return this.createEntry(resource);
+  }
+
+  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): TransactionBuilder<S> {
+    return this.updateEntry(resource);
+  }
+
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TransactionBuilder<S> {
+    return this.deleteEntry(resourceType, id);
+  }
+}
+
+export class BatchBuilderImpl<S extends FhirSchema>
+  extends MutationBundleBuilderBase<S, BatchBuilder<S>>
+  implements BatchBuilder<S>
+{
+  readonly #executor: Executor;
+
+  constructor(executor: Executor, entries?: TransactionEntry[]) {
+    super(executor, "batch", entries);
+    this.#executor = executor;
+  }
+
+  protected clone(entries: TransactionEntry[]): BatchBuilder<S> {
+    return new BatchBuilderImpl<S>(this.#executor, entries);
+  }
+
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): BatchBuilder<S> {
+    return this.createEntry(resource);
+  }
+
+  update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): BatchBuilder<S> {
+    return this.updateEntry(resource);
+  }
+
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): BatchBuilder<S> {
+    return this.deleteEntry(resourceType, id);
   }
 }

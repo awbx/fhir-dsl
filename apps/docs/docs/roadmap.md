@@ -54,6 +54,10 @@ What's available today:
 - **`_has`** -- Reverse chaining for filtering via `.has()` (e.g., `_has:Observation:subject:code=1234`)
 - **Composite parameters** -- Type-safe `.whereComposite()` for multi-value composite search params with typed components (e.g., `code-value-quantity`)
 
+### Developer Experience (Unreleased)
+
+- **Batch support** -- Type-safe FHIR batch operations via `.batch()` for non-transactional bundles
+
 ## Planned
 
 ### FHIR Operations
@@ -65,7 +69,6 @@ What's available today:
 ### Developer Experience
 
 - **Middleware/interceptors** -- Hook into request/response pipeline for logging, retries, auth refresh
-- **Batch support** -- Type-safe FHIR batch operations (non-transactional)
 - **History** -- Resource and type-level history queries
 - **Capabilities** -- Typed access to CapabilityStatement for feature detection
 

@@ -33,7 +33,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 
 | Package | Description | When to Install |
 |---|---|---|
-| [`@fhir-dsl/core`](./packages/core) | Query builder DSL (search, read, transactions) | Always — this is the query builder |
+| [`@fhir-dsl/core`](./packages/core) | Query builder DSL (search, read, batch, transactions) | Always — this is the query builder |
 | [`@fhir-dsl/runtime`](./packages/runtime) | HTTP executor with pagination and error handling | Always — provides the HTTP executor |
 | [`@fhir-dsl/cli`](./packages/cli) | CLI for generating types from FHIR specs | Dev dependency — generates types for your project |
 | [`@fhir-dsl/types`](./packages/types) | Base FHIR R4/R5 type definitions | Automatically installed as a dependency of `@fhir-dsl/core` |
@@ -172,6 +172,16 @@ const bundle = await fhir
   .transaction()
   .create({ resourceType: "Patient", name: [{ family: "Doe" }] })
   .create({ resourceType: "Observation", status: "final", code: { text: "BP" } })
+  .delete("Observation", "obs-456")
+  .execute();
+```
+
+### Batch operations
+
+```ts
+const bundle = await fhir
+  .batch()
+  .create({ resourceType: "Patient", name: [{ family: "Doe" }] })
   .delete("Observation", "obs-456")
   .execute();
 ```

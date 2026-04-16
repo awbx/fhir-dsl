@@ -116,6 +116,19 @@ const result = await fhir
   .execute();
 ```
 
+### Batch operations
+
+```ts
+const result = await fhir
+  .batch()
+  .create({
+    resourceType: "Patient",
+    name: [{ family: "Doe", given: ["Jane"] }],
+  })
+  .delete("Observation", "789")
+  .execute();
+```
+
 ### Compile without executing
 
 Every builder has a `compile()` method that returns the raw query representation without hitting the server:

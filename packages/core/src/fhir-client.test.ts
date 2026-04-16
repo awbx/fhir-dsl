@@ -126,6 +126,26 @@ describe("FhirClient", () => {
     });
   });
 
+  describe("batch", () => {
+    it("sends POST to root with batch bundle body", async () => {
+      const fetch = mockFetch({ resourceType: "Bundle", type: "batch-response" });
+      const client = createFhirClient<TestSchema>({ baseUrl: "https://fhir.example.com", fetch });
+
+      await client
+        .batch()
+        .create({ resourceType: "Patient" } as any)
+        .execute();
+
+      expect(fetch).toHaveBeenCalledOnce();
+      const [, opts] = fetch.mock.calls[0]!;
+      expect(opts.method).toBe("POST");
+      expect(opts.body).toBeDefined();
+      const body = JSON.parse(opts.body);
+      expect(body.resourceType).toBe("Bundle");
+      expect(body.type).toBe("batch");
+    });
+  });
+
   describe("error handling", () => {
     it("throws FhirRequestError on non-ok response", async () => {
       const operationOutcome = {

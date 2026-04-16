@@ -2,7 +2,12 @@ import type { CompiledQuery } from "./compiled-query.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
-import { type TransactionBuilder, TransactionBuilderImpl } from "./transaction-builder.js";
+import {
+  type BatchBuilder,
+  BatchBuilderImpl,
+  type TransactionBuilder,
+  TransactionBuilderImpl,
+} from "./transaction-builder.js";
 import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
 
 // --- Client Configuration ---
@@ -143,6 +148,10 @@ export class FhirClient<S extends FhirSchema> {
 
   transaction(): TransactionBuilder<S> {
     return new TransactionBuilderImpl<S>(this.#executor);
+  }
+
+  batch(): BatchBuilder<S> {
+    return new BatchBuilderImpl<S>(this.#executor);
   }
 }
 
