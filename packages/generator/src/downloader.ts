@@ -16,9 +16,20 @@ function resolveSpecBaseUrl(version: string): string {
 export interface DownloadedSpec {
   resourceDefinitions: unknown[];
   searchParameters: unknown[];
+  expansions?: unknown[] | undefined;
+  valueSets?: unknown[] | undefined;
+  codeSystems?: unknown[] | undefined;
 }
 
-export async function downloadSpec(version: string, cacheDir: string): Promise<DownloadedSpec> {
+export interface DownloadSpecOptions {
+  expandValueSets?: boolean | undefined;
+}
+
+export async function downloadSpec(
+  version: string,
+  cacheDir: string,
+  options?: DownloadSpecOptions,
+): Promise<DownloadedSpec> {
   const baseUrl = resolveSpecBaseUrl(version);
 
   await mkdir(cacheDir, { recursive: true });
@@ -30,16 +41,26 @@ export async function downloadSpec(version: string, cacheDir: string): Promise<D
 
   const searchParameters = await loadOrDownload(searchParamsPath, `${baseUrl}/search-parameters.json`);
 
-  return {
+  const result: DownloadedSpec = {
     resourceDefinitions: extractEntries(resourceDefinitions),
     searchParameters: extractEntries(searchParameters),
   };
+
+  if (options?.expandValueSets) {
+    const expansionsPath = join(cacheDir, "expansions.json");
+    const expansions = await loadOrDownload(expansionsPath, `${baseUrl}/expansions.json`);
+    result.expansions = extractEntries(expansions);
+  }
+
+  return result;
 }
 
 export async function loadLocalSpec(dir: string): Promise<DownloadedSpec> {
   const files = await readdir(dir);
   const resourceDefinitions: unknown[] = [];
   const searchParameters: unknown[] = [];
+  const valueSets: unknown[] = [];
+  const codeSystems: unknown[] = [];
 
   for (const file of files) {
     if (!file.endsWith(".json")) continue;
@@ -50,16 +71,27 @@ export async function loadLocalSpec(dir: string): Promise<DownloadedSpec> {
       for (const entry of entries) {
         const rt = isRecord(entry) ? entry.resourceType : undefined;
         if (rt === "StructureDefinition") resourceDefinitions.push(entry);
-        if (rt === "SearchParameter") searchParameters.push(entry);
+        else if (rt === "SearchParameter") searchParameters.push(entry);
+        else if (rt === "ValueSet") valueSets.push(entry);
+        else if (rt === "CodeSystem") codeSystems.push(entry);
       }
     } else if (content.resourceType === "StructureDefinition") {
       resourceDefinitions.push(content);
     } else if (content.resourceType === "SearchParameter") {
       searchParameters.push(content);
+    } else if (content.resourceType === "ValueSet") {
+      valueSets.push(content);
+    } else if (content.resourceType === "CodeSystem") {
+      codeSystems.push(content);
     }
   }
 
-  return { resourceDefinitions, searchParameters };
+  return {
+    resourceDefinitions,
+    searchParameters,
+    valueSets: valueSets.length > 0 ? valueSets : undefined,
+    codeSystems: codeSystems.length > 0 ? codeSystems : undefined,
+  };
 }
 
 // --- IG Package Support ---
@@ -70,6 +102,8 @@ export interface DownloadedIG {
   name: string;
   version: string;
   profiles: unknown[];
+  valueSets: unknown[];
+  codeSystems: unknown[];
 }
 
 export async function downloadIG(packageRef: string, cacheDir: string): Promise<DownloadedIG> {
@@ -96,8 +130,10 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
     files = await fetchAndExtractIG(name, version, igDir);
   }
 
-  // Load profile StructureDefinitions
+  // Load resources from IG package
   const profiles: unknown[] = [];
+  const valueSets: unknown[] = [];
+  const codeSystems: unknown[] = [];
   for (const file of files) {
     if (!file.endsWith(".json") || file === ".index.json" || file === "package.json") continue;
     try {
@@ -109,15 +145,21 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
         !content.abstract
       ) {
         profiles.push(content);
+      } else if (content.resourceType === "ValueSet") {
+        valueSets.push(content);
+      } else if (content.resourceType === "CodeSystem") {
+        codeSystems.push(content);
       }
     } catch {
       // Skip invalid files
     }
   }
 
-  console.info(`Loaded ${profiles.length} profiles from ${name}@${version}`);
+  console.info(
+    `Loaded ${profiles.length} profiles, ${valueSets.length} ValueSets, ${codeSystems.length} CodeSystems from ${name}@${version}`,
+  );
 
-  return { name, version, profiles };
+  return { name, version, profiles, valueSets, codeSystems };
 }
 
 function parsePackageRef(ref: string): { name: string; version: string } {
