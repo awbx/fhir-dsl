@@ -220,7 +220,7 @@ The package implements approximately 85% of the [official FHIRPath specification
 | String | indexOf, substring, startsWith, endsWith, contains, upper, lower, replace, matches, replaceMatches, length, toChars | Implemented |
 | Math | abs, ceiling, exp, floor, ln, log, power, round, sqrt, truncate | Implemented |
 | Conversion | toBoolean, toInteger, toDecimal, toString, toDate, toDateTime, toTime, toQuantity, convertsTo* | Implemented |
-| Operators | =, !=, <, >, <=, >=, and, or, xor, not, implies, is, as | Implemented |
+| Operators | `=`, `!=`, `<`, `>`, `<=`, `>=`, and, or, xor, not, implies, is, as | Implemented |
 | Utility | trace, now, today, timeOfDay, iif | Implemented |
 | Aggregate | aggregate() | Not yet |
 | Equality | ~ (equivalent), !~ (not equivalent) | Not yet |
