@@ -7,6 +7,7 @@ This suite tests the public client API through `@fhir-dsl/core` from a `packages
 It uses:
 
 - a hand-rolled mini schema in `schema.ts`
+- canonical resource and Bundle fixtures in `fixtures.ts`
 - a scripted in-memory `fetch` recorder in `mock-fetch.ts`
 - runtime e2e tests in `client.e2e.test.ts`
 - type-level tests in `client-types.test-d.ts`
