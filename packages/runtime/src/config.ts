@@ -1,6 +1,8 @@
+import type { AuthConfig } from "@fhir-dsl/core";
+
 export interface FhirClientConfig {
   baseUrl: string;
-  auth?: { type: "bearer" | "basic"; credentials: string } | undefined;
+  auth?: AuthConfig | undefined;
   headers?: Record<string, string> | undefined;
   fetch?: typeof globalThis.fetch | undefined;
 }

@@ -1,14 +1,12 @@
-import type { CompiledQuery } from "@fhir-dsl/core";
+import { type CompiledQuery, performRequest } from "@fhir-dsl/core";
 import type { FhirClientConfig } from "./config.js";
 import { FhirError } from "./errors.js";
 
 export class FhirExecutor {
   readonly #config: FhirClientConfig;
-  readonly #fetch: typeof globalThis.fetch;
 
   constructor(config: FhirClientConfig) {
     this.#config = config;
-    this.#fetch = config.fetch ?? globalThis.fetch;
   }
 
   async execute<T = unknown>(query: CompiledQuery): Promise<T> {
@@ -29,19 +27,15 @@ export class FhirExecutor {
       ...query.headers,
     };
 
-    if (this.#config.auth) {
-      const { type, credentials } = this.#config.auth;
-      headers.Authorization = type === "bearer" ? `Bearer ${credentials}` : `Basic ${credentials}`;
-    }
-
-    const response = await this.#fetch(url.toString(), {
+    const response = await performRequest(this.#config, {
+      url: url.toString(),
       method: query.method,
       headers,
       ...(query.body ? { body: JSON.stringify(query.body) } : {}),
     });
 
     if (!response.ok) {
-      const errorBody = await response.json().catch(() => null);
+      const errorBody = (await response.json().catch(() => null)) as import("./errors.js").OperationOutcome | null;
       throw new FhirError(response.status, response.statusText, errorBody);
     }
 
@@ -54,15 +48,10 @@ export class FhirExecutor {
       ...this.#config.headers,
     };
 
-    if (this.#config.auth) {
-      const { type, credentials } = this.#config.auth;
-      headers.Authorization = type === "bearer" ? `Bearer ${credentials}` : `Basic ${credentials}`;
-    }
-
-    const response = await this.#fetch(url, { method: "GET", headers });
+    const response = await performRequest(this.#config, { url, method: "GET", headers });
 
     if (!response.ok) {
-      const errorBody = await response.json().catch(() => null);
+      const errorBody = (await response.json().catch(() => null)) as import("./errors.js").OperationOutcome | null;
       throw new FhirError(response.status, response.statusText, errorBody);
     }
 
