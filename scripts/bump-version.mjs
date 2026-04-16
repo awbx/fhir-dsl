@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { writeChangelog } from "./generate-changelog.mjs";
@@ -16,40 +16,27 @@ const root = new URL("..", import.meta.url).pathname;
 // Update root package.json
 const rootPkg = join(root, "package.json");
 const rootJson = JSON.parse(readFileSync(rootPkg, "utf-8"));
-const oldVersion = rootJson.version;
 rootJson.version = version;
 writeFileSync(rootPkg, `${JSON.stringify(rootJson, null, 2)}\n`);
+console.log(`  fhir-dsl -> ${version}`);
 
-// Update all public workspace packages
+// Update every workspace package (public and private) so docs, examples,
+// and libraries stay in lockstep. Doc pages read the current version from
+// package.json at build time (see apps/docs/docusaurus.config.js), so no
+// string replacement is needed here.
 const output = execSync("pnpm -r list --json --depth -1", {
 	encoding: "utf-8",
 });
 const packages = JSON.parse(output);
 
 for (const pkg of packages) {
-	if (pkg.private) continue;
 	const pkgPath = join(pkg.path, "package.json");
+	// Skip the root — already handled above.
+	if (pkgPath === rootPkg) continue;
 	const json = JSON.parse(readFileSync(pkgPath, "utf-8"));
 	json.version = version;
 	writeFileSync(pkgPath, `${JSON.stringify(json, null, 2)}\n`);
 	console.log(`  ${json.name} -> ${version}`);
-}
-
-// Update version references in docs
-const docsDir = join(root, "apps", "docs", "docs");
-if (existsSync(docsDir)) {
-	const updateFile = (filePath) => {
-		if (!existsSync(filePath)) return;
-		const content = readFileSync(filePath, "utf-8");
-		const updated = content.replaceAll(oldVersion, version);
-		if (content !== updated) {
-			writeFileSync(filePath, updated);
-			console.log(`  docs: ${filePath.replace(root, "")}`);
-		}
-	};
-
-	updateFile(join(docsDir, "roadmap.md"));
-	updateFile(join(docsDir, "monorepo", "setup.md"));
 }
 
 writeChangelog(version);

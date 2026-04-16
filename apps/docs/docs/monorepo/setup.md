@@ -170,12 +170,16 @@ mkdir packages/my-package
 ```json
 {
   "name": "@fhir-dsl/my-package",
-  "version": "0.14.0",
+  "version": "0.0.0",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts"
 }
 ```
+
+The `version` field gets rewritten to match the rest of the monorepo
+the next time you run `pnpm version:bump`, so any placeholder works
+here.
 
 3. Add a `tsconfig.json` extending the base config.
 
