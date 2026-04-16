@@ -257,9 +257,57 @@ const allVitals = await patientData("123")
 This pattern works because `where()` returns a new builder. The `patientData()` function produces a fresh builder each time it's called, and subsequent `.where()` calls extend it without mutation.
 :::
 
-## Working with Pagination
+## Streaming Large Datasets
 
-Using the runtime package for paginated results:
+Use `.stream()` to iterate over results across all pages without loading everything into memory:
+
+```typescript
+// Stream all active patients, page by page
+for await (const patient of fhir.search("Patient").where("active", "eq", "true").stream()) {
+  console.log(patient.id, patient.name);
+}
+```
+
+### Stream with Cancellation
+
+```typescript
+const controller = new AbortController();
+
+// Stop after processing 1000 results
+let count = 0;
+for await (const obs of fhir.search("Observation").stream({ signal: controller.signal })) {
+  process(obs);
+  if (++count >= 1000) {
+    controller.abort();
+    break;
+  }
+}
+```
+
+### Stream with Filters
+
+`.stream()` works with all query builder methods:
+
+```typescript
+for await (const obs of fhir
+  .search("Observation")
+  .where("patient", "eq", "Patient/123")
+  .where("status", "eq", "final")
+  .sort("date", "desc")
+  .count(100) // page size
+  .stream()
+) {
+  console.log(obs.code?.text, obs.effectiveDateTime);
+}
+```
+
+:::tip
+See the [Streaming & Lazy Loading](/docs/guides/streaming) guide for more details on streaming vs eager execution.
+:::
+
+## Working with Pagination (Runtime)
+
+For lower-level control, use the runtime package's pagination utilities directly:
 
 ```typescript
 import { FhirExecutor, fetchAllPages, paginate } from "@fhir-dsl/runtime";

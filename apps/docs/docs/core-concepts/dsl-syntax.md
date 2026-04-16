@@ -184,6 +184,27 @@ interface SearchResult<Primary, Included> {
 }
 ```
 
+### `stream(options?)`
+
+Returns an `AsyncIterable` that yields individual resources across all pages, automatically following Bundle pagination links:
+
+```typescript
+for await (const patient of fhir.search("Patient").stream()) {
+  console.log(patient.id);
+}
+```
+
+Supports cancellation via `AbortSignal`:
+
+```typescript
+const controller = new AbortController();
+for await (const patient of fhir.search("Patient").stream({ signal: controller.signal })) {
+  console.log(patient.id);
+}
+```
+
+See the [Streaming & Lazy Loading](/docs/guides/streaming) guide for full details.
+
 ## Read Queries
 
 Read a single resource by type and ID:

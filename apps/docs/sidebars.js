@@ -21,6 +21,13 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'Guides',
+      items: [
+        'guides/streaming',
+      ],
+    },
+    {
+      type: 'category',
       label: 'FHIRPath',
       items: [
         'fhirpath/overview',

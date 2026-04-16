@@ -17,10 +17,18 @@ What's available today:
 - Implementation Guide support (US Core and custom IGs)
 - Profile-aware queries with type narrowing
 - HTTP executor with pagination and error handling
+- Streaming and lazy loading for large datasets
 - Dual ESM/CJS builds
 - CLI for type generation
 
 ## Recently Added
+
+### Streaming & Lazy Loading (v0.6.1)
+
+- **`.stream()`** -- Lazy `AsyncIterable` that yields resources across all pages, automatically following Bundle pagination links
+- **Cancellation** -- `AbortSignal` support via `stream({ signal })` for timeouts and user-initiated cancellation
+- **Memory efficient** -- Processes resources page-by-page without loading full datasets into memory
+- **Type-safe** -- Streaming preserves full type inference including profile-narrowed types
 
 ### FHIRPath Expression Builder (v0.6.1)
 
