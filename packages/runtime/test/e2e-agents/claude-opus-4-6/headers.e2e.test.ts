@@ -23,7 +23,7 @@ describe("claude-opus-4-6 / headers & auth", () => {
     await client.read("Patient", "pat-alice").execute();
 
     for (const req of mock.requests) {
-      expect(req.headers["accept"]).toBe("application/fhir+json");
+      expect(req.headers.accept).toBe("application/fhir+json");
       expect(req.headers["content-type"]).toBe("application/fhir+json");
     }
   });
@@ -38,7 +38,7 @@ describe("claude-opus-4-6 / headers & auth", () => {
     });
 
     await client.search("Patient").execute();
-    expect(mock.requests[0]!.headers["authorization"]).toBe("Bearer sk-live-1234");
+    expect(mock.requests[0]!.headers.authorization).toBe("Bearer sk-live-1234");
   });
 
   it("basic auth sets `Authorization: Basic <creds>` verbatim (no re-encoding)", async () => {
@@ -51,7 +51,7 @@ describe("claude-opus-4-6 / headers & auth", () => {
     });
 
     await client.search("Patient").execute();
-    expect(mock.requests[0]!.headers["authorization"]).toBe("Basic dXNlcjpwYXNz");
+    expect(mock.requests[0]!.headers.authorization).toBe("Basic dXNlcjpwYXNz");
   });
 
   it("config.headers are merged into every request", async () => {

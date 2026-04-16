@@ -56,7 +56,7 @@ describe("claude-opus-4-6 / transaction", () => {
     const req = mock.requests[0]!;
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/fhir\/?$/);
-    expect(req.headers["accept"]).toBe("application/fhir+json");
+    expect(req.headers.accept).toBe("application/fhir+json");
     expect(req.headers["content-type"]).toBe("application/fhir+json");
     expect(req.body).not.toBeNull();
     expect(JSON.parse(req.body!)).toEqual(compiled);

@@ -63,9 +63,9 @@ describe("claude-opus-4-6 / stream — pagination & abort", () => {
     }
 
     const pageTwo = mock.requests[1]!;
-    expect(pageTwo.headers["accept"]).toBe("application/fhir+json");
+    expect(pageTwo.headers.accept).toBe("application/fhir+json");
     expect(pageTwo.headers["content-type"]).toBeUndefined();
-    expect(pageTwo.headers["authorization"]).toBe("Basic dXNlcjpwYXNz");
+    expect(pageTwo.headers.authorization).toBe("Basic dXNlcjpwYXNz");
     expect(pageTwo.headers["x-trace-id"]).toBe("stream-trace");
     expect(seen).toHaveLength(2);
   });
