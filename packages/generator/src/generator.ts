@@ -1,5 +1,6 @@
 import { access, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { TerminologyRegistry } from "@fhir-dsl/terminology";
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
 import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
@@ -7,6 +8,7 @@ import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/pr
 import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
+import { type BindingTypeMap, emitTerminology } from "./emitter/terminology-emitter.js";
 import type { ProfileModel } from "./model/profile-model.js";
 import type { ResourceModel, ResourceSearchParams } from "./model/resource-model.js";
 import { parseProfile } from "./parser/profile.js";
@@ -45,6 +47,8 @@ export interface GeneratorOptions {
   cacheDir?: string | undefined;
   localSpecDir?: string | undefined;
   ig?: string[] | undefined;
+  expandValueSets?: boolean | undefined;
+  resolveCodeSystems?: boolean | undefined;
 }
 
 export async function generate(options: GeneratorOptions): Promise<void> {
@@ -58,7 +62,9 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     spec = await loadLocalSpec(localSpecDir);
   } else {
     const cache = cacheDir ?? join(outDir, ".cache");
-    spec = await downloadSpec(version, cache);
+    spec = await downloadSpec(version, cache, {
+      expandValueSets: options.expandValueSets,
+    });
   }
 
   console.info(
@@ -110,10 +116,66 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   // Emit search param types
   await writeFile(join(versionDir, "search-param-types.ts"), emitSearchParamTypes(), "utf-8");
 
+  // --- Terminology resolution ---
+  let bindingTypeMap: BindingTypeMap | undefined;
+
+  if (options.expandValueSets) {
+    const registry = new TerminologyRegistry();
+
+    // Load pre-expanded ValueSets from spec
+    if (spec.expansions) {
+      registry.loadExpansions(spec.expansions);
+    }
+
+    // Load CodeSystems and ValueSets from spec (local or downloaded)
+    if (spec.codeSystems) {
+      for (const cs of spec.codeSystems) {
+        registry.loadCodeSystem(cs);
+      }
+    }
+    if (spec.valueSets) {
+      for (const vs of spec.valueSets) {
+        registry.loadValueSet(vs);
+      }
+    }
+
+    registry.resolveAll();
+
+    console.info(
+      `Terminology: ${registry.resolvedCount} ValueSets resolved, ${registry.codeSystemCount} CodeSystems loaded`,
+    );
+
+    // Emit terminology files
+    const allResolved = [...registry.allResolved()];
+    const termResult = emitTerminology(allResolved);
+    bindingTypeMap = termResult.bindingTypeMap;
+
+    if (termResult.valueSetsSource) {
+      const terminologyDir = join(versionDir, "terminology");
+      await mkdir(terminologyDir, { recursive: true });
+
+      await writeFile(join(terminologyDir, "valuesets.ts"), termResult.valueSetsSource, "utf-8");
+
+      const includeCodeSystems = options.resolveCodeSystems && !!termResult.codeSystemsSource;
+      if (includeCodeSystems) {
+        await writeFile(join(terminologyDir, "codesystems.ts"), termResult.codeSystemsSource, "utf-8");
+      }
+
+      // Build index with only the files we actually wrote
+      const indexLines: string[] = ['export * from "./valuesets.js";'];
+      if (includeCodeSystems) {
+        indexLines.push('export * from "./codesystems.js";');
+      }
+      await writeFile(join(terminologyDir, "index.ts"), `${indexLines.join("\n")}\n`, "utf-8");
+
+      console.info(`Generated ${bindingTypeMap.size} terminology types`);
+    }
+  }
+
   // Emit resource files
   for (const model of resourceModels) {
     const fileName = `${toKebabCase(model.name)}.ts`;
-    const content = emitResource(model);
+    const content = emitResource(model, bindingTypeMap);
     await writeFile(join(resourcesDir, fileName), content, "utf-8");
   }
 

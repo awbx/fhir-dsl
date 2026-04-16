@@ -10,6 +10,8 @@ export const generateCommand = new Command("generate")
   .requiredOption("--out <dir>", "Output directory for generated types")
   .option("--src <path>", "Local path to FHIR definitions (skip download)")
   .option("--cache <dir>", "Cache directory for downloaded specs")
+  .option("--expand-valuesets", "Generate typed unions from FHIR ValueSet bindings")
+  .option("--resolve-codesystems", "Generate CodeSystem namespace objects for IntelliSense")
   .action(async (opts) => {
     const resources = opts.resources ? opts.resources.split(",").map((r: string) => r.trim()) : undefined;
 
@@ -20,5 +22,7 @@ export const generateCommand = new Command("generate")
       localSpecDir: opts.src ? resolve(opts.src) : undefined,
       cacheDir: opts.cache ? resolve(opts.cache) : undefined,
       ig: opts.ig,
+      expandValueSets: opts.expandValuesets,
+      resolveCodeSystems: opts.resolveCodesystems,
     });
   });
