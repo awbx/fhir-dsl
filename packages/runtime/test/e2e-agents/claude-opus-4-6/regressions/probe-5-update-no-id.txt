@@ -1,0 +1,36 @@
+Testing types with tsc and vue-tsc is an experimental feature.
+Breaking changes might not follow SemVer, please pin Vitest's version when using it.
+
+ RUN  v4.1.4 /Users/awbx/open-source/fhir-dsl-claude-opus-4-6
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/transaction.e2e.test.ts (5 tests | 1 failed) 17ms
+     × update() throws synchronously when resource has no id 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/runtime/test/e2e-agents/claude-opus-4-6/transaction.e2e.test.ts > claude-opus-4-6 / transaction > update() throws synchronously when resource has no id
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/transaction.e2e.test.ts:73:7
+     71|     expect(() =>
+     72|       tx.update({ resourceType: "Patient", name: [{ family: "NoId" }] …
+     73|     ).toThrow(/id/i);
+       |       ^
+     74|   });
+     75|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+Type Errors  no errors
+   Start at  16:44:31
+   Duration  155ms (transform 38ms, setup 0ms, import 48ms, tests 17ms, environment 0ms)
+

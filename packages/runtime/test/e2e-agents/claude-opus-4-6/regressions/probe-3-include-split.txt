@@ -1,0 +1,60 @@
++         {
++           "code": "29463-7",
++           "display": "Body Weight",
++           "system": "http://loinc.org",
++         },
++       ],
++     },
++     "effectiveDateTime": "2024-02-10T10:00:00Z",
++     "id": "obs-weight",
++     "performer": [
++       {
++         "reference": "Practitioner/prc-1",
++       },
++     ],
++     "resourceType": "Observation",
++     "status": "final",
++     "subject": {
++       "reference": "Patient/pat-alice",
++     },
++     "valueQuantity": {
++       "code": "kg",
++       "system": "http://unitsofmeasure.org",
++       "unit": "kg",
++       "value": 72,
++     },
++   },
++   {
++     "code": {
++       "coding": [
++         {
++           "code": "38341003",
++           "system": "http://snomed.info/sct",
++         },
++       ],
++     },
++     "id": "cnd-hyp",
++     "resourceType": "Condition",
++     "subject": {
++       "reference": "Patient/pat-alice",
++     },
++   },
+  ]
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/execute.e2e.test.ts:117:25
+    115|       .execute();
+    116|
+    117|     expect(result.data).toEqual([patientAlice]);
+       |                         ^
+    118|     expect(result.included).toEqual([observationBodyWeight, conditionH…
+    119|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+Type Errors  no errors
+   Start at  16:41:25
+   Duration  168ms (transform 42ms, setup 0ms, import 53ms, tests 26ms, environment 0ms)
+

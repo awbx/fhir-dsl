@@ -1,0 +1,40 @@
+
+Expected: "https://cdn.example.test/page-2?_token=abc"
+Received: "https://example.test/fhir/Patient?_count=1"
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts:50:35
+     48|     expect(ids).toEqual(["pat-alice", "pat-bob", "pat-vip"]);
+     49|     expect(mock.requests).toHaveLength(3);
+     50|     expect(mock.requests[1]!.url).toBe("https://cdn.example.test/page-…
+       |                                   ^
+     51|     expect(mock.requests[2]!.url).toBe("https://cdn.example.test/page-…
+     52|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts > claude-opus-4-6 / stream — pagination & abort > uses Accept only (no Content-Type) on pagination URL fetches
+AssertionError: expected 'application/fhir+json' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+"application/fhir+json"
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts:72:45
+     70|     const pageTwo = mock.requests[1]!;
+     71|     expect(pageTwo.headers["accept"]).toBe("application/fhir+json");
+     72|     expect(pageTwo.headers["content-type"]).toBeUndefined();
+       |                                             ^
+     73|     expect(pageTwo.headers["authorization"]).toBe("Basic dXNlcjpwYXNz"…
+     74|     expect(pageTwo.headers["x-trace-id"]).toBe("stream-trace");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+Type Errors  no errors
+   Start at  16:43:39
+   Duration  158ms (transform 39ms, setup 0ms, import 49ms, tests 21ms, environment 0ms)
+

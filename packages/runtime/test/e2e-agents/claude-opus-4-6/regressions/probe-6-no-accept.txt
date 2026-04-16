@@ -1,0 +1,36 @@
+Testing types with tsc and vue-tsc is an experimental feature.
+Breaking changes might not follow SemVer, please pin Vitest's version when using it.
+
+ RUN  v4.1.4 /Users/awbx/open-source/fhir-dsl-claude-opus-4-6
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/headers.e2e.test.ts (7 tests | 1 failed) 18ms
+     × every executor request sets Accept + Content-Type to application/fhir+json 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/runtime/test/e2e-agents/claude-opus-4-6/headers.e2e.test.ts > claude-opus-4-6 / headers & auth > every executor request sets Accept + Content-Type to application/fhir+json
+AssertionError: expected undefined to be 'application/fhir+json' // Object.is equality
+
+- Expected:
+"application/fhir+json"
+
++ Received:
+undefined
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/headers.e2e.test.ts:26:37
+     24|
+     25|     for (const req of mock.requests) {
+     26|       expect(req.headers["accept"]).toBe("application/fhir+json");
+       |                                     ^
+     27|       expect(req.headers["content-type"]).toBe("application/fhir+json"…
+     28|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+Type Errors  no errors
+   Start at  16:44:55
+   Duration  157ms (transform 40ms, setup 0ms, import 50ms, tests 18ms, environment 0ms)
+

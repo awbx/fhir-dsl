@@ -1,0 +1,40 @@
+undefined
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts:111:6
+    109|         controller.abort();
+    110|       }
+    111|     }).rejects.toThrowError();
+       |      ^
+    112|
+    113|     // Observable invariant: consumer only saw the pre-abort yield.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts > claude-opus-4-6 / stream — pagination & abort > abort before iteration starts rejects the first `.next()` without hanging
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/stream.e2e.test.ts:129:6
+    127|         seen.push(resource.id ?? "");
+    128|       }
+    129|     }).rejects.toThrowError();
+       |      ^
+    130|
+    131|     expect(seen).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+Type Errors  no errors
+   Start at  16:46:38
+   Duration  166ms (transform 41ms, setup 0ms, import 52ms, tests 21ms, environment 0ms)
+

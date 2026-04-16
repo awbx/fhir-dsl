@@ -1,0 +1,30 @@
+     66|     expect(url.searchParams.get("name")).toBe("containssmith");
+       |                                          ^
+     67|     expect(url.searchParams.get("gender")).toBe("notmale");
+     68|     expect(url.searchParams.get("identifier")).toBe("of-typesys|MR|abc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  packages/runtime/test/e2e-agents/claude-opus-4-6/execute.e2e.test.ts > claude-opus-4-6 / execute — URL serialization & result parsing > whereChained serializes chain to URL exactly
+AssertionError: expected 'exact' to be 'exactSmith' // Object.is equality
+
+Expected: "exactSmith"
+Received: "exact"
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/execute.e2e.test.ts:145:58
+    143|
+    144|     const url = new URL(mock.requests[0]!.url);
+    145|     expect(url.searchParams.get("subject:Patient.name")).toBe("exactSm…
+       |                                                          ^
+    146|   });
+    147|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 passed (13)
+Type Errors  no errors
+   Start at  16:38:11
+   Duration  178ms (transform 44ms, setup 0ms, import 55ms, tests 25ms, environment 0ms)
+

@@ -1,0 +1,30 @@
+       |     ^
+     47|     client.search("Patient").where("name", "ge", "Smith");
+     48|     // @ts-expect-error — string has no `not` modifier
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯ Unhandled Source Error ⎯⎯⎯
+TypeCheckError: Unused '@ts-expect-error' directive.
+ ❯ packages/runtime/test/e2e-agents/codex/client-types.test-d.ts:18:5
+
+
+⎯⎯⎯ Unhandled Source Error ⎯⎯⎯
+TypeCheckError: Unused '@ts-expect-error' directive.
+ ❯ packages/runtime/test/e2e-agents/codex/client-types.test-d.ts:48:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+Type Errors  1 failed
+     Errors  2 errors
+   Start at  16:46:10
+   Duration  1.25s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms, typecheck 1.22s)
+
