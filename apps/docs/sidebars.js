@@ -25,6 +25,7 @@ const sidebars = {
       items: [
         'guides/streaming',
         'guides/terminology',
+        'guides/smart',
       ],
     },
     {
