@@ -1,0 +1,14 @@
+{
+  "resourceType": "ValueSet",
+  "id": "administrative-gender",
+  "url": "http://hl7.org/fhir/ValueSet/administrative-gender",
+  "name": "AdministrativeGender",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/administrative-gender"
+      }
+    ]
+  }
+}

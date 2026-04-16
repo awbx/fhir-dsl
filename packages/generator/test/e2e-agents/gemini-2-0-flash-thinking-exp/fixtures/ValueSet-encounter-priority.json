@@ -1,0 +1,14 @@
+{
+  "resourceType": "ValueSet",
+  "id": "encounter-priority",
+  "url": "http://hl7.org/fhir/ValueSet/encounter-priority",
+  "name": "EncounterPriority",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/encounter-priority"
+      }
+    ]
+  }
+}

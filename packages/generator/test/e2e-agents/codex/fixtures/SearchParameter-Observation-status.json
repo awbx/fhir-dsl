@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Observation-status",
+  "name": "status",
+  "code": "status",
+  "base": ["Observation"],
+  "type": "token",
+  "description": "The status of the observation",
+  "expression": "Observation.status"
+}

@@ -47,7 +47,10 @@
       "!**/generated",
       "!**/pnpm-lock.yaml",
       "!packages/generator/test/fixtures/generated-golden",
-      "!packages/generator/test/fixtures/generated-legacy-golden"
+      "!packages/generator/test/fixtures/generated-legacy-golden",
+      "!packages/generator/test/e2e-agents/**/.tmp-*",
+      "!packages/generator/test/e2e-agents/**/golden",
+      "!packages/generator/test/e2e-agents/**/legacy-golden"
     ]
   }
 }

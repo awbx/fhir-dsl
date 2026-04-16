@@ -1,0 +1,10 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://hl7.org/fhir/ValueSet/observation-status",
+  "name": "ObservationStatus",
+  "version": "4.0.1",
+  "status": "active",
+  "compose": {
+    "include": [{ "system": "http://hl7.org/fhir/observation-status" }]
+  }
+}

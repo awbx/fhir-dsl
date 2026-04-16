@@ -1,0 +1,40 @@
+AssertionError: expected FhirRequestError: FHIR request failed: 42… { …(3) } to match object { status: 422, …(2) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "operationOutcome": {
+-     "issue": [
+-       {
+-         "code": "processing",
+-         "diagnostics": "invalid filter",
+-         "severity": "error",
+-       },
+-     ],
+-     "resourceType": "OperationOutcome",
+-   },
++ FhirRequestError {
++   "operationOutcome": null,
+    "status": 422,
+    "statusText": "Unprocessable Entity",
+  }
+
+ ❯ packages/runtime/test/e2e-agents/claude-opus-4-6/errors.e2e.test.ts:29:25
+     27|
+     28|     await expect(promise).rejects.toBeInstanceOf(FhirRequestError);
+     29|     await expect(promise).rejects.toMatchObject({
+       |                         ^
+     30|       status: 422,
+     31|       statusText: "Unprocessable Entity",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+Type Errors  no errors
+   Start at  16:39:33
+   Duration  157ms (transform 34ms, setup 0ms, import 44ms, tests 23ms, environment 0ms)
+

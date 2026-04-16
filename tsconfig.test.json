@@ -7,7 +7,8 @@
   "include": [
     "packages/generator/test/**/*.ts",
     "packages/generator/src/**/*.ts",
-    "packages/generator/test/fixtures/generated-golden/**/*.ts"
+    "packages/generator/test/fixtures/generated-golden/**/*.ts",
+    "packages/runtime/test/**/*.ts"
   ],
   "exclude": ["**/node_modules", "**/dist", "packages/generator/test/.tmp-output/**"]
 }

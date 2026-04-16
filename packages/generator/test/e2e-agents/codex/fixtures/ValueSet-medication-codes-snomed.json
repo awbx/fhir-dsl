@@ -1,0 +1,21 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://hl7.org/fhir/ValueSet/medication-codes-snomed",
+  "name": "MedicationCodesSnomed",
+  "version": "4.0.1",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "373873005"
+          }
+        ]
+      }
+    ]
+  }
+}

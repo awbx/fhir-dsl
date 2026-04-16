@@ -1,0 +1,14 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "observation-status",
+  "url": "http://hl7.org/fhir/observation-status",
+  "name": "ObservationStatus",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    { "code": "registered", "display": "Registered" },
+    { "code": "preliminary", "display": "Preliminary" },
+    { "code": "final", "display": "Final" },
+    { "code": "amended", "display": "Amended" }
+  ]
+}

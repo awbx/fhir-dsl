@@ -1,0 +1,13 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "specimen-type",
+  "url": "http://hl7.org/fhir/specimen-type",
+  "name": "SpecimenType",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    { "code": "blood", "display": "Blood" },
+    { "code": "urine", "display": "Urine" },
+    { "code": "serum", "display": "Serum" }
+  ]
+}
