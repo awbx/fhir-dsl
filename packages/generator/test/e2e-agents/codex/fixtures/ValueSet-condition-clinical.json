@@ -1,0 +1,22 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://hl7.org/fhir/ValueSet/condition-clinical",
+  "name": "ConditionClinicalStatusCodes",
+  "version": "4.0.1",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "concept": [
+          { "code": "active", "display": "Active" },
+          { "code": "recurrence", "display": "Recurrence" },
+          { "code": "relapse", "display": "Relapse" },
+          { "code": "inactive", "display": "Inactive" },
+          { "code": "remission", "display": "Remission" },
+          { "code": "resolved", "display": "Resolved" }
+        ]
+      }
+    ]
+  }
+}

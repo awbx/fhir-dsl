@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://hl7.org/fhir/ValueSet/observation-category",
+  "name": "ObservationCategoryCodes",
+  "version": "4.0.1",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+        "concept": [
+          { "code": "social-history", "display": "Social History" },
+          { "code": "vital-signs", "display": "Vital Signs" },
+          { "code": "imaging", "display": "Imaging" },
+          { "code": "laboratory", "display": "Laboratory" },
+          { "code": "procedure", "display": "Procedure" },
+          { "code": "survey", "display": "Survey" },
+          { "code": "exam", "display": "Exam" },
+          { "code": "therapy", "display": "Therapy" },
+          { "code": "activity", "display": "Activity" }
+        ]
+      }
+    ]
+  }
+}

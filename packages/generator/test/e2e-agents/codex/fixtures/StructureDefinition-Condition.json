@@ -1,0 +1,37 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/Condition",
+  "name": "Condition",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Condition",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "snapshot": {
+    "element": [
+      { "path": "Condition", "min": 0, "max": "*" },
+      {
+        "path": "Condition.clinicalStatus",
+        "short": "active | recurrence | relapse | inactive | remission | resolved",
+        "min": 0,
+        "max": "1",
+        "type": [{ "code": "CodeableConcept" }],
+        "binding": {
+          "strength": "extensible",
+          "valueSet": "http://hl7.org/fhir/ValueSet/condition-clinical"
+        }
+      },
+      {
+        "path": "Condition.subject",
+        "short": "Who has the condition?",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          }
+        ]
+      }
+    ]
+  }
+}
