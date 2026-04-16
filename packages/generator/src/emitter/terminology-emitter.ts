@@ -30,11 +30,18 @@ export function emitTerminology(resolvedValueSets: ResolvedValueSet[]): Terminol
 
   // Sort by name for deterministic output
   const sorted = [...resolvedValueSets].sort((a, b) => a.name.localeCompare(b.name));
+  const usedNames = new Set<string>();
 
   for (const vs of sorted) {
     if (vs.codes.length === 0) continue;
 
-    const typeName = vs.name;
+    const typeName = sanitizeIdentifier(vs.name);
+    if (!typeName) continue;
+
+    // Deduplicate names (some ValueSets have the same name after sanitization)
+    if (usedNames.has(typeName)) continue;
+    usedNames.add(typeName);
+
     bindingTypeMap.set(vs.url, typeName);
 
     // Emit type alias (literal union)
@@ -43,8 +50,16 @@ export function emitTerminology(resolvedValueSets: ResolvedValueSet[]): Terminol
 
     // Emit const namespace object (for IntelliSense / code completion)
     csLines.push(`export const ${typeName} = {`);
+    const usedKeys = new Set<string>();
     for (const code of vs.codes) {
-      const key = codeToPascalKey(code.code);
+      let key = codeToPascalKey(code.code);
+      // Deduplicate keys within the same const object
+      if (usedKeys.has(key)) {
+        let i = 2;
+        while (usedKeys.has(`${key}${i}`)) i++;
+        key = `${key}${i}`;
+      }
+      usedKeys.add(key);
       csLines.push(`  ${key}: "${escapeString(code.code)}" as const,`);
     }
     csLines.push("} as const;");
@@ -60,6 +75,20 @@ export function emitTerminology(resolvedValueSets: ResolvedValueSet[]): Terminol
   const indexSource = indexLines.length > 0 ? `${indexLines.join("\n")}\n` : "";
 
   return { valueSetsSource, codeSystemsSource, indexSource, bindingTypeMap };
+}
+
+/**
+ * Sanitize a ValueSet name into a valid TypeScript identifier.
+ * Removes spaces, hyphens, and other non-identifier characters.
+ * e.g., "Marital Status Codes" → "MaritalStatusCodes"
+ */
+function sanitizeIdentifier(name: string): string {
+  return name
+    .replace(/[^a-zA-Z0-9]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => (w.length > 0 ? w[0]!.toUpperCase() + w.slice(1) : ""))
+    .join("");
 }
 
 function escapeString(s: string): string {

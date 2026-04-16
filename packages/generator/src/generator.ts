@@ -156,17 +156,9 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
       await writeFile(join(terminologyDir, "valuesets.ts"), termResult.valueSetsSource, "utf-8");
 
-      const includeCodeSystems = options.resolveCodeSystems && !!termResult.codeSystemsSource;
-      if (includeCodeSystems) {
+      if (options.resolveCodeSystems && termResult.codeSystemsSource) {
         await writeFile(join(terminologyDir, "codesystems.ts"), termResult.codeSystemsSource, "utf-8");
       }
-
-      // Build index with only the files we actually wrote
-      const indexLines: string[] = ['export * from "./valuesets.js";'];
-      if (includeCodeSystems) {
-        indexLines.push('export * from "./codesystems.js";');
-      }
-      await writeFile(join(terminologyDir, "index.ts"), `${indexLines.join("\n")}\n`, "utf-8");
 
       console.info(`Generated ${bindingTypeMap.size} terminology types`);
     }
@@ -230,7 +222,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   try {
     const entries = await readdir(versionDir);
     for (const entry of entries) {
-      if (entry === "resources") continue;
+      if (entry === "resources" || entry === "terminology") continue;
       const entryPath = join(versionDir, entry);
       const entryStat = await stat(entryPath);
       if (entryStat.isDirectory() && (await fileExists(join(entryPath, "index.ts")))) {

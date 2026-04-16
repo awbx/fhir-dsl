@@ -62,6 +62,24 @@ describe("emitTerminology", () => {
     expect(result.codeSystemsSource).toContain("NotPresent:");
   });
 
+  it("sanitizes names with spaces into valid identifiers", () => {
+    const result = emitTerminology([makeVS({ name: "Marital Status Codes", url: "http://example.com/vs/marital" })]);
+
+    expect(result.valueSetsSource).toContain("export type MaritalStatusCodes =");
+    expect(result.bindingTypeMap.get("http://example.com/vs/marital")).toBe("MaritalStatusCodes");
+  });
+
+  it("deduplicates sanitized names", () => {
+    const result = emitTerminology([
+      makeVS({ name: "TestCodes", url: "http://a.com", codes: [{ code: "a" }] }),
+      makeVS({ name: "TestCodes", url: "http://b.com", codes: [{ code: "b" }] }),
+    ]);
+
+    // Only the first one should be emitted
+    const matches = result.valueSetsSource.match(/export type TestCodes/g);
+    expect(matches).toHaveLength(1);
+  });
+
   it("sorts ValueSets by name", () => {
     const result = emitTerminology([
       makeVS({ name: "Zebra", url: "http://z.com", codes: [{ code: "z" }] }),
