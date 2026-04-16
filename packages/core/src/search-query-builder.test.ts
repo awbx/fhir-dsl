@@ -345,4 +345,183 @@ describe("SearchQueryBuilder", () => {
       expect(result.link![1]!.relation).toBe("next");
     });
   });
+
+  describe("stream", () => {
+    it("yields individual resources from a single page", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [
+          { resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } },
+          { resource: { resourceType: "Patient", id: "2" }, search: { mode: "match" } },
+        ],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>("Patient", executor);
+      const results: any[] = [];
+
+      for await (const item of builder.stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(2);
+      expect(results[0]).toEqual({ resourceType: "Patient", id: "1" });
+      expect(results[1]).toEqual({ resourceType: "Patient", id: "2" });
+    });
+
+    it("follows next links across pages", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } }],
+        link: [{ relation: "next", url: "http://example.com/Patient?_page=2" }],
+      }));
+
+      const urlExecutor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [
+          { resource: { resourceType: "Patient", id: "2" }, search: { mode: "match" } },
+          { resource: { resourceType: "Patient", id: "3" }, search: { mode: "match" } },
+        ],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>(
+        "Patient",
+        executor,
+        undefined,
+        undefined,
+        urlExecutor,
+      );
+      const results: any[] = [];
+
+      for await (const item of builder.stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(3);
+      expect(results.map((r) => r.id)).toEqual(["1", "2", "3"]);
+      expect(urlExecutor).toHaveBeenCalledWith("http://example.com/Patient?_page=2");
+    });
+
+    it("skips included resources", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [
+          { resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } },
+          { resource: { resourceType: "Practitioner", id: "p1" }, search: { mode: "include" } },
+        ],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>("Patient", executor);
+      const results: any[] = [];
+
+      for await (const item of builder.stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(1);
+      expect(results[0]?.resourceType).toBe("Patient");
+    });
+
+    it("handles empty bundle", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>("Patient", executor);
+      const results: any[] = [];
+
+      for await (const item of builder.stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(0);
+    });
+
+    it("stops when no urlExecutor is provided even if next link exists", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } }],
+        link: [{ relation: "next", url: "http://example.com/Patient?_page=2" }],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>("Patient", executor);
+      const results: any[] = [];
+
+      for await (const item of builder.stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(1);
+    });
+
+    it("supports cancellation via AbortSignal", async () => {
+      const controller = new AbortController();
+
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } }],
+        link: [{ relation: "next", url: "http://example.com/Patient?_page=2" }],
+      }));
+
+      const urlExecutor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "2" }, search: { mode: "match" } }],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, Record<string, any>>(
+        "Patient",
+        executor,
+        undefined,
+        undefined,
+        urlExecutor,
+      );
+
+      controller.abort();
+
+      const results: any[] = [];
+      await expect(async () => {
+        for await (const item of builder.stream({ signal: controller.signal })) {
+          results.push(item);
+        }
+      }).rejects.toThrow();
+    });
+
+    it("preserves stream through chained methods", async () => {
+      const executor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "1" }, search: { mode: "match" } }],
+        link: [{ relation: "next", url: "http://example.com/Patient?_page=2" }],
+      }));
+
+      const urlExecutor = vi.fn(async () => ({
+        resourceType: "Bundle",
+        type: "searchset",
+        entry: [{ resource: { resourceType: "Patient", id: "2" }, search: { mode: "match" } }],
+      }));
+
+      const builder = new SearchQueryBuilderImpl<TestSchema, string, FlexibleSearchParams>(
+        "Patient",
+        executor,
+        undefined,
+        undefined,
+        urlExecutor,
+      );
+
+      const results: any[] = [];
+      for await (const item of builder.where("birthdate", "ge", "1990-01-01").count(10).stream()) {
+        results.push(item);
+      }
+
+      expect(results).toHaveLength(2);
+      expect(urlExecutor).toHaveBeenCalledOnce();
+    });
+  });
 });
