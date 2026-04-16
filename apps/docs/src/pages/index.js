@@ -86,6 +86,172 @@ for await (const patient of fhir
   console.log(patient.id, patient.name?.[0]?.family);
 }`,
   },
+  {
+    id: 'fhirpath',
+    label: 'FHIRPath',
+    code: `import { fhirpath } from "@fhir-dsl/fhirpath";
+import type { Patient, Observation } from "./fhir/r4";
+
+// Compile a path — autocomplete at every step.
+fhirpath<Patient>("Patient").name.family.compile();
+// → "Patient.name.family"
+
+// Predicate expressions with $this, chained functions.
+fhirpath<Patient>("Patient")
+  .name.where($this => $this.use.eq("official"))
+  .family.first()
+  .compile();
+// → "Patient.name.where($this.use = 'official').family.first()"
+
+// Polymorphic value[x] narrowed via ofType().
+fhirpath<Observation>("Observation")
+  .value.ofType("Quantity").value
+  .compile();
+// → "Observation.value.ofType(Quantity).value"
+
+// Evaluate against a live resource.
+const families = fhirpath<Patient>("Patient")
+  .name.select($this => $this.family)
+  .evaluate(patient);
+// families: string[]`,
+  },
+  {
+    id: 'terminology',
+    label: 'Terminology',
+    code: `// After \`fhir-gen --expand-valuesets --resolve-codesystems\`,
+// every FHIR-bound code field is typed to its ValueSet.
+
+import type { Patient, Condition } from "./fhir/r4";
+import { AdministrativeGender } from "./fhir/r4";
+
+const patient: Patient = {
+  resourceType: "Patient",
+  gender: AdministrativeGender.Female, // "female"
+  //      ^ autocomplete: Male | Female | Other | Unknown
+};
+
+// Required binding → closed union, bad codes caught at compile time.
+const bad: Patient = {
+  resourceType: "Patient",
+  gender: "banana",
+  //      ~~~~~~~~ Type '"banana"' is not assignable to 'AdministrativeGender'
+};
+
+// Extensible binding → known codes autocomplete, custom strings still compile.
+const condition: Condition = {
+  resourceType: "Condition",
+  clinicalStatus: {
+    coding: [{ code: "active" }], // ConditionClinical | (string & {})
+  },
+  subject: { reference: "Patient/123" },
+};
+
+// Typed search-param values flow through the query builder too.
+await fhir
+  .search("Patient")
+  .where("gender", "eq", "female") // ✓ — unknown codes rejected
+  .execute();`,
+  },
+  {
+    id: 'cli',
+    label: 'CLI',
+    lang: 'bash',
+    code: `# Generate R4 types + US Core profiles + typed ValueSets +
+# CodeSystem namespaces + markdown specs (LLM context).
+npx @fhir-dsl/cli generate \\
+  --version r4 \\
+  --ig hl7.fhir.us.core@6.1.0 \\
+  --expand-valuesets \\
+  --resolve-codesystems \\
+  --include-spec \\
+  --out ./src/fhir
+
+# Output layout:
+#   ./src/fhir/r4/
+#     client.ts              createClient({ baseUrl }) — pre-typed
+#     resources/*.ts         Patient, Observation, Encounter, …
+#     profiles/*.ts          USCorePatientProfile, USCoreVitalSignsProfile, …
+#     terminology/           AdministrativeGender, ObservationStatus, …
+#     spec/                  markdown per resource + profile
+
+# Wire it into your build:
+#   "scripts": {
+#     "generate:fhir": "fhir-gen generate --version r4 --out ./src/fhir",
+#     "build": "pnpm generate:fhir && tsc"
+#   }
+
+# Then in application code:
+#   import { createClient } from "./src/fhir/r4";
+#   const fhir = createClient({ baseUrl: "https://hapi.fhir.org/baseR4" });`,
+  },
+  {
+    id: 'complete',
+    label: 'Complete Workflow',
+    code: `// Every DSL feature in one pass — profiles, _has, chaining,
+// includes, composites, projection, transactions, streaming.
+
+// 1) Cohort: active US Core patients born before 1970 who have a
+//    blood-pressure reading, whose GP is named "Smith" — with care
+//    team, conditions, and meds included in a single round-trip.
+const cohort = await fhir
+  .search(
+    "Patient",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+  )
+  .where("active", "eq", "true")
+  .where("birthdate", "le", "1970-01-01")
+  .has("Observation", "subject", "code", "eq", "http://loinc.org|8480-6")
+  .whereChained("general-practitioner", "Practitioner", "family", "eq", "Smith")
+  .include("general-practitioner")
+  .revinclude("Condition", "subject")
+  .revinclude("MedicationRequest", "subject")
+  .select(["id", "name", "birthDate", "address"])
+  .sort("family", "asc")
+  .count(50)
+  .execute();
+
+const patientId = cohort.data[0].id!;
+
+// 2) Drill into elevated systolic readings via a composite param.
+const elevated = await fhir
+  .search("Observation")
+  .where("patient", "eq", \`Patient/\${patientId}\`)
+  .whereComposite("code-value-quantity", {
+    code: "http://loinc.org|8480-6",
+    "value-quantity": "gt140",
+  })
+  .sort("date", "desc")
+  .execute();
+
+// 3) Atomic write-back — tag the patient, retire an old task,
+//    open a follow-up. All succeed or none do.
+await fhir
+  .transaction()
+  .update({
+    resourceType: "Patient",
+    id: patientId,
+    active: true,
+    meta: { tag: [{ code: "htn-follow-up" }] },
+  })
+  .delete("Task", "old-followup-task")
+  .create({
+    resourceType: "Task",
+    status: "requested",
+    intent: "order",
+    for: { reference: \`Patient/\${patientId}\` },
+    description: "Schedule hypertension follow-up",
+  })
+  .execute();
+
+// 4) Stream the full active cohort for bulk export — paged, constant memory.
+for await (const p of fhir
+  .search("Patient")
+  .where("active", "eq", "true")
+  .count(200)
+  .stream()) {
+  await exportToWarehouse(p);
+}`,
+  },
 ];
 
 const FEATURES = [
@@ -263,7 +429,7 @@ function Playground() {
           ))}
         </div>
 
-        <Highlight code={active.code} language="tsx" theme={themes.oneDark}>
+        <Highlight code={active.code} language={active.lang ?? 'tsx'} theme={themes.oneDark}>
           {({ tokens, getLineProps, getTokenProps }) => (
             <pre className={styles.codeBlock}>
               <code>
