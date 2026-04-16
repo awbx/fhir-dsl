@@ -1,4 +1,6 @@
+import type { AuthConfig } from "./auth.js";
 import type { CompiledQuery } from "./compiled-query.js";
+import { performRequest } from "./http.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
@@ -14,7 +16,7 @@ import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
 
 export interface FhirClientConfig {
   baseUrl: string;
-  auth?: { type: "bearer" | "basic"; credentials: string } | undefined;
+  auth?: AuthConfig | undefined;
   headers?: Record<string, string> | undefined;
   fetch?: typeof globalThis.fetch | undefined;
 }
@@ -22,8 +24,6 @@ export interface FhirClientConfig {
 // --- Default executor using fetch ---
 
 function createFetchExecutor(config: FhirClientConfig): Executor {
-  const fetchFn = config.fetch ?? globalThis.fetch;
-
   return async (query: CompiledQuery): Promise<unknown> => {
     const url = new URL(query.path, config.baseUrl.endsWith("/") ? config.baseUrl : `${config.baseUrl}/`);
 
@@ -38,18 +38,11 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
       ...config.headers,
     };
 
-    if (config.auth) {
-      if (config.auth.type === "bearer") {
-        headers.Authorization = `Bearer ${config.auth.credentials}`;
-      } else if (config.auth.type === "basic") {
-        headers.Authorization = `Basic ${config.auth.credentials}`;
-      }
-    }
-
-    const response = await fetchFn(url.toString(), {
+    const response = await performRequest(config, {
+      url: url.toString(),
       method: query.method,
       headers,
-      ...(query.body ? { body: JSON.stringify(query.body) } : {}),
+      ...(query.body != null ? { body: JSON.stringify(query.body) } : {}),
     });
 
     if (!response.ok) {
@@ -64,23 +57,13 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
 // --- URL executor for following pagination links ---
 
 function createUrlExecutor(config: FhirClientConfig): UrlExecutor {
-  const fetchFn = config.fetch ?? globalThis.fetch;
-
   return async (url: string): Promise<unknown> => {
     const headers: Record<string, string> = {
       Accept: "application/fhir+json",
       ...config.headers,
     };
 
-    if (config.auth) {
-      if (config.auth.type === "bearer") {
-        headers.Authorization = `Bearer ${config.auth.credentials}`;
-      } else if (config.auth.type === "basic") {
-        headers.Authorization = `Basic ${config.auth.credentials}`;
-      }
-    }
-
-    const response = await fetchFn(url, { method: "GET", headers });
+    const response = await performRequest(config, { url, method: "GET", headers });
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => null);
