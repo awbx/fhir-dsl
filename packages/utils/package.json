@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/utils",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Shared utilities for FHIR DSL packages",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.1] - 2026-04-16
+
+### Bug Fixes
+
+- Fix terminology emitter: sanitize ValueSet names and deduplicate keys (`9cfb483`)
+
 ## [0.9.0] - 2026-04-16
 
 ### Features
