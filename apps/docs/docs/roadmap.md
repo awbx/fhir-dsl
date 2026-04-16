@@ -8,7 +8,7 @@ sidebar_label: Roadmap
 
 The current priorities and future direction for fhir-dsl.
 
-## Current State (v0.11.0)
+## Current State (v0.12.0)
 
 What's available today:
 
@@ -23,6 +23,12 @@ What's available today:
 - CLI for type generation
 
 ## Recently Added
+
+### Field Projection (v0.12.0)
+
+- **`.select([...])`** -- Search builder method that narrows the result type to the picked top-level fields and emits FHIR's `_elements` parameter. Reduces payload size on mobile and dashboards while keeping full type safety.
+- **Internal type utilities** -- New `_internal/type-utils.ts` module exporting `Prettify`, `UnionToIntersection`, `Path<T,D>`, `PathValue<T,P>`, and `PickFields` for use across builders.
+- **Type-test helpers** -- New `_internal/test-helpers.ts` exporting `Equals<A,B>`, `Assert<T extends true>`, and `Expect<T extends true>` for compile-time assertions in `.test-d.ts` files.
 
 ### Terminology Engine (v0.11.0)
 

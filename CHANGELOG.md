@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.0] - 2026-04-16
+
+### Features
+
+- Add .select() projection with _elements support (`4e48621`)
+
+### Improvements
+
+- Update roadmap status (`077a689`)
+
 ## [0.11.0] - 2026-04-16
 
 ### Features
