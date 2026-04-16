@@ -142,3 +142,6 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# E2E test output — generated into the repo so pnpm workspace links resolve during tsc
+packages/generator/test/.tmp-output/

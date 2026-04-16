@@ -45,7 +45,9 @@
       "!**/.cache",
       "!**/.docusaurus",
       "!**/generated",
-      "!**/pnpm-lock.yaml"
+      "!**/pnpm-lock.yaml",
+      "!packages/generator/test/fixtures/generated-golden",
+      "!packages/generator/test/fixtures/generated-legacy-golden"
     ]
   }
 }

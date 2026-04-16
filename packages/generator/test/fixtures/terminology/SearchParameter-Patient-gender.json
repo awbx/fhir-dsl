@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Patient-gender",
+  "name": "gender",
+  "code": "gender",
+  "base": ["Patient"],
+  "type": "token",
+  "description": "Gender of the patient",
+  "expression": "Patient.gender"
+}

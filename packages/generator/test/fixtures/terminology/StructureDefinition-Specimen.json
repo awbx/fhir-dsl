@@ -1,0 +1,25 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/Specimen",
+  "name": "Specimen",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Specimen",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "snapshot": {
+    "element": [
+      { "path": "Specimen", "min": 0, "max": "*" },
+      {
+        "path": "Specimen.type",
+        "short": "Kind of material that forms the specimen",
+        "min": 0,
+        "max": "1",
+        "type": [{ "code": "CodeableConcept" }],
+        "binding": {
+          "strength": "example",
+          "valueSet": "http://hl7.org/fhir/ValueSet/v2-0487"
+        }
+      }
+    ]
+  }
+}
