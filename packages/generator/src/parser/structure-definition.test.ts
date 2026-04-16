@@ -202,6 +202,70 @@ describe("parseStructureDefinition", () => {
     expect(active.types[0]!.code).toBe("boolean");
   });
 
+  it("extracts binding from elements", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          { path: "TestResource" },
+          {
+            path: "TestResource.status",
+            type: [{ code: "code" }],
+            min: 1,
+            max: "1",
+            binding: {
+              strength: "required",
+              valueSet: "http://hl7.org/fhir/ValueSet/observation-status|4.0.1",
+            },
+          },
+          {
+            path: "TestResource.category",
+            type: [{ code: "CodeableConcept" }],
+            min: 0,
+            max: "*",
+            binding: {
+              strength: "extensible",
+              valueSet: "http://hl7.org/fhir/ValueSet/observation-category",
+            },
+          },
+          {
+            path: "TestResource.code",
+            type: [{ code: "CodeableConcept" }],
+            min: 1,
+            max: "1",
+            binding: {
+              strength: "example",
+              valueSet: "http://hl7.org/fhir/ValueSet/observation-codes",
+            },
+          },
+          {
+            path: "TestResource.name",
+            type: [{ code: "string" }],
+            min: 0,
+            max: "1",
+          },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+
+    const model = parseStructureDefinition(sd);
+
+    const status = model.properties.find((p) => p.name === "status")!;
+    expect(status.binding).toEqual({
+      strength: "required",
+      valueSet: "http://hl7.org/fhir/ValueSet/observation-status|4.0.1",
+    });
+
+    const category = model.properties.find((p) => p.name === "category")!;
+    expect(category.binding?.strength).toBe("extensible");
+
+    const code = model.properties.find((p) => p.name === "code")!;
+    expect(code.binding?.strength).toBe("example");
+
+    const name = model.properties.find((p) => p.name === "name")!;
+    expect(name.binding).toBeUndefined();
+  });
+
   it("falls back to differential when snapshot is missing", () => {
     const sd = {
       resourceType: "StructureDefinition" as const,

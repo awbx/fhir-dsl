@@ -5,6 +5,7 @@ export interface PropertyModel {
   isArray: boolean;
   isChoiceType: boolean;
   description?: string | undefined;
+  binding?: BindingModel | undefined;
 }
 
 export interface TypeRef {
@@ -34,6 +35,11 @@ export interface CompositeComponent {
   code: string;
   /** The FHIR search param type of the component (e.g. "token", "quantity") */
   type: string;
+}
+
+export interface BindingModel {
+  strength: "required" | "extensible" | "preferred" | "example";
+  valueSet: string;
 }
 
 export interface SearchParamModel {

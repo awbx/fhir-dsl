@@ -1,5 +1,11 @@
 import { capitalizeFirst, fhirPathToPropertyName } from "@fhir-dsl/utils";
-import type { BackboneElementModel, PropertyModel, ResourceModel, TypeRef } from "../model/resource-model.js";
+import type {
+  BackboneElementModel,
+  BindingModel,
+  PropertyModel,
+  ResourceModel,
+  TypeRef,
+} from "../model/resource-model.js";
 
 // --- FHIR StructureDefinition types (minimal for parsing) ---
 
@@ -18,6 +24,7 @@ interface FhirElementDefinition {
   short?: string | undefined;
   definition?: string | undefined;
   contentReference?: string | undefined;
+  binding?: { strength?: string | undefined; valueSet?: string | undefined } | undefined;
 }
 
 interface FhirStructureDefinition {
@@ -149,6 +156,7 @@ function elementToProperty(element: FhirElementDefinition, resourceName?: string
   }
 
   const types: TypeRef[] = (element.type ?? []).map(fhirTypeRefToTypeRef);
+  const binding = extractBinding(element);
 
   return {
     name,
@@ -157,12 +165,14 @@ function elementToProperty(element: FhirElementDefinition, resourceName?: string
     isArray: element.max === "*",
     isChoiceType: false,
     description: element.short,
+    binding,
   };
 }
 
 function expandChoiceType(element: FhirElementDefinition): PropertyModel[] {
   const baseName = fhirPathToPropertyName(element.path).replace("[x]", "");
   const types = element.type ?? [];
+  const binding = extractBinding(element);
 
   return types.map((type) => ({
     name: baseName + capitalizeFirst(resolveFhirPathType(type.code)),
@@ -171,6 +181,7 @@ function expandChoiceType(element: FhirElementDefinition): PropertyModel[] {
     isArray: element.max === "*",
     isChoiceType: true,
     description: element.short,
+    binding,
   }));
 }
 
@@ -250,4 +261,16 @@ function normalizeKind(kind: string): "resource" | "complex-type" | "primitive-t
   if (kind === "complex-type") return "complex-type";
   if (kind === "primitive-type") return "primitive-type";
   return "resource";
+}
+
+const VALID_BINDING_STRENGTHS = new Set(["required", "extensible", "preferred", "example"]);
+
+function extractBinding(element: FhirElementDefinition): BindingModel | undefined {
+  const b = element.binding;
+  if (!b?.strength || !b.valueSet) return undefined;
+  if (!VALID_BINDING_STRENGTHS.has(b.strength)) return undefined;
+  return {
+    strength: b.strength as BindingModel["strength"],
+    valueSet: b.valueSet,
+  };
 }
