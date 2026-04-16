@@ -12,6 +12,7 @@ export const generateCommand = new Command("generate")
   .option("--cache <dir>", "Cache directory for downloaded specs")
   .option("--expand-valuesets", "Generate typed unions from FHIR ValueSet bindings")
   .option("--resolve-codesystems", "Generate CodeSystem namespace objects for IntelliSense")
+  .option("--include-spec", "Emit markdown spec files alongside types for AI/LLM context")
   .action(async (opts) => {
     const resources = opts.resources ? opts.resources.split(",").map((r: string) => r.trim()) : undefined;
 
@@ -24,5 +25,6 @@ export const generateCommand = new Command("generate")
       ig: opts.ig,
       expandValueSets: opts.expandValuesets,
       resolveCodeSystems: opts.resolveCodesystems,
+      includeSpec: opts.includeSpec,
     });
   });
