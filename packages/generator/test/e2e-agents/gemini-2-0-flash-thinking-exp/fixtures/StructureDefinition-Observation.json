@@ -1,0 +1,49 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Observation",
+  "url": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "name": "Observation",
+  "status": "active",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Observation",
+        "path": "Observation"
+      },
+      {
+        "id": "Observation.status",
+        "path": "Observation.status",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/ValueSet/observation-status"
+        }
+      },
+      {
+        "id": "Observation.category",
+        "path": "Observation.category",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
+        }
+      }
+    ]
+  }
+}

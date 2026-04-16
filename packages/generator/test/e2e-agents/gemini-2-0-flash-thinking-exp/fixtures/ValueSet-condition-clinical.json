@@ -1,0 +1,14 @@
+{
+  "resourceType": "ValueSet",
+  "id": "condition-clinical",
+  "url": "http://hl7.org/fhir/ValueSet/condition-clinical",
+  "name": "ClinicalCodes",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/condition-clinical"
+      }
+    ]
+  }
+}

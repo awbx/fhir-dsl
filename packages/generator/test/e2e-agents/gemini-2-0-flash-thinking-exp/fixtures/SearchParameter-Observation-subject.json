@@ -1,0 +1,11 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "Observation-subject",
+  "url": "http://hl7.org/fhir/SearchParameter/Observation-subject",
+  "name": "subject",
+  "status": "active",
+  "code": "subject",
+  "base": ["Observation"],
+  "type": "reference",
+  "expression": "Observation.subject"
+}

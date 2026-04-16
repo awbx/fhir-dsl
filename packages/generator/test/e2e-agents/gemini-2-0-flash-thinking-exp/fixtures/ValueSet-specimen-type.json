@@ -1,0 +1,14 @@
+{
+  "resourceType": "ValueSet",
+  "id": "specimen-type",
+  "url": "http://hl7.org/fhir/ValueSet/specimen-type",
+  "name": "SpecimenType",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/specimen-type"
+      }
+    ]
+  }
+}

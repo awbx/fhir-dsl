@@ -1,0 +1,13 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "observation-category",
+  "url": "http://hl7.org/fhir/observation-category",
+  "name": "ObservationCategoryCodes",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    { "code": "vital-signs", "display": "Vital Signs" },
+    { "code": "imaging", "display": "Imaging" },
+    { "code": "laboratory", "display": "Laboratory" }
+  ]
+}

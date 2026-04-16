@@ -1,0 +1,14 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "encounter-priority",
+  "url": "http://hl7.org/fhir/encounter-priority",
+  "name": "EncounterPriority",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    { "code": "stat", "display": "Stat" },
+    { "code": "emergency", "display": "Emergency" },
+    { "code": "urgent", "display": "Urgent" },
+    { "code": "routine", "display": "Routine" }
+  ]
+}
