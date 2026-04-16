@@ -12,7 +12,7 @@ The current priorities and future direction for fhir-dsl.
 
 What's available today:
 
-- Type-safe search, read, and transaction builders
+- Type-safe search, read, batch, and transaction builders
 - Code generation from FHIR R4, R4B, R5, and R6 StructureDefinitions
 - Implementation Guide support (US Core and custom IGs)
 - Profile-aware queries with type narrowing
@@ -54,11 +54,13 @@ What's available today:
 - **`_has`** -- Reverse chaining for filtering via `.has()` (e.g., `_has:Observation:subject:code=1234`)
 - **Composite parameters** -- Type-safe `.whereComposite()` for multi-value composite search params with typed components (e.g., `code-value-quantity`)
 
-### Developer Experience (Unreleased)
+### Developer Experience (v0.11.0)
 
 - **Batch support** -- Type-safe FHIR batch operations via `.batch()` for non-transactional bundles
 
 ## Planned
+
+The following roadmap items are not implemented yet:
 
 ### FHIR Operations
 
