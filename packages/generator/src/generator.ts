@@ -9,6 +9,7 @@ import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
 import type { SearchParamBindingMap } from "./emitter/search-param-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
+import { emitProfileSpec, emitResourceSpec, emitSpecIndex } from "./emitter/spec-emitter.js";
 import { type BindingTypeMap, emitTerminology } from "./emitter/terminology-emitter.js";
 import type { ProfileModel } from "./model/profile-model.js";
 import type { ResourceModel, ResourceSearchParams } from "./model/resource-model.js";
@@ -50,6 +51,7 @@ export interface GeneratorOptions {
   ig?: string[] | undefined;
   expandValueSets?: boolean | undefined;
   resolveCodeSystems?: boolean | undefined;
+  includeSpec?: boolean | undefined;
 }
 
 export async function generate(options: GeneratorOptions): Promise<void> {
@@ -206,6 +208,17 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     "utf-8",
   );
 
+  // --- Spec markdown (resources) ---
+  if (options.includeSpec) {
+    const specResourcesDir = join(versionDir, "spec", "resources");
+    await mkdir(specResourcesDir, { recursive: true });
+    for (const model of resourceModels) {
+      const fileName = `${toKebabCase(model.name)}.md`;
+      const content = emitResourceSpec(model, filteredSearchParams.get(model.name));
+      await writeFile(join(specResourcesDir, fileName), content, "utf-8");
+    }
+  }
+
   // --- IG Profile Generation ---
   const igPackages = options.ig ?? [];
   const allProfiles: ProfileModel[] = [];
@@ -240,7 +253,25 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       await writeFile(join(profilesDir, "profile-registry.ts"), emitProfileRegistry(allProfiles), "utf-8");
 
       console.info(`Generated ${allProfiles.length} profiles`);
+
+      // --- Spec markdown (profiles) ---
+      if (options.includeSpec) {
+        const specProfilesDir = join(versionDir, "spec", "profiles");
+        await mkdir(specProfilesDir, { recursive: true });
+        for (const profile of allProfiles) {
+          const fileName = `${toKebabCase(profile.name)}.md`;
+          await writeFile(join(specProfilesDir, fileName), emitProfileSpec(profile), "utf-8");
+        }
+      }
     }
+  }
+
+  // --- Spec index ---
+  if (options.includeSpec) {
+    const specDir = join(versionDir, "spec");
+    await mkdir(specDir, { recursive: true });
+    await writeFile(join(specDir, "index.md"), emitSpecIndex(version, resourceModels, allProfiles), "utf-8");
+    console.info(`Generated spec markdown in ${specDir}`);
   }
 
   // Detect subdirectories with index.ts (profiles/, etc.)
