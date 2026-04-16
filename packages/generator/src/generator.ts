@@ -7,6 +7,7 @@ import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-em
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/profile-emitter.js";
 import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
+import type { SearchParamBindingMap } from "./emitter/search-param-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
 import { type BindingTypeMap, emitTerminology } from "./emitter/terminology-emitter.js";
 import type { ProfileModel } from "./model/profile-model.js";
@@ -171,13 +172,39 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     await writeFile(join(resourcesDir, fileName), content, "utf-8");
   }
 
+  // Build search param binding map from resource properties with bindings
+  let searchParamBindingMap: SearchParamBindingMap | undefined;
+  if (bindingTypeMap) {
+    searchParamBindingMap = new Map();
+    for (const model of resourceModels) {
+      for (const prop of model.properties) {
+        if (!prop.binding) continue;
+        let typeName = bindingTypeMap.get(prop.binding.valueSet);
+        if (!typeName) {
+          const bareUrl = prop.binding.valueSet.split("|")[0]!;
+          typeName = bindingTypeMap.get(bareUrl);
+        }
+        if (typeName) {
+          searchParamBindingMap.set(`${model.name}.${prop.name}`, {
+            typeName,
+            strength: prop.binding.strength,
+          });
+        }
+      }
+    }
+  }
+
   // Emit search params
   const filteredSearchParams = new Map<string, ResourceSearchParams>();
   for (const model of resourceModels) {
     const sp = searchParamsMap.get(model.name);
     if (sp) filteredSearchParams.set(model.name, sp);
   }
-  await writeFile(join(versionDir, "search-params.ts"), emitSearchParams(filteredSearchParams), "utf-8");
+  await writeFile(
+    join(versionDir, "search-params.ts"),
+    emitSearchParams(filteredSearchParams, searchParamBindingMap),
+    "utf-8",
+  );
 
   // --- IG Profile Generation ---
   const igPackages = options.ig ?? [];

@@ -3,9 +3,9 @@ export interface StringParam {
   value: string;
 }
 
-export interface TokenParam {
+export interface TokenParam<T extends string = string> {
   type: "token";
-  value: string;
+  value: T;
 }
 
 export interface DateParam {
