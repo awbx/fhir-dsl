@@ -11,7 +11,7 @@ export function evalSubsetting(op: SubsetOp, collection: unknown[], _ctx: EvalCo
 
     case "single":
       if (collection.length > 1) {
-        throw new Error("single() expected at most one element, got " + collection.length);
+        throw new Error(`single() expected at most one element, got ${collection.length}`);
       }
       return collection.length === 1 ? [collection[0]!] : [];
 

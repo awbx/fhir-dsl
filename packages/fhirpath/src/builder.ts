@@ -45,49 +45,6 @@ const NULLARY_FNS: Record<string, { opType: string; compile: (path: string) => s
   descendants: { opType: "descendants", compile: (p) => `${p}.descendants()` },
 };
 
-// --- Set of all known method names (prevents navigation fallthrough) ---
-
-const ALL_METHOD_NAMES = new Set([
-  ...Object.keys(NULLARY_FNS),
-  "compile",
-  "evaluate",
-  "where",
-  "exists",
-  "all",
-  "select",
-  "repeat",
-  "count",
-  "empty",
-  "ofType",
-  "union",
-  "combine",
-  "intersect",
-  "exclude",
-  "subsetOf",
-  "supersetOf",
-  "skip",
-  "take",
-  "indexOf",
-  "substring",
-  "startsWith",
-  "endsWith",
-  "contains",
-  "matches",
-  "replace",
-  "replaceMatches",
-  "length",
-  "log",
-  "power",
-  "round",
-  "toQuantity",
-  "trace",
-  "toFhirString",
-  "iif",
-  "now",
-  "timeOfDay",
-  "today",
-]);
-
 function buildPredicate(callback: (proxy: unknown) => unknown): CompiledPredicate {
   const $this = createPredicateProxy("$this", []);
   const result = callback($this);
