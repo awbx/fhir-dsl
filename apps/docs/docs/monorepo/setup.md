@@ -170,7 +170,7 @@ mkdir packages/my-package
 ```json
 {
   "name": "@fhir-dsl/my-package",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts"

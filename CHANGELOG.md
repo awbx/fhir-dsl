@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-04-16
+
+### Features
+
+- Add streaming documentation and update docs (`304b793`)
+- Add tests for search query streaming (`8962ece`)
+- Add streaming and lazy loading for search queries (`715b296`)
+- Add changelog page to docs site (`017f024`)
+- Add changelog generation from git history (`9f95bb9`)
+
 ## [0.6.1] - 2026-04-16
 
 ### Bug Fixes
