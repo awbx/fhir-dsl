@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2026-04-16
+
+### Features
+
+- Add terminology documentation and update docs (`679d4af`)
+- Add terminology emitter and parameterize resource emitter for bound types (`e293dfe`)
+- Add BindingModel and parse bindings from FHIR StructureDefinitions (`828ae46`)
+- Add @fhir-dsl/terminology package for offline ValueSet/CodeSystem resolution (`6f8df42`)
+
+### Other
+
+- Wire terminology engine in generator and add CLI flags (`c8eec8a`)
+- Extend downloader to fetch expansions.json and collect VS/CS from IGs (`706f582`)
+- Make Coding and CodeableConcept generic with backward-compatible defaults (`55f7d8d`)
+
 ## [0.8.0] - 2026-04-16
 
 ### Features

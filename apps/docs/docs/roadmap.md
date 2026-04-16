@@ -32,14 +32,14 @@ What's available today:
 - **Offline resolution** -- Pre-expanded ValueSets from the FHIR spec are downloaded and cached; no terminology server required
 - **Binding strength awareness** -- Required bindings produce closed unions, extensible bindings use `(string & {})` for autocomplete with fallback, preferred/example bindings are left unconstrained
 
-### Streaming & Lazy Loading (v0.8.0)
+### Streaming & Lazy Loading (v0.9.0)
 
 - **`.stream()`** -- Lazy `AsyncIterable` that yields resources across all pages, automatically following Bundle pagination links
 - **Cancellation** -- `AbortSignal` support via `stream({ signal })` for timeouts and user-initiated cancellation
 - **Memory efficient** -- Processes resources page-by-page without loading full datasets into memory
 - **Type-safe** -- Streaming preserves full type inference including profile-narrowed types
 
-### FHIRPath Expression Builder (v0.8.0)
+### FHIRPath Expression Builder (v0.9.0)
 
 - **`@fhir-dsl/fhirpath`** -- New package: type-safe FHIRPath expression builder with ~85% spec coverage
 - **Expression system** -- Predicate callbacks with `$this` proxy for `where()`, `select()`, `all()`, `exists()`, `iif()`
@@ -47,7 +47,7 @@ What's available today:
 - **`ofType()` narrowing** -- Type-safe polymorphic field handling via extensible `FhirTypeMap`
 - **Compile + evaluate** -- Build FHIRPath strings and evaluate against resources at runtime
 
-### Query Features (v0.8.0)
+### Query Features (v0.9.0)
 
 - **`_revinclude`** -- Reverse include support in search queries via `.revinclude()`
 - **Chained parameters** -- Type-safe chained search via `.whereChained()` (e.g., `subject:Patient.name=Smith`)
