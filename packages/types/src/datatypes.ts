@@ -43,16 +43,16 @@ export interface Extension extends Element {
 
 // --- Complex Datatypes ---
 
-export interface Coding extends Element {
+export interface Coding<T extends string = string> extends Element {
   system?: FhirUri;
   version?: FhirString;
-  code?: FhirCode;
+  code?: FhirCode<T>;
   display?: FhirString;
   userSelected?: FhirBoolean;
 }
 
-export interface CodeableConcept extends Element {
-  coding?: Coding[];
+export interface CodeableConcept<T extends string = string> extends Element {
+  coding?: Coding<T>[];
   text?: FhirString;
 }
 
