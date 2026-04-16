@@ -21,6 +21,13 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'FHIRPath',
+      items: [
+        'fhirpath/overview',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Examples',
       items: [
         'examples/patient',

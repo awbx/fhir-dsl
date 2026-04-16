@@ -59,6 +59,7 @@ for (const patient of result.data) {
 | `@fhir-dsl/cli` | CLI for generating types from FHIR specs |
 | `@fhir-dsl/types` | Base FHIR type definitions |
 | `@fhir-dsl/runtime` | HTTP executor with pagination and error handling |
+| `@fhir-dsl/fhirpath` | Type-safe FHIRPath expression builder |
 | `@fhir-dsl/generator` | Code generation engine |
 | `@fhir-dsl/utils` | Shared utilities |
 

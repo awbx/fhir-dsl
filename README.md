@@ -15,6 +15,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 ## Features
 
 - **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
+- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers ~85% of the official FHIRPath spec including 60+ functions, expression predicates, and operators.
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 - **Immutable builders** — Every query method returns a new builder instance, safe to reuse, fork, and compose.
@@ -37,6 +38,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 | [`@fhir-dsl/cli`](./packages/cli) | CLI for generating types from FHIR specs | Dev dependency — generates types for your project |
 | [`@fhir-dsl/types`](./packages/types) | Base FHIR R4/R5 type definitions | Automatically installed as a dependency of `@fhir-dsl/core` |
 | [`@fhir-dsl/generator`](./packages/generator) | Code generation engine | Only if building custom tooling on top of the generator |
+| [`@fhir-dsl/fhirpath`](./packages/fhirpath) | Type-safe FHIRPath expression builder | When working with FHIRPath expressions |
 | [`@fhir-dsl/utils`](./packages/utils) | Shared utilities | Only if building custom tooling |
 
 For detailed installation instructions, see the [Installation Guide](https://awbx.github.io/fhir-dsl/docs/getting-started/installation).
@@ -127,6 +129,32 @@ const vitals = await fhir
 // result.data is USCoreVitalSignsProfile[] — profile-required fields are non-optional
 ```
 
+### FHIRPath Expressions
+
+```ts
+import { fhirpath } from "@fhir-dsl/fhirpath";
+import type { Patient } from "./fhir/r4";
+
+// Type-safe path navigation with autocomplete
+const expr = fhirpath<Patient>("Patient").name.family;
+expr.compile();              // "Patient.name.family"
+expr.evaluate(somePatient);  // ["Smith", "Doe"]
+
+// Expression predicates with $this
+fhirpath<Patient>("Patient")
+  .name.where($this => $this.use.eq("official")).given
+  .compile();  // "Patient.name.where($this.use = 'official').given"
+
+// Collection operations
+fhirpath<Patient>("Patient").name.first().family.compile();
+fhirpath<Patient>("Patient").name.count().compile();
+fhirpath<Patient>("Patient").name.exists().compile();
+
+// String, math, and conversion functions
+fhirpath<Patient>("Patient").name.family.upper().compile();
+fhirpath<Patient>("Patient").name.family.startsWith("Sm").compile();
+```
+
 ### Transactions
 
 ```ts
@@ -213,6 +241,7 @@ fhir-dsl/
     types/       # FHIR type definitions (generated + hand-written)
     core/        # Query builder DSL - the main user-facing API
     runtime/     # HTTP executor, pagination, error handling
+    fhirpath/    # Type-safe FHIRPath expression builder
     generator/   # Parses StructureDefinitions, emits TypeScript
     cli/         # CLI wrapping the generator
     utils/       # Shared naming/type-mapping utilities
@@ -223,6 +252,7 @@ fhir-dsl/
 ```
 cli -> generator -> utils
 core -> types
+fhirpath -> types
 runtime -> core, types
 ```
 

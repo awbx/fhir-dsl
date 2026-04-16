@@ -22,6 +22,14 @@ What's available today:
 
 ## Recently Added
 
+### FHIRPath Expression Builder (v0.5.0)
+
+- **`@fhir-dsl/fhirpath`** -- New package: type-safe FHIRPath expression builder with ~85% spec coverage
+- **Expression system** -- Predicate callbacks with `$this` proxy for `where()`, `select()`, `all()`, `exists()`, `iif()`
+- **60+ FHIRPath functions** -- Navigation, filtering, subsetting, string, math, conversion, utility, and boolean operators
+- **`ofType()` narrowing** -- Type-safe polymorphic field handling via extensible `FhirTypeMap`
+- **Compile + evaluate** -- Build FHIRPath strings and evaluate against resources at runtime
+
 ### Query Features (v0.5.0)
 
 - **`_revinclude`** -- Reverse include support in search queries via `.revinclude()`

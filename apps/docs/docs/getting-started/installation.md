@@ -54,6 +54,7 @@ npx @fhir-dsl/cli generate --version r4 --out ./src/fhir
 | `@fhir-dsl/runtime` | Always -- provides the HTTP executor |
 | `@fhir-dsl/cli` | Dev dependency -- generates types for your project |
 | `@fhir-dsl/types` | Automatically installed as a dependency of `@fhir-dsl/core` |
+| `@fhir-dsl/fhirpath` | Optional -- for type-safe FHIRPath expression building |
 | `@fhir-dsl/generator` | Only if building custom tooling on top of the generator |
 | `@fhir-dsl/utils` | Only if building custom tooling |
 
