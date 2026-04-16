@@ -207,6 +207,44 @@ Controls pagination:
 .offset(50)   // Skip the first 50 results
 ```
 
+### `select(fields)`
+
+Narrows the returned resources to the given top-level fields. Compiles to FHIR's [`_elements`](https://www.hl7.org/fhir/search.html#elements) search parameter and refines the result type via `Pick`:
+
+```typescript
+const result = await fhir
+  .search("Patient")
+  .where("family", "eq", "Smith")
+  .select(["id", "name", "birthDate"])
+  .execute();
+
+// result.data[0] is typed as:
+// { resourceType: "Patient"; id?: string; name?: HumanName[]; birthDate?: FhirDate }
+```
+
+Behavior:
+
+- Only top-level element names are accepted — FHIR `_elements` does not support nested paths like `"name.given"`.
+- `resourceType` is always preserved in the narrowed type (FHIR servers include it regardless).
+- Calling `.select()` again replaces the previous selection; selections do not accumulate.
+- Omitting `.select()` preserves the full resource in the result type.
+- Per the FHIR spec, servers return *at least* the requested elements — they may return more. The narrowed TypeScript type reflects what you asked for, not what the server is guaranteed to return.
+
+Compiled output:
+
+```typescript
+const query = fhir
+  .search("Patient")
+  .select(["id", "name"])
+  .compile();
+
+// {
+//   method: "GET",
+//   path: "Patient",
+//   params: [{ name: "_elements", value: "id,name" }]
+// }
+```
+
 ### Search Result Type
 
 `execute()` returns a `SearchResult`:

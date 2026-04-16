@@ -1,4 +1,5 @@
 import type { Resource, SearchParam } from "@fhir-dsl/types";
+import type { Prettify } from "./_internal/type-utils.js";
 import type { CompiledQuery } from "./compiled-query.js";
 import type {
   CompositeKeys,
@@ -11,6 +12,17 @@ import type {
   SearchPrefixFor,
   SortDirection,
 } from "./types.js";
+
+// --- Result projection (used by .select()) ---
+
+/**
+ * Narrows a resource type to the picked fields.
+ * `resourceType` is always preserved since FHIR servers include it regardless.
+ * When `Sel` is `never`, the full resource is returned (no projection).
+ */
+export type ApplySelection<R, Sel extends string> = [Sel] extends [never]
+  ? R
+  : Prettify<Pick<R, Extract<Sel | "resourceType", keyof R>>>;
 
 // --- Search Result Types ---
 
@@ -48,26 +60,34 @@ export interface SearchQueryBuilder<
   SP = Record<string, SearchParam>,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
+  Sel extends string = never,
 > {
   where<K extends string & keyof SP>(
     param: K,
     op: SearchPrefixFor<SP[K]>,
     value: SP[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   whereComposite<K extends string & CompositeKeys<SP>>(
     param: K,
     values: CompositeValues<SP[K]>,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   include<K extends string & keyof IncludeFor<S, RT>>(
     param: K,
-  ): SearchQueryBuilder<S, RT, SP, Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never), Prof>;
+  ): SearchQueryBuilder<
+    S,
+    RT,
+    SP,
+    Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never),
+    Prof,
+    Sel
+  >;
 
   revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
     sourceResource: SrcRT,
     param: Param,
-  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof>;
+  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel>;
 
   whereChained<
     RefParam extends string & keyof IncludeFor<S, RT>,
@@ -79,7 +99,7 @@ export interface SearchQueryBuilder<
     targetParam: K,
     op: SearchPrefixFor<SearchParamFor<S, TargetRT>[K]>,
     value: SearchParamFor<S, TargetRT>[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   has<
     SrcRT extends string & keyof RevIncludeFor<S, RT>,
@@ -91,24 +111,36 @@ export interface SearchQueryBuilder<
     searchParam: K,
     op: SearchPrefixFor<SearchParamFor<S, SrcRT>[K]>,
     value: SearchParamFor<S, SrcRT>[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
-  sort(param: string & keyof SP, direction?: SortDirection): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  sort(param: string & keyof SP, direction?: SortDirection): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
-  count(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  count(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
-  offset(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+  offset(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /**
+   * Narrow the returned resources to the given top-level fields.
+   * Compiles to FHIR's `_elements` search parameter and refines the
+   * `execute()` / `stream()` result type via `Pick`.
+   *
+   * Calling `.select()` again replaces the previous selection.
+   * `resourceType` is always implicitly included (servers return it regardless).
+   */
+  select<K extends string & keyof ResolveProfile<S, RT, Prof>>(
+    fields: readonly K[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, K>;
 
   compile(): CompiledQuery;
 
   execute(): Promise<
     SearchResult<
-      ResolveProfile<S, RT, Prof> & Resource,
+      ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
     >
   >;
 
-  stream(options?: StreamOptions): AsyncIterable<ResolveProfile<S, RT, Prof> & Resource>;
+  stream(options?: StreamOptions): AsyncIterable<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource>;
 }
 
 // --- Read Query Builder Interface ---

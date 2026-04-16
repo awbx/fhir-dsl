@@ -263,6 +263,37 @@ const result = await fhir
 Composite parameters are different from using multiple `.where()` calls. Multiple `.where()` calls act as independent filters (AND), while a composite parameter ensures the component values match on the same element within a resource.
 :::
 
+## Projecting Fields
+
+Use `.select()` to request only specific top-level fields. The query compiles to FHIR's [`_elements`](https://www.hl7.org/fhir/search.html#elements) parameter and the result type narrows to match — useful for reducing payload size on mobile or for dashboards that only need a few fields.
+
+```typescript
+const summary = await fhir
+  .search("Patient")
+  .where("active", "eq", "true")
+  .select(["id", "name", "birthDate"])
+  .count(100)
+  .execute();
+
+// summary.data[0] is typed as { resourceType: "Patient"; id?: string; name?: HumanName[]; birthDate?: FhirDate }
+```
+
+Only top-level element names are accepted — `_elements` does not support nested paths. Calling `.select()` twice replaces the previous selection.
+
+```typescript
+// Combine with includes — projection applies only to the primary resource,
+// included resources are returned in full.
+const { data, included } = await fhir
+  .search("Patient")
+  .select(["id", "name"])
+  .include("general-practitioner")
+  .execute();
+```
+
+:::note
+Per the FHIR spec, servers return *at least* the requested elements and may return more. The narrowed TypeScript type reflects what you asked for, not what the server is guaranteed to return.
+:::
+
 ## Composing Reusable Queries
 
 Because builders are immutable, you can create reusable base queries:

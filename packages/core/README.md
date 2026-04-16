@@ -77,6 +77,22 @@ const result = await fhir
 
 The `include` parameter is typed to only accept valid include paths for the resource, and the included resource type is automatically inferred.
 
+### Narrow returned fields
+
+Use `.select()` to request only specific top-level fields. The result type narrows to match, and the query compiles to FHIR's `_elements` search parameter:
+
+```ts
+const result = await fhir
+  .search("Patient")
+  .where("family", "eq", "Smith")
+  .select(["id", "name", "birthDate"])
+  .execute();
+
+// result.data[0]: { resourceType: "Patient"; id?: string; name?: HumanName[]; birthDate?: FhirDate }
+```
+
+Only top-level element names are accepted (matches the `_elements` spec). `resourceType` is always preserved. Calling `.select()` twice replaces the earlier selection.
+
 ### Profile-aware queries
 
 ```ts

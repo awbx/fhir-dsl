@@ -1,6 +1,13 @@
 import type { Bundle, Resource } from "@fhir-dsl/types";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
-import type { BundleLink, ResolveIncluded, SearchQueryBuilder, SearchResult, StreamOptions } from "./query-builder.js";
+import type {
+  ApplySelection,
+  BundleLink,
+  ResolveIncluded,
+  SearchQueryBuilder,
+  SearchResult,
+  StreamOptions,
+} from "./query-builder.js";
 import type {
   CompositeKeys,
   CompositeValues,
@@ -24,6 +31,7 @@ interface QueryState {
   count?: number | undefined;
   offset?: number | undefined;
   profile?: string | undefined;
+  fieldSelection?: readonly string[] | undefined;
 }
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
@@ -37,7 +45,8 @@ export class SearchQueryBuilderImpl<
   SP,
   Inc extends string = never,
   Prof extends string | undefined = undefined,
-> implements SearchQueryBuilder<S, RT, SP, Inc, Prof>
+  Sel extends string = never,
+> implements SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>
 {
   readonly #state: QueryState;
   readonly #executor: Executor;
@@ -66,8 +75,8 @@ export class SearchQueryBuilderImpl<
     param: K,
     op: SearchPrefixFor<SP[K]>,
     value: SP[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -89,9 +98,9 @@ export class SearchQueryBuilderImpl<
   whereComposite<K extends string & CompositeKeys<SP>>(
     param: K,
     values: CompositeValues<SP[K]>,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
     const compositeValue = Object.values(values as Record<string, string | number>).join("$");
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -111,7 +120,14 @@ export class SearchQueryBuilderImpl<
 
   include<K extends string & keyof IncludeFor<S, RT>>(
     param: K,
-  ): SearchQueryBuilder<S, RT, SP, Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never), Prof> {
+  ): SearchQueryBuilder<
+    S,
+    RT,
+    SP,
+    Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never),
+    Prof,
+    Sel
+  > {
     return new SearchQueryBuilderImpl(
       this.#state.resourceType,
       this.#executor,
@@ -127,7 +143,7 @@ export class SearchQueryBuilderImpl<
   revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
     sourceResource: SrcRT,
     param: Param,
-  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof> {
+  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel> {
     return new SearchQueryBuilderImpl(
       this.#state.resourceType,
       this.#executor,
@@ -150,9 +166,9 @@ export class SearchQueryBuilderImpl<
     targetParam: K,
     op: SearchPrefixFor<SearchParamFor<S, TargetRT>[K]>,
     value: SearchParamFor<S, TargetRT>[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
     const name = `${refParam}:${targetResource}.${targetParam}`;
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -181,9 +197,9 @@ export class SearchQueryBuilderImpl<
     searchParam: K,
     op: SearchPrefixFor<SearchParamFor<S, SrcRT>[K]>,
     value: SearchParamFor<S, SrcRT>[K] extends { value: infer V } ? V : string,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
     const name = `_has:${sourceResource}:${refParam}:${searchParam}`;
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -202,8 +218,8 @@ export class SearchQueryBuilderImpl<
     );
   }
 
-  sort(param: string & keyof SP, direction: SortDirection = "asc"): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+  sort(param: string & keyof SP, direction: SortDirection = "asc"): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -215,8 +231,8 @@ export class SearchQueryBuilderImpl<
     );
   }
 
-  count(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+  count(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
@@ -228,13 +244,28 @@ export class SearchQueryBuilderImpl<
     );
   }
 
-  offset(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
-    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+  offset(n: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
       {
         ...this.#state,
         offset: n,
+      },
+      undefined,
+      this.#urlExecutor,
+    );
+  }
+
+  select<K extends string & keyof ResolveProfile<S, RT, Prof>>(
+    fields: readonly K[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, K> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, K>(
+      this.#state.resourceType,
+      this.#executor,
+      {
+        ...this.#state,
+        fieldSelection: fields,
       },
       undefined,
       this.#urlExecutor,
@@ -275,6 +306,10 @@ export class SearchQueryBuilderImpl<
       params.push({ name: "_offset", value: this.#state.offset });
     }
 
+    if (this.#state.fieldSelection && this.#state.fieldSelection.length > 0) {
+      params.push({ name: "_elements", value: this.#state.fieldSelection.join(",") });
+    }
+
     return {
       method: "GET",
       path: this.#state.resourceType,
@@ -284,7 +319,7 @@ export class SearchQueryBuilderImpl<
 
   async execute(): Promise<
     SearchResult<
-      ResolveProfile<S, RT, Prof> & Resource,
+      ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
     >
   > {
@@ -293,7 +328,8 @@ export class SearchQueryBuilderImpl<
 
     const entries = bundle.entry ?? [];
 
-    const data: Array<ResolveProfile<S, RT, Prof> & Resource> = [];
+    type PrimaryType = ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource;
+    const data: PrimaryType[] = [];
     const included: Resource[] = [];
 
     for (const entry of entries) {
@@ -301,16 +337,13 @@ export class SearchQueryBuilderImpl<
       if (entry.search?.mode === "include") {
         included.push(entry.resource);
       } else {
-        data.push(entry.resource as ResolveProfile<S, RT, Prof> & Resource);
+        data.push(entry.resource as PrimaryType);
       }
     }
 
     const links: BundleLink[] | undefined = bundle.link;
 
-    type ResultType = SearchResult<
-      ResolveProfile<S, RT, Prof> & Resource,
-      [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
-    >;
+    type ResultType = SearchResult<PrimaryType, [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource>;
 
     return {
       data,
@@ -321,8 +354,8 @@ export class SearchQueryBuilderImpl<
     } as ResultType;
   }
 
-  async *stream(options?: StreamOptions): AsyncIterable<ResolveProfile<S, RT, Prof> & Resource> {
-    type R = ResolveProfile<S, RT, Prof> & Resource;
+  async *stream(options?: StreamOptions): AsyncIterable<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource> {
+    type R = ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource;
 
     const query = this.compile();
     let bundle = (await this.#executor(query)) as Bundle;
