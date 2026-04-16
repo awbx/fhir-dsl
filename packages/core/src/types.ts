@@ -87,6 +87,23 @@ export type SearchPrefixFor<P> = P extends { type: "date" }
               ? UriModifier
               : "eq";
 
+// --- Composite parameter helpers ---
+
+/** Extract keys from SP whose param type is "composite" */
+export type CompositeKeys<SP> = {
+  [K in keyof SP]: SP[K] extends { type: "composite" } ? K : never;
+}[keyof SP];
+
+/** Extract the component record from a composite param */
+export type CompositeComponents<P> = P extends { type: "composite"; components: infer C } ? C : never;
+
+/** Map composite component params to their value types */
+export type CompositeValues<P> = P extends { type: "composite"; components: infer C }
+  ? C extends Record<string, { type: string; value: string | number }>
+    ? { [K in keyof C]: C[K]["value"] }
+    : never
+  : never;
+
 // --- Extract value type from a search param ---
 
 export type ParamValue<P extends SearchParam> = P["value"];

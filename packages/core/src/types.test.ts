@@ -1,6 +1,9 @@
 import type { SearchParam } from "@fhir-dsl/types";
 import { describe, expectTypeOf, it } from "vitest";
 import type {
+  CompositeComponents,
+  CompositeKeys,
+  CompositeValues,
   DatePrefix,
   IncludeFor,
   NumberPrefix,
@@ -35,6 +38,14 @@ type TestSchema = {
       code: { type: "token"; value: string };
       value_quantity: { type: "quantity"; value: string };
       _count: { type: "number"; value: number | string };
+      "code-value-quantity": {
+        type: "composite";
+        value: string;
+        components: {
+          code: { type: "token"; value: string };
+          "value-quantity": { type: "quantity"; value: string };
+        };
+      };
     };
   };
   includes: {
@@ -171,6 +182,52 @@ describe("type-level tests", () => {
 
     it("falls back to eq for unknown param type", () => {
       expectTypeOf<SearchPrefixFor<{ type: "composite" }>>().toEqualTypeOf<"eq">();
+    });
+  });
+
+  describe("CompositeKeys", () => {
+    it("extracts composite param keys", () => {
+      type Result = CompositeKeys<TestSchema["searchParams"]["Observation"]>;
+      expectTypeOf<Result>().toEqualTypeOf<"code-value-quantity">();
+    });
+
+    it("returns never when no composite params exist", () => {
+      type Result = CompositeKeys<TestSchema["searchParams"]["Patient"]>;
+      expectTypeOf<Result>().toBeNever();
+    });
+  });
+
+  describe("CompositeComponents", () => {
+    it("extracts component types from a composite param", () => {
+      type Param = TestSchema["searchParams"]["Observation"]["code-value-quantity"];
+      type Result = CompositeComponents<Param>;
+      expectTypeOf<Result>().toEqualTypeOf<{
+        code: { type: "token"; value: string };
+        "value-quantity": { type: "quantity"; value: string };
+      }>();
+    });
+
+    it("returns never for non-composite param", () => {
+      type Param = TestSchema["searchParams"]["Observation"]["code"];
+      type Result = CompositeComponents<Param>;
+      expectTypeOf<Result>().toBeNever();
+    });
+  });
+
+  describe("CompositeValues", () => {
+    it("maps composite components to their value types", () => {
+      type Param = TestSchema["searchParams"]["Observation"]["code-value-quantity"];
+      type Result = CompositeValues<Param>;
+      expectTypeOf<Result>().toEqualTypeOf<{
+        code: string;
+        "value-quantity": string;
+      }>();
+    });
+
+    it("returns never for non-composite param", () => {
+      type Param = TestSchema["searchParams"]["Observation"]["code"];
+      type Result = CompositeValues<Param>;
+      expectTypeOf<Result>().toBeNever();
     });
   });
 

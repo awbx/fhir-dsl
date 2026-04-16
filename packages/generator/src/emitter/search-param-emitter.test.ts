@@ -58,6 +58,48 @@ describe("emitSearchParams", () => {
     expect(birthdateIdx).toBeLessThan(nameIdx);
   });
 
+  it("generates typed CompositeParam with component info", () => {
+    const params = new Map([
+      [
+        "Observation",
+        {
+          params: [
+            {
+              code: "code-value-quantity",
+              type: "composite",
+              components: [
+                { code: "code", type: "token" },
+                { code: "value-quantity", type: "quantity" },
+              ],
+            },
+          ],
+        },
+      ],
+    ]);
+
+    const output = emitSearchParams(params as any);
+
+    expect(output).toContain(
+      '"code-value-quantity": CompositeParam<{ "code": TokenParam; "value-quantity": QuantityParam }>',
+    );
+  });
+
+  it("falls back to plain CompositeParam when no components", () => {
+    const params = new Map([
+      [
+        "Test",
+        {
+          params: [{ code: "my-composite", type: "composite" }],
+        },
+      ],
+    ]);
+
+    const output = emitSearchParams(params as any);
+
+    expect(output).toContain('"my-composite": CompositeParam;');
+    expect(output).not.toContain("CompositeParam<");
+  });
+
   it("maps all search param types correctly", () => {
     const params = new Map([
       [

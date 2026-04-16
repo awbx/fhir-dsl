@@ -17,6 +17,14 @@ type TestSchema = {
       code: { type: "token"; value: string };
       date: { type: "date"; value: string };
       subject: { type: "reference"; value: string };
+      "code-value-quantity": {
+        type: "composite";
+        value: string;
+        components: {
+          code: { type: "token"; value: string };
+          "value-quantity": { type: "quantity"; value: string };
+        };
+      };
     };
   };
   includes: {
@@ -241,6 +249,46 @@ describe("SearchQueryBuilder", () => {
         prefix: "ge",
         value: "2024-01-01",
       });
+    });
+  });
+
+  describe("whereComposite", () => {
+    it("compiles composite parameter with $-separated values", () => {
+      const builder = new SearchQueryBuilderImpl<TestSchema, "Observation", TestSchema["searchParams"]["Observation"]>(
+        "Observation",
+        noopExecutor,
+      );
+
+      const query = builder
+        .whereComposite("code-value-quantity", {
+          code: "http://loinc.org|8480-6",
+          "value-quantity": "60",
+        })
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "code-value-quantity",
+        value: "http://loinc.org|8480-6$60",
+      });
+    });
+
+    it("combines composite with regular where clauses", () => {
+      const builder = new SearchQueryBuilderImpl<TestSchema, "Observation", TestSchema["searchParams"]["Observation"]>(
+        "Observation",
+        noopExecutor,
+      );
+
+      const query = builder
+        .where("date", "ge", "2024-01-01")
+        .whereComposite("code-value-quantity", {
+          code: "http://loinc.org|8480-6",
+          "value-quantity": "60",
+        })
+        .compile();
+
+      expect(query.params).toHaveLength(2);
+      expect(query.params[0]).toEqual({ name: "date", prefix: "ge", value: "2024-01-01" });
+      expect(query.params[1]).toEqual({ name: "code-value-quantity", value: "http://loinc.org|8480-6$60" });
     });
   });
 

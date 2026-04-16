@@ -20,8 +20,13 @@ export function emitSearchParams(allParams: Map<string, ResourceSearchParams>): 
 
     const sortedParams = [...params.params].sort((a, b) => a.code.localeCompare(b.code));
     for (const param of sortedParams) {
-      const tsType = searchParamTypeToTs(param.type);
-      lines.push(`  "${param.code}": ${tsType};`);
+      if (param.type === "composite" && param.components?.length) {
+        const componentEntries = param.components.map((c) => `"${c.code}": ${searchParamTypeToTs(c.type)}`).join("; ");
+        lines.push(`  "${param.code}": CompositeParam<{ ${componentEntries} }>;`);
+      } else {
+        const tsType = searchParamTypeToTs(param.type);
+        lines.push(`  "${param.code}": ${tsType};`);
+      }
     }
 
     lines.push("}");
@@ -67,9 +72,10 @@ export interface UriParam {
   value: string;
 }
 
-export interface CompositeParam {
+export interface CompositeParam<C extends Record<string, { type: string; value: string | number }> = Record<string, { type: string; value: string | number }>> {
   type: "composite";
   value: string;
+  components: C;
 }
 
 export interface SpecialParam {

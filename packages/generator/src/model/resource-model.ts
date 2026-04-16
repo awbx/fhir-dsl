@@ -29,6 +29,13 @@ export interface BackboneElementModel {
   properties: PropertyModel[];
 }
 
+export interface CompositeComponent {
+  /** The code of the component search parameter (e.g. "code", "value-quantity") */
+  code: string;
+  /** The FHIR search param type of the component (e.g. "token", "quantity") */
+  type: string;
+}
+
 export interface SearchParamModel {
   name: string;
   code: string;
@@ -36,6 +43,8 @@ export interface SearchParamModel {
   description?: string | undefined;
   expression?: string | undefined;
   targets?: string[] | undefined;
+  /** For composite params, the ordered list of component search params */
+  components?: CompositeComponent[] | undefined;
 }
 
 export interface ResourceSearchParams {

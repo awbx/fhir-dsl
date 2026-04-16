@@ -89,6 +89,78 @@ describe("parseSearchParameters", () => {
     expect(result.size).toBe(0);
   });
 
+  it("resolves composite param components from definitions", () => {
+    const params = [
+      {
+        resourceType: "SearchParameter" as const,
+        url: "http://hl7.org/fhir/SearchParameter/Observation-code",
+        name: "code",
+        code: "code",
+        base: ["Observation"],
+        type: "token",
+      },
+      {
+        resourceType: "SearchParameter" as const,
+        url: "http://hl7.org/fhir/SearchParameter/Observation-value-quantity",
+        name: "value-quantity",
+        code: "value-quantity",
+        base: ["Observation"],
+        type: "quantity",
+      },
+      {
+        resourceType: "SearchParameter" as const,
+        url: "http://hl7.org/fhir/SearchParameter/Observation-code-value-quantity",
+        name: "code-value-quantity",
+        code: "code-value-quantity",
+        base: ["Observation"],
+        type: "composite",
+        component: [
+          {
+            definition: "http://hl7.org/fhir/SearchParameter/Observation-code",
+            expression: "code",
+          },
+          {
+            definition: "http://hl7.org/fhir/SearchParameter/Observation-value-quantity",
+            expression: "value.ofType(Quantity)",
+          },
+        ],
+      },
+    ];
+
+    const result = parseSearchParameters(params);
+    const composite = result.get("Observation")!.params.find((p) => p.code === "code-value-quantity")!;
+
+    expect(composite.type).toBe("composite");
+    expect(composite.components).toEqual([
+      { code: "code", type: "token" },
+      { code: "value-quantity", type: "quantity" },
+    ]);
+  });
+
+  it("leaves components undefined when definitions cannot be resolved", () => {
+    const params = [
+      {
+        resourceType: "SearchParameter" as const,
+        url: "http://hl7.org/fhir/SearchParameter/Observation-code-value-quantity",
+        name: "code-value-quantity",
+        code: "code-value-quantity",
+        base: ["Observation"],
+        type: "composite",
+        component: [
+          {
+            definition: "http://hl7.org/fhir/SearchParameter/nonexistent",
+            expression: "code",
+          },
+        ],
+      },
+    ];
+
+    const result = parseSearchParameters(params);
+    const composite = result.get("Observation")!.params.find((p) => p.code === "code-value-quantity")!;
+
+    expect(composite.components).toBeUndefined();
+  });
+
   it("accumulates multiple params for the same resource", () => {
     const params = [
       {

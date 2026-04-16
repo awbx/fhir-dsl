@@ -2,6 +2,8 @@ import type { Bundle, Resource } from "@fhir-dsl/types";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import type { BundleLink, ResolveIncluded, SearchQueryBuilder, SearchResult, StreamOptions } from "./query-builder.js";
 import type {
+  CompositeKeys,
+  CompositeValues,
   FhirSchema,
   IncludeFor,
   ResolveProfile,
@@ -76,6 +78,29 @@ export class SearchQueryBuilderImpl<
             name: param,
             prefix: op === "eq" ? undefined : (op as string),
             value: value as string | number,
+          },
+        ],
+      },
+      undefined,
+      this.#urlExecutor,
+    );
+  }
+
+  whereComposite<K extends string & CompositeKeys<SP>>(
+    param: K,
+    values: CompositeValues<SP[K]>,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof> {
+    const compositeValue = Object.values(values as Record<string, string | number>).join("$");
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof>(
+      this.#state.resourceType,
+      this.#executor,
+      {
+        ...this.#state,
+        params: [
+          ...this.#state.params,
+          {
+            name: param,
+            value: compositeValue,
           },
         ],
       },

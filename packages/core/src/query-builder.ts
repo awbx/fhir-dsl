@@ -1,6 +1,8 @@
 import type { Resource, SearchParam } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import type {
+  CompositeKeys,
+  CompositeValues,
   FhirSchema,
   IncludeFor,
   ResolveProfile,
@@ -51,6 +53,11 @@ export interface SearchQueryBuilder<
     param: K,
     op: SearchPrefixFor<SP[K]>,
     value: SP[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
+
+  whereComposite<K extends string & CompositeKeys<SP>>(
+    param: K,
+    values: CompositeValues<SP[K]>,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof>;
 
   include<K extends string & keyof IncludeFor<S, RT>>(
