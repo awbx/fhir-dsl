@@ -51,6 +51,18 @@ fhir-gen generate \
   --out ./src/fhir
 ```
 
+### Emit markdown spec for AI assistants
+
+```bash
+fhir-gen generate \
+  --version r4 \
+  --resources Patient,Observation \
+  --include-spec \
+  --out ./src/fhir
+```
+
+Writes a parallel `spec/` tree with one markdown file per resource (and per profile when `--ig` is used), plus an `index.md`. Intended as context for AI coding assistants: they get the properties table, cardinality, terminology bindings, and search parameters in a format that's easy to embed or attach.
+
 ## Commands
 
 ### `fhir-gen generate`
@@ -65,6 +77,9 @@ Generate TypeScript types from FHIR specification.
 | `--resources <list>` | No | all | Comma-separated resource names to generate |
 | `--src <path>` | No | - | Local path to FHIR definitions (skips download) |
 | `--cache <dir>` | No | - | Cache directory for downloaded specs |
+| `--expand-valuesets` | No | `false` | Generate typed unions from FHIR ValueSet bindings |
+| `--resolve-codesystems` | No | `false` | Generate CodeSystem namespace objects for IntelliSense |
+| `--include-spec` | No | `false` | Emit markdown spec files alongside types (for AI/LLM context) |
 
 ## What gets generated
 
@@ -83,6 +98,10 @@ out/
     uscore-patient-profile.ts
     uscore-vital-signs-profile.ts
     ...
+  spec/              # (when --include-spec is used)
+    index.md
+    resources/*.md
+    profiles/*.md    # (when --ig is also used)
   client.ts          # Pre-configured FhirClient type
 ```
 

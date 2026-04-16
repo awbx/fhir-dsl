@@ -24,6 +24,19 @@ await generate({
 });
 ```
 
+### Emit markdown spec alongside types
+
+Pass `includeSpec: true` to write a parallel `spec/` tree (`resources/*.md`, `profiles/*.md`, `index.md`) summarizing every emitted resource. Built from the same `StructureDefinition` data used for code generation — no extra network calls — and intended as context for AI assistants working against the generated types.
+
+```ts
+await generate({
+  version: "r4",
+  outDir: "./src/fhir",
+  resources: ["Patient", "Observation"],
+  includeSpec: true,
+});
+```
+
 ### Load and parse FHIR specs
 
 ```ts
@@ -60,6 +73,7 @@ out/
   search-params.ts   # Typed search parameters per resource
   resources/         # One file per resource
   profiles/          # One file per profile (when IGs are included)
+  spec/              # Markdown spec files (when includeSpec: true)
   client.ts          # Pre-configured FhirClient type
 ```
 

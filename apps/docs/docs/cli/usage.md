@@ -43,6 +43,7 @@ fhir-gen generate [options]
 | `--cache <dir>` | Cache directory for downloaded specs | No |
 | `--expand-valuesets` | Generate typed unions from FHIR ValueSet bindings | No |
 | `--resolve-codesystems` | Generate CodeSystem namespace objects for IntelliSense | No |
+| `--include-spec` | Emit markdown spec files alongside types (for AI/LLM context) | No |
 
 ## Examples
 
@@ -94,6 +95,36 @@ fhir-gen generate \
 
 This generates a `terminology/` directory with literal union types (e.g., `AdministrativeGender = "male" | "female" | "other" | "unknown"`) and parameterizes bound fields like `Patient.gender` as `FhirCode<AdministrativeGender>`. See [Terminology Engine](/docs/guides/terminology) for details.
 
+### With Markdown Spec (for AI assistants)
+
+Emit a parallel tree of markdown files summarizing every generated resource and profile:
+
+```bash
+fhir-gen generate \
+  --version r4 \
+  --resources Patient,Observation \
+  --include-spec \
+  --out ./src/fhir
+```
+
+This writes `<out>/<version>/spec/` alongside the TypeScript output:
+
+```
+src/fhir/r4/spec/
+  index.md                    # Linked index of every resource + profile
+  resources/
+    patient.md                # Description, properties table, backbone elements, search params
+    observation.md
+    ...
+  profiles/                   # Only when --ig is used
+    uscore-patient.md         # Same shape, listing only constrained deltas vs. base
+    ...
+```
+
+Each resource file contains the resource description, a properties table with cardinality / type / terminology binding / description for every field, nested tables for each backbone element, and a table of search parameters. Intended as context for AI coding assistants working against the generated types — point the tool at `spec/` (or attach `spec/index.md`) so it can reason about FHIR semantics, not just TypeScript shapes.
+
+Built purely from data the generator already parses — no extra network calls, works offline with `--src`, and respects `--resources` so the spec stays in lockstep with the emitted types.
+
 ### Using Local Definitions
 
 If you have FHIR StructureDefinitions locally (e.g., for offline builds):
@@ -143,6 +174,14 @@ src/fhir/
       ...
       index.ts
       profile-registry.ts
+    spec/                   # Only when --include-spec is used
+      index.md
+      resources/
+        patient.md
+        ...
+      profiles/             # Only when --ig is also used
+        uscore-patient.md
+        ...
 ```
 
 ### Key Generated Files
