@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-04-16
+
+### Features
+
+- Add e2e test suite for terminology engine (`7a88af0`)
+
 ## [0.9.2] - 2026-04-16
 
 ### Features
