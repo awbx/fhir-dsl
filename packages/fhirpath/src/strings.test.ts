@@ -1,17 +1,15 @@
-import type { Resource } from "@fhir-dsl/types";
 import { describe, expect, it } from "vitest";
 import { fhirpath } from "./builder.js";
+import type { TestPatient } from "./test-types.js";
 
-type AnyResource = Resource;
-
-const patient = {
+const patient: TestPatient = {
   resourceType: "Patient",
   name: [{ use: "official", family: "Smith", given: ["John", "Michael"] }],
   birthDate: "1990-01-15",
 };
 
-function fp(resourceType = "Patient") {
-  return fhirpath<AnyResource>(resourceType);
+function fp() {
+  return fhirpath<TestPatient>("Patient");
 }
 
 describe("string functions", () => {

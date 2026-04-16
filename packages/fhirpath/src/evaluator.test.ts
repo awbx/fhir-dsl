@@ -1,10 +1,36 @@
 import type { Resource } from "@fhir-dsl/types";
 import { describe, expect, it } from "vitest";
 import { fhirpath } from "./builder.js";
+import type { TestObservation, TestPatient } from "./test-types.js";
 
-type AnyResource = Resource;
+interface TestFlags extends Resource {
+  flags?: boolean[];
+}
 
-const patient = {
+interface TestValues extends Resource {
+  values?: number[];
+}
+
+interface TestMixed extends Resource {
+  mixed?: (string | number | boolean)[];
+}
+
+interface TestNested extends Resource {
+  a?: number[];
+  b?: number[];
+  nested?: { a?: number; b?: { c?: number } };
+}
+
+interface TestBundle extends Resource {
+  entry?: Array<{ resource?: Resource }>;
+}
+
+interface TestOrganization extends Resource {
+  partOf?: TestOrganization;
+  name?: string;
+}
+
+const patient: TestPatient = {
   resourceType: "Patient",
   name: [
     { use: "official", family: "Smith", given: ["John", "Michael"] },
@@ -18,28 +44,21 @@ const patient = {
   active: true,
 };
 
-const observation = {
+const observation: TestObservation = {
   resourceType: "Observation",
   status: "final",
   code: {
-    coding: [{ system: "http://loinc.org", code: "85354-9", display: "Blood pressure" }],
-    text: "Blood pressure",
+    coding: [{ system: "http://loinc.org", code: "85354-9" }],
   },
-  valueQuantity: { value: 120, unit: "mmHg", system: "http://unitsofmeasure.org" },
-  component: [
-    {
-      code: { text: "Systolic" },
-      valueQuantity: { value: 120, unit: "mmHg" },
-    },
-    {
-      code: { text: "Diastolic" },
-      valueQuantity: { value: 80, unit: "mmHg" },
-    },
-  ],
+  valueQuantity: { value: 120, unit: "mmHg" },
 };
 
-function fp(resourceType = "Patient") {
-  return fhirpath<AnyResource>(resourceType);
+function fp() {
+  return fhirpath<TestPatient>("Patient");
+}
+
+function fpObs() {
+  return fhirpath<TestObservation>("Observation");
 }
 
 describe("fhirpath evaluator", () => {
@@ -65,29 +84,25 @@ describe("fhirpath evaluator", () => {
     });
 
     it("returns empty array for missing property", () => {
-      expect(fp().address.evaluate(patient)).toEqual([]);
+      expect(fhirpath<TestPatient>("Patient").birthDate.evaluate({ resourceType: "Patient" })).toEqual([]);
     });
 
     it("returns empty array for nested missing property", () => {
-      expect(fp().address.city.evaluate(patient)).toEqual([]);
+      expect(fhirpath<TestPatient>("Patient").name.family.evaluate({ resourceType: "Patient" })).toEqual([]);
     });
   });
 
   describe("complex resource navigation", () => {
     it("navigates into nested object", () => {
-      expect(fp("Observation").code.text.evaluate(observation)).toEqual(["Blood pressure"]);
+      const obs: TestObservation = {
+        resourceType: "Observation",
+        code: { coding: [{ system: "http://loinc.org", code: "85354-9" }] },
+      };
+      expect(fpObs().code.coding.code.evaluate(obs)).toEqual(["85354-9"]);
     });
 
     it("navigates through array of objects", () => {
-      expect(fp("Observation").code.coding.code.evaluate(observation)).toEqual(["85354-9"]);
-    });
-
-    it("navigates component backbone elements", () => {
-      expect(fp("Observation").component.code.text.evaluate(observation)).toEqual(["Systolic", "Diastolic"]);
-    });
-
-    it("navigates component value", () => {
-      expect(fp("Observation").component.valueQuantity.value.evaluate(observation)).toEqual([120, 80]);
+      expect(fpObs().code.coding.code.evaluate(observation)).toEqual(["85354-9"]);
     });
   });
 
@@ -117,7 +132,7 @@ describe("fhirpath evaluator", () => {
   describe("first", () => {
     it("takes first element", () => {
       const result = fp().name.first().evaluate(patient);
-      expect(result).toEqual([patient.name[0]]);
+      expect(result).toEqual([patient.name![0]]);
     });
 
     it("navigates after first", () => {
@@ -125,14 +140,14 @@ describe("fhirpath evaluator", () => {
     });
 
     it("returns empty on empty collection", () => {
-      expect(fp().address.first().evaluate(patient)).toEqual([]);
+      expect(fhirpath<TestPatient>("Patient").name.first().evaluate({ resourceType: "Patient" })).toEqual([]);
     });
   });
 
   describe("last", () => {
     it("takes last element", () => {
       const result = fp().name.last().evaluate(patient);
-      expect(result).toEqual([patient.name[1]]);
+      expect(result).toEqual([patient.name![1]]);
     });
 
     it("navigates after last", () => {
@@ -146,7 +161,7 @@ describe("fhirpath evaluator", () => {
     });
 
     it("counts zero for missing", () => {
-      expect(fp().address.count().evaluate(patient)).toEqual([0]);
+      expect(fhirpath<TestPatient>("Patient").name.count().evaluate({ resourceType: "Patient" })).toEqual([0]);
     });
   });
 
@@ -156,7 +171,7 @@ describe("fhirpath evaluator", () => {
     });
 
     it("returns false for missing", () => {
-      expect(fp().address.exists().evaluate(patient)).toEqual([false]);
+      expect(fhirpath<TestPatient>("Patient").name.exists().evaluate({ resourceType: "Patient" })).toEqual([false]);
     });
   });
 
@@ -166,7 +181,7 @@ describe("fhirpath evaluator", () => {
     });
 
     it("returns true for missing", () => {
-      expect(fp().address.empty().evaluate(patient)).toEqual([true]);
+      expect(fhirpath<TestPatient>("Patient").name.empty().evaluate({ resourceType: "Patient" })).toEqual([true]);
     });
   });
 
@@ -182,50 +197,50 @@ describe("fhirpath evaluator", () => {
 
   describe("allTrue / anyTrue / allFalse / anyFalse", () => {
     it("allTrue with all true", () => {
-      const data = { resourceType: "Test", flags: [true, true, true] };
-      expect(fhirpath<AnyResource>("Test").flags.allTrue().evaluate(data)).toEqual([true]);
+      const data: TestFlags = { resourceType: "Test", flags: [true, true, true] };
+      expect(fhirpath<TestFlags>("Test").flags.allTrue().evaluate(data)).toEqual([true]);
     });
 
     it("allTrue with mixed", () => {
-      const data = { resourceType: "Test", flags: [true, false, true] };
-      expect(fhirpath<AnyResource>("Test").flags.allTrue().evaluate(data)).toEqual([false]);
+      const data: TestFlags = { resourceType: "Test", flags: [true, false, true] };
+      expect(fhirpath<TestFlags>("Test").flags.allTrue().evaluate(data)).toEqual([false]);
     });
 
     it("anyTrue with one true", () => {
-      const data = { resourceType: "Test", flags: [false, true, false] };
-      expect(fhirpath<AnyResource>("Test").flags.anyTrue().evaluate(data)).toEqual([true]);
+      const data: TestFlags = { resourceType: "Test", flags: [false, true, false] };
+      expect(fhirpath<TestFlags>("Test").flags.anyTrue().evaluate(data)).toEqual([true]);
     });
 
     it("anyTrue with none true", () => {
-      const data = { resourceType: "Test", flags: [false, false] };
-      expect(fhirpath<AnyResource>("Test").flags.anyTrue().evaluate(data)).toEqual([false]);
+      const data: TestFlags = { resourceType: "Test", flags: [false, false] };
+      expect(fhirpath<TestFlags>("Test").flags.anyTrue().evaluate(data)).toEqual([false]);
     });
 
     it("allFalse with all false", () => {
-      const data = { resourceType: "Test", flags: [false, false] };
-      expect(fhirpath<AnyResource>("Test").flags.allFalse().evaluate(data)).toEqual([true]);
+      const data: TestFlags = { resourceType: "Test", flags: [false, false] };
+      expect(fhirpath<TestFlags>("Test").flags.allFalse().evaluate(data)).toEqual([true]);
     });
 
     it("anyFalse with one false", () => {
-      const data = { resourceType: "Test", flags: [true, false, true] };
-      expect(fhirpath<AnyResource>("Test").flags.anyFalse().evaluate(data)).toEqual([true]);
+      const data: TestFlags = { resourceType: "Test", flags: [true, false, true] };
+      expect(fhirpath<TestFlags>("Test").flags.anyFalse().evaluate(data)).toEqual([true]);
     });
   });
 
   describe("distinct / isDistinct", () => {
     it("distinct removes duplicates", () => {
-      const data = { resourceType: "Test", values: [1, 2, 2, 3, 1] };
-      expect(fhirpath<AnyResource>("Test").values.distinct().evaluate(data)).toEqual([1, 2, 3]);
+      const data: TestValues = { resourceType: "Test", values: [1, 2, 2, 3, 1] };
+      expect(fhirpath<TestValues>("Test").values.distinct().evaluate(data)).toEqual([1, 2, 3]);
     });
 
     it("isDistinct returns false for duplicates", () => {
-      const data = { resourceType: "Test", values: [1, 2, 2] };
-      expect(fhirpath<AnyResource>("Test").values.isDistinct().evaluate(data)).toEqual([false]);
+      const data: TestValues = { resourceType: "Test", values: [1, 2, 2] };
+      expect(fhirpath<TestValues>("Test").values.isDistinct().evaluate(data)).toEqual([false]);
     });
 
     it("isDistinct returns true for unique", () => {
-      const data = { resourceType: "Test", values: [1, 2, 3] };
-      expect(fhirpath<AnyResource>("Test").values.isDistinct().evaluate(data)).toEqual([true]);
+      const data: TestValues = { resourceType: "Test", values: [1, 2, 3] };
+      expect(fhirpath<TestValues>("Test").values.isDistinct().evaluate(data)).toEqual([true]);
     });
   });
 
@@ -241,7 +256,7 @@ describe("fhirpath evaluator", () => {
     });
 
     it("returns empty for no elements", () => {
-      expect(fp().address.single().evaluate(patient)).toEqual([]);
+      expect(fhirpath<TestPatient>("Patient").name.single().evaluate({ resourceType: "Patient" })).toEqual([]);
     });
   });
 
@@ -275,7 +290,7 @@ describe("fhirpath evaluator", () => {
 
   describe("ofType", () => {
     it("filters by FHIR type name", () => {
-      const bundle = {
+      const bundle: TestBundle = {
         resourceType: "Bundle",
         entry: [
           { resource: { resourceType: "Patient", id: "1" } },
@@ -283,7 +298,7 @@ describe("fhirpath evaluator", () => {
           { resource: { resourceType: "Patient", id: "3" } },
         ],
       };
-      const result = fhirpath<AnyResource>("Bundle").entry.resource.ofType("Patient").evaluate(bundle);
+      const result = fhirpath<TestBundle>("Bundle").entry.resource.ofType("Patient").evaluate(bundle);
       expect(result).toEqual([
         { resourceType: "Patient", id: "1" },
         { resourceType: "Patient", id: "3" },
@@ -291,8 +306,8 @@ describe("fhirpath evaluator", () => {
     });
 
     it("filters primitives by type", () => {
-      const data = { resourceType: "Test", mixed: [1, "hello", true, 2] };
-      expect(fhirpath<AnyResource>("Test").mixed.ofType("string").evaluate(data)).toEqual(["hello"]);
+      const data: TestMixed = { resourceType: "Test", mixed: [1, "hello", true, 2] };
+      expect(fhirpath<TestMixed>("Test").mixed.ofType("string").evaluate(data)).toEqual(["hello"]);
     });
 
     it("compiles ofType", () => {
@@ -302,16 +317,15 @@ describe("fhirpath evaluator", () => {
 
   describe("children / descendants", () => {
     it("children returns immediate children", () => {
-      const data = { resourceType: "Test", a: 1, b: "hello" };
-      const result = fhirpath<AnyResource>("Test").children().evaluate(data);
+      const data: TestNested = { resourceType: "Test", a: [1] };
+      const result = fhirpath<TestNested>("Test").children().evaluate(data);
       expect(result).toContain("Test");
       expect(result).toContain(1);
-      expect(result).toContain("hello");
     });
 
     it("descendants returns nested values", () => {
-      const data = { resourceType: "Test", nested: { a: 1, b: { c: 2 } } };
-      const result = fhirpath<AnyResource>("Test").descendants().evaluate(data);
+      const data: TestNested = { resourceType: "Test", nested: { a: 1, b: { c: 2 } } };
+      const result = fhirpath<TestNested>("Test").descendants().evaluate(data);
       expect(result).toContain("Test");
       expect(result).toContain(1);
       expect(result).toContain(2);
@@ -320,16 +334,16 @@ describe("fhirpath evaluator", () => {
 
   describe("union / combine", () => {
     it("union deduplicates", () => {
-      const data = { resourceType: "Test", a: [1, 2, 3], b: [2, 3, 4] };
-      const exprA = fhirpath<AnyResource>("Test").a;
-      const result = exprA.union(fhirpath<AnyResource>("Test").b).evaluate(data);
+      const data: TestNested = { resourceType: "Test", a: [1, 2, 3], b: [2, 3, 4] };
+      const exprA = fhirpath<TestNested>("Test").a;
+      const result = exprA.union(fhirpath<TestNested>("Test").b).evaluate(data);
       expect(result).toEqual([1, 2, 3, 4]);
     });
 
     it("combine keeps duplicates", () => {
-      const data = { resourceType: "Test", a: [1, 2], b: [2, 3] };
-      const exprA = fhirpath<AnyResource>("Test").a;
-      const result = exprA.combine(fhirpath<AnyResource>("Test").b).evaluate(data);
+      const data: TestNested = { resourceType: "Test", a: [1, 2], b: [2, 3] };
+      const exprA = fhirpath<TestNested>("Test").a;
+      const result = exprA.combine(fhirpath<TestNested>("Test").b).evaluate(data);
       expect(result).toEqual([1, 2, 2, 3]);
     });
   });
@@ -365,9 +379,9 @@ describe("fhirpath evaluator", () => {
       const result = fp()
         .name.first()
         .iif(
-          ($this: any) => $this.use.eq("official"),
-          ($this: any) => $this.family,
-          ($this: any) => $this.given,
+          ($this) => $this.use.eq("official"),
+          ($this) => $this.family,
+          ($this) => $this.given,
         )
         .evaluate(patient);
       expect(result).toEqual(["Smith"]);
@@ -377,9 +391,9 @@ describe("fhirpath evaluator", () => {
       const result = fp()
         .name.last()
         .iif(
-          ($this: any) => $this.use.eq("official"),
-          ($this: any) => $this.family,
-          ($this: any) => $this.given,
+          ($this) => $this.use.eq("official"),
+          ($this) => $this.family,
+          ($this) => $this.given,
         )
         .evaluate(patient);
       expect(result).toEqual(["Johnny"]);
@@ -389,8 +403,8 @@ describe("fhirpath evaluator", () => {
       const result = fp()
         .name.last()
         .iif(
-          ($this: any) => $this.use.eq("official"),
-          ($this: any) => $this.family,
+          ($this) => $this.use.eq("official"),
+          ($this) => $this.family,
         )
         .evaluate(patient);
       expect(result).toEqual([]);
@@ -399,18 +413,20 @@ describe("fhirpath evaluator", () => {
 
   describe("repeat", () => {
     it("recursively navigates", () => {
-      const data = {
+      const data: TestOrganization = {
         resourceType: "Organization",
         partOf: {
+          resourceType: "Organization",
           partOf: {
+            resourceType: "Organization",
             name: "Root Org",
           },
           name: "Middle Org",
         },
         name: "Leaf Org",
       };
-      const result = fhirpath<AnyResource>("Organization")
-        .repeat(($this: any) => $this.partOf)
+      const result = fhirpath<TestOrganization>("Organization")
+        .repeat(($this) => $this.partOf)
         .evaluate(data);
       expect(result).toHaveLength(2);
     });

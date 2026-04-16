@@ -1,12 +1,13 @@
-import type { Resource } from "@fhir-dsl/types";
 import { describe, expect, it } from "vitest";
 import { fhirpath } from "./builder.js";
+import type { TestObservation, TestPatient } from "./test-types.js";
 
-// Use a flexible type for runtime-focused tests
-type AnyResource = Resource;
+function fp() {
+  return fhirpath<TestPatient>("Patient");
+}
 
-function fp(resourceType = "Patient") {
-  return fhirpath<AnyResource>(resourceType);
+function fpObs() {
+  return fhirpath<TestObservation>("Observation");
 }
 
 describe("fhirpath builder", () => {
@@ -24,7 +25,7 @@ describe("fhirpath builder", () => {
     });
 
     it("compiles deep navigation", () => {
-      expect(fp("Observation").code.coding.system.compile()).toBe("Observation.code.coding.system");
+      expect(fpObs().code.coding.system.compile()).toBe("Observation.code.coding.system");
     });
 
     it("compiles where clause", () => {
@@ -160,7 +161,7 @@ describe("fhirpath builder", () => {
     it("compiles select()", () => {
       expect(
         fp()
-          .name.select(($this: any) => $this.family)
+          .name.select(($this) => $this.family)
           .compile(),
       ).toBe("Patient.name.select($this.family)");
     });
@@ -168,7 +169,7 @@ describe("fhirpath builder", () => {
     it("compiles all()", () => {
       expect(
         fp()
-          .name.all(($this: any) => $this.family.exists())
+          .name.all(($this) => $this.family.exists())
           .compile(),
       ).toBe("Patient.name.all($this.family.exists())");
     });
@@ -177,9 +178,9 @@ describe("fhirpath builder", () => {
       expect(
         fp()
           .name.iif(
-            ($this: any) => $this.use.eq("official"),
-            ($this: any) => $this.family,
-            ($this: any) => $this.given,
+            ($this) => $this.use.eq("official"),
+            ($this) => $this.family,
+            ($this) => $this.given,
           )
           .compile(),
       ).toBe("Patient.name.iif($this.use = 'official', $this.family, $this.given)");
@@ -195,7 +196,7 @@ describe("fhirpath builder", () => {
     it("is not a thenable", async () => {
       const expr = fp().name;
       // Should not trigger Promise resolution
-      expect((expr as any).then).toBeUndefined();
+      expect("then" in expr && (expr as unknown as Record<string, unknown>).then).toBeFalsy();
     });
   });
 });

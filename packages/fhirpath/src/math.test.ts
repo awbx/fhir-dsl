@@ -1,16 +1,14 @@
-import type { Resource } from "@fhir-dsl/types";
 import { describe, expect, it } from "vitest";
 import { fhirpath } from "./builder.js";
+import type { TestObservation } from "./test-types.js";
 
-type AnyResource = Resource;
-
-const observation = {
+const observation: TestObservation = {
   resourceType: "Observation",
   valueQuantity: { value: -3.7, unit: "mmHg" },
 };
 
-function fp(resourceType = "Observation") {
-  return fhirpath<AnyResource>(resourceType);
+function fp() {
+  return fhirpath<TestObservation>("Observation");
 }
 
 describe("math functions", () => {
@@ -39,32 +37,32 @@ describe("math functions", () => {
   });
 
   it("sqrt on positive", () => {
-    const obs = { resourceType: "Observation", valueQuantity: { value: 9 } };
+    const obs: TestObservation = { resourceType: "Observation", valueQuantity: { value: 9 } };
     expect(fp().valueQuantity.value.sqrt().evaluate(obs)).toEqual([3]);
   });
 
   it("power", () => {
-    const obs = { resourceType: "Observation", valueQuantity: { value: 2 } };
+    const obs: TestObservation = { resourceType: "Observation", valueQuantity: { value: 2 } };
     expect(fp().valueQuantity.value.power(3).evaluate(obs)).toEqual([8]);
   });
 
   it("ln", () => {
-    const obs = { resourceType: "Observation", valueQuantity: { value: Math.E } };
-    expect(fp().valueQuantity.value.ln().evaluate(obs)[0]).toBeCloseTo(1);
+    const obs: TestObservation = { resourceType: "Observation", valueQuantity: { value: Math.E } };
+    expect(fp().valueQuantity.value.ln().evaluate(obs)[0]!).toBeCloseTo(1);
   });
 
   it("log", () => {
-    const obs = { resourceType: "Observation", valueQuantity: { value: 100 } };
-    expect(fp().valueQuantity.value.log(10).evaluate(obs)[0]).toBeCloseTo(2);
+    const obs: TestObservation = { resourceType: "Observation", valueQuantity: { value: 100 } };
+    expect(fp().valueQuantity.value.log(10).evaluate(obs)[0]!).toBeCloseTo(2);
   });
 
   it("exp", () => {
-    const obs = { resourceType: "Observation", valueQuantity: { value: 0 } };
+    const obs: TestObservation = { resourceType: "Observation", valueQuantity: { value: 0 } };
     expect(fp().valueQuantity.value.exp().evaluate(obs)).toEqual([1]);
   });
 
   it("returns empty for non-numeric", () => {
-    const obs = { resourceType: "Observation", status: "final" };
+    const obs: TestObservation = { resourceType: "Observation", status: "final" };
     expect(fp().status.abs().evaluate(obs)).toEqual([]);
   });
 

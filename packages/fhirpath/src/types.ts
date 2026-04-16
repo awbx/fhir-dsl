@@ -34,6 +34,14 @@ export interface FhirTypeMap {
   Period: Period;
   Range: Range;
   Ratio: Ratio;
+  Resource: Resource;
+  Patient: Resource;
+  Observation: Resource;
+  Bundle: Resource;
+  Condition: Resource;
+  Encounter: Resource;
+  Organization: Resource;
+  Practitioner: Resource;
   string: string;
   String: string;
   boolean: boolean;
@@ -261,6 +269,11 @@ export interface FhirPathConversionOps {
   convertsToQuantity(): FhirPathExpr<boolean>;
 }
 
+export interface FhirPathBooleanOps {
+  /** Boolean NOT */
+  not(): FhirPathExpr<boolean>;
+}
+
 export interface FhirPathUtilityOps<T> {
   /** Debug trace (returns input unchanged) */
   trace(name: string): FhirPathExpr<T>;
@@ -292,6 +305,7 @@ export interface FhirPathOps<T>
     FhirPathStringOps,
     FhirPathMathOps,
     FhirPathConversionOps,
+    FhirPathBooleanOps,
     FhirPathUtilityOps<T> {}
 
 /**

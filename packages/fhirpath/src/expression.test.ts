@@ -1,10 +1,8 @@
-import type { Resource } from "@fhir-dsl/types";
 import { describe, expect, it } from "vitest";
 import { fhirpath } from "./builder.js";
+import type { TestPatient } from "./test-types.js";
 
-type AnyResource = Resource;
-
-const patient = {
+const patient: TestPatient = {
   resourceType: "Patient",
   name: [
     { use: "official", family: "Smith", given: ["John", "Michael"] },
@@ -18,15 +16,15 @@ const patient = {
   active: true,
 };
 
-function fp(resourceType = "Patient") {
-  return fhirpath<AnyResource>(resourceType);
+function fp() {
+  return fhirpath<TestPatient>("Patient");
 }
 
 describe("expression system", () => {
   describe("where with predicate callback", () => {
     it("filters by equality", () => {
       const result = fp()
-        .name.where(($this: any) => $this.use.eq("official"))
+        .name.where(($this) => $this.use.eq("official"))
         .evaluate(patient);
       expect(result).toEqual([{ use: "official", family: "Smith", given: ["John", "Michael"] }]);
     });
@@ -34,14 +32,14 @@ describe("expression system", () => {
     it("compiles predicate where", () => {
       expect(
         fp()
-          .name.where(($this: any) => $this.use.eq("official"))
+          .name.where(($this) => $this.use.eq("official"))
           .compile(),
       ).toBe("Patient.name.where($this.use = 'official')");
     });
 
     it("navigates after predicate where", () => {
       const result = fp()
-        .name.where(($this: any) => $this.use.eq("official"))
+        .name.where(($this) => $this.use.eq("official"))
         .family.evaluate(patient);
       expect(result).toEqual(["Smith"]);
     });
@@ -56,7 +54,7 @@ describe("expression system", () => {
     it("returns true when any match", () => {
       expect(
         fp()
-          .name.exists(($this: any) => $this.use.eq("official"))
+          .name.exists(($this) => $this.use.eq("official"))
           .evaluate(patient),
       ).toEqual([true]);
     });
@@ -64,7 +62,7 @@ describe("expression system", () => {
     it("returns false when none match", () => {
       expect(
         fp()
-          .name.exists(($this: any) => $this.use.eq("temp"))
+          .name.exists(($this) => $this.use.eq("temp"))
           .evaluate(patient),
       ).toEqual([false]);
     });
@@ -72,7 +70,7 @@ describe("expression system", () => {
     it("compiles exists with predicate", () => {
       expect(
         fp()
-          .name.exists(($this: any) => $this.use.eq("official"))
+          .name.exists(($this) => $this.use.eq("official"))
           .compile(),
       ).toBe("Patient.name.exists($this.use = 'official')");
     });
@@ -82,7 +80,7 @@ describe("expression system", () => {
     it("returns true when all match", () => {
       expect(
         fp()
-          .name.all(($this: any) => $this.family.exists())
+          .name.all(($this) => $this.family.exists())
           .evaluate(patient),
       ).toEqual([true]);
     });
@@ -90,7 +88,7 @@ describe("expression system", () => {
     it("returns false when not all match", () => {
       expect(
         fp()
-          .name.all(($this: any) => $this.use.eq("official"))
+          .name.all(($this) => $this.use.eq("official"))
           .evaluate(patient),
       ).toEqual([false]);
     });
@@ -98,7 +96,7 @@ describe("expression system", () => {
     it("compiles all", () => {
       expect(
         fp()
-          .name.all(($this: any) => $this.use.eq("official"))
+          .name.all(($this) => $this.use.eq("official"))
           .compile(),
       ).toBe("Patient.name.all($this.use = 'official')");
     });
@@ -108,7 +106,7 @@ describe("expression system", () => {
     it("projects family names", () => {
       expect(
         fp()
-          .name.select(($this: any) => $this.family)
+          .name.select(($this) => $this.family)
           .evaluate(patient),
       ).toEqual(["Smith", "Smithy"]);
     });
@@ -116,7 +114,7 @@ describe("expression system", () => {
     it("compiles select", () => {
       expect(
         fp()
-          .name.select(($this: any) => $this.family)
+          .name.select(($this) => $this.family)
           .compile(),
       ).toBe("Patient.name.select($this.family)");
     });
@@ -125,7 +123,7 @@ describe("expression system", () => {
   describe("comparison operators in predicates", () => {
     it("neq filters correctly", () => {
       const result = fp()
-        .name.where(($this: any) => $this.use.neq("official"))
+        .name.where(($this) => $this.use.neq("official"))
         .evaluate(patient);
       expect(result).toEqual([{ use: "nickname", family: "Smithy", given: ["Johnny"] }]);
     });
