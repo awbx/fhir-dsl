@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.0] - 2026-04-16
+
+### Features
+
+- Add SMART on FHIR guide (`d05357e`)
+- Add complete-workflow example to docs (`67e0887`)
+- Add @fhir-dsl/smart package for SMART on FHIR v2 auth (`8522365`)
+- Add FHIRPath, Terminology, CLI examples, and complete workflow to documentation (`f351f80`)
+- Add lint:unsafefix script and update header access in tests for consistency (`70bb60b`)
+
+### Other
+
+- Trim roadmap to upcoming work (`6ff4117`)
+- Route runtime executor through performRequest (`e270fba`)
+- Introduce pluggable AuthProvider and shared HTTP helper in core (`3ef8ea2`)
+- Redesign docs landing page with tabbed examples and modern hero (`554d9cd`)
+- Split Biome config into per-package files for monorepo (`7879b81`)
+
 ## [0.13.0] - 2026-04-16
 
 ### Features
