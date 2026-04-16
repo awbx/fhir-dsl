@@ -11,6 +11,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "changelog": "node scripts/generate-changelog.mjs --write",
     "version:bump": "node scripts/bump-version.mjs",
     "prepare": "husky"
   },

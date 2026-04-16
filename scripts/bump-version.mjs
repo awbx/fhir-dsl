@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
+import { writeChangelog } from "./generate-changelog.mjs";
 
 const version = process.argv[2];
 
@@ -50,6 +51,8 @@ if (existsSync(docsDir)) {
 	updateFile(join(docsDir, "roadmap.md"));
 	updateFile(join(docsDir, "monorepo", "setup.md"));
 }
+
+writeChangelog(version);
 
 execSync("git add -A", { stdio: "inherit" });
 execSync(`git commit -m "v${version}"`, { stdio: "inherit" });
