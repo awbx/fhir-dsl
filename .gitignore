@@ -145,3 +145,4 @@ dist
 
 # E2E test output — generated into the repo so pnpm workspace links resolve during tsc
 packages/generator/test/.tmp-output/
+packages/generator/test/e2e-agents/**/.tmp-*/
