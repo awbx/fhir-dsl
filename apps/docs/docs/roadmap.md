@@ -8,7 +8,7 @@ sidebar_label: Roadmap
 
 The current priorities and future direction for fhir-dsl.
 
-## Current State (v0.12.0)
+## Current State (v0.13.0)
 
 What's available today:
 
@@ -24,7 +24,7 @@ What's available today:
 
 ## Recently Added
 
-### Field Projection (v0.12.0)
+### Field Projection (v0.13.0)
 
 - **`.select([...])`** -- Search builder method that narrows the result type to the picked top-level fields and emits FHIR's `_elements` parameter. Reduces payload size on mobile and dashboards while keeping full type safety.
 - **Internal type utilities** -- New `_internal/type-utils.ts` module exporting `Prettify`, `UnionToIntersection`, `Path<T,D>`, `PathValue<T,P>`, and `PickFields` for use across builders.

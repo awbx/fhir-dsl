@@ -8,6 +8,19 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.0] - 2026-04-16
+
+### Features
+
+- Add spec-emitter for resource/profile markdown output (`6a4cf5f`)
+
+### Other
+
+- Ignore local .claude state directory (`e1b42dd`)
+- Document --include-spec flag (`e25ea26`)
+- Expose --include-spec flag on CLI generate command (`f951339`)
+- Wire includeSpec option into generator pipeline (`f4beb42`)
+
 ## [0.12.0] - 2026-04-16
 
 ### Features
