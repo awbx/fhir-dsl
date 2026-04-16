@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-04-16
+
+### Features
+
+- Add typed batch builder (`9b069d9`)
+- Add claude-opus-4-6 client e2e benchmark suite (`77e1bb4`)
+- Add codex client and terminology e2e suites (`50e8639`)
+- Add codex e2e benchmark submission for terminology engine (`6893ada`)
+- Add gemini-2-0-flash-thinking-exp e2e benchmark submission (`c9699d8`)
+
+### Other
+
+- Document fixtures.ts in codex runtime e2e README (`16c1483`)
+- chore: update gitignore and biome for agent-specific E2E tests (`e9405d3`)
+
 ## [0.10.0] - 2026-04-16
 
 ### Features
