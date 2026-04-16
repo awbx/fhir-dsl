@@ -1,0 +1,15 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+  "extends": "//",
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.json",
+      "!test/fixtures/generated-golden",
+      "!test/fixtures/generated-legacy-golden",
+      "!test/e2e-agents/**/.tmp-*",
+      "!test/e2e-agents/**/golden",
+      "!test/e2e-agents/**/legacy-golden"
+    ]
+  }
+}
