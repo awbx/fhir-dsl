@@ -1,5 +1,7 @@
 // @ts-check
 
+const rootPkg = require('../../package.json');
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'fhir-dsl',
@@ -13,6 +15,10 @@ const config = {
   projectName: 'fhir-dsl',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
+
+  customFields: {
+    version: rootPkg.version,
+  },
 
   onBrokenLinks: 'throw',
 

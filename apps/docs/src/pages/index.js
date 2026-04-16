@@ -358,7 +358,8 @@ function InstallStrip() {
   );
 }
 
-function Hero({ title, tagline }) {
+function Hero({ title, tagline, version }) {
+  const majorMinor = version ? version.split('.').slice(0, 2).join('.') : '';
   return (
     <section className={styles.hero}>
       <div className={styles.heroGrid} />
@@ -366,7 +367,7 @@ function Hero({ title, tagline }) {
 
       <div className={styles.badge}>
         <span className={styles.badgeDot} />
-        v0.13 — R4 · R4B · R5 · R6
+        {majorMinor ? `v${majorMinor} — ` : ''}R4 · R4B · R5 · R6
       </div>
 
       <h1 className={styles.heroTitle}>
@@ -503,7 +504,11 @@ export default function Home() {
   return (
     <Layout title={siteConfig.title} description={siteConfig.tagline}>
       <main className={styles.page}>
-        <Hero title={siteConfig.title} tagline={siteConfig.tagline} />
+        <Hero
+          title={siteConfig.title}
+          tagline={siteConfig.tagline}
+          version={siteConfig.customFields?.version}
+        />
         <Playground />
         <Features />
         <CTA />
