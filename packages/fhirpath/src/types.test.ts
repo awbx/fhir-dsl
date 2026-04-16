@@ -1,4 +1,4 @@
-import type { CodeableConcept, HumanName, Identifier, Period, Reference, Resource } from "@fhir-dsl/types";
+import type { CodeableConcept, HumanName, Identifier, Reference, Resource } from "@fhir-dsl/types";
 import { describe, expectTypeOf, it } from "vitest";
 import { fhirpath } from "./builder.js";
 import type { FhirPathExpr, IsPrimitive, NavKeys, Unwrap } from "./types.js";

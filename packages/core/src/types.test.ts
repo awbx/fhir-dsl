@@ -94,9 +94,9 @@ describe("type-level tests", () => {
     it("falls back to generic record when revIncludes is undefined", () => {
       type SchemaWithout = {
         resources: { Patient: { resourceType: "Patient" } };
-        searchParams: {};
-        includes: {};
-        profiles: {};
+        searchParams: Record<string, never>;
+        includes: Record<string, never>;
+        profiles: Record<string, never>;
       };
       type Result = RevIncludeFor<SchemaWithout, "Patient">;
       expectTypeOf<Result>().toEqualTypeOf<Record<string, string>>();
