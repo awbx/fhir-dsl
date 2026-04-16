@@ -137,4 +137,131 @@ describe("emitResource", () => {
     expect(output).toContain("DomainResource");
     expect(output).toContain("Reference");
   });
+
+  it("emits FhirCode with terminology type for required binding", () => {
+    const bindingTypeMap = new Map([["http://hl7.org/fhir/ValueSet/gender", "AdministrativeGender"]]);
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "gender",
+            types: [{ code: "code" }],
+            isRequired: false,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "required", valueSet: "http://hl7.org/fhir/ValueSet/gender" },
+          },
+        ],
+      }),
+      bindingTypeMap,
+    );
+
+    expect(output).toContain("gender?: FhirCode<AdministrativeGender>;");
+    expect(output).toContain('import type { AdministrativeGender } from "../terminology/valuesets.js"');
+  });
+
+  it("emits extensible binding with string & {} fallback", () => {
+    const bindingTypeMap = new Map([["http://hl7.org/fhir/ValueSet/condition-clinical", "ConditionClinical"]]);
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "clinicalStatus",
+            types: [{ code: "CodeableConcept" }],
+            isRequired: false,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "extensible", valueSet: "http://hl7.org/fhir/ValueSet/condition-clinical" },
+          },
+        ],
+      }),
+      bindingTypeMap,
+    );
+
+    expect(output).toContain("clinicalStatus?: CodeableConcept<ConditionClinical | (string & {})>;");
+  });
+
+  it("does not parameterize preferred or example bindings", () => {
+    const bindingTypeMap = new Map([["http://hl7.org/fhir/ValueSet/test", "TestCodes"]]);
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "code",
+            types: [{ code: "code" }],
+            isRequired: false,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "example", valueSet: "http://hl7.org/fhir/ValueSet/test" },
+          },
+        ],
+      }),
+      bindingTypeMap,
+    );
+
+    expect(output).toContain("code?: FhirCode;");
+    expect(output).not.toContain("TestCodes");
+  });
+
+  it("falls back to unparameterized type when binding URL not in map", () => {
+    const bindingTypeMap = new Map<string, string>();
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "status",
+            types: [{ code: "code" }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "required", valueSet: "http://hl7.org/fhir/ValueSet/unknown" },
+          },
+        ],
+      }),
+      bindingTypeMap,
+    );
+
+    expect(output).toContain("status: FhirCode;");
+  });
+
+  it("resolves binding URL with version suffix", () => {
+    const bindingTypeMap = new Map([["http://hl7.org/fhir/ValueSet/status", "ObservationStatus"]]);
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "status",
+            types: [{ code: "code" }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "required", valueSet: "http://hl7.org/fhir/ValueSet/status|4.0.1" },
+          },
+        ],
+      }),
+      bindingTypeMap,
+    );
+
+    expect(output).toContain("status: FhirCode<ObservationStatus>;");
+  });
+
+  it("emits without terminology when no bindingTypeMap provided", () => {
+    const output = emitResource(
+      makeModel({
+        properties: [
+          {
+            name: "status",
+            types: [{ code: "code" }],
+            isRequired: true,
+            isArray: false,
+            isChoiceType: false,
+            binding: { strength: "required", valueSet: "http://hl7.org/fhir/ValueSet/status" },
+          },
+        ],
+      }),
+    );
+
+    expect(output).toContain("status: FhirCode;");
+    expect(output).not.toContain("terminology");
+  });
 });

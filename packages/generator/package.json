@@ -25,6 +25,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@fhir-dsl/terminology": "workspace:*",
     "@fhir-dsl/utils": "workspace:*"
   },
   "files": [
