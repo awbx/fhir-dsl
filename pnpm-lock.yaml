@@ -103,6 +103,9 @@ importers:
 
   packages/generator:
     dependencies:
+      '@fhir-dsl/terminology':
+        specifier: workspace:*
+        version: link:../terminology
       '@fhir-dsl/utils':
         specifier: workspace:*
         version: link:../utils
@@ -115,6 +118,12 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+
+  packages/terminology:
+    dependencies:
+      '@fhir-dsl/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   packages/types: {}
 

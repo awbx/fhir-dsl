@@ -1,0 +1,50 @@
+{
+  "name": "@fhir-dsl/terminology",
+  "version": "0.8.0",
+  "description": "Compile-time FHIR terminology resolver for ValueSets and CodeSystems",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@fhir-dsl/utils": "workspace:*"
+  },
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awbx/fhir-dsl.git",
+    "directory": "packages/terminology"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "fhir",
+    "terminology",
+    "valueset",
+    "codesystem",
+    "typescript"
+  ]
+}
