@@ -19,6 +19,7 @@ import type {
   SearchPrefixFor,
   SortDirection,
 } from "./types.js";
+import { resolveSchema, type SchemaRegistry, ValidationUnavailableError, validateOne } from "./validation.js";
 
 // --- Internal query state ---
 
@@ -32,6 +33,7 @@ interface QueryState {
   offset?: number | undefined;
   profile?: string | undefined;
   fieldSelection?: readonly string[] | undefined;
+  validate?: boolean | undefined;
 }
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
@@ -51,6 +53,7 @@ export class SearchQueryBuilderImpl<
   readonly #state: QueryState;
   readonly #executor: Executor;
   readonly #urlExecutor: UrlExecutor | undefined;
+  readonly #schemas: SchemaRegistry | undefined;
 
   constructor(
     resourceType: string,
@@ -58,9 +61,11 @@ export class SearchQueryBuilderImpl<
     state?: QueryState,
     profile?: string,
     urlExecutor?: UrlExecutor,
+    schemas?: SchemaRegistry,
   ) {
     this.#executor = executor;
     this.#urlExecutor = urlExecutor;
+    this.#schemas = schemas;
     this.#state = state ?? {
       resourceType,
       params: [],
@@ -92,6 +97,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -115,6 +121,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -137,6 +144,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -153,6 +161,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -184,6 +193,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -215,6 +225,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -228,6 +239,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -241,6 +253,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -254,6 +267,7 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -269,6 +283,22 @@ export class SearchQueryBuilderImpl<
       },
       undefined,
       this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  validate(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    if (!this.#schemas) throw new ValidationUnavailableError();
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      {
+        ...this.#state,
+        validate: true,
+      },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
     );
   }
 
@@ -341,6 +371,14 @@ export class SearchQueryBuilderImpl<
       }
     }
 
+    if (this.#state.validate) {
+      if (!this.#schemas) throw new ValidationUnavailableError();
+      const schema = resolveSchema(this.#schemas, this.#state.resourceType, this.#state.profile);
+      for (let i = 0; i < data.length; i++) {
+        await validateOne(schema, this.#state.resourceType, data[i], i);
+      }
+    }
+
     const links: BundleLink[] | undefined = bundle.link;
 
     type ResultType = SearchResult<PrimaryType, [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource>;
@@ -360,6 +398,13 @@ export class SearchQueryBuilderImpl<
     const query = this.compile();
     let bundle = (await this.#executor(query)) as Bundle;
 
+    let schema: ReturnType<typeof resolveSchema> | undefined;
+    if (this.#state.validate) {
+      if (!this.#schemas) throw new ValidationUnavailableError();
+      schema = resolveSchema(this.#schemas, this.#state.resourceType, this.#state.profile);
+    }
+    let index = 0;
+
     while (bundle) {
       options?.signal?.throwIfAborted();
 
@@ -367,6 +412,10 @@ export class SearchQueryBuilderImpl<
       for (const entry of entries) {
         if (!entry.resource) continue;
         if (entry.search?.mode === "include") continue;
+        if (schema) {
+          await validateOne(schema, this.#state.resourceType, entry.resource, index);
+        }
+        index++;
         yield entry.resource as R;
       }
 

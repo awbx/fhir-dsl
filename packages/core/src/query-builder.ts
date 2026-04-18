@@ -131,6 +131,13 @@ export interface SearchQueryBuilder<
     fields: readonly K[],
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, K>;
 
+  /**
+   * Validate every returned resource against its generated Standard Schema on `.execute()` / `.stream()`.
+   * Requires schemas to be wired into the client (generate with `--validator native|zod`);
+   * otherwise this call throws `ValidationUnavailableError` immediately.
+   */
+  validate(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   compile(): CompiledQuery;
 
   execute(): Promise<
@@ -146,6 +153,13 @@ export interface SearchQueryBuilder<
 // --- Read Query Builder Interface ---
 
 export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
+  /**
+   * Validate the returned resource against its generated Standard Schema on `.execute()`.
+   * Requires schemas to be wired into the client (generate with `--validator native|zod`);
+   * otherwise this call throws `ValidationUnavailableError` immediately.
+   */
+  validate(): ReadQueryBuilder<S, RT>;
+
   compile(): CompiledQuery;
 
   execute(): Promise<S["resources"][RT] & Resource>;

@@ -11,6 +11,7 @@ import {
   TransactionBuilderImpl,
 } from "./transaction-builder.js";
 import type { FhirSchema, ProfileNames, SearchParamFor } from "./types.js";
+import type { SchemaRegistry } from "./validation.js";
 
 // --- Client Configuration ---
 
@@ -19,6 +20,7 @@ export interface FhirClientConfig {
   auth?: AuthConfig | undefined;
   headers?: Record<string, string> | undefined;
   fetch?: typeof globalThis.fetch | undefined;
+  schemas?: SchemaRegistry | undefined;
 }
 
 // --- Default executor using fetch ---
@@ -92,10 +94,12 @@ export class FhirRequestError extends Error {
 export class FhirClient<S extends FhirSchema> {
   readonly #executor: Executor;
   readonly #urlExecutor: UrlExecutor;
+  readonly #schemas: SchemaRegistry | undefined;
 
   constructor(config: FhirClientConfig) {
     this.#executor = createFetchExecutor(config);
     this.#urlExecutor = createUrlExecutor(config);
+    this.#schemas = config.schemas;
   }
 
   search<RT extends string & keyof S["resources"]>(resourceType: RT): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
@@ -114,6 +118,7 @@ export class FhirClient<S extends FhirSchema> {
         undefined,
         profile,
         this.#urlExecutor,
+        this.#schemas,
       );
     }
     return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
@@ -122,11 +127,12 @@ export class FhirClient<S extends FhirSchema> {
       undefined,
       undefined,
       this.#urlExecutor,
+      this.#schemas,
     );
   }
 
   read<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): ReadQueryBuilder<S, RT> {
-    return new ReadQueryBuilderImpl<S, RT>(resourceType, id, this.#executor);
+    return new ReadQueryBuilderImpl<S, RT>(resourceType, id, this.#executor, this.#schemas);
   }
 
   transaction(): TransactionBuilder<S> {
