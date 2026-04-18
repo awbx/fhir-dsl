@@ -18,6 +18,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 - **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers ~85% of the official FHIRPath spec including 60+ functions, expression predicates, and operators.
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
+- **Runtime validation (optional)** — Opt in with `--validator native|zod` to emit [Standard Schema V1](https://standardschema.dev/) validators for every resource, datatype, binding, and profile. See [Validation](https://awbx.github.io/fhir-dsl/docs/guides/validation).
 - **Immutable builders** — Every query method returns a new builder instance, safe to reuse, fork, and compose.
 - **Zero runtime dependencies** — Core DSL depends only on `@fhir-dsl/types`.
 - **Dual ESM/CJS** — Works in any Node.js environment out of the box.
@@ -217,6 +218,8 @@ fhir-gen generate [options]
 | `--resources <list>` | Comma-separated list of resource names to generate | No |
 | `--src <path>` | Local FHIR definitions directory (skips download) | No |
 | `--cache <dir>` | Cache directory for downloaded specs | No |
+| `--validator <target>` | Emit Standard Schema validators: `native` or `zod` | No |
+| `--strict-extensible` | Treat extensible bindings as closed enums (validator only) | No |
 
 For full CLI details and examples, see the [CLI Usage Guide](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 

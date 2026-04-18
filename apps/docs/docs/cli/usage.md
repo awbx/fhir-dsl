@@ -44,6 +44,8 @@ fhir-gen generate [options]
 | `--expand-valuesets` | Generate typed unions from FHIR ValueSet bindings | No |
 | `--resolve-codesystems` | Generate CodeSystem namespace objects for IntelliSense | No |
 | `--include-spec` | Emit markdown spec files alongside types (for AI/LLM context) | No |
+| `--validator <target>` | Emit Standard Schema runtime validators: `native` or `zod` | No |
+| `--strict-extensible` | Treat extensible bindings as closed enums (validator only) | No |
 
 ## Examples
 
@@ -94,6 +96,20 @@ fhir-gen generate \
 ```
 
 This generates a `terminology/` directory with literal union types (e.g., `AdministrativeGender = "male" | "female" | "other" | "unknown"`) and parameterizes bound fields like `Patient.gender` as `FhirCode<AdministrativeGender>`. See [Terminology Engine](/docs/guides/terminology) for details.
+
+### With Runtime Validators
+
+Emit Standard Schema validators alongside the types so you can check incoming payloads at runtime:
+
+```bash
+fhir-gen generate \
+  --version r4 \
+  --expand-valuesets \
+  --validator native \
+  --out ./src/fhir
+```
+
+`--validator native` produces a zero-dependency implementation; `--validator zod` emits Zod schemas and requires `zod` as a peer dependency. Both conform to [Standard Schema V1](https://standardschema.dev/), so call sites (`schema["~standard"].validate(value)`) stay identical if you switch targets. See [Validation](/docs/guides/validation) for the full guide, including profile schemas.
 
 ### With Markdown Spec (for AI assistants)
 
@@ -174,6 +190,17 @@ src/fhir/
       ...
       index.ts
       profile-registry.ts
+    schemas/                # Only when --validator is used
+      __runtime.ts          # native adapter only
+      datatypes.ts
+      terminology.ts
+      resources/
+        patient.schema.ts
+        ...
+      profiles/             # Only when --ig is also used
+        uscore-patient-profile.schema.ts
+        profile-schema-registry.ts
+      index.ts
     spec/                   # Only when --include-spec is used
       index.md
       resources/
