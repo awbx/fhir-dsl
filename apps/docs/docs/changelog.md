@@ -8,6 +8,20 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.15.0] - 2026-04-18
+
+### Features
+
+- Add .validate() chain on query builders (`a547f8d`)
+
+### Other
+
+- Document runtime validation and .validate() builder chain (`dde31b4`)
+- Emit Standard Schema runtime validators from the generator (`5a475b9`)
+- Bump every workspace package in lockstep, drop docs string-replace (`81f6e8b`)
+- Pull landing-page version badge from package.json (`2ab504e`)
+- Refresh architecture overview for nine-package layout (`81239e4`)
+
 ## [0.14.0] - 2026-04-16
 
 ### Features
