@@ -1,12 +1,26 @@
 import { access, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TerminologyRegistry } from "@fhir-dsl/terminology";
+import { type ResolvedValueSet, TerminologyRegistry } from "@fhir-dsl/terminology";
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
 import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/profile-emitter.js";
 import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
+import { getAdapter } from "./emitter/schema/index.js";
+import {
+  emitProfileSchema,
+  emitProfileSchemaIndex,
+  emitProfileSchemaRegistry,
+} from "./emitter/schema/profile-schema-emitter.js";
+import {
+  emitDatatypeSchemas,
+  emitResourceSchema,
+  emitResourceSchemaIndex,
+  emitSchemaRegistry,
+  emitSchemaRootIndex,
+} from "./emitter/schema/schema-emitter.js";
+import { emitTerminologySchemas } from "./emitter/schema/terminology-schema-emitter.js";
 import type { SearchParamBindingMap } from "./emitter/search-param-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
 import { emitProfileSpec, emitResourceSpec, emitSpecIndex } from "./emitter/spec-emitter.js";
@@ -42,6 +56,8 @@ function isStructureDefinition(value: unknown): value is FhirStructureDefinition
   );
 }
 
+export type ValidatorTarget = "zod" | "native";
+
 export interface GeneratorOptions {
   version: string;
   outDir: string;
@@ -52,6 +68,10 @@ export interface GeneratorOptions {
   expandValueSets?: boolean | undefined;
   resolveCodeSystems?: boolean | undefined;
   includeSpec?: boolean | undefined;
+  /** Emit Standard Schema-compatible runtime validators using the chosen library. */
+  validator?: ValidatorTarget | undefined;
+  /** Treat extensible bindings as closed enums in validators (default: open). */
+  strictExtensible?: boolean | undefined;
 }
 
 export async function generate(options: GeneratorOptions): Promise<void> {
@@ -67,6 +87,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     const cache = cacheDir ?? join(outDir, ".cache");
     spec = await downloadSpec(version, cache, {
       expandValueSets: options.expandValueSets,
+      includeTypes: Boolean(options.validator),
     });
   }
 
@@ -76,17 +97,26 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
   // Parse StructureDefinitions
   let resourceModels: ResourceModel[] = [];
+  const complexTypeModels: ResourceModel[] = [];
   for (const sd of spec.resourceDefinitions) {
     if (!isStructureDefinition(sd)) continue;
-    if (sd.kind !== "resource") continue;
     if (sd.abstract) continue;
     if (!sd.snapshot?.element?.length) continue;
 
-    try {
-      const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
-      resourceModels.push(model);
-    } catch (err) {
-      console.warn(`Failed to parse ${sd.name}: ${err}`);
+    if (sd.kind === "resource") {
+      try {
+        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
+        resourceModels.push(model);
+      } catch (err) {
+        console.warn(`Failed to parse ${sd.name}: ${err}`);
+      }
+    } else if (sd.kind === "complex-type" && options.validator) {
+      try {
+        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
+        complexTypeModels.push(model);
+      } catch (err) {
+        console.warn(`Failed to parse complex type ${sd.name}: ${err}`);
+      }
     }
   }
 
@@ -121,6 +151,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
   // --- Terminology resolution ---
   let bindingTypeMap: BindingTypeMap | undefined;
+  let allResolvedValueSets: ResolvedValueSet[] = [];
 
   if (options.expandValueSets) {
     const registry = new TerminologyRegistry();
@@ -150,6 +181,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
     // Emit terminology files
     const allResolved = [...registry.allResolved()];
+    allResolvedValueSets = allResolved;
     const termResult = emitTerminology(allResolved);
     bindingTypeMap = termResult.bindingTypeMap;
 
@@ -172,6 +204,56 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     const fileName = `${toKebabCase(model.name)}.ts`;
     const content = emitResource(model, bindingTypeMap);
     await writeFile(join(resourcesDir, fileName), content, "utf-8");
+  }
+
+  // --- Schema (Standard Schema) generation ---
+  if (options.validator) {
+    const adapter = getAdapter(options.validator);
+    const schemasDir = join(versionDir, "schemas");
+    const schemaResourcesDir = join(schemasDir, "resources");
+    await mkdir(schemaResourcesDir, { recursive: true });
+
+    // Optional runtime file (only native adapter emits one)
+    const runtime = adapter.runtimeFile?.();
+    if (runtime) {
+      await writeFile(join(schemasDir, runtime.filename), runtime.source, "utf-8");
+    }
+
+    // Terminology schemas (enum consts per resolved ValueSet)
+    const hasTerminology = Boolean(bindingTypeMap && bindingTypeMap.size > 0);
+    if (bindingTypeMap && allResolvedValueSets.length > 0) {
+      const terminologySource = emitTerminologySchemas(allResolvedValueSets, bindingTypeMap, adapter);
+      await writeFile(join(schemasDir, "terminology.ts"), terminologySource, "utf-8");
+    }
+
+    // Datatype schemas (HumanName, Coding, etc.) — from parsed complex types
+    const datatypeSource = emitDatatypeSchemas(complexTypeModels, adapter, {
+      bindingTypeMap,
+      strictExtensible: options.strictExtensible,
+    });
+    await writeFile(join(schemasDir, "datatypes.ts"), datatypeSource, "utf-8");
+    const datatypeNames = new Set(complexTypeModels.map((m) => m.name));
+
+    // Resource schemas
+    for (const model of resourceModels) {
+      const fileName = `${toKebabCase(model.name)}.schema.ts`;
+      const content = emitResourceSchema(model, adapter, {
+        bindingTypeMap,
+        importedDatatypes: datatypeNames,
+        strictExtensible: options.strictExtensible,
+      });
+      await writeFile(join(schemaResourcesDir, fileName), content, "utf-8");
+    }
+
+    await writeFile(join(schemaResourcesDir, "index.ts"), emitResourceSchemaIndex(resourceModels), "utf-8");
+
+    // SchemaRegistry const (profiles added later if present — rewritten below)
+    await writeFile(join(schemasDir, "schema-registry.ts"), emitSchemaRegistry(resourceModels, false), "utf-8");
+
+    // Root schemas index (profiles block appended below if profiles exist)
+    await writeFile(join(schemasDir, "index.ts"), emitSchemaRootIndex(hasTerminology, false), "utf-8");
+
+    console.info(`Generated validator schemas (${adapter.name}) for ${resourceModels.length} resources`);
   }
 
   // Build search param binding map from resource properties with bindings
@@ -252,6 +334,42 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       await writeFile(join(profilesDir, "index.ts"), emitProfileIndex(allProfiles), "utf-8");
       await writeFile(join(profilesDir, "profile-registry.ts"), emitProfileRegistry(allProfiles), "utf-8");
 
+      // Profile schemas
+      if (options.validator) {
+        const adapter = getAdapter(options.validator);
+        const profileSchemasDir = join(versionDir, "schemas", "profiles");
+        await mkdir(profileSchemasDir, { recursive: true });
+
+        const profileDatatypeNames = new Set(complexTypeModels.map((m) => m.name));
+        for (const profile of allProfiles) {
+          const fileName = `${toKebabCase(profile.name)}.schema.ts`;
+          const content = emitProfileSchema(profile, adapter, {
+            bindingTypeMap,
+            strictExtensible: options.strictExtensible,
+            availableDatatypes: profileDatatypeNames,
+          });
+          await writeFile(join(profileSchemasDir, fileName), content, "utf-8");
+        }
+
+        await writeFile(join(profileSchemasDir, "index.ts"), emitProfileSchemaIndex(allProfiles), "utf-8");
+        await writeFile(
+          join(profileSchemasDir, "profile-schema-registry.ts"),
+          emitProfileSchemaRegistry(allProfiles),
+          "utf-8",
+        );
+
+        // Rewrite root schemas/index.ts + schema-registry.ts to include profiles
+        const hasTerminology = Boolean(bindingTypeMap && bindingTypeMap.size > 0);
+        await writeFile(join(versionDir, "schemas", "index.ts"), emitSchemaRootIndex(hasTerminology, true), "utf-8");
+        await writeFile(
+          join(versionDir, "schemas", "schema-registry.ts"),
+          emitSchemaRegistry(resourceModels, true),
+          "utf-8",
+        );
+
+        console.info(`Generated profile schemas for ${allProfiles.length} profiles`);
+      }
+
       console.info(`Generated ${allProfiles.length} profiles`);
 
       // --- Spec markdown (profiles) ---
@@ -299,8 +417,8 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     "utf-8",
   );
 
-  // Emit typed client helper
-  await writeFile(join(versionDir, "client.ts"), emitClient(hasProfilesDir), "utf-8");
+  // Emit typed client helper — wire schemas in when --validator was used
+  await writeFile(join(versionDir, "client.ts"), emitClient(hasProfilesDir, Boolean(options.validator)), "utf-8");
 
   // Emit index files (include client export)
   await writeFile(join(versionDir, "index.ts"), emitResourceIndex(resourceModels, extraExports), "utf-8");

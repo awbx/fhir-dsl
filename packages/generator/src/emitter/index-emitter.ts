@@ -33,7 +33,7 @@ export function emitRootIndex(version: string): string {
   return `export * from "./${version.toLowerCase()}/index.js";\n`;
 }
 
-export function emitClient(hasProfiles: boolean): string {
+export function emitClient(hasProfiles: boolean, hasValidator: boolean = false): string {
   const lines: string[] = [];
 
   lines.push('import { createFhirClient, type FhirClientConfig } from "@fhir-dsl/core";');
@@ -42,6 +42,9 @@ export function emitClient(hasProfiles: boolean): string {
   );
   if (hasProfiles) {
     lines.push('import type { ProfileRegistry } from "./profiles/profile-registry.js";');
+  }
+  if (hasValidator) {
+    lines.push('import { SchemaRegistry } from "./schemas/schema-registry.js";');
   }
   lines.push("");
 
@@ -55,7 +58,11 @@ export function emitClient(hasProfiles: boolean): string {
   lines.push("");
 
   lines.push("export function createClient(config: FhirClientConfig) {");
-  lines.push("  return createFhirClient<GeneratedSchema>(config);");
+  if (hasValidator) {
+    lines.push("  return createFhirClient<GeneratedSchema>({ schemas: SchemaRegistry, ...config });");
+  } else {
+    lines.push("  return createFhirClient<GeneratedSchema>(config);");
+  }
   lines.push("}");
   lines.push("");
 

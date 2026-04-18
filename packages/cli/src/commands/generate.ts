@@ -13,8 +13,15 @@ export const generateCommand = new Command("generate")
   .option("--expand-valuesets", "Generate typed unions from FHIR ValueSet bindings")
   .option("--resolve-codesystems", "Generate CodeSystem namespace objects for IntelliSense")
   .option("--include-spec", "Emit markdown spec files alongside types for AI/LLM context")
+  .option("--validator <target>", "Emit Standard Schema validators using: zod | native")
+  .option("--strict-extensible", "Treat extensible bindings as closed enums in validators")
   .action(async (opts) => {
     const resources = opts.resources ? opts.resources.split(",").map((r: string) => r.trim()) : undefined;
+
+    const validator = opts.validator as "zod" | "native" | undefined;
+    if (validator && !["zod", "native"].includes(validator)) {
+      throw new Error(`Invalid --validator value: ${validator}. Expected zod | native.`);
+    }
 
     await generate({
       version: opts.version,
@@ -26,5 +33,7 @@ export const generateCommand = new Command("generate")
       expandValueSets: opts.expandValuesets,
       resolveCodeSystems: opts.resolveCodesystems,
       includeSpec: opts.includeSpec,
+      validator,
+      strictExtensible: opts.strictExtensible,
     });
   });
