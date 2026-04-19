@@ -66,17 +66,35 @@ export function evalNav(op: NavOp, collection: unknown[]): unknown[] {
       });
 
     case "descendants": {
+      // §5.2.3: walk transitive children. Track visited object identities so
+      // cyclic FHIR graphs (e.g. Bundle entries that reference each other, or
+      // circular contained/extension chains) terminate instead of infinite-
+      // looping. `repeat()` uses an analogous `seen` Set in filtering.ts.
+      // We dedupe object nodes on the way into `result` as well: an object
+      // reached via two paths is the same descendant and should appear once,
+      // matching repeat()'s set-semantics. Primitives are not deduped (they
+      // have no identity).
       const result: unknown[] = [];
+      const seen = new WeakSet<object>();
       const stack = [...collection];
       while (stack.length > 0) {
         const item = stack.pop()!;
         if (item == null || typeof item !== "object") continue;
+        if (seen.has(item as object)) continue;
+        seen.add(item as object);
         const children = Object.values(item as Record<string, unknown>).flatMap((val) => {
           if (val == null) return [];
           return Array.isArray(val) ? val : [val];
         });
-        result.push(...children);
-        stack.push(...children.filter((c) => c != null && typeof c === "object"));
+        for (const c of children) {
+          if (c != null && typeof c === "object") {
+            if (seen.has(c as object)) continue;
+            result.push(c);
+            stack.push(c);
+          } else {
+            result.push(c);
+          }
+        }
       }
       return result;
     }

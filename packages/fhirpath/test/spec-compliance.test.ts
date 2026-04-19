@@ -705,11 +705,15 @@ describe("Tree navigation (FP-TREE-*)", () => {
     expect(ids.sort()).toEqual(["a", "a1", "b"]);
   });
 
-  // FP-TREE-002 CYCLE-TERMINATION gap: see audit/impl/fhirpath-impl-map.md
-  // (eval/nav.ts:22-36 has no visited set; cyclic inputs infinite-loop).
-  // Not enforceable as a passing/failing assertion without hanging the
-  // suite; tracked as a todo until evaluate() accepts a bailout budget.
-  it.todo("FP-TREE-002: descendants() terminates on cyclic input (needs evaluate(depthLimit) or similar)");
+  it("FP-TREE-002c: descendants() terminates on cyclic input (WeakSet guard)", () => {
+    const a: Record<string, unknown> = { id: "a" };
+    const b: Record<string, unknown> = { id: "b", next: a };
+    a.next = b; // cycle: a → b → a
+    const tree = { resourceType: "X", head: a };
+    const result = fhirpath<any>("X").descendants().evaluate(tree);
+    const ids = result.filter((r: any) => r != null && typeof r === "object" && "id" in r).map((r: any) => r.id);
+    expect(ids.sort()).toEqual(["a", "b"]);
+  });
 });
 
 /* -------------------------------------------------------------------------- */
