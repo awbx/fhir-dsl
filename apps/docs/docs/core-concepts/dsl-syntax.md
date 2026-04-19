@@ -2,31 +2,47 @@
 id: dsl-syntax
 title: DSL Syntax
 sidebar_label: DSL Syntax
+sidebar_position: 2
 ---
 
 # DSL Syntax
 
-fhir-dsl provides three builder types for interacting with FHIR servers: **search**, **read**, and **transaction**. Each follows a fluent, chainable API with full type safety.
+fhir-dsl exposes three core builder families — **search**, **read**, and **transaction / batch** — plus direct CRUD (`create`, `update`, `delete`, `patch`) and `operation()`. Every family follows the same shape: start with a `fhir.*(...)` call, chain **modifier** methods, and end at a **terminal** (`.compile()` / `.execute()` / `.stream()`).
 
-## Search Queries
+## The fluent chain
 
-Search is the primary way to find resources. Start with `fhir.search()` and chain methods:
+Three rules describe the entire surface:
+
+1. **Every chainable method returns a new builder.** Builders are immutable (see [Immutable Builders](./immutability.md)); the instance is never mutated. This means `const base = fhir.search("Patient"); base.where(...)` does **not** change `base`.
+2. **Terminals never return a builder.** `.compile()` returns a `CompiledQuery`; `.execute()` returns a `Promise`; `.stream()` returns an `AsyncIterable`. Once you hit a terminal, the chain ends.
+3. **Modifier methods chain indefinitely** and their return type stays the same shape, threading new generic slots through each call (`.include()` widens `Inc`, `.withProfile()` swaps `Prof`, `.select()` narrows `Sel` — see [Types & Generics](./types-and-generics.md)).
 
 ```typescript
 const result = await fhir
-  .search("Patient")
-  .where("family", "eq", "Smith")
-  .where("birthdate", "ge", "1990-01-01")
-  .include("general-practitioner")
-  .sort("birthdate", "desc")
-  .count(10)
-  .offset(0)
-  .execute();
+  .search("Patient")                                // start
+  .where("family", "eq", "Smith")                   // modifier
+  .where("birthdate", "ge", "1990-01-01")           // modifier
+  .include("general-practitioner")                  // modifier (widens Inc)
+  .sort("birthdate", "desc")                        // modifier
+  .count(10)                                        // modifier
+  .offset(0)                                        // modifier
+  .execute();                                       // terminal
 ```
+
+:::note Gotcha — terminal means terminal
+You cannot chain modifiers after `.compile()`. If you want to inspect and then run, call them on separate branches of the same (immutable) base builder:
+```typescript
+const base = fhir.search("Patient").where("family", "eq", "Smith");
+console.log(base.compile());   // inspect
+const page = await base.execute(); // run
+```
+:::
+
+## Search Queries
 
 ### `where(param, operator, value)`
 
-Adds a search parameter with a typed operator and value:
+Adds a typed search parameter. The operator slot is constrained by the param's **type** (`string` / `token` / `date` / …), so TypeScript refuses illegal combinations at compile time:
 
 ```typescript
 // String parameters: eq, contains, exact
@@ -46,7 +62,6 @@ Adds a search parameter with a typed operator and value:
 
 // Reference parameters: eq, identifier
 .where("patient", "eq", "Patient/123")
-.where("subject", "eq", "Patient/456")
 .where("patient", "identifier", "http://hospital.example.org|MRN-123")
 
 // Quantity parameters: eq, ne, gt, ge, lt, le, sa, eb, ap
@@ -59,15 +74,13 @@ Adds a search parameter with a typed operator and value:
 .where("url", "below", "http://example.com/fhir/")
 ```
 
-The operator is constrained by the parameter type -- TypeScript won't let you use `"contains"` on a date parameter.
-
 :::note Prefixes vs. modifiers
 FHIR splits these operators into two URL-level concepts:
 
 - **Value-prefixes** (`gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap`, `ne`) attach to the value: `birthdate=gt2020`.
 - **Modifiers** (`exact`, `contains`, `not`, `in`, `not-in`, `above`, `below`, `of-type`, `identifier`, `text`, `code-text`) attach to the parameter name: `family:exact=Smith`.
 
-The builder routes each op to the correct slot automatically. If you read `CompiledQuery.params[*]`, prefixes land on `prefix` and modifiers land on `modifier` -- never both on the same field.
+The builder routes each op to the correct slot automatically. If you read `CompiledQuery.params[*]`, prefixes land on `prefix` and modifiers land on `modifier` — never both on the same entry.
 :::
 
 ### Multi-value (OR via comma)
@@ -80,7 +93,7 @@ Pass an array to `where(..., "eq", [...])` to express an OR across values. FHIR 
 .whereIn("gender", ["male", "female"])  // shorthand
 ```
 
-OR-arrays are only valid with `eq` -- combining an array with a non-eq operator throws at `compile()` time, since FHIR doesn't allow per-value prefixes inside an OR list.
+OR-arrays are only valid with `eq` — combining an array with a non-`eq` operator throws at `compile()` time, since FHIR does not allow per-value prefixes inside an OR list.
 
 ### Functional `where` (composable conditions)
 
@@ -126,11 +139,11 @@ fhir.search("Observation").where(eb =>
 
 **`_filter` operator support.** Inside the FHIR `_filter` grammar, `contains` becomes `co`, `not` becomes `ne`, and `not-in` becomes `ni`. The following operators have no equivalent in `_filter` and will throw if used inside an OR or nested group: `exact`, `above`, `below`, `of-type`, `text`, `identifier`, `code-text`, `missing`. Use the positional `where(...)` form for those.
 
-**`_filter` server support varies.** Not every FHIR server implements `_filter` — that's why the builder only reaches for it when the simpler URL forms can't express your query.
+**`_filter` server support varies.** Not every FHIR server implements `_filter` — that is why the builder only reaches for it when the simpler URL forms cannot express your query.
 
 ### `whereMissing(param, isMissing)`
 
-Adds a `:missing` modifier to filter resources where a parameter is (or isn't) populated:
+Adds a `:missing` modifier to filter resources where a parameter is (or is not) populated:
 
 ```typescript
 .whereMissing("birthdate", true)   // birthdate:missing=true
@@ -156,165 +169,84 @@ const result = await fhir
 
 Each component key and value type is validated at compile time. The generated types carry component metadata, so only valid component names are accepted and each value is typed according to its underlying search param type.
 
-```typescript
-// Combine composite with regular where clauses
-const result = await fhir
-  .search("Observation")
-  .where("status", "eq", "final")
-  .whereComposite("code-value-quantity", {
-    code: "http://loinc.org|8480-6",
-    "value-quantity": "5.4|http://unitsofmeasure.org|mg",
-  })
-  .execute();
-```
+### `include(param, options?)` and `revinclude(source, param, options?)`
 
-:::note
-You can still use `.where()` with composite parameters by passing the pre-formatted `$`-separated string directly. `whereComposite` provides a structured, type-safe alternative.
-:::
-
-### `include(param)`
-
-Includes related resources in the response:
+Includes related resources in the response, with typed targets:
 
 ```typescript
 const result = await fhir
   .search("Patient")
-  .include("general-practitioner")
+  .include("general-practitioner")        // widens Inc with Practitioner | Organization | PractitionerRole
   .include("organization")
+  .revinclude("Observation", "subject")   // widens Inc with Observation
   .execute();
 
-// result.data: Patient[]
-// result.included: typed included resources
+// result.data:     Patient[]
+// result.included: (Practitioner | Organization | PractitionerRole | Observation)[]
 ```
 
-Valid include parameters are derived from the resource's reference fields.
-
-Pass `{ iterate: true }` to follow include chains transitively (compiles to `_include:iterate`):
+Both methods accept `{ iterate: true }` to follow include chains transitively — compiles to `_include:iterate` / `_revinclude:iterate`:
 
 ```typescript
-const result = await fhir
-  .search("MedicationRequest")
-  .include("medication")
-  .include("medication", { iterate: true })  // _include:iterate=MedicationRequest:medication
-  .execute();
+.include("medication", { iterate: true })
 ```
 
-### `revinclude(sourceResource, param)`
+### `whereChained` and `whereChain` — chained params
 
-Includes resources that **reference** the search results (the reverse of `include`):
+`whereChained` covers the one-hop case; `whereChain` handles 2–3 hops with each hop typed against the previous one:
 
 ```typescript
-const result = await fhir
-  .search("Patient")
-  .where("family", "eq", "Smith")
-  .revinclude("Observation", "subject")
-  .execute();
+// One hop
+.whereChained("subject", "Patient", "name", "eq", "Smith")
+// → subject:Patient.name=Smith
 
-// result.data: Patient[]
-// result.included: Observation[] (observations referencing these patients)
+// Two hops
+.whereChain(
+  [["encounter", "Encounter"], ["subject", "Patient"]],
+  "name", "eq", "Smith",
+)
+// → encounter:Encounter.subject:Patient.name=Smith
 ```
 
-Both arguments are type-checked: `"Observation"` must be a resource that has a reference param targeting `Patient`, and `"subject"` must be that specific param.
+Recursion is capped at three typed hops to keep TypeScript inference well-behaved. Deeper chains fall back to the untyped overload.
 
-`revinclude` accepts the same `{ iterate: true }` option as `include`.
+### `has(sourceResource, refParam, searchParam, op, value)` — reverse chain
 
-### `whereChained(refParam, targetResource, targetParam, op, value)`
-
-Searches through a reference to filter by properties of the referenced resource:
+Filters results based on properties of resources that **reference** them:
 
 ```typescript
-// Find observations where the referenced patient's name is "Smith"
-const result = await fhir
-  .search("Observation")
-  .whereChained("subject", "Patient", "name", "eq", "Smith")
-  .execute();
-
-// Compiles to: Observation?subject:Patient.name=Smith
+.has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
+// → Patient?_has:Observation:subject:code=http://loinc.org|85354-9
 ```
 
-All five arguments are type-checked:
-1. `"subject"` must be a reference param on Observation
-2. `"Patient"` must be a valid target of that reference
-3. `"name"` must be a valid search param on Patient
-4. `"eq"` must be a valid operator for string params
-5. The value type matches the param type
+`_has` filters the primary results — it does not add included resources. Use `revinclude` if you want the referencing resources in the response.
+
+### Meta-parameter helpers
+
+These methods wrap the FHIR meta search parameters (`_id`, `_lastUpdated`, `_tag`, `_security`, `_source`) and the result-shaping parameters (`_summary`, `_total`, `_contained`, `_containedType`).
 
 ```typescript
-// Chain through with non-eq operators
-.whereChained("subject", "Patient", "birthdate", "ge", "1990-01-01")
-// Compiles to: subject:Patient.birthdate=ge1990-01-01
-```
-
-### `whereChain(hops, op, value)` — multi-hop chains
-
-`whereChained` covers the one-hop case. For two or more hops, use `whereChain`:
-
-```typescript
-// Two hops: through Encounter -> Patient
 fhir
-  .search("Observation")
-  .whereChain(
-    [["encounter", "Encounter"], ["subject", "Patient"]],
-    "name",
-    "eq",
-    "Smith",
-  )
-  .execute();
-// Compiles to: encounter:Encounter.subject:Patient.name=Smith
-```
-
-Each hop is `[refParam, targetResource]` and is type-checked against the previous step. The trailing `(op, value)` is validated against the terminal search param. Recursion is capped at three hops to keep TS inference well-behaved.
-
-### `has(sourceResource, refParam, searchParam, op, value)`
-
-Filters results based on properties of resources that **reference** them (reverse chaining):
-
-```typescript
-// Find patients that have at least one final observation with a specific code
-const result = await fhir
   .search("Patient")
-  .has("Observation", "subject", "code", "eq", "http://loinc.org|85354-9")
-  .execute();
-
-// Compiles to: Patient?_has:Observation:subject:code=http://loinc.org|85354-9
+  .whereId("123", "456")                       // _id=123,456
+  .whereLastUpdated("ge", "2024-01-01")        // _lastUpdated=ge2024-01-01
+  .withTag("http://acme.com/tags|vip")         // _tag=...
+  .withSecurity("R")                           // _security=R
+  .fromSource("https://acme.com/fhir")         // _source=...
+  .summary("count")                            // _summary=count
+  .total("accurate")                           // _total=accurate
+  .contained("true")                           // _contained=true
+  .containedType("container");                 // _containedType=container
 ```
 
-All arguments are type-checked:
-1. `"Observation"` must be a resource with a reference param targeting Patient
-2. `"subject"` must be that reference param
-3. `"code"` must be a valid search param on Observation
-4. Operator and value are validated against the param type
+The mode arguments are typed as their FHIR-defined literal unions (`"true" | "false" | "text" | "data" | "count"`, etc.).
+
+### `sort`, `count`, `offset`
 
 ```typescript
-// Combine _has with regular where clauses
-const result = await fhir
-  .search("Patient")
-  .where("active", "eq", "true")
-  .has("Observation", "subject", "date", "ge", "2024-01-01")
-  .execute();
-```
-
-:::note
-`_has` filters the primary results — it doesn't add included resources. Use `revinclude` if you want the referencing resources in the response.
-:::
-
-### `sort(param, direction?)`
-
-Sorts results by a search parameter:
-
-```typescript
-.sort("birthdate", "desc")   // Descending
-.sort("family", "asc")       // Ascending (default)
-.sort("family")              // Ascending (default)
-```
-
-### `count(n)` and `offset(n)`
-
-Controls pagination:
-
-```typescript
-.count(25)    // Return up to 25 results
-.offset(50)   // Skip the first 50 results
+.sort("birthdate", "desc")   // default: asc
+.count(25)                   // _count=25
+.offset(50)                  // _getpagesoffset=50
 ```
 
 ### `select(fields)`
@@ -335,41 +267,75 @@ const result = await fhir
 Behavior:
 
 - Only top-level element names are accepted — FHIR `_elements` does not support nested paths like `"name.given"`.
-- `resourceType` is always preserved in the narrowed type (FHIR servers include it regardless).
+- `resourceType` is always preserved in the narrowed type.
 - Calling `.select()` again replaces the previous selection; selections do not accumulate.
-- Omitting `.select()` preserves the full resource in the result type.
 - Per the FHIR spec, servers return *at least* the requested elements — they may return more. The narrowed TypeScript type reflects what you asked for, not what the server is guaranteed to return.
 
-Compiled output:
+### Escape hatches
+
+When a query needs a feature outside the typed surface, the builder offers untyped pass-through methods. They emit raw URL parameters and skip schema validation — use them sparingly.
 
 ```typescript
-const query = fhir
+fhir
   .search("Patient")
-  .select(["id", "name"])
-  .compile();
-
-// {
-//   method: "GET",
-//   path: "Patient",
-//   params: [{ name: "_elements", value: "id,name" }]
-// }
+  .filter("name eq 'Smith' and birthdate gt 1990")  // _filter=...
+  .namedQuery("everything", { start: "2024-01-01" }) // _query=everything&start=...
+  .text("diabetes")                                  // _text=diabetes
+  .content("blood pressure")                         // _content=...
+  .inList("active-list");                            // _list=active-list
 ```
 
-### Search Result Type
+### Profile-aware search
+
+Pass a generated profile name as the second argument to `search()` to narrow `Prof`:
+
+```typescript
+const result = await fhir
+  .search("Patient", "us-core-patient")
+  .where("family", "eq", "Jones")
+  .execute();
+// result.data: USCorePatient[] — profile-required fields (gender, identifier) are no longer optional
+```
+
+See [Types & Generics](./types-and-generics.md#prof---withprofile-and-search-overload) for how the `Prof` slot threads through `.select()`.
+
+## Compile vs execute
+
+Every search / read / transaction / operation builder splits **planning** from **running**:
+
+```typescript
+// Plan — no network I/O
+const q = fhir
+  .search("Patient")
+  .where("family", "eq", "Smith")
+  .compile();
+// q = { method: "GET", path: "Patient", params: [{ name: "family", value: "Smith" }] }
+
+// Run — fires fetch, parses bundle, returns typed result
+const r = await fhir.search("Patient").where("family", "eq", "Smith").execute();
+```
+
+`CompiledQuery` is `{ method, path, params, headers?, body? }` (`packages/core/src/compiled-query.ts`). Log it, diff it in tests, or hand it to a custom transport.
+
+## Search result type
 
 `execute()` returns a `SearchResult`:
 
 ```typescript
 interface SearchResult<Primary, Included> {
   data: Primary[];
-  included: Included[];
-  total: number | undefined;
+  included: [Included] extends [never] ? [] : Included[];
+  total?: number | undefined;
+  link?: BundleLink[] | undefined;
+  raw: unknown;            // raw Bundle, for escape hatches
 }
 ```
 
-### `stream(options?)`
+Match-mode entries go to `data`; include-mode entries go to `included`. The raw Bundle is still available on `result.raw`.
 
-Returns an `AsyncIterable` that yields individual resources across all pages, automatically following Bundle pagination links:
+## Streaming
+
+`stream()` returns an `AsyncIterable` that yields individual resources across all pages, automatically following Bundle pagination links:
 
 ```typescript
 for await (const patient of fhir.search("Patient").stream()) {
@@ -382,68 +348,27 @@ Supports cancellation via `AbortSignal`:
 ```typescript
 const controller = new AbortController();
 for await (const patient of fhir.search("Patient").stream({ signal: controller.signal })) {
-  console.log(patient.id);
+  if (shouldStop) controller.abort();
 }
 ```
 
-See the [Streaming & Lazy Loading](/docs/guides/streaming) guide for full details.
-
-## Meta-parameter helpers
-
-These methods wrap the FHIR meta search parameters (`_id`, `_lastUpdated`, `_tag`, `_security`, `_source`) and the result-shaping parameters (`_summary`, `_total`, `_contained`, `_containedType`).
-
-```typescript
-fhir
-  .search("Patient")
-  .whereId("123", "456")                       // _id=123,456
-  .whereLastUpdated("ge", "2024-01-01")        // _lastUpdated=ge2024-01-01
-  .withTag("http://acme.com/tags|vip")         // _tag=...
-  .withSecurity("R")                           // _security=R
-  .fromSource("https://acme.com/fhir")         // _source=...
-  .summary("count")                            // _summary=count
-  .total("accurate")                           // _total=accurate
-  .contained("true")                           // _contained=true
-  .containedType("container");                 // _containedType=container
-```
-
-The mode arguments to `summary`, `total`, `contained`, and `containedType` are typed as their FHIR-defined literal unions (`"true" | "false" | "text" | "data" | "count"`, etc.).
-
-## Escape hatches
-
-When a query needs a feature outside the typed surface, the builder offers untyped pass-through methods. They emit raw URL parameters and skip schema validation -- use them sparingly.
-
-```typescript
-fhir
-  .search("Patient")
-  .filter("name eq 'Smith' and birthdate gt 1990")  // _filter=...
-  .namedQuery("everything", { start: "2024-01-01" }) // _query=everything&start=...
-  .text("diabetes")        // _text=diabetes
-  .content("blood pressure") // _content=...
-  .inList("active-list");   // _list=active-list
-```
-
-- `.filter(expr)` -- FHIR `_filter` search expression.
-- `.namedQuery(name, params?)` -- FHIR `_query` plus its named-query parameters.
-- `.text(q)`, `.content(q)`, `.inList(listId)` -- the corresponding `_text`, `_content`, `_list` parameters.
-
 ## POST _search
 
-Long URLs (chained params, big OR lists, sensitive identifiers) can exceed proxy/server URL limits or leak data through access logs. `.usePost()` switches the compiled query to `POST <Resource>/_search` with an `application/x-www-form-urlencoded` body:
+Long URLs (chained params, big OR lists, sensitive identifiers) can exceed proxy/server URL limits or leak data through access logs. `.usePost()` forces the compiled query to `POST <Resource>/_search` with `application/x-www-form-urlencoded`:
 
 ```typescript
 const compiled = fhir
   .search("Patient")
-  .whereIn("identifier", ["MRN-001", "MRN-002", /* ... */])
+  .whereIn("identifier", ["MRN-001", "MRN-002" /* ... */])
   .usePost()
   .compile();
 
 // compiled.method === "POST"
 // compiled.path   === "Patient/_search"
-// compiled.body   === "identifier=MRN-001%2CMRN-002..."
 // compiled.headers["Content-Type"] === "application/x-www-form-urlencoded"
 ```
 
-The builder also auto-switches to POST when the serialized GET URL would exceed ~1900 characters, so most callers never need to opt in explicitly.
+The builder also **auto-switches** to POST when the serialized GET URL exceeds **1900 UTF-8 bytes** (`DEFAULT_AUTO_POST_THRESHOLD`, `packages/core/src/search-query-builder.ts:61`). Override the ceiling with `.getUrlByteLimit(bytes)` — despite the name, this is a setter that returns a new builder.
 
 ## Composition: `$if` and `$call`
 
@@ -472,41 +397,28 @@ Always applies the transformer; returns whatever the callback returns. Lets you 
 
 ```typescript
 // Reusable fragment, defined once
-const onlyFinal = <T extends { where: (p: "status", op: "eq", v: "final") => T }>(qb: T) =>
-  qb.where("status", "eq", "final");
+const onlyFinal = <QB extends SearchQueryBuilder<any, any, any, any, any, any>>(qb: QB): QB =>
+  qb.where("status", "eq", "final") as QB;
 
-const labs = await fhir
-  .search("Observation")
-  .where("category", "eq", "laboratory")
-  .$call(onlyFinal)
-  .execute();
-
-const vitals = await fhir
-  .search("Observation")
-  .where("category", "eq", "vital-signs")
-  .$call(onlyFinal)
-  .execute();
+const labs   = await fhir.search("Observation").where("category", "eq", "laboratory").$call(onlyFinal).execute();
+const vitals = await fhir.search("Observation").where("category", "eq", "vital-signs").$call(onlyFinal).execute();
 ```
 
-`$call` is also handy for committing to a non-builder result mid-chain — for example, `qb.$call((b) => b.compile())` returns the `CompiledQuery` directly.
+See [Immutable Builders](./immutability.md) for more composition patterns.
 
-## Read Queries
+## Read queries
 
-Read a single resource by type and ID:
+Read a single resource by type and id:
 
 ```typescript
 const patient = await fhir.read("Patient", "123").execute();
 // patient: Patient
-```
 
-The returned type matches the resource type argument.
-
-### Compile a Read
-
-```typescript
 const query = fhir.read("Patient", "123").compile();
 // { method: "GET", path: "Patient/123", params: [] }
 ```
+
+`.ifNoneMatch(etag)` and `.ifModifiedSince(date)` add conditional read headers; the server replies `304` on an unchanged resource, surfaced as `FhirRequestError` so you can branch on `err.status`.
 
 ## Transactions
 
@@ -515,81 +427,15 @@ Group multiple operations into an atomic FHIR transaction:
 ```typescript
 const result = await fhir
   .transaction()
-  .create({
-    resourceType: "Patient",
-    name: [{ family: "Doe" }],
-    gender: "female",
-  })
-  .update({
-    resourceType: "Patient",
-    id: "existing-123",
-    name: [{ family: "Smith" }],
-    gender: "male",
-  })
+  .create({ resourceType: "Patient", name: [{ family: "Doe" }], gender: "female" })
+  .update({ resourceType: "Patient", id: "existing-123", name: [{ family: "Smith" }], gender: "male" })
   .delete("Observation", "obs-456")
   .execute();
 ```
 
-### `create(resource)`
+`.compile()` returns a FHIR Bundle (`type: "transaction"`). Use `batch()` for the non-atomic variant.
 
-Adds a POST entry to the transaction Bundle:
-
-```typescript
-.create({
-  resourceType: "Observation",
-  status: "final",
-  code: { text: "Blood Pressure" },
-  subject: { reference: "Patient/123" },
-})
-```
-
-### `update(resource)`
-
-Adds a PUT entry. The resource must have an `id`:
-
-```typescript
-.update({
-  resourceType: "Patient",
-  id: "123",
-  name: [{ family: "Updated" }],
-})
-```
-
-### `delete(resourceType, id)`
-
-Adds a DELETE entry:
-
-```typescript
-.delete("Observation", "456")
-```
-
-### Compile a Transaction
-
-```typescript
-const bundle = fhir
-  .transaction()
-  .create({ resourceType: "Patient", name: [{ family: "Doe" }] })
-  .compile();
-// Returns a FHIR Bundle with type "transaction"
-```
-
-## Profile-Aware Queries
-
-Pass a profile URL as the second argument to `search()` to get narrowed types:
-
-```typescript
-const result = await fhir
-  .search("Patient", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
-  .where("name", "eq", "Smith")
-  .execute();
-
-// result.data is USCorePatientProfile[]
-// Profile-required fields (like gender) are no longer optional
-```
-
-This uses the `ProfileRegistry` in your generated schema to resolve the correct type.
-
-## Operator Reference
+## Operator reference
 
 | Parameter Type | Valid Operators |
 |---|---|
@@ -600,17 +446,13 @@ This uses the `ProfileRegistry` in your generated schema to resolve the correct 
 | `quantity` | `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap` |
 | `reference` | `eq`, `identifier` |
 | `uri` | `eq`, `above`, `below` |
-| `composite` | N/A (use `whereComposite` with structured component values) |
+| `composite` | N/A — use `whereComposite` with structured component values |
 
-`:missing` is cross-cutting -- use `.whereMissing(param, true | false)` rather than passing it through `where`.
+`:missing` is cross-cutting — use `.whereMissing(param, true | false)` rather than passing it through `where`.
 
-:::note
-Operators `sa` (starts after) and `eb` (ends before) are FHIR-specific date/quantity operators for interval comparisons. `ap` means approximately equal.
-:::
+## FHIR search spec coverage
 
-## FHIR R5 search spec coverage
-
-Mapping of [FHIR R5 search](https://fhir.hl7.org/fhir/search.html) features to the builder API:
+Mapping of [FHIR search](https://fhir.hl7.org/fhir/search.html) features to the builder API:
 
 | FHIR feature | Builder API |
 |---|---|
@@ -625,9 +467,10 @@ Mapping of [FHIR R5 search](https://fhir.hl7.org/fhir/search.html) features to t
 | Chained params (multi-hop) | `.whereChain([hops], op, value)` |
 | `_has` reverse-chain | `.has(rt, param, target, op, value)` |
 | Composite params | `.whereComposite(name, components)` |
-| `_filter` (FHIRPath-like search expr) | `.filter(expr)` |
-| `_query` (named queries) | `.namedQuery(name, params?)` |
+| `_filter` | `.filter(expr)` or compiled automatically by condition trees |
+| `_query` | `.namedQuery(name, params?)` |
 | `_text`, `_content`, `_list` | `.text(q)`, `.content(q)`, `.inList(listId)` |
-| POST `_search` | `.usePost()` (auto-switch over ~1900 chars) |
+| POST `_search` | `.usePost()` (auto-switch over 1900 UTF-8 bytes) |
 | `_count`, `_sort` | `.count(n)`, `.sort(param, dir)` |
 | `_elements` | `.select([...fields])` |
+| `Prefer: respond-async` + 202 polling | `.execute({ prefer: { respondAsync: true } })` — see [Async Pattern](./async-pattern.md) |

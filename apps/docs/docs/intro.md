@@ -2,40 +2,29 @@
 id: intro
 title: Introduction
 sidebar_label: Introduction
+description: Type-safe FHIR query builder and code generator for TypeScript, inspired by Kysely.
 slug: /
 ---
 
 # fhir-dsl
 
-A fully type-safe FHIR query builder and code generator for TypeScript, inspired by [Kysely](https://github.com/kysely-org/kysely).
+Type-safe FHIR queries in TypeScript, with types generated straight from the official FHIR StructureDefinitions and any Implementation Guide you point it at.
 
-Build FHIR REST queries with **compile-time type safety** for resources, search parameters, profiles, and includes -- no more string guessing.
+## What you get
 
-## Why fhir-dsl?
+- **Compile-time checked queries** — resource types, search parameters, operators, includes, chained params, `_has`, composites, and profile fields are all narrowed by TypeScript before you ever hit the network.
+- **A generator, not a schema download** — `@fhir-dsl/cli` emits real `.ts` files into your repo from FHIR R4/R4B/R5/R6 plus any `hl7.fhir.*` IG package; optional Standard Schema validators (zod or zero-dep native) come with the same flag.
+- **A Kysely-style fluent builder** — immutable, composable, with `.include()` / `.revinclude()` / `.whereChained()` / `.has()` / `.transaction()` / `.batch()` / `.operation()` plus `$if` / `$call` escape hatches.
 
-Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, memorizing search parameter names, and hoping your query strings are correct. Bugs surface at runtime, not at build time.
+## 60 seconds in
 
-**fhir-dsl** fixes this by generating TypeScript types directly from official FHIR StructureDefinitions and wiring them into a fluent query builder. The result: autocomplete in your editor, compile-time validation of every query, and zero runtime overhead.
-
-## Key Benefits
-
-- **Full type safety** -- Resource types, search parameters, operators, and includes are all checked at compile time.
-- **Profile-aware queries** -- Query against US Core or any custom Implementation Guide with automatic type narrowing.
-- **Code generation from spec** -- Generate types from any FHIR version (R4, R4B, R5, R6) and any published IG.
-- **Immutable builders** -- Every method returns a new builder instance. Safe to reuse, fork, and compose.
-- **Zero runtime dependencies** -- The core DSL depends only on `@fhir-dsl/types`.
-- **Dual ESM/CJS** -- Works in any Node.js environment out of the box.
-
-## What It Looks Like
-
-```typescript
-import { createClient } from "./fhir";
+```ts
+import { createClient } from "./fhir/r4";
 
 const fhir = createClient({
   baseUrl: "https://hapi.fhir.org/baseR4",
 });
 
-// Every part of this query is type-checked
 const result = await fhir
   .search("Patient")
   .where("family", "eq", "Smith")
@@ -45,27 +34,16 @@ const result = await fhir
   .count(10)
   .execute();
 
-// result.data is Patient[], result.included is typed too
-for (const patient of result.data) {
-  console.log(patient.name?.[0]?.family); // fully typed
-}
+// result.data: Patient[]
+// result.included: (Practitioner | Organization)[]
+// result.total?: number
+for (const p of result.data) console.log(p.name?.[0]?.family);
 ```
 
-## Packages
+The `./fhir/r4` import is produced by one CLI call — see [Quick Start](/docs/getting-started/quick-start).
 
-| Package | Description |
-|---|---|
-| `@fhir-dsl/core` | Query builder DSL (search, read, transactions) |
-| `@fhir-dsl/cli` | CLI for generating types from FHIR specs |
-| `@fhir-dsl/types` | Base FHIR type definitions |
-| `@fhir-dsl/runtime` | HTTP executor with pagination and error handling |
-| `@fhir-dsl/fhirpath` | Type-safe FHIRPath expression builder |
-| `@fhir-dsl/generator` | Code generation engine |
-| `@fhir-dsl/utils` | Shared utilities |
+## Next
 
-## Who Is This For?
-
-- **Backend developers** building FHIR-connected services in TypeScript
-- **Health tech teams** who want compile-time guarantees over FHIR APIs
-- **EHR integrators** working with US Core, IPS, or custom profiles
-- **Anyone** tired of debugging FHIR query strings at runtime
+- [Installation](/docs/getting-started/installation) — packages, peer versions, and the full `generate` flag set.
+- [Quick Start](/docs/getting-started/quick-start) — under five minutes from install to typed response.
+- [Core Concepts](/docs/core-concepts/overview) — how the schema, search-param discriminator, and profile narrowing thread together.

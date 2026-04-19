@@ -60,10 +60,11 @@ What each call contributes:
 ### Result shape
 
 ```typescript
-const { data, included, next } = cohort;
+const { data, included, link, raw } = cohort;
 //      ^ Array of Patient narrowed to { id?; name?; birthDate?; address? }
 //             ^ Array typed as Practitioner | Condition | MedicationRequest
-//                       ^ Pagination cursor for the next page
+//                       ^ BundleLink[]; pagination lives at link.find(l => l.relation === "next")?.url
+//                             ^ The raw Bundle for anything the typed fields miss
 ```
 
 The projection flows into the result type — fields you didn't select won't appear in autocomplete.

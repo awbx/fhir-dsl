@@ -2,160 +2,107 @@
 id: quick-start
 title: Quick Start
 sidebar_label: Quick Start
+description: Under five minutes from install to your first typed FHIR query.
 ---
 
 # Quick Start
 
-Get from zero to a type-safe FHIR query in three steps.
+Under five minutes from install to a typed response. Uses the public HAPI test server at `https://hapi.fhir.org/baseR4`.
 
-## Step 1: Generate Types
-
-Run the CLI to generate TypeScript types from the FHIR R4 specification:
+## 1. Install and generate
 
 ```bash
-npx @fhir-dsl/cli generate --version r4 --out ./src/fhir
+npm install @fhir-dsl/core @fhir-dsl/runtime
+npm install -D @fhir-dsl/cli
+npx @fhir-dsl/cli generate --version r4 --ig hl7.fhir.us.core@6.1.0 --out ./src/fhir
 ```
 
-This downloads the official FHIR R4 StructureDefinitions and generates typed interfaces for every resource, search parameter, and include relationship.
+The last line writes `./src/fhir/r4/` with `client.ts`, `resources/*.ts`, `profiles/*.ts`, `search-params/*.ts`, and (if `--validator` was passed) `schemas/*.ts`.
 
-The generated output looks like this:
+## 2. Create a client
 
-```
-src/fhir/
-  r4/
-    index.ts            # Schema type + createClient helper
-    resources/
-      patient.ts        # Patient interface
-      observation.ts    # Observation interface
-      ...               # One file per resource
-    search-params.ts    # Typed search parameters
-    registry.ts         # Type registries
-    client.ts           # Pre-typed createClient()
-```
-
-### With Implementation Guide Profiles
-
-To include US Core (or any IG) profiles:
-
-```bash
-npx @fhir-dsl/cli generate \
-  --version r4 \
-  --ig hl7.fhir.us.core@6.1.0 \
-  --out ./src/fhir
-```
-
-This adds a `profiles/` directory with narrowed types for each profile.
-
-### Generate Only Specific Resources
-
-If you only need a subset of resources:
-
-```bash
-npx @fhir-dsl/cli generate \
-  --version r4 \
-  --resources Patient,Observation,Encounter \
-  --out ./src/fhir
-```
-
-## Step 2: Create a Client
-
-Use the generated `createClient` helper for a fully typed client:
-
-```typescript
+```ts
+// src/fhir.ts
 import { createClient } from "./fhir/r4";
 
-const fhir = createClient({
+export const fhir = createClient({
   baseUrl: "https://hapi.fhir.org/baseR4",
+  // auth: { type: "bearer", credentials: process.env.FHIR_TOKEN! },
 });
 ```
 
-Or if you need authentication:
+## 3. First typed search
 
-```typescript
-const fhir = createClient({
-  baseUrl: "https://your-fhir-server.com/fhir",
-  auth: {
-    type: "bearer",
-    credentials: "your-access-token",
-  },
-});
-```
+```ts
+import { fhir } from "./fhir";
 
-## Step 3: Query With Type Safety
-
-### Search for Resources
-
-```typescript
 const result = await fhir
   .search("Patient")
   .where("family", "eq", "Smith")
   .where("birthdate", "ge", "1990-01-01")
   .sort("birthdate", "desc")
-  .count(10)
+  .count(5)
   .execute();
 
-// result.data is Patient[]
-for (const patient of result.data) {
-  console.log(patient.name?.[0]?.family);
-  console.log(patient.birthDate);
+// Expected shape (typed, not just guessed):
+//   result: {
+//     data: Patient[];
+//     total?: number;
+//     included: never[];    // no .include() called
+//     link?: BundleLink[];
+//     raw: unknown;         // the raw Bundle response
+//   }
+for (const p of result.data) {
+  console.log(p.id, p.name?.[0]?.family, p.birthDate);
 }
 ```
 
-Every argument is type-checked:
-- `"Patient"` must be a valid resource type
-- `"family"` must be a valid search parameter for Patient
-- `"eq"` must be a valid operator for string parameters
-- The value type is validated against the parameter type
+Every argument is narrowed:
 
-### Read a Single Resource
+- `"Patient"` is constrained to resource types in the generated schema.
+- `"family"` autocompletes from the Patient search params.
+- `"eq"` is valid because `family` is a `string` param; `"gt"` would be a type error.
+- `result.data[0].birthDate` is `FhirDate | undefined`, not `any`.
 
-```typescript
-const patient = await fhir.read("Patient", "123").execute();
-// patient is typed as Patient
-```
+## 4. One advanced query
 
-### Build Transactions
+Cross-reference search with `.whereChained` plus `_include` to pull related resources in a single request:
 
-```typescript
-const bundle = await fhir
-  .transaction()
-  .create({
-    resourceType: "Patient",
-    name: [{ family: "Doe", given: ["Jane"] }],
-    gender: "female",
-  })
-  .execute();
-```
+```ts
+import { fhir } from "./fhir";
 
-### Compile Without Executing
-
-Inspect the raw query without sending it:
-
-```typescript
-const query = fhir
+// Observations whose subject is a Patient named "Smith",
+// with the Patient and the performing Practitioner included in the bundle.
+const obs = await fhir
   .search("Observation")
+  .whereChained(["subject", "Patient"], "family", "eq", "Smith")
   .where("status", "eq", "final")
-  .count(50)
-  .compile();
+  .include("subject")
+  .include("performer")
+  .count(20)
+  .execute();
 
-console.log(query);
-// {
-//   method: "GET",
-//   path: "Observation",
-//   params: [
-//     { name: "status", value: "final" },
-//     { name: "_count", value: 50 }
-//   ]
-// }
+// obs.data is Observation[]
+// obs.included is typed as (Patient | Practitioner | PractitionerRole | Organization | ...)[]
+//   — the exact union comes from the generated `includes` map.
+for (const o of obs.data) {
+  console.log(o.code.coding?.[0]?.display, o.valueQuantity?.value, o.valueQuantity?.unit);
+}
+
+for (const inc of obs.included ?? []) {
+  if (inc.resourceType === "Patient") console.log("patient:", inc.id);
+}
 ```
 
-:::tip
-`compile()` is useful for debugging, logging, or when you want to execute the query with a custom HTTP client.
-:::
+The compiled URL (visible via `.compile()` instead of `.execute()`) is:
 
-## What's Next?
+```
+GET Observation?subject:Patient.family=Smith&status=final&_include=Observation:subject&_include=Observation:performer&_count=20
+```
 
-- Learn about [Core Concepts](/docs/core-concepts/overview) to understand the type system
-- See more [Examples](/docs/examples/patient) for real-world patterns
-- Compose dynamic queries with [`$if` / `$call`](/docs/core-concepts/dsl-syntax#composition-if-and-call) and the [functional `where(callback)`](/docs/core-concepts/dsl-syntax#functional-where-composable-conditions) overload
-- Set up the [CLI](/docs/cli/usage) for your project
+## Next steps
+
+- [Core Concepts](/docs/core-concepts/overview) — how the 6-generic `SearchQueryBuilder` threads schema, profile, selection, and include-union through every chained call.
+- [DSL Syntax Reference](/docs/core-concepts/dsl-syntax) — every method: `whereIn`, `whereMissing`, `whereComposite`, `has`, `withProfile`, `select`, `summary`, `total`, `usePost`, `$if` / `$call`.
+- [CLI Usage](/docs/cli/usage) — every generator flag, output layout, and IG conventions.
+- [Validation Guide](/docs/guides/validation) — wiring zod or native Standard Schema validators into `.validate()`.
