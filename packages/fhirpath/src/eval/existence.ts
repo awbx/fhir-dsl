@@ -35,14 +35,16 @@ export function evalExistence(
     case "all":
       return [collection.every((item) => isTruthy(ctx.evaluateSub(op.predicate.ops, item)))];
 
+    // §5.1.4 / §5.1.6: vacuous truth — allTrue/allFalse on [] return [true].
+    // `anyTrue`/`anyFalse` on [] return [false]: no element satisfies the test.
     case "allTrue":
-      return [collection.length > 0 && collection.every((item) => item === true)];
+      return [collection.every((item) => item === true)];
 
     case "anyTrue":
       return [collection.some((item) => item === true)];
 
     case "allFalse":
-      return [collection.length > 0 && collection.every((item) => item === false)];
+      return [collection.every((item) => item === false)];
 
     case "anyFalse":
       return [collection.some((item) => item === false)];

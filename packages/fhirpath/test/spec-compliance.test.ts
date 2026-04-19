@@ -437,9 +437,7 @@ describe("Existence (FP-EXI-*)", () => {
     expect(expr.evaluate(patientNoName)).toEqual([true]);
   });
 
-  test.fails("FP-EXI-004: allTrue() on empty collection returns [true] (spec §5.1.4)", () => {
-    // Impl: eval/existence.ts:37-38 returns `[collection.length > 0 && ...]`.
-    // Empty collection → `[false]`. Spec requires `[true]`.
+  it("FP-EXI-004: allTrue() on empty collection returns [true] (spec §5.1.4)", () => {
     const data = { resourceType: "X", items: [] as boolean[] };
     expect(fhirpath<any>("X").items.allTrue().evaluate(data)).toEqual([true]);
   });
@@ -459,8 +457,7 @@ describe("Existence (FP-EXI-*)", () => {
     expect(fhirpath<any>("X").items.anyTrue().evaluate(data)).toEqual([false]);
   });
 
-  test.fails("FP-EXI-006: allFalse() on empty collection returns [true] (spec §5.1.6)", () => {
-    // Impl: eval/existence.ts:43-44 same bug pattern as allTrue.
+  it("FP-EXI-006: allFalse() on empty collection returns [true] (spec §5.1.6)", () => {
     const data = { resourceType: "X", items: [] as boolean[] };
     expect(fhirpath<any>("X").items.allFalse().evaluate(data)).toEqual([true]);
   });
