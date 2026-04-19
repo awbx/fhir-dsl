@@ -204,6 +204,42 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("OR via comma (Phase 3)", () => {
+    it("compiles where with array value as comma-joined", () => {
+      const query = createBuilder("Patient")
+        .where("gender" as any, "eq", ["male", "female"])
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "gender", value: "male,female" });
+    });
+
+    it("compiles whereIn as comma-joined eq", () => {
+      const query = createBuilder("Patient")
+        .whereIn("subject" as any, ["Patient/1", "Patient/2", "Patient/3"])
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "subject", value: "Patient/1,Patient/2,Patient/3" });
+    });
+
+    it("throws when array value is combined with a non-eq op", () => {
+      expect(() => createBuilder("Patient").where("birthdate", "ge" as any, ["2020", "2021"] as any)).toThrow(
+        /array values require the/,
+      );
+    });
+
+    it("preserves single-value where behavior alongside array overload", () => {
+      const query = createBuilder("Patient")
+        .where("gender" as any, "eq", "male")
+        .where("status" as any, "eq", ["active", "completed"])
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "gender", value: "male" },
+        { name: "status", value: "active,completed" },
+      ]);
+    });
+  });
+
   describe("meta params (Phase 2)", () => {
     it("compiles whereMissing(true/false) as :missing modifier", () => {
       const query = createBuilder("Patient").whereMissing("family", true).whereMissing("birthdate", false).compile();

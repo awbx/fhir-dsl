@@ -119,7 +119,36 @@ export class SearchQueryBuilderImpl<
     param: K,
     op: SearchPrefixFor<SP[K]>,
     value: SP[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  where<K extends string & keyof SP>(
+    param: K,
+    op: "eq",
+    values: readonly (SP[K] extends { value: infer V } ? V : string)[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  where<K extends string & keyof SP>(
+    param: K,
+    op: SearchPrefixFor<SP[K]> | "eq",
+    value: unknown,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    if (Array.isArray(value)) {
+      if (op !== "eq") {
+        throw new Error(
+          `where(${JSON.stringify(param)}, ...): array values require the "eq" operator (got "${String(op)}"). FHIR forbids per-value prefixes inside an OR list.`,
+        );
+      }
+      const joined = (value as readonly (string | number)[]).map((v) => String(v)).join(",");
+      return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+        this.#state.resourceType,
+        this.#executor,
+        {
+          ...this.#state,
+          params: [...this.#state.params, { name: param, value: joined }],
+        },
+        undefined,
+        this.#urlExecutor,
+        this.#schemas,
+      );
+    }
     return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,
@@ -138,6 +167,13 @@ export class SearchQueryBuilderImpl<
       this.#urlExecutor,
       this.#schemas,
     );
+  }
+
+  whereIn<K extends string & keyof SP>(
+    param: K,
+    values: readonly (SP[K] extends { value: infer V } ? V : string)[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return this.where(param, "eq" as SearchPrefixFor<SP[K]>, values as never);
   }
 
   whereMissing<K extends string & keyof SP>(param: K, missing: boolean): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {

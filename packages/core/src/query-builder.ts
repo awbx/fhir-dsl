@@ -74,6 +74,25 @@ export interface SearchQueryBuilder<
     value: SP[K] extends { value: infer V } ? V : string,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /**
+   * Multi-value OR: emits a single `param=v1,v2,v3` query.
+   * Only the `eq` operator is allowed — FHIR forbids per-value prefixes inside an OR list.
+   */
+  where<K extends string & keyof SP>(
+    param: K,
+    op: "eq",
+    values: readonly (SP[K] extends { value: infer V } ? V : string)[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /**
+   * Multi-value OR shorthand — equivalent to `where(param, "eq", values)`.
+   * Emits `param=v1,v2,v3`.
+   */
+  whereIn<K extends string & keyof SP>(
+    param: K,
+    values: readonly (SP[K] extends { value: infer V } ? V : string)[],
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   /** FHIR `:missing` modifier — `param:missing=true|false` */
   whereMissing<K extends string & keyof SP>(param: K, missing: boolean): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
