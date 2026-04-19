@@ -394,6 +394,87 @@ for await (const page of paginate(executor, firstPage)) {
 }
 ```
 
+## Advanced Search Patterns
+
+### OR across multiple values
+
+```typescript
+// Either gender, in one round-trip
+const result = await fhir
+  .search("Patient")
+  .whereIn("gender", ["male", "female"])
+  .execute();
+// Patient?gender=male,female
+```
+
+### Filter by missing data
+
+```typescript
+// Patients with no recorded birthdate
+const result = await fhir
+  .search("Patient")
+  .whereMissing("birthdate", true)
+  .execute();
+```
+
+### Multi-hop chained search
+
+```typescript
+// Observations whose Encounter's Patient is named "Smith"
+const result = await fhir
+  .search("Observation")
+  .whereChain(
+    [["encounter", "Encounter"], ["subject", "Patient"]],
+    "name",
+    "eq",
+    "Smith",
+  )
+  .execute();
+```
+
+### Transitive _include
+
+```typescript
+// Walk MedicationRequest -> Medication -> Substance
+const result = await fhir
+  .search("MedicationRequest")
+  .include("medication")
+  .include("medication", { iterate: true })
+  .execute();
+```
+
+### POST _search for long URLs
+
+```typescript
+// Bulk identifier lookup that wouldn't fit in a GET URL
+const result = await fhir
+  .search("Patient")
+  .whereIn("identifier", manyMrns)
+  .usePost()
+  .execute();
+```
+
+### Result-shaping with meta params
+
+```typescript
+// Just the count -- no resources, no narrative
+const { total } = await fhir
+  .search("Observation")
+  .where("patient", "eq", "Patient/123")
+  .summary("count")
+  .total("accurate")
+  .execute();
+```
+
+### Server-side _filter expression
+
+```typescript
+const result = await fhir
+  .search("Patient")
+  .filter("name eq 'Smith' and (birthdate gt 1990 or active eq true)")
+  .execute();
+```
+
 ## Error Handling
 
 ```typescript

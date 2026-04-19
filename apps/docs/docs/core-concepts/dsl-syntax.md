@@ -34,18 +34,20 @@ Adds a search parameter with a typed operator and value:
 .where("name", "contains", "John")
 .where("family", "exact", "O'Brien")
 
-// Token parameters: eq, not, in, not-in, text, above, below, of-type
+// Token parameters: eq, not, in, not-in, text, above, below, of-type, code-text
 .where("status", "eq", "active")
 .where("gender", "not", "unknown")
 .where("code", "in", "http://example.com/ValueSet/my-codes")
+.where("code", "code-text", "diabetes")
 
 // Date parameters: eq, ne, gt, ge, lt, le, sa, eb, ap
 .where("birthdate", "ge", "1990-01-01")
 .where("date", "lt", "2024-12-31")
 
-// Reference parameters: eq
+// Reference parameters: eq, identifier
 .where("patient", "eq", "Patient/123")
 .where("subject", "eq", "Patient/456")
+.where("patient", "identifier", "http://hospital.example.org|MRN-123")
 
 // Quantity parameters: eq, ne, gt, ge, lt, le, sa, eb, ap
 .where("value-quantity", "gt", "5.4|http://unitsofmeasure.org|mg")
@@ -58,6 +60,36 @@ Adds a search parameter with a typed operator and value:
 ```
 
 The operator is constrained by the parameter type -- TypeScript won't let you use `"contains"` on a date parameter.
+
+:::note Prefixes vs. modifiers
+FHIR splits these operators into two URL-level concepts:
+
+- **Value-prefixes** (`gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap`, `ne`) attach to the value: `birthdate=gt2020`.
+- **Modifiers** (`exact`, `contains`, `not`, `in`, `not-in`, `above`, `below`, `of-type`, `identifier`, `text`, `code-text`) attach to the parameter name: `family:exact=Smith`.
+
+The builder routes each op to the correct slot automatically. If you read `CompiledQuery.params[*]`, prefixes land on `prefix` and modifiers land on `modifier` -- never both on the same field.
+:::
+
+### Multi-value (OR via comma)
+
+Pass an array to `where(..., "eq", [...])` to express an OR across values. FHIR encodes this as a comma-separated list (`gender=male,female`), and the builder URL-encodes embedded commas in each value.
+
+```typescript
+// Equivalent to: Patient?gender=male,female
+.where("gender", "eq", ["male", "female"])
+.whereIn("gender", ["male", "female"])  // shorthand
+```
+
+OR-arrays are only valid with `eq` -- combining an array with a non-eq operator throws at `compile()` time, since FHIR doesn't allow per-value prefixes inside an OR list.
+
+### `whereMissing(param, isMissing)`
+
+Adds a `:missing` modifier to filter resources where a parameter is (or isn't) populated:
+
+```typescript
+.whereMissing("birthdate", true)   // birthdate:missing=true
+.whereMissing("birthdate", false)  // birthdate:missing=false
+```
 
 ### `whereComposite(param, values)`
 
@@ -111,6 +143,16 @@ const result = await fhir
 
 Valid include parameters are derived from the resource's reference fields.
 
+Pass `{ iterate: true }` to follow include chains transitively (compiles to `_include:iterate`):
+
+```typescript
+const result = await fhir
+  .search("MedicationRequest")
+  .include("medication")
+  .include("medication", { iterate: true })  // _include:iterate=MedicationRequest:medication
+  .execute();
+```
+
 ### `revinclude(sourceResource, param)`
 
 Includes resources that **reference** the search results (the reverse of `include`):
@@ -127,6 +169,8 @@ const result = await fhir
 ```
 
 Both arguments are type-checked: `"Observation"` must be a resource that has a reference param targeting `Patient`, and `"subject"` must be that specific param.
+
+`revinclude` accepts the same `{ iterate: true }` option as `include`.
 
 ### `whereChained(refParam, targetResource, targetParam, op, value)`
 
@@ -154,6 +198,26 @@ All five arguments are type-checked:
 .whereChained("subject", "Patient", "birthdate", "ge", "1990-01-01")
 // Compiles to: subject:Patient.birthdate=ge1990-01-01
 ```
+
+### `whereChain(hops, op, value)` — multi-hop chains
+
+`whereChained` covers the one-hop case. For two or more hops, use `whereChain`:
+
+```typescript
+// Two hops: through Encounter -> Patient
+fhir
+  .search("Observation")
+  .whereChain(
+    [["encounter", "Encounter"], ["subject", "Patient"]],
+    "name",
+    "eq",
+    "Smith",
+  )
+  .execute();
+// Compiles to: encounter:Encounter.subject:Patient.name=Smith
+```
+
+Each hop is `[refParam, targetResource]` and is type-checked against the previous step. The trailing `(op, value)` is validated against the terminal search param. Recursion is capped at three hops to keep TS inference well-behaved.
 
 ### `has(sourceResource, refParam, searchParam, op, value)`
 
@@ -278,6 +342,63 @@ for await (const patient of fhir.search("Patient").stream({ signal: controller.s
 
 See the [Streaming & Lazy Loading](/docs/guides/streaming) guide for full details.
 
+## Meta-parameter helpers
+
+These methods wrap the FHIR meta search parameters (`_id`, `_lastUpdated`, `_tag`, `_security`, `_source`) and the result-shaping parameters (`_summary`, `_total`, `_contained`, `_containedType`).
+
+```typescript
+fhir
+  .search("Patient")
+  .whereId("123", "456")                       // _id=123,456
+  .whereLastUpdated("ge", "2024-01-01")        // _lastUpdated=ge2024-01-01
+  .withTag("http://acme.com/tags|vip")         // _tag=...
+  .withSecurity("R")                           // _security=R
+  .fromSource("https://acme.com/fhir")         // _source=...
+  .summary("count")                            // _summary=count
+  .total("accurate")                           // _total=accurate
+  .contained("true")                           // _contained=true
+  .containedType("container");                 // _containedType=container
+```
+
+The mode arguments to `summary`, `total`, `contained`, and `containedType` are typed as their FHIR-defined literal unions (`"true" | "false" | "text" | "data" | "count"`, etc.).
+
+## Escape hatches
+
+When a query needs a feature outside the typed surface, the builder offers untyped pass-through methods. They emit raw URL parameters and skip schema validation -- use them sparingly.
+
+```typescript
+fhir
+  .search("Patient")
+  .filter("name eq 'Smith' and birthdate gt 1990")  // _filter=...
+  .namedQuery("everything", { start: "2024-01-01" }) // _query=everything&start=...
+  .text("diabetes")        // _text=diabetes
+  .content("blood pressure") // _content=...
+  .inList("active-list");   // _list=active-list
+```
+
+- `.filter(expr)` -- FHIR `_filter` search expression.
+- `.namedQuery(name, params?)` -- FHIR `_query` plus its named-query parameters.
+- `.text(q)`, `.content(q)`, `.inList(listId)` -- the corresponding `_text`, `_content`, `_list` parameters.
+
+## POST _search
+
+Long URLs (chained params, big OR lists, sensitive identifiers) can exceed proxy/server URL limits or leak data through access logs. `.usePost()` switches the compiled query to `POST <Resource>/_search` with an `application/x-www-form-urlencoded` body:
+
+```typescript
+const compiled = fhir
+  .search("Patient")
+  .whereIn("identifier", ["MRN-001", "MRN-002", /* ... */])
+  .usePost()
+  .compile();
+
+// compiled.method === "POST"
+// compiled.path   === "Patient/_search"
+// compiled.body   === "identifier=MRN-001%2CMRN-002..."
+// compiled.headers["Content-Type"] === "application/x-www-form-urlencoded"
+```
+
+The builder also auto-switches to POST when the serialized GET URL would exceed ~1900 characters, so most callers never need to opt in explicitly.
+
 ## Read Queries
 
 Read a single resource by type and ID:
@@ -382,14 +503,40 @@ This uses the `ProfileRegistry` in your generated schema to resolve the correct 
 | Parameter Type | Valid Operators |
 |---|---|
 | `string` | `eq`, `contains`, `exact` |
-| `token` | `eq`, `not`, `in`, `not-in`, `text`, `above`, `below`, `of-type` |
+| `token` | `eq`, `not`, `in`, `not-in`, `text`, `above`, `below`, `of-type`, `code-text` |
 | `date` | `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap` |
 | `number` | `eq`, `ne`, `gt`, `ge`, `lt`, `le` |
 | `quantity` | `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap` |
-| `reference` | `eq` |
+| `reference` | `eq`, `identifier` |
 | `uri` | `eq`, `above`, `below` |
 | `composite` | N/A (use `whereComposite` with structured component values) |
+
+`:missing` is cross-cutting -- use `.whereMissing(param, true | false)` rather than passing it through `where`.
 
 :::note
 Operators `sa` (starts after) and `eb` (ends before) are FHIR-specific date/quantity operators for interval comparisons. `ap` means approximately equal.
 :::
+
+## FHIR R5 search spec coverage
+
+Mapping of [FHIR R5 search](https://fhir.hl7.org/fhir/search.html) features to the builder API:
+
+| FHIR feature | Builder API |
+|---|---|
+| Equality / value-prefix ops (`gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap`, `ne`) | `.where(param, op, value)` |
+| Modifiers `:exact`, `:contains`, `:not`, `:in`, `:not-in`, `:above`, `:below`, `:identifier`, `:of-type`, `:text`, `:code-text` | `.where(param, modifier, value)` |
+| `:missing` | `.whereMissing(param, true \| false)` |
+| OR via comma | `.where(param, "eq", [v1, v2])` or `.whereIn(param, [...])` |
+| `_id`, `_lastUpdated`, `_tag`, `_security`, `_source` | `.whereId(...)`, `.whereLastUpdated(op, v)`, `.withTag(v)`, `.withSecurity(v)`, `.fromSource(uri)` |
+| `_summary`, `_total`, `_contained`, `_containedType` | `.summary(mode)`, `.total(mode)`, `.contained(mode)`, `.containedType(mode)` |
+| `_include`, `_revinclude` | `.include(...)`, `.revinclude(...)` |
+| `_include:iterate`, `_revinclude:iterate` | `.include(spec, { iterate: true })`, `.revinclude(spec, { iterate: true })` |
+| Chained params (multi-hop) | `.whereChain([hops], op, value)` |
+| `_has` reverse-chain | `.has(rt, param, target, op, value)` |
+| Composite params | `.whereComposite(name, components)` |
+| `_filter` (FHIRPath-like search expr) | `.filter(expr)` |
+| `_query` (named queries) | `.namedQuery(name, params?)` |
+| `_text`, `_content`, `_list` | `.text(q)`, `.content(q)`, `.inList(listId)` |
+| POST `_search` | `.usePost()` (auto-switch over ~1900 chars) |
+| `_count`, `_sort` | `.count(n)`, `.sort(param, dir)` |
+| `_elements` | `.select([...fields])` |
