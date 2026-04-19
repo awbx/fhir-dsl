@@ -21,7 +21,7 @@
  */
 
 import type { CompiledQuery } from "@fhir-dsl/core";
-import { beforeEach, describe, expect, it, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type FhirError, FhirExecutor, paginate } from "../src/index.js";
 
 /** Build a mock fetch that returns one scripted response per call. */
@@ -420,33 +420,72 @@ describe("AbortSignal threading (runtime-impl-map #1)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("Retry / backoff (runtime-impl-map #2)", () => {
-  test.fails("429 Too Many Requests must retry honoring Retry-After", async () => {
-    // Impl: no retry logic for 429. The second call never happens.
+  it("429 Too Many Requests retries honoring Retry-After (BUG-029, FEAT #27)", async () => {
     const fetchFn = queuedFetch([
       { status: 429, statusText: "Too Many Requests", body: {}, headers: { "Retry-After": "0" } },
       { status: 200, body: { resourceType: "Patient", id: "ok" } },
     ]);
-    const result = await makeExecutor(fetchFn).execute<any>({
+    const result = await new FhirExecutor({
+      baseUrl: BASE,
+      fetch: fetchFn,
+      retry: { baseBackoffMs: 0, sleep: async () => undefined },
+    }).execute<any>({
       method: "GET",
       path: "Patient/1",
       params: [],
     } as CompiledQuery);
-    // Spec-correct: after the 429 + Retry-After:0, a compliant client retries
-    // and surfaces the 200 body.
     expect(result?.id).toBe("ok");
+    expect((fetchFn as any).mock.calls).toHaveLength(2);
   });
 
-  test.fails("503 Service Unavailable must retry with exponential backoff", async () => {
+  it("503 Service Unavailable retries with exponential backoff (BUG-029, FEAT #27)", async () => {
     const fetchFn = queuedFetch([
       { status: 503, statusText: "Service Unavailable", body: {} },
       { status: 200, body: { resourceType: "Patient", id: "ok" } },
     ]);
-    const result = await makeExecutor(fetchFn).execute<any>({
+    const sleep = vi.fn(async () => undefined);
+    const result = await new FhirExecutor({
+      baseUrl: BASE,
+      fetch: fetchFn,
+      retry: { sleep },
+    }).execute<any>({
       method: "GET",
       path: "Patient/1",
       params: [],
     } as CompiledQuery);
     expect(result?.id).toBe("ok");
+    expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives up after maxAttempts and surfaces the final error (BUG-029)", async () => {
+    const fetchFn = queuedFetch([
+      { status: 503, body: {} },
+      { status: 503, body: {} },
+      { status: 503, body: {} },
+    ]);
+    await expect(
+      new FhirExecutor({
+        baseUrl: BASE,
+        fetch: fetchFn,
+        retry: { sleep: async () => undefined },
+      }).execute({ method: "GET", path: "Patient/1", params: [] } as CompiledQuery),
+    ).rejects.toMatchObject({ status: 503 });
+    expect((fetchFn as any).mock.calls).toHaveLength(3);
+  });
+
+  it("retry: false disables the retry loop entirely", async () => {
+    const fetchFn = queuedFetch([
+      { status: 503, body: {} },
+      { status: 200, body: { resourceType: "Patient", id: "never" } },
+    ]);
+    await expect(
+      new FhirExecutor({ baseUrl: BASE, fetch: fetchFn, retry: false }).execute({
+        method: "GET",
+        path: "Patient/1",
+        params: [],
+      } as CompiledQuery),
+    ).rejects.toMatchObject({ status: 503 });
+    expect((fetchFn as any).mock.calls).toHaveLength(1);
   });
 });
 

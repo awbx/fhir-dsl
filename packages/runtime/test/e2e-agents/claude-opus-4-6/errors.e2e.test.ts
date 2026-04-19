@@ -13,6 +13,7 @@ describe("claude-opus-4-6 / errors", () => {
     return createFhirClient<TestSchema>({
       baseUrl: "https://example.test/fhir",
       fetch: mock.fetch,
+      retry: false,
     });
   }
 

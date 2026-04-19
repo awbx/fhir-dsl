@@ -3,6 +3,7 @@ import type { CompiledQuery } from "./compiled-query.js";
 import { type HttpResponse, performRequest } from "./http.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
+import type { RetryConfig } from "./retry.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
 import {
   type BatchBuilder,
@@ -21,6 +22,7 @@ export interface FhirClientConfig {
   headers?: Record<string, string> | undefined;
   fetch?: typeof globalThis.fetch | undefined;
   schemas?: SchemaRegistry | undefined;
+  retry?: RetryConfig;
 }
 
 // --- Default executor using fetch ---
