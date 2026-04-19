@@ -392,12 +392,9 @@ describe("Pagination (paginate / fetchAllPages)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("AbortSignal threading (runtime-impl-map #1)", () => {
-  test.fails("AbortSignal should cancel an in-flight fetch (spec expectation via standard web-fetch semantics)", async () => {
-    // Impl: http.ts:35 does not pass `signal` into fetchFn. An AbortController
-    // cannot cancel an in-flight request; stream() only checks between pages.
+  it("AbortSignal is threaded through FhirExecutor.execute() to fetch (BUG-028)", async () => {
     const ac = new AbortController();
     const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
-      // A compliant implementation would reject when the signal aborts.
       if (init?.signal?.aborted) throw new DOMException("aborted", "AbortError");
       return {
         status: 200,
@@ -409,15 +406,9 @@ describe("AbortSignal threading (runtime-impl-map #1)", () => {
       } as unknown as Response;
     });
     ac.abort();
-    // The current FhirExecutor signature doesn't accept a signal. The test
-    // asserts the capability exists (any API shape) by checking that a
-    // caller *can* cancel. Since no signal can be threaded, the fetch runs
-    // to completion → test body does NOT throw → test.fails flips it.
     await expect(
       new FhirExecutor({ baseUrl: BASE, fetch: fetchFn as unknown as typeof globalThis.fetch }).execute(
         { method: "GET", path: "Patient/1", params: [] } as CompiledQuery,
-        // Spec-correct API: a second arg accepts an AbortSignal.
-        // @ts-expect-error — not yet in the type surface.
         { signal: ac.signal },
       ),
     ).rejects.toThrow(/abort/i);

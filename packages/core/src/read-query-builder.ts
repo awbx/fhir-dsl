@@ -1,6 +1,6 @@
 import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
-import type { ReadQueryBuilder } from "./query-builder.js";
+import type { ExecuteOptions, ReadQueryBuilder } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
 import type { FhirSchema } from "./types.js";
 import { resolveSchema, type SchemaRegistry, ValidationUnavailableError, validateOne } from "./validation.js";
@@ -47,9 +47,9 @@ export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string> imple
     };
   }
 
-  async execute(): Promise<S["resources"][RT] & Resource> {
+  async execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource> {
     const query = this.compile();
-    const resource = (await this.#executor(query)) as S["resources"][RT] & Resource;
+    const resource = (await this.#executor(query, options?.signal)) as S["resources"][RT] & Resource;
     if (this.#validate) {
       if (!this.#schemas) throw new ValidationUnavailableError();
       const schema = resolveSchema(this.#schemas, this.#resourceType);

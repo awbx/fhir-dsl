@@ -829,7 +829,7 @@ describe("SearchQueryBuilder", () => {
 
       expect(results).toHaveLength(3);
       expect(results.map((r) => r.id)).toEqual(["1", "2", "3"]);
-      expect(urlExecutor).toHaveBeenCalledWith("http://example.com/Patient?_page=2");
+      expect(urlExecutor).toHaveBeenCalledWith("http://example.com/Patient?_page=2", undefined);
     });
 
     it("skips included resources", async () => {

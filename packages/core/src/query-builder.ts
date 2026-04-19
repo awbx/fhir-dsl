@@ -46,7 +46,16 @@ export interface SearchResult<Primary extends Resource, Included extends Resourc
   raw: unknown;
 }
 
-// --- Stream Options ---
+// --- Execute / Stream Options ---
+
+export interface ExecuteOptions {
+  /**
+   * AbortSignal that cancels the in-flight request. If the signal is already
+   * aborted when `.execute()` is called, the promise rejects immediately with
+   * an `AbortError`; otherwise the in-flight `fetch()` is aborted.
+   */
+  signal?: AbortSignal;
+}
 
 export interface StreamOptions {
   signal?: AbortSignal;
@@ -319,7 +328,9 @@ export interface SearchQueryBuilder<
 
   compile(): CompiledQuery;
 
-  execute(): Promise<
+  execute(
+    options?: ExecuteOptions,
+  ): Promise<
     SearchResult<
       ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
@@ -347,5 +358,5 @@ export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
 
   compile(): CompiledQuery;
 
-  execute(): Promise<S["resources"][RT] & Resource>;
+  execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource>;
 }

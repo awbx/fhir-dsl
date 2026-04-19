@@ -12,6 +12,8 @@ export interface HttpRequest {
   method: string;
   headers?: Record<string, string>;
   body?: BodyInit | null;
+  /** Propagated to the underlying fetch() so in-flight requests can be aborted. */
+  signal?: AbortSignal;
 }
 
 export interface HttpResponse {
@@ -37,6 +39,7 @@ export async function performRequest(config: HttpConfig, req: HttpRequest): Prom
       method: req.method,
       headers,
       ...(req.body != null ? { body: req.body } : {}),
+      ...(req.signal !== undefined ? { signal: req.signal } : {}),
     });
   };
 

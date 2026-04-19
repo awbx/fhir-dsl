@@ -1,4 +1,5 @@
 import type { Bundle, BundleEntry, Resource } from "@fhir-dsl/types";
+import type { ExecuteOptions } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
 import type { FhirSchema } from "./types.js";
 
@@ -47,7 +48,7 @@ export interface TransactionBuilder<S extends FhirSchema> {
 
   compile(): Bundle;
 
-  execute(): Promise<Bundle>;
+  execute(options?: ExecuteOptions): Promise<Bundle>;
 }
 
 export interface BatchBuilder<S extends FhirSchema> {
@@ -65,7 +66,7 @@ export interface BatchBuilder<S extends FhirSchema> {
 
   compile(): Bundle;
 
-  execute(): Promise<Bundle>;
+  execute(options?: ExecuteOptions): Promise<Bundle>;
 }
 
 abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
@@ -148,14 +149,17 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
     };
   }
 
-  async execute(): Promise<Bundle> {
+  async execute(options?: ExecuteOptions): Promise<Bundle> {
     const bundle = this.compile();
-    return (await this.#executor({
-      method: "POST",
-      path: "",
-      params: [],
-      body: bundle,
-    })) as Bundle;
+    return (await this.#executor(
+      {
+        method: "POST",
+        path: "",
+        params: [],
+        body: bundle,
+      },
+      options?.signal,
+    )) as Bundle;
   }
 }
 

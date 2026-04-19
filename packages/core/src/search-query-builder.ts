@@ -8,6 +8,7 @@ import type {
   BundleLink,
   ContainedMode,
   ContainedTypeMode,
+  ExecuteOptions,
   ResolveIncluded,
   SearchQueryBuilder,
   SearchResult,
@@ -73,8 +74,8 @@ function paramsToFormBody(params: CompiledSearchParam[]): string {
   return usp.toString();
 }
 
-export type Executor = (query: CompiledQuery) => Promise<unknown>;
-export type UrlExecutor = (url: string) => Promise<unknown>;
+export type Executor = (query: CompiledQuery, signal?: AbortSignal) => Promise<unknown>;
+export type UrlExecutor = (url: string, signal?: AbortSignal) => Promise<unknown>;
 
 // --- Immutable Search Query Builder Implementation ---
 
@@ -726,14 +727,16 @@ export class SearchQueryBuilderImpl<
     };
   }
 
-  async execute(): Promise<
+  async execute(
+    options?: ExecuteOptions,
+  ): Promise<
     SearchResult<
       ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
     >
   > {
     const query = this.compile();
-    const bundle = (await this.#executor(query)) as Bundle;
+    const bundle = (await this.#executor(query, options?.signal)) as Bundle;
 
     const entries = bundle.entry ?? [];
 
@@ -775,7 +778,7 @@ export class SearchQueryBuilderImpl<
     type R = ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource;
 
     const query = this.compile();
-    let bundle = (await this.#executor(query)) as Bundle;
+    let bundle = (await this.#executor(query, options?.signal)) as Bundle;
 
     let schema: ReturnType<typeof resolveSchema> | undefined;
     if (this.#state.validate) {
@@ -800,7 +803,7 @@ export class SearchQueryBuilderImpl<
 
       const nextLink = bundle.link?.find((l) => l.relation === "next");
       if (nextLink?.url && this.#urlExecutor) {
-        bundle = (await this.#urlExecutor(nextLink.url)) as Bundle;
+        bundle = (await this.#urlExecutor(nextLink.url, options?.signal)) as Bundle;
       } else {
         break;
       }

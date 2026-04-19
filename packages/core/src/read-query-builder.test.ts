@@ -38,11 +38,14 @@ describe("ReadQueryBuilder", () => {
       const result = await builder.execute();
 
       expect(executor).toHaveBeenCalledOnce();
-      expect(executor).toHaveBeenCalledWith({
-        method: "GET",
-        path: "Patient/123",
-        params: [],
-      });
+      expect(executor).toHaveBeenCalledWith(
+        {
+          method: "GET",
+          path: "Patient/123",
+          params: [],
+        },
+        undefined,
+      );
       expect(result).toEqual(patient);
     });
   });

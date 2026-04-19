@@ -1,9 +1,10 @@
 import type { Bundle, Resource } from "@fhir-dsl/types";
-import type { FhirExecutor } from "./executor.js";
+import type { ExecuteRequestOptions, FhirExecutor } from "./executor.js";
 
 export async function* paginate<T extends Resource>(
   executor: FhirExecutor,
   firstBundle: Bundle,
+  options?: ExecuteRequestOptions,
 ): AsyncGenerator<T[], void, undefined> {
   let bundle: Bundle | undefined = firstBundle;
   // §3.2.1.3.3: a misconfigured server can produce a `next` link that points
@@ -26,7 +27,7 @@ export async function* paginate<T extends Resource>(
       continue;
     }
     seen.add(nextUrl);
-    bundle = (await executor.executeUrl(nextUrl)) as Bundle;
+    bundle = (await executor.executeUrl(nextUrl, options)) as Bundle;
     // Peek at the fetched bundle's own `next`: if it points back at a URL we
     // already walked, the server is looping. Dropping the bundle here stops
     // us from yielding duplicate content that'd only retrigger the cycle
@@ -36,9 +37,13 @@ export async function* paginate<T extends Resource>(
   }
 }
 
-export async function fetchAllPages<T extends Resource>(executor: FhirExecutor, firstBundle: Bundle): Promise<T[]> {
+export async function fetchAllPages<T extends Resource>(
+  executor: FhirExecutor,
+  firstBundle: Bundle,
+  options?: ExecuteRequestOptions,
+): Promise<T[]> {
   const all: T[] = [];
-  for await (const page of paginate<T>(executor, firstBundle)) {
+  for await (const page of paginate<T>(executor, firstBundle, options)) {
     all.push(...page);
   }
   return all;

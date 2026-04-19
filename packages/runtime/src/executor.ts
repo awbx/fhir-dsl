@@ -2,6 +2,11 @@ import { type CompiledQuery, type HttpResponse, performRequest } from "@fhir-dsl
 import type { FhirClientConfig } from "./config.js";
 import { FhirError, type OperationOutcome } from "./errors.js";
 
+export interface ExecuteRequestOptions {
+  /** Propagated to the underlying fetch() so in-flight requests can be aborted. */
+  signal?: AbortSignal;
+}
+
 export class FhirExecutor {
   readonly #config: FhirClientConfig;
 
@@ -9,7 +14,7 @@ export class FhirExecutor {
     this.#config = config;
   }
 
-  async execute<T = unknown>(query: CompiledQuery): Promise<T> {
+  async execute<T = unknown>(query: CompiledQuery, options?: ExecuteRequestOptions): Promise<T> {
     const url = new URL(
       query.path,
       this.#config.baseUrl.endsWith("/") ? this.#config.baseUrl : `${this.#config.baseUrl}/`,
@@ -36,6 +41,7 @@ export class FhirExecutor {
       method: query.method,
       headers,
       ...(body !== undefined ? { body } : {}),
+      ...(options?.signal !== undefined ? { signal: options.signal } : {}),
     });
 
     if (!response.ok) throw await buildFhirError(response);
@@ -43,7 +49,7 @@ export class FhirExecutor {
     return attachResponseMetadata(await readJsonBody<T>(response), response);
   }
 
-  async executeUrl<T = unknown>(url: string): Promise<T> {
+  async executeUrl<T = unknown>(url: string, options?: ExecuteRequestOptions): Promise<T> {
     const headers: Record<string, string> = {
       Accept: "application/fhir+json",
       ...this.#config.headers,
@@ -56,7 +62,12 @@ export class FhirExecutor {
     const config = isSameOrigin(url, this.#config.baseUrl) ? this.#config : { ...this.#config, auth: undefined };
     if (!isSameOrigin(url, this.#config.baseUrl)) delete headers.Authorization;
 
-    const response = await performRequest(config, { url, method: "GET", headers });
+    const response = await performRequest(config, {
+      url,
+      method: "GET",
+      headers,
+      ...(options?.signal !== undefined ? { signal: options.signal } : {}),
+    });
 
     if (!response.ok) throw await buildFhirError(response);
 

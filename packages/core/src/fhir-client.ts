@@ -26,7 +26,7 @@ export interface FhirClientConfig {
 // --- Default executor using fetch ---
 
 function createFetchExecutor(config: FhirClientConfig): Executor {
-  return async (query: CompiledQuery): Promise<unknown> => {
+  return async (query: CompiledQuery, signal?: AbortSignal): Promise<unknown> => {
     const url = new URL(query.path, config.baseUrl.endsWith("/") ? config.baseUrl : `${config.baseUrl}/`);
 
     for (const param of query.params) {
@@ -50,6 +50,7 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
       method: query.method,
       headers,
       ...(body !== undefined ? { body } : {}),
+      ...(signal !== undefined ? { signal } : {}),
     });
 
     if (!response.ok) {
@@ -64,13 +65,18 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
 // --- URL executor for following pagination links ---
 
 function createUrlExecutor(config: FhirClientConfig): UrlExecutor {
-  return async (url: string): Promise<unknown> => {
+  return async (url: string, signal?: AbortSignal): Promise<unknown> => {
     const headers: Record<string, string> = {
       Accept: "application/fhir+json",
       ...config.headers,
     };
 
-    const response = await performRequest(config, { url, method: "GET", headers });
+    const response = await performRequest(config, {
+      url,
+      method: "GET",
+      headers,
+      ...(signal !== undefined ? { signal } : {}),
+    });
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => null);
