@@ -157,6 +157,75 @@ describe("FhirExecutor", () => {
       await expect(executor.execute({ method: "GET", path: "Patient/999", params: [] })).rejects.toThrow(FhirError);
     });
 
+    it("emits every R5 value-prefix as a value-prefix (not a modifier)", async () => {
+      const fetch = mockFetch({});
+      const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });
+
+      const prefixes = ["gt", "ge", "lt", "le", "sa", "eb", "ap", "ne"] as const;
+      await executor.execute({
+        method: "GET",
+        path: "Observation",
+        params: prefixes.map((p) => ({ name: "date", prefix: p, value: "2024-01-01" })),
+      });
+
+      const [url] = (fetch as any).mock.calls[0]!;
+      for (const p of prefixes) {
+        expect(url).toContain(`date=${p}2024-01-01`);
+      }
+      expect(url).not.toMatch(/date%3A(gt|ge|lt|le|sa|eb|ap|ne)/);
+    });
+
+    it("emits every R5 modifier as a name-suffix (not a value-prefix)", async () => {
+      const fetch = mockFetch({});
+      const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });
+
+      const modifiers = [
+        "exact",
+        "contains",
+        "not",
+        "in",
+        "not-in",
+        "above",
+        "below",
+        "of-type",
+        "identifier",
+        "text",
+        "code-text",
+        "missing",
+        "iterate",
+      ];
+
+      await executor.execute({
+        method: "GET",
+        path: "Patient",
+        params: modifiers.map((m) => ({ name: "p", modifier: m, value: "v" })),
+      });
+
+      const [url] = (fetch as any).mock.calls[0]!;
+      for (const m of modifiers) {
+        expect(url).toContain(`p%3A${encodeURIComponent(m)}=v`);
+      }
+    });
+
+    it("passes through string body for POST _search form-encoded bodies", async () => {
+      const fetch = mockFetch({});
+      const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });
+
+      const body = "family=Smith&birthdate=ge2020-01-01";
+      await executor.execute({
+        method: "POST",
+        path: "Patient/_search",
+        params: [],
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+      });
+
+      const [, opts] = (fetch as any).mock.calls[0]!;
+      expect(opts.method).toBe("POST");
+      expect(opts.body).toBe(body);
+      expect(opts.headers["Content-Type"]).toBe("application/x-www-form-urlencoded");
+    });
+
     it("handles baseUrl with trailing slash", async () => {
       const fetch = mockFetch({});
       const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com/r4/", fetch });

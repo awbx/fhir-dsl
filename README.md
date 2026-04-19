@@ -204,6 +204,29 @@ Operators are constrained by parameter type — TypeScript won't let you use `"c
 | `uri` | `eq`, `above`, `below` |
 | `composite` | N/A (use `whereComposite` with structured component values) |
 
+## FHIR R5 Search Spec Coverage
+
+Mapping of [FHIR R5 search features](https://fhir.hl7.org/fhir/search.html) to the builder API:
+
+| FHIR feature | Builder API |
+|---|---|
+| Equality / value-prefix ops (`gt`, `ge`, `lt`, `le`, `sa`, `eb`, `ap`, `ne`) | `.where(param, op, value)` |
+| Modifiers `:exact`, `:contains`, `:not`, `:in`, `:not-in`, `:above`, `:below`, `:identifier`, `:of-type`, `:text`, `:code-text` | `.where(param, modifier, value)` |
+| `:missing` | `.whereMissing(param, true \| false)` |
+| OR via comma (`gender=male,female`) | `.where(param, "eq", [v1, v2])` or `.whereIn(param, [...])` |
+| `_id`, `_lastUpdated`, `_tag`, `_security`, `_source` | `.whereId(...)`, `.whereLastUpdated(op, v)`, `.withTag(v)`, `.withSecurity(v)`, `.fromSource(uri)` |
+| `_summary`, `_total`, `_contained`, `_containedType` | `.summary(mode)`, `.total(mode)`, `.contained(mode)`, `.containedType(mode)` |
+| `_include`, `_revinclude` | `.include(...)`, `.revinclude(...)` |
+| `_include:iterate`, `_revinclude:iterate` | `.include(spec, { iterate: true })`, `.revinclude(spec, { iterate: true })` |
+| Chained params (multi-hop) | `.whereChain([hops], op, value)` |
+| `_has` reverse-chain | `.has(rt, param, target, op, value)` |
+| Composite params | `.whereComposite(name, components)` |
+| `_filter` (FHIRPath-like search expr) | `.filter(expr)` |
+| `_query` (named queries) | `.namedQuery(name, params?)` |
+| `_text`, `_content`, `_list` | `.text(q)`, `.content(q)`, `.inList(listId)` |
+| POST `_search` (long URLs / sensitive params) | `.usePost()` (auto-switch over ~1900 chars) |
+| `_count`, `_sort` | `.count(n)`, `.sort(param, dir)` |
+
 ## CLI Reference
 
 ```bash
