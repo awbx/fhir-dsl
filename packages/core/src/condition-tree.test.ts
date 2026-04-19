@@ -102,7 +102,6 @@ describe("compileConditionTree", () => {
       ["eb", "eb"],
       ["ap", "ap"],
       ["contains", "co"],
-      ["not", "ne"],
       ["in", "in"],
       ["not-in", "ni"],
     ];
@@ -117,6 +116,15 @@ describe("compileConditionTree", () => {
         expect(param!.value).toBe(`status ${expected} 'x' or code eq 'y'`);
       });
     }
+
+    it("emits `:not` as `not(... eq ...)` (spec §3.2.1.5.5.10; BUG-015)", () => {
+      const tree = eb.or([
+        ["status", "not", "x"],
+        ["code", "eq", "y"],
+      ]);
+      const [param] = compileConditionTree(tree);
+      expect(param!.value).toBe("not(status eq 'x') or code eq 'y'");
+    });
 
     const unsupported = ["exact", "above", "below", "of-type", "text", "identifier", "code-text", "missing"];
 

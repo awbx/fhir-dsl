@@ -56,7 +56,6 @@ const FILTER_OP_MAP: Readonly<Record<string, string>> = {
   eb: "eb",
   ap: "ap",
   contains: "co",
-  not: "ne",
   in: "in",
   "not-in": "ni",
 };
@@ -88,6 +87,14 @@ function emitTuple<SP>(tuple: ConditionTuple<SP>): string {
     throw new Error(
       `where(...): operator "${opStr}" cannot be expressed in FHIR _filter. Use the positional where(param, "${opStr}", value) form instead.`,
     );
+  }
+  // §3.2.1.5.5.10: the `:not` modifier includes resources that have no value
+  // for the param. `_filter ne` excludes them. These are NOT the same set, so
+  // we emit `not(param eq value)` — the logical-negation form — which matches
+  // `:not` semantics (a missing param yields false on `eq`, which `not()`
+  // flips to true, re-including the null-valued resource).
+  if (opStr === "not") {
+    return `not(${String(name)} eq ${formatFilterValue(value)})`;
   }
   const mapped = FILTER_OP_MAP[opStr];
   if (!mapped) {

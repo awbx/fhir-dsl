@@ -510,13 +510,10 @@ describe("_filter (SRCH-FILT-*)", () => {
     expect(String(filt?.value)).toContain("\\\\");
   });
 
-  test.fails("SRCH-FILT-001: `:not` in an OR group must NOT degrade to `ne` in _filter (spec §3.2.1.5.5.10)", () => {
-    // Impl: condition-tree.ts:52 maps `:not` → `ne` when routing to _filter.
-    // Spec: `:not` is null-inclusive (resources with no value match);
-    // `ne` excludes null-valued resources. The DSL's silent mapping loses
-    // semantics. A compliant DSL should either:
-    //   (a) throw when routing `:not` via cross-param OR,
-    //   (b) emit `not(... eq ...)` which preserves `:not` semantics.
+  it("SRCH-FILT-001: `:not` in an OR group emits `not(... eq ...)` in _filter (spec §3.2.1.5.5.10)", () => {
+    // `:not` includes resources with no value for the param; `_filter ne`
+    // excludes them. Emitter maps `:not` → `not(param eq value)` so the
+    // logical-negation semantics line up with `:not`.
     const q = (builder("Patient") as any)
       .where((cb: any) =>
         cb.or([
@@ -526,9 +523,8 @@ describe("_filter (SRCH-FILT-*)", () => {
       )
       .compile();
     const filt = paramEntry(q).find((p: any) => p.name === "_filter");
-    // Spec-correct: uses `not(... eq ...)` (logical negation, preserves nulls).
-    // Impl today: uses `ne` directly.
     expect(String(filt?.value)).toMatch(/not\s*\(/);
+    expect(String(filt?.value)).not.toMatch(/\sne\s/);
   });
 });
 
