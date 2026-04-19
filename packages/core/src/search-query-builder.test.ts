@@ -204,6 +204,54 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("POST _search (Phase 4)", () => {
+    it("emits POST [type]/_search with form-encoded body when usePost() is set", () => {
+      const query = createBuilder("Patient")
+        .where("family", "eq", "Smith")
+        .where("birthdate", "ge", "1990-01-01")
+        .usePost()
+        .compile();
+
+      expect(query.method).toBe("POST");
+      expect(query.path).toBe("Patient/_search");
+      expect(query.params).toEqual([]);
+      expect(query.headers).toEqual({ "Content-Type": "application/x-www-form-urlencoded" });
+      expect(typeof query.body).toBe("string");
+
+      const parsed = new URLSearchParams(query.body as string);
+      expect(parsed.get("family")).toBe("Smith");
+      expect(parsed.get("birthdate")).toBe("ge1990-01-01");
+    });
+
+    it("preserves modifier-on-name (e.g. family:exact) in POST body", () => {
+      const query = createBuilder("Patient")
+        .where("family", "exact" as any, "Smith")
+        .usePost()
+        .compile();
+
+      const parsed = new URLSearchParams(query.body as string);
+      expect(parsed.get("family:exact")).toBe("Smith");
+    });
+
+    it("auto-switches to POST when serialized params exceed the threshold", () => {
+      let builder = createBuilder("Patient");
+      for (let i = 0; i < 200; i++) {
+        builder = builder.where(`p${i}` as any, "eq", `value-with-some-length-${i}`) as typeof builder;
+      }
+      const query = builder.compile();
+
+      expect(query.method).toBe("POST");
+      expect(query.path).toBe("Patient/_search");
+    });
+
+    it("stays on GET when params are short", () => {
+      const query = createBuilder("Patient").where("family", "eq", "Smith").compile();
+
+      expect(query.method).toBe("GET");
+      expect(query.path).toBe("Patient");
+    });
+  });
+
   describe("OR via comma (Phase 3)", () => {
     it("compiles where with array value as comma-joined", () => {
       const query = createBuilder("Patient")

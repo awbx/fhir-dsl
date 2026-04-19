@@ -39,13 +39,17 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
       Accept: "application/fhir+json",
       "Content-Type": "application/fhir+json",
       ...config.headers,
+      ...query.headers,
     };
+
+    const body =
+      query.body == null ? undefined : typeof query.body === "string" ? query.body : JSON.stringify(query.body);
 
     const response = await performRequest(config, {
       url: url.toString(),
       method: query.method,
       headers,
-      ...(query.body != null ? { body: JSON.stringify(query.body) } : {}),
+      ...(body !== undefined ? { body } : {}),
     });
 
     if (!response.ok) {

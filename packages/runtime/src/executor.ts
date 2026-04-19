@@ -28,11 +28,14 @@ export class FhirExecutor {
       ...query.headers,
     };
 
+    const body =
+      query.body == null ? undefined : typeof query.body === "string" ? query.body : JSON.stringify(query.body);
+
     const response = await performRequest(this.#config, {
       url: url.toString(),
       method: query.method,
       headers,
-      ...(query.body ? { body: JSON.stringify(query.body) } : {}),
+      ...(body !== undefined ? { body } : {}),
     });
 
     if (!response.ok) {

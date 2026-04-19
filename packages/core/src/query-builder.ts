@@ -197,6 +197,13 @@ export interface SearchQueryBuilder<
    */
   validate(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /**
+   * Force POST `[type]/_search` with form-encoded body instead of GET. Useful when
+   * the query string would exceed server limits, or when the params contain values
+   * that should not appear in URL logs.
+   */
+  usePost(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   compile(): CompiledQuery;
 
   execute(): Promise<

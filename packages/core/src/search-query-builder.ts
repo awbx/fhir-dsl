@@ -48,6 +48,25 @@ interface QueryState {
   total?: TotalMode | undefined;
   contained?: ContainedMode | undefined;
   containedType?: ContainedTypeMode | undefined;
+  usePost?: boolean | undefined;
+  autoPostThreshold?: number | undefined;
+}
+
+const DEFAULT_AUTO_POST_THRESHOLD = 1900;
+
+function encodeParam(param: CompiledSearchParam): { name: string; value: string } {
+  const name = param.modifier ? `${param.name}:${param.modifier}` : param.name;
+  const value = param.prefix ? `${param.prefix}${param.value}` : String(param.value);
+  return { name, value };
+}
+
+function paramsToFormBody(params: CompiledSearchParam[]): string {
+  const usp = new URLSearchParams();
+  for (const param of params) {
+    const { name, value } = encodeParam(param);
+    usp.append(name, value);
+  }
+  return usp.toString();
 }
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
@@ -491,6 +510,17 @@ export class SearchQueryBuilderImpl<
     );
   }
 
+  usePost(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, usePost: true },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
   compile(): CompiledQuery {
     const params: CompiledSearchParam[] = [...this.#state.params];
 
@@ -573,6 +603,19 @@ export class SearchQueryBuilderImpl<
 
     if (this.#state.fieldSelection && this.#state.fieldSelection.length > 0) {
       params.push({ name: "_elements", value: this.#state.fieldSelection.join(",") });
+    }
+
+    const threshold = this.#state.autoPostThreshold ?? DEFAULT_AUTO_POST_THRESHOLD;
+    const wouldExceedThreshold = paramsToFormBody(params).length > threshold;
+
+    if (this.#state.usePost || wouldExceedThreshold) {
+      return {
+        method: "POST",
+        path: `${this.#state.resourceType}/_search`,
+        params: [],
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: paramsToFormBody(params),
+      };
     }
 
     return {
