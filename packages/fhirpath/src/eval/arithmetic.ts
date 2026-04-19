@@ -45,10 +45,6 @@ export function evalArithmetic(op: ArithmeticOp, collection: unknown[], ctx: Eva
     case "mod":
       if (typeof a !== "number" || typeof b !== "number" || b === 0) return [];
       return [a % b];
-
-    case "concat":
-      // Handled above with empty-coercion semantics.
-      return [];
   }
 }
 

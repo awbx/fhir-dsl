@@ -706,9 +706,18 @@ export class SearchQueryBuilderImpl<
     // Measuring the form-body (BUG-017) under-counts by the path + "?" bytes,
     // so borderline queries slip past the threshold and then get rejected by
     // servers with URL length caps. Include the path and the separator.
+    //
+    // Measurement uses TextEncoder so the threshold is compared against UTF-8
+    // byte length, not UTF-16 code-unit count (BUG-023 / SRCH.9b defensive):
+    // `URLSearchParams` already percent-encodes non-ASCII, so the two counts
+    // agree in practice today — but if a future change ever produces a raw
+    // non-ASCII queryString, `.length` would diverge from the wire length.
     const threshold = this.#state.autoPostThreshold ?? DEFAULT_AUTO_POST_THRESHOLD;
     const queryString = paramsToFormBody(params);
-    const getUrlBytes = this.#state.resourceType.length + (queryString.length > 0 ? 1 : 0) + queryString.length;
+    const encoder = new TextEncoder();
+    const pathBytes = encoder.encode(this.#state.resourceType).length;
+    const queryBytes = encoder.encode(queryString).length;
+    const getUrlBytes = pathBytes + (queryBytes > 0 ? 1 : 0) + queryBytes;
     const wouldExceedThreshold = getUrlBytes > threshold;
 
     if (this.#state.usePost || wouldExceedThreshold) {
