@@ -4,6 +4,7 @@ import type { CompiledQuery } from "./compiled-query.js";
 import type {
   CompositeKeys,
   CompositeValues,
+  DatePrefix,
   FhirSchema,
   IncludeFor,
   ResolveProfile,
@@ -12,6 +13,11 @@ import type {
   SearchPrefixFor,
   SortDirection,
 } from "./types.js";
+
+export type SummaryMode = "true" | "false" | "text" | "data" | "count";
+export type TotalMode = "none" | "estimate" | "accurate";
+export type ContainedMode = "true" | "false" | "both";
+export type ContainedTypeMode = "container" | "contained";
 
 // --- Result projection (used by .select()) ---
 
@@ -67,6 +73,40 @@ export interface SearchQueryBuilder<
     op: SearchPrefixFor<SP[K]>,
     value: SP[K] extends { value: infer V } ? V : string,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `:missing` modifier — `param:missing=true|false` */
+  whereMissing<K extends string & keyof SP>(param: K, missing: boolean): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  // --- Common search parameters (shared across resources) ---
+
+  /** FHIR `_id` — match resource(s) by logical id. Multiple ids = OR. */
+  whereId(...ids: string[]): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_lastUpdated` — filter by Resource.meta.lastUpdated with a date prefix. */
+  whereLastUpdated(op: DatePrefix, value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_tag` — match by tag. Use `system|code` or just `code`. */
+  withTag(value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_security` — match by security label. */
+  withSecurity(value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_source` — filter by Resource.meta.source URI. */
+  fromSource(uri: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  // --- Result-shaping parameters ---
+
+  /** FHIR `_summary` — request partial resources. */
+  summary(mode: SummaryMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_total` — request total count behavior. */
+  total(mode: TotalMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_contained` — control inclusion of contained resources. */
+  contained(mode: ContainedMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_containedType` — when `_contained=true`, choose container or contained. */
+  containedType(mode: ContainedTypeMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   whereComposite<K extends string & CompositeKeys<SP>>(
     param: K,

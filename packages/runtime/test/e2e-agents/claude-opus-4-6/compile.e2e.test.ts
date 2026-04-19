@@ -82,8 +82,8 @@ describe("claude-opus-4-6 / compile", () => {
 
       expect(compiled.params).toEqual([
         { name: "name", value: "Smith" },
-        { name: "name", prefix: "contains", value: "smi" },
-        { name: "given", prefix: "exact", value: "Alice" },
+        { name: "name", modifier: "contains", value: "smi" },
+        { name: "given", modifier: "exact", value: "Alice" },
       ]);
     });
 
@@ -102,13 +102,13 @@ describe("claude-opus-4-6 / compile", () => {
 
       expect(compiled.params).toEqual([
         { name: "gender", value: "female" },
-        { name: "gender", prefix: "not", value: "male" },
-        { name: "identifier", prefix: "of-type", value: "http://ex|MR|abc" },
-        { name: "identifier", prefix: "in", value: "http://ex/ValueSet/ids" },
-        { name: "identifier", prefix: "not-in", value: "http://ex/ValueSet/bad" },
-        { name: "identifier", prefix: "text", value: "mrn-abc" },
-        { name: "identifier", prefix: "above", value: "http://ex|parent" },
-        { name: "identifier", prefix: "below", value: "http://ex|root" },
+        { name: "gender", modifier: "not", value: "male" },
+        { name: "identifier", modifier: "of-type", value: "http://ex|MR|abc" },
+        { name: "identifier", modifier: "in", value: "http://ex/ValueSet/ids" },
+        { name: "identifier", modifier: "not-in", value: "http://ex/ValueSet/bad" },
+        { name: "identifier", modifier: "text", value: "mrn-abc" },
+        { name: "identifier", modifier: "above", value: "http://ex|parent" },
+        { name: "identifier", modifier: "below", value: "http://ex|root" },
       ]);
     });
 
@@ -135,8 +135,8 @@ describe("claude-opus-4-6 / compile", () => {
 
       expect(compiled.params).toEqual([
         { name: "website", value: "https://example.test" },
-        { name: "website", prefix: "above", value: "https://example.test/sub" },
-        { name: "website", prefix: "below", value: "https://example.test" },
+        { name: "website", modifier: "above", value: "https://example.test/sub" },
+        { name: "website", modifier: "below", value: "https://example.test" },
       ]);
     });
   });
@@ -159,7 +159,7 @@ describe("claude-opus-4-6 / compile", () => {
         .whereChained("subject", "Patient", "name", "exact", "Smith")
         .compile();
 
-      expect(compiled.params).toEqual([{ name: "subject:Patient.name", prefix: "exact", value: "Smith" }]);
+      expect(compiled.params).toEqual([{ name: "subject:Patient.name", modifier: "exact", value: "Smith" }]);
     });
 
     it("has emits FHIR reverse-chain `_has:Source:ref:param`", () => {

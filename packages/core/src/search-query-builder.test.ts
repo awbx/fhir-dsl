@@ -77,6 +77,44 @@ describe("SearchQueryBuilder", () => {
       expect(query.params).toEqual([{ name: "status", value: "final" }]);
     });
 
+    it("emits string modifier on name (not value) — :exact, :contains", () => {
+      const query = createBuilder("Patient")
+        .where("family", "exact" as any, "Smith")
+        .where("name", "contains" as any, "ohn")
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "family", modifier: "exact", value: "Smith" },
+        { name: "name", modifier: "contains", value: "ohn" },
+      ]);
+    });
+
+    it("emits token modifiers on name (:not, :in, :above, :below, :of-type, :text)", () => {
+      const query = createBuilder("Patient")
+        .where("gender", "not" as any, "male")
+        .where("identifier", "of-type" as any, "MR|123")
+        .where("language", "in" as any, "ValueSet/abc")
+        .where("language", "above" as any, "http://snomed.info/sct|123")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "gender", modifier: "not", value: "male" });
+      expect(query.params).toContainEqual({ name: "identifier", modifier: "of-type", value: "MR|123" });
+      expect(query.params).toContainEqual({ name: "language", modifier: "in", value: "ValueSet/abc" });
+      expect(query.params).toContainEqual({ name: "language", modifier: "above", value: "http://snomed.info/sct|123" });
+    });
+
+    it("keeps date prefix (gt/ge/lt/le/sa/eb/ap/ne) on value", () => {
+      const query = createBuilder("Patient")
+        .where("birthdate", "gt", "2000-01-01")
+        .where("birthdate", "ne", "2010-01-01")
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "birthdate", prefix: "gt", value: "2000-01-01" },
+        { name: "birthdate", prefix: "ne", value: "2010-01-01" },
+      ]);
+    });
+
     it("compiles _include params", () => {
       const query = createBuilder("Patient")
         .include("general-practitioner" as any)
@@ -163,6 +201,59 @@ describe("SearchQueryBuilder", () => {
       expect(query.method).toBe("GET");
       expect(query.path).toBe("Observation");
       expect(query.params).toHaveLength(6);
+    });
+  });
+
+  describe("meta params (Phase 2)", () => {
+    it("compiles whereMissing(true/false) as :missing modifier", () => {
+      const query = createBuilder("Patient").whereMissing("family", true).whereMissing("birthdate", false).compile();
+
+      expect(query.params).toContainEqual({ name: "family", modifier: "missing", value: "true" });
+      expect(query.params).toContainEqual({ name: "birthdate", modifier: "missing", value: "false" });
+    });
+
+    it("compiles whereId as a single _id param with comma-joined ids", () => {
+      const query = createBuilder("Patient").whereId("a", "b", "c").compile();
+
+      expect(query.params).toContainEqual({ name: "_id", value: "a,b,c" });
+    });
+
+    it("compiles whereLastUpdated with prefix and without prefix (eq)", () => {
+      const query = createBuilder("Patient")
+        .whereLastUpdated("ge", "2024-01-01")
+        .whereLastUpdated("eq", "2024-06-01")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "_lastUpdated", prefix: "ge", value: "2024-01-01" });
+      expect(query.params).toContainEqual({ name: "_lastUpdated", value: "2024-06-01" });
+    });
+
+    it("compiles withTag, withSecurity, fromSource as _tag/_security/_source", () => {
+      const query = createBuilder("Patient")
+        .withTag("http://example.org/tag|a")
+        .withTag("b")
+        .withSecurity("http://example.org/sec|N")
+        .fromSource("http://example.org/source")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "_tag", value: "http://example.org/tag|a" });
+      expect(query.params).toContainEqual({ name: "_tag", value: "b" });
+      expect(query.params).toContainEqual({ name: "_security", value: "http://example.org/sec|N" });
+      expect(query.params).toContainEqual({ name: "_source", value: "http://example.org/source" });
+    });
+
+    it("compiles result-shaping params: summary/total/contained/containedType", () => {
+      const query = createBuilder("Patient")
+        .summary("count")
+        .total("accurate")
+        .contained("both")
+        .containedType("contained")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "_summary", value: "count" });
+      expect(query.params).toContainEqual({ name: "_total", value: "accurate" });
+      expect(query.params).toContainEqual({ name: "_contained", value: "both" });
+      expect(query.params).toContainEqual({ name: "_containedType", value: "contained" });
     });
   });
 

@@ -3,6 +3,7 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 export interface CompiledSearchParam {
   name: string;
   prefix?: string | undefined;
+  modifier?: string | undefined;
   value: string | number;
 }
 

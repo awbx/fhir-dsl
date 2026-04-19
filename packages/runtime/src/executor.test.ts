@@ -32,6 +32,40 @@ describe("FhirExecutor", () => {
       expect(url).toContain("birthdate=ge1990-01-01");
     });
 
+    it("appends modifier to param name (FHIR :modifier)", async () => {
+      const fetch = mockFetch({ resourceType: "Bundle" });
+      const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });
+
+      await executor.execute({
+        method: "GET",
+        path: "Patient",
+        params: [
+          { name: "family", modifier: "exact", value: "Smith" },
+          { name: "gender", modifier: "not", value: "male" },
+          { name: "birthdate", modifier: "missing", value: "true" },
+        ],
+      });
+
+      const [url] = (fetch as any).mock.calls[0]!;
+      expect(url).toContain("family%3Aexact=Smith");
+      expect(url).toContain("gender%3Anot=male");
+      expect(url).toContain("birthdate%3Amissing=true");
+    });
+
+    it("supports modifier and prefix on the same param (e.g. _has subselect)", async () => {
+      const fetch = mockFetch({ resourceType: "Bundle" });
+      const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });
+
+      await executor.execute({
+        method: "GET",
+        path: "Observation",
+        params: [{ name: "code", modifier: "in", value: "ValueSet/abc" }],
+      });
+
+      const [url] = (fetch as any).mock.calls[0]!;
+      expect(url).toContain("code%3Ain=ValueSet%2Fabc");
+    });
+
     it("sets FHIR content headers", async () => {
       const fetch = mockFetch({});
       const executor = new FhirExecutor({ baseUrl: "https://fhir.example.com", fetch });

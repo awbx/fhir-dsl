@@ -45,7 +45,7 @@ describe("claude-opus-4-6 / execute — URL serialization & result parsing", () 
     expect(url.searchParams.get("gender")).toBe("female");
   });
 
-  it("all per-type ops serialize to URL with prefix concatenation", async () => {
+  it("modifiers attach to param name (:modifier); prefixes concatenate to value", async () => {
     mock.enqueueJson(bundleOf());
     await client()
       .search("Patient")
@@ -59,10 +59,12 @@ describe("claude-opus-4-6 / execute — URL serialization & result parsing", () 
       .execute();
 
     const url = new URL(mock.requests[0]!.url);
-    expect(url.searchParams.get("name")).toBe("containssmith");
-    expect(url.searchParams.get("gender")).toBe("notmale");
-    expect(url.searchParams.get("identifier")).toBe("of-typesys|MR|abc");
-    expect(url.searchParams.get("website")).toBe("belowhttps://example.test");
+    // Modifiers go on the name (FHIR :modifier)
+    expect(url.searchParams.get("name:contains")).toBe("smith");
+    expect(url.searchParams.get("gender:not")).toBe("male");
+    expect(url.searchParams.get("identifier:of-type")).toBe("sys|MR|abc");
+    expect(url.searchParams.get("website:below")).toBe("https://example.test");
+    // Prefixes concatenate to the value (date/number/quantity)
     expect(url.searchParams.get("risk-score")).toBe("le4");
     expect(url.searchParams.get("weight")).toBe("ap72|kg");
     expect(url.searchParams.get("organization")).toBe("Organization/org-acme");
@@ -126,12 +128,12 @@ describe("claude-opus-4-6 / execute — URL serialization & result parsing", () 
     expect(result.raw).toEqual(bundle);
   });
 
-  it("whereChained serializes chain to URL exactly", async () => {
+  it("whereChained serializes chain to URL with modifier on name (subject:Patient.name:exact=Smith)", async () => {
     mock.enqueueJson(bundleOf());
     await client().search("Observation").whereChained("subject", "Patient", "name", "exact", "Smith").execute();
 
     const url = new URL(mock.requests[0]!.url);
-    expect(url.searchParams.get("subject:Patient.name")).toBe("exactSmith");
+    expect(url.searchParams.get("subject:Patient.name:exact")).toBe("Smith");
   });
 
   it("has() serializes reverse-chain to URL exactly", async () => {

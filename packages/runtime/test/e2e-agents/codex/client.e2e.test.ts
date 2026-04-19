@@ -49,12 +49,12 @@ describe("codex client e2e", () => {
       method: "GET",
       path: "Patient",
       params: [
-        { name: "name", prefix: "contains", value: "smith" },
+        { name: "name", modifier: "contains", value: "smith" },
         { name: "birthdate", prefix: "ge", value: "1990-01-01" },
-        { name: "gender", prefix: "not", value: "male" },
-        { name: "identifier", prefix: "of-type", value: "sys|abc" },
+        { name: "gender", modifier: "not", value: "male" },
+        { name: "identifier", modifier: "of-type", value: "sys|abc" },
         { name: "organization", value: "Organization/org-1" },
-        { name: "website", prefix: "below", value: "https://example.test" },
+        { name: "website", modifier: "below", value: "https://example.test" },
         { name: "risk-score", prefix: "le", value: 4 },
         { name: "weight", prefix: "ap", value: "72|kg" },
         { name: "_sort", value: "-birthdate" },
@@ -117,7 +117,7 @@ describe("codex client e2e", () => {
     expect(observationUrl.searchParams.get("status")).toBe("final");
     expect(observationUrl.searchParams.get("combo")).toBe("1234-5$72|kg");
     expect(observationUrl.searchParams.getAll("_include")).toEqual(["Observation:subject", "Observation:performer"]);
-    expect(observationUrl.searchParams.get("subject:Patient.name")).toBe("exactSmith");
+    expect(observationUrl.searchParams.get("subject:Patient.name:exact")).toBe("Smith");
 
     const patientRequest = mock.requests[1]!;
     const patientUrl = new URL(patientRequest.url);

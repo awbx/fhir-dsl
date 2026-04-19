@@ -67,8 +67,8 @@ export type DatePrefix = "eq" | "ne" | "gt" | "ge" | "lt" | "le" | "sa" | "eb" |
 export type NumberPrefix = "eq" | "ne" | "gt" | "ge" | "lt" | "le";
 export type QuantityPrefix = "eq" | "ne" | "gt" | "ge" | "lt" | "le" | "sa" | "eb" | "ap";
 export type StringModifier = "eq" | "contains" | "exact";
-export type TokenModifier = "eq" | "not" | "of-type" | "in" | "not-in" | "text" | "above" | "below";
-export type ReferenceModifier = "eq";
+export type TokenModifier = "eq" | "not" | "of-type" | "in" | "not-in" | "text" | "above" | "below" | "code-text";
+export type ReferenceModifier = "eq" | "identifier";
 export type UriModifier = "eq" | "above" | "below";
 
 export type SearchPrefixFor<P> = P extends { type: "date" }

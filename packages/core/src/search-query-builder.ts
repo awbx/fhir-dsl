@@ -3,14 +3,19 @@ import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import type {
   ApplySelection,
   BundleLink,
+  ContainedMode,
+  ContainedTypeMode,
   ResolveIncluded,
   SearchQueryBuilder,
   SearchResult,
   StreamOptions,
+  SummaryMode,
+  TotalMode,
 } from "./query-builder.js";
 import type {
   CompositeKeys,
   CompositeValues,
+  DatePrefix,
   FhirSchema,
   IncludeFor,
   ResolveProfile,
@@ -34,10 +39,44 @@ interface QueryState {
   profile?: string | undefined;
   fieldSelection?: readonly string[] | undefined;
   validate?: boolean | undefined;
+  ids?: string[] | undefined;
+  lastUpdated?: Array<{ prefix?: string; value: string }> | undefined;
+  tags?: string[] | undefined;
+  securityLabels?: string[] | undefined;
+  source?: string | undefined;
+  summary?: SummaryMode | undefined;
+  total?: TotalMode | undefined;
+  contained?: ContainedMode | undefined;
+  containedType?: ContainedTypeMode | undefined;
 }
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
 export type UrlExecutor = (url: string) => Promise<unknown>;
+
+// FHIR prefixes go on the value (date=gt2020). Modifiers go on the name (family:exact=Smith).
+const PREFIX_OPS = new Set(["gt", "ge", "lt", "le", "sa", "eb", "ap", "ne"]);
+const MODIFIER_OPS = new Set([
+  "exact",
+  "contains",
+  "not",
+  "of-type",
+  "in",
+  "not-in",
+  "text",
+  "above",
+  "below",
+  "identifier",
+  "code-text",
+  "missing",
+  "iterate",
+]);
+
+function classifyOp(op: string): { prefix?: string; modifier?: string } {
+  if (op === "eq") return {};
+  if (PREFIX_OPS.has(op)) return { prefix: op };
+  if (MODIFIER_OPS.has(op)) return { modifier: op };
+  return { prefix: op };
+}
 
 // --- Immutable Search Query Builder Implementation ---
 
@@ -90,11 +129,125 @@ export class SearchQueryBuilderImpl<
           ...this.#state.params,
           {
             name: param,
-            prefix: op === "eq" ? undefined : (op as string),
+            ...classifyOp(op as string),
             value: value as string | number,
           },
         ],
       },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  whereMissing<K extends string & keyof SP>(param: K, missing: boolean): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      {
+        ...this.#state,
+        params: [...this.#state.params, { name: param, modifier: "missing", value: missing ? "true" : "false" }],
+      },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  whereId(...ids: string[]): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, ids: [...(this.#state.ids ?? []), ...ids] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  whereLastUpdated(op: DatePrefix, value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    const entry = op === "eq" ? { value } : { prefix: op, value };
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, lastUpdated: [...(this.#state.lastUpdated ?? []), entry] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  withTag(value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, tags: [...(this.#state.tags ?? []), value] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  withSecurity(value: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, securityLabels: [...(this.#state.securityLabels ?? []), value] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  fromSource(uri: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, source: uri },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  summary(mode: SummaryMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, summary: mode },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  total(mode: TotalMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, total: mode },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  contained(mode: ContainedMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, contained: mode },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  containedType(mode: ContainedTypeMode): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, containedType: mode },
       undefined,
       this.#urlExecutor,
       this.#schemas,
@@ -186,7 +339,7 @@ export class SearchQueryBuilderImpl<
           ...this.#state.params,
           {
             name,
-            prefix: op === "eq" ? undefined : (op as string),
+            ...classifyOp(op as string),
             value: value as string | number,
           },
         ],
@@ -218,7 +371,7 @@ export class SearchQueryBuilderImpl<
           ...this.#state.params,
           {
             name,
-            prefix: op === "eq" ? undefined : (op as string),
+            ...classifyOp(op as string),
             value: value as string | number,
           },
         ],
@@ -305,6 +458,36 @@ export class SearchQueryBuilderImpl<
   compile(): CompiledQuery {
     const params: CompiledSearchParam[] = [...this.#state.params];
 
+    if (this.#state.ids && this.#state.ids.length > 0) {
+      params.push({ name: "_id", value: this.#state.ids.join(",") });
+    }
+
+    if (this.#state.lastUpdated) {
+      for (const entry of this.#state.lastUpdated) {
+        params.push(
+          entry.prefix
+            ? { name: "_lastUpdated", prefix: entry.prefix, value: entry.value }
+            : { name: "_lastUpdated", value: entry.value },
+        );
+      }
+    }
+
+    if (this.#state.tags) {
+      for (const tag of this.#state.tags) {
+        params.push({ name: "_tag", value: tag });
+      }
+    }
+
+    if (this.#state.securityLabels) {
+      for (const label of this.#state.securityLabels) {
+        params.push({ name: "_security", value: label });
+      }
+    }
+
+    if (this.#state.source !== undefined) {
+      params.push({ name: "_source", value: this.#state.source });
+    }
+
     if (this.#state.profile) {
       params.push({ name: "_profile", value: this.#state.profile });
     }
@@ -321,6 +504,22 @@ export class SearchQueryBuilderImpl<
         name: "_revinclude",
         value: revInc,
       });
+    }
+
+    if (this.#state.summary !== undefined) {
+      params.push({ name: "_summary", value: this.#state.summary });
+    }
+
+    if (this.#state.total !== undefined) {
+      params.push({ name: "_total", value: this.#state.total });
+    }
+
+    if (this.#state.contained !== undefined) {
+      params.push({ name: "_contained", value: this.#state.contained });
+    }
+
+    if (this.#state.containedType !== undefined) {
+      params.push({ name: "_containedType", value: this.#state.containedType });
     }
 
     if (this.#state.sorts.length > 0) {

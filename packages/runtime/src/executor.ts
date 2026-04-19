@@ -16,8 +16,9 @@ export class FhirExecutor {
     );
 
     for (const param of query.params) {
+      const name = param.modifier ? `${param.name}:${param.modifier}` : param.name;
       const value = param.prefix ? `${param.prefix}${param.value}` : String(param.value);
-      url.searchParams.append(param.name, value);
+      url.searchParams.append(name, value);
     }
 
     const headers: Record<string, string> = {
