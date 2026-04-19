@@ -551,6 +551,50 @@ export class SearchQueryBuilderImpl<
     );
   }
 
+  filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return this.#withParam("_filter", expression);
+  }
+
+  namedQuery(name: string, extras?: Record<string, string | number>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    const newParams: CompiledSearchParam[] = [{ name: "_query", value: name }];
+    if (extras) {
+      for (const [k, v] of Object.entries(extras)) {
+        newParams.push({ name: k, value: v });
+      }
+    }
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, params: [...this.#state.params, ...newParams] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
+  text(query: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return this.#withParam("_text", query);
+  }
+
+  content(query: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return this.#withParam("_content", query);
+  }
+
+  inList(listId: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return this.#withParam("_list", listId);
+  }
+
+  #withParam(name: string, value: string | number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, params: [...this.#state.params, { name, value }] },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
   compile(): CompiledQuery {
     const params: CompiledSearchParam[] = [...this.#state.params];
 

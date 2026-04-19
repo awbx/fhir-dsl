@@ -204,6 +204,39 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("escape hatches: _filter / _query / _text / _content / _list (Phase 7)", () => {
+    it("compiles filter() as _filter", () => {
+      const query = createBuilder("Patient").filter("name eq 'Smith' and birthdate gt 1990-01-01").compile();
+
+      expect(query.params).toContainEqual({
+        name: "_filter",
+        value: "name eq 'Smith' and birthdate gt 1990-01-01",
+      });
+    });
+
+    it("compiles namedQuery() as _query plus extra params", () => {
+      const query = createBuilder("Patient")
+        .namedQuery("patient-by-meds", { medication: "rxnorm|123", onset: "2024" })
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "_query", value: "patient-by-meds" });
+      expect(query.params).toContainEqual({ name: "medication", value: "rxnorm|123" });
+      expect(query.params).toContainEqual({ name: "onset", value: "2024" });
+    });
+
+    it("compiles text(), content(), inList() as _text/_content/_list", () => {
+      const query = createBuilder("Patient")
+        .text("diabetic AND hypertensive")
+        .content("encounter discharge")
+        .inList("List/abc")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "_text", value: "diabetic AND hypertensive" });
+      expect(query.params).toContainEqual({ name: "_content", value: "encounter discharge" });
+      expect(query.params).toContainEqual({ name: "_list", value: "List/abc" });
+    });
+  });
+
   describe("whereChain multi-hop (Phase 6)", () => {
     it("compiles a single-hop chain", () => {
       const query = createBuilder("Observation")

@@ -265,6 +265,21 @@ export interface SearchQueryBuilder<
    */
   usePost(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /** FHIR `_filter` — server-side advanced filter expression (untyped string passthrough). */
+  filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_query` — invoke a named search (e.g. `_query=patient-by-meds`) with optional extra params. */
+  namedQuery(name: string, params?: Record<string, string | number>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_text` — full-text narrative search. */
+  text(query: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_content` — full-text content search across the resource. */
+  content(query: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /** FHIR `_list` — restrict results to members of a List resource by id. */
+  inList(listId: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   compile(): CompiledQuery;
 
   execute(): Promise<
