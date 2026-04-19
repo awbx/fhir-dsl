@@ -1,6 +1,7 @@
 import type { AuthConfig } from "./auth.js";
 import type { CompiledQuery } from "./compiled-query.js";
 import { type HttpResponse, performRequest } from "./http.js";
+import { type OperationBuilder, OperationBuilderImpl, type OperationOptions } from "./operation-builder.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 import type { RetryConfig } from "./retry.js";
@@ -163,6 +164,10 @@ export class FhirClient<S extends FhirSchema> {
 
   batch(): BatchBuilder<S> {
     return new BatchBuilderImpl<S>(this.#executor);
+  }
+
+  operation(name: string, options?: OperationOptions): OperationBuilder {
+    return new OperationBuilderImpl(this.#executor, name, options);
   }
 }
 

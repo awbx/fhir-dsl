@@ -307,10 +307,102 @@ describe("history / capabilities (REST-HIST-* / REST-CAP-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("operations framework (OP-*)", () => {
-  it.todo("OP-INV-001: POST /$op / /<Type>/$op / /<Type>/<id>/$op (MISSING)");
-  it.todo("OP-INV-003: GET allowed when all params primitive AND affectsState=false (MISSING)");
-  it.todo("OP-PARM-001: Parameters resource request body (MISSING)");
-  it.todo("OP-PARM-004: single `return` Resource unwrapping (MISSING)");
+  it("OP-INV-001: system-level POST /$op", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Parameters", parameter: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.operation("$ping").execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/$ping`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("POST");
+  });
+
+  it("OP-INV-001: type-level POST /<Type>/$op", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "searchset", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.operation("everything", { scope: { kind: "type", resourceType: "Patient" } }).execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/$everything`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("POST");
+  });
+
+  it("OP-INV-001: instance-level POST /<Type>/<id>/$op", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "searchset", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client
+      .operation("$everything", { scope: { kind: "instance", resourceType: "Patient", id: "123" } })
+      .execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123/$everything`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("POST");
+  });
+
+  it("OP-INV-003: GET with primitive params serialized as query string", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Parameters", parameter: [] } }]);
+    const client = makeClient(fetchFn);
+    await client
+      .operation("lookup", {
+        scope: { kind: "type", resourceType: "CodeSystem" },
+        method: "GET",
+        parameters: { system: "http://loinc.org", code: "1234-5" },
+      })
+      .execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    const u = new URL(String(url));
+    expect(u.pathname.endsWith("/CodeSystem/$lookup")).toBe(true);
+    expect(u.searchParams.get("system")).toBe("http://loinc.org");
+    expect(u.searchParams.get("code")).toBe("1234-5");
+    expect((init.method ?? "GET").toUpperCase()).toBe("GET");
+    expect(init.body).toBeUndefined();
+  });
+
+  it("OP-PARM-001: POST wraps a plain record as a Parameters resource body", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Parameters", parameter: [] } }]);
+    const client = makeClient(fetchFn);
+    await client
+      .operation("validate-code", {
+        scope: { kind: "type", resourceType: "ValueSet" },
+        parameters: { url: "http://hl7.org/fhir/ValueSet/x", code: "active", count: 5 },
+      })
+      .execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["Content-Type"]).toBe("application/fhir+json");
+    const body = JSON.parse(init.body as string);
+    expect(body.resourceType).toBe("Parameters");
+    const byName = Object.fromEntries(body.parameter.map((p: any) => [p.name, p]));
+    expect(byName.url.valueString).toBe("http://hl7.org/fhir/ValueSet/x");
+    expect(byName.code.valueString).toBe("active");
+    expect(byName.count.valueInteger).toBe(5);
+  });
+
+  it("OP-PARM-001: POST passes through an already-built Parameters resource verbatim", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Parameters", parameter: [] } }]);
+    const client = makeClient(fetchFn);
+    const params = {
+      resourceType: "Parameters",
+      parameter: [{ name: "mode", valueCode: "create" }],
+    } as const;
+    await client
+      .operation("$validate", {
+        scope: { kind: "type", resourceType: "Patient" },
+        parameters: params as any,
+      })
+      .execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    const body = JSON.parse(init.body as string);
+    expect(body).toEqual(params);
+  });
+
+  it("OP-PARM-004: operation returns the server payload verbatim (Resource or Parameters)", async () => {
+    const payload = {
+      resourceType: "Parameters",
+      parameter: [{ name: "result", valueBoolean: true }],
+    };
+    const fetchFn = queuedFetch([{ status: 200, body: payload }]);
+    const client = makeClient(fetchFn);
+    const result = await client.operation("$validate", { scope: { kind: "type", resourceType: "Patient" } }).execute();
+    expect(result).toEqual(payload);
+  });
+
   it.todo("OP-VAL-001..005: $validate with mode/profile/usageContext");
   it.todo("OP-EV-001/002: Patient/<id>/$everything — Bundle response, paginated");
   it.todo("OP-EXP-001..004: ValueSet/$expand with url/valueSet/filter/count");

@@ -20,7 +20,7 @@
  *   audit/impl/runtime-impl-map.md   — file:line citations per rule
  */
 
-import type { CompiledQuery } from "@fhir-dsl/core";
+import { type CompiledQuery, createFhirClient } from "@fhir-dsl/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type FhirError, FhirExecutor, paginate } from "../src/index.js";
 
@@ -545,7 +545,27 @@ describe("Interaction matrix — MISSING on FhirClient (runtime-impl-map §23)",
   it.todo("REST-HEAD-001: head(rt, id) — HEAD /<rt>/<id>");
   it.todo("REST-ASYNC-001..006: async pattern with Prefer: respond-async");
   it.todo("REST-BUND-006: entry.request.ifNoneExist inside transaction");
-  it.todo("OP-INV-001..005: operation() — POST /$op / /<rt>/$op / /<rt>/<id>/$op");
+  it("OP-INV-001..005: operation() — POST /$op / /<rt>/$op / /<rt>/<id>/$op", async () => {
+    const responses: Array<{ url: string; method: string }> = [];
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
+      responses.push({ url: String(url), method: (init?.method ?? "GET").toUpperCase() });
+      return {
+        status: 200,
+        statusText: "OK",
+        ok: true,
+        headers: new Headers(),
+        json: async () => ({ resourceType: "Parameters", parameter: [] }),
+        text: async () => "",
+      } as unknown as Response;
+    });
+    const client = createFhirClient<any>({ baseUrl: BASE, fetch: fetchFn as any });
+    await client.operation("$ping").execute();
+    await client.operation("expand", { scope: { kind: "type", resourceType: "ValueSet" } }).execute();
+    await client.operation("everything", { scope: { kind: "instance", resourceType: "Patient", id: "p1" } }).execute();
+    expect(responses[0]).toEqual({ url: `${BASE}/$ping`, method: "POST" });
+    expect(responses[1]).toEqual({ url: `${BASE}/ValueSet/$expand`, method: "POST" });
+    expect(responses[2]).toEqual({ url: `${BASE}/Patient/p1/$everything`, method: "POST" });
+  });
   it.todo("OP-VAL-001..005: $validate with mode + profile");
   it.todo("OP-EV-001/002: $everything on Patient/Encounter");
   it.todo("OP-EXP-001..004: ValueSet $expand");

@@ -271,6 +271,28 @@ export interface BundleEntry {
   response?: { status: string; location?: string; etag?: string; lastModified?: string };
 }
 
+// --- Parameters (infrastructure type for FHIR operations) ---
+
+export interface Parameters extends Resource {
+  resourceType: "Parameters";
+  parameter: ParametersParameter[];
+}
+
+export interface ParametersParameter {
+  name: string;
+  valueString?: FhirString;
+  valueBoolean?: FhirBoolean;
+  valueInteger?: FhirInteger;
+  valueDecimal?: FhirDecimal;
+  valueUri?: FhirUri;
+  valueCode?: FhirCode;
+  valueCanonical?: FhirCanonical;
+  valueDateTime?: FhirDateTime;
+  valueInstant?: FhirInstant;
+  resource?: Resource;
+  part?: ParametersParameter[];
+}
+
 // --- BackboneElement ---
 
 export interface BackboneElement extends Element {
