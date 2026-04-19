@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - fix: TextEncoder-measured auto-POST threshold + arithmetic dead arm (#49) (`3ee7b7b`)
-- fix(types): Reference<T> narrows `type` field to allowed targets (BUG-027) (`190257c`)
+- fix(types): Reference&lt;T> narrows `type` field to allowed targets (BUG-027) (`190257c`)
 - fix: validate modifier-applicability and preserve null-valued properties (BUG-024, BUG-025) (`f6c1d66`)
 - fix(runtime): cycle-safe pagination + response metadata + non-JSON error body (BUG-019, BUG-020, BUG-021, BUG-022) (`c946f4e`)
 - fix(core): auto-POST threshold measures GET URL bytes and exposes getUrlByteLimit() (BUG-017) (`58fea58`)

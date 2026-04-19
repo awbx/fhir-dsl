@@ -123,10 +123,20 @@ export function generateChangelog(newVersion) {
 /**
  * Write changelog to disk. Called from bump-version.mjs or standalone.
  */
+/**
+ * MDX parses bare `<Word>` as JSX. Commit messages like `Reference<T>` or
+ * `Map<K,V>` would fail the Docusaurus build. Escape `<` to `&lt;` everywhere
+ * except inside code spans/blocks (which MDX already treats as literal).
+ */
+function sanitizeForMdx(content) {
+  const parts = content.split(/(`[^`]*`)/g);
+  return parts.map((p, i) => (i % 2 === 1 ? p : p.replace(/</g, "&lt;"))).join("");
+}
+
 export function writeChangelog(newVersion) {
   const content = generateChangelog(newVersion);
   writeFileSync(changelogPath, content);
-  writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + content);
+  writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + sanitizeForMdx(content));
   console.log(`  changelog: CHANGELOG.md`);
   console.log(`  changelog: apps/docs/docs/changelog.md`);
   return [changelogPath, docsChangelogPath];
@@ -141,7 +151,7 @@ if (isMain) {
   const content = generateChangelog(version);
   if (flags.includes("--write")) {
     writeFileSync(changelogPath, content);
-    writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + content);
+    writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + sanitizeForMdx(content));
     console.log("Wrote CHANGELOG.md and docs/changelog.md");
   } else {
     process.stdout.write(content);
