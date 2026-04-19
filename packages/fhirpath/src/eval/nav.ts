@@ -51,8 +51,12 @@ export function evalNav(op: NavOp, collection: unknown[]): unknown[] {
         if (item == null || typeof item !== "object") return [];
         const obj = item as Record<string, unknown>;
         let val: unknown = obj[op.prop];
-        if (val == null) val = dispatchChoiceType(obj, op.prop);
-        if (val == null) return [];
+        // §5.1 edge-case a.3 (BUG-024): distinguish explicit-null property
+        // values (present but null-valued → yield `{null}`) from absence
+        // (yield `{}`). Only `undefined` triggers choice-type fallback and
+        // empty return; an explicit `null` is a present collection member.
+        if (val === undefined) val = dispatchChoiceType(obj, op.prop);
+        if (val === undefined) return [];
         return Array.isArray(val) ? val : [val];
       });
 

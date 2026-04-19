@@ -40,7 +40,7 @@ export function compileConditionTree<SP>(root: Condition<SP>): CompiledSearchPar
 
 function tupleToParam<SP>(tuple: ConditionTuple<SP>): CompiledSearchParam {
   const [name, op, value] = tuple;
-  return { name: name as string, ...classifyOp(op as string), value: value as string | number };
+  return { name: name as string, ...classifyOp(op as string, name as string), value: value as string | number };
 }
 
 // --- _filter expression emitter (FHIRPath-like) ---

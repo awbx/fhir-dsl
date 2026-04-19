@@ -74,6 +74,18 @@ describe("Navigation (FP-NAV-*)", () => {
     expect(result).not.toContain(undefined);
   });
 
+  it("FP-NAV-006: explicit-null property values are preserved (spec §5.1, BUG-024)", () => {
+    // A property set to `null` is *present* (not absent), so nav must yield
+    // `{null}` — a length-1 collection — rather than silently dropping it.
+    // Critical for `exists()` and `count()`, which must not conflate
+    // null-valued with missing.
+    const resource: any = { resourceType: "Patient", deceasedBoolean: null };
+    const navResult = (fp() as any).deceasedBoolean.evaluate(resource);
+    expect(navResult).toEqual([null]);
+    expect((fp() as any).deceasedBoolean.exists().evaluate(resource)).toEqual([true]);
+    expect((fp() as any).deceasedBoolean.count().evaluate(resource)).toEqual([1]);
+  });
+
   it("FP-NAV-003: a step on a collection flattens the results", () => {
     const result = fp().name.given.evaluate(patientMultipleNames);
     expect(result).toEqual(["Alice", "A.", "Bob"]);

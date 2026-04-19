@@ -167,7 +167,7 @@ export class SearchQueryBuilderImpl<
           ...this.#state.params,
           {
             name: param,
-            ...classifyOp(op as string),
+            ...classifyOp(op as string, param),
             value: value as string | number,
           },
         ],
