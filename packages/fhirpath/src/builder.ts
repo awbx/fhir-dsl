@@ -49,6 +49,11 @@ const NULLARY_FNS: Record<string, { opType: string; compile: (path: string) => s
   getValue: { opType: "getValue", compile: (p) => `${p}.getValue()` },
   htmlChecks: { opType: "htmlChecks", compile: (p) => `${p}.htmlChecks()` },
   resolve: { opType: "resolve", compile: (p) => `${p}.resolve()` },
+  // Aggregates (§5.3.1 — STU numeric conveniences)
+  sum: { opType: "sum", compile: (p) => `${p}.sum()` },
+  min: { opType: "min", compile: (p) => `${p}.min()` },
+  max: { opType: "max", compile: (p) => `${p}.max()` },
+  avg: { opType: "avg", compile: (p) => `${p}.avg()` },
 };
 
 function buildPredicate(callback: (proxy: unknown) => unknown): CompiledPredicate {
@@ -197,6 +202,20 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
             ...ops,
             { type: "repeat", projection: pred },
           ]);
+        };
+      }
+
+      // --- aggregate(aggregator, init?) — §5.3 general-purpose fold ---
+
+      if (prop === "aggregate") {
+        return (aggregatorCb: (p: unknown) => unknown, init?: unknown) => {
+          const aggregator = buildPredicate(aggregatorCb);
+          const initPred = init === undefined ? undefined : scalarToPredicate(init);
+          const initPart = initPred ? `, ${initPred.compiledPath}` : "";
+          const op: PathOp = initPred
+            ? { type: "aggregate", aggregator, init: initPred }
+            : { type: "aggregate", aggregator };
+          return createExprProxy(`${path}.aggregate(${aggregator.compiledPath}${initPart})`, [...ops, op]);
         };
       }
 

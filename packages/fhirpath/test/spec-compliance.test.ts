@@ -1064,11 +1064,43 @@ describe("Utility (FP-UTIL-*)", () => {
 /* 18. Aggregate (§7 STU) — MISSING                                           */
 /* -------------------------------------------------------------------------- */
 
-describe("Aggregate (FP-AGG-*) — MISSING", () => {
-  it.todo("FP-AGG-001: aggregate($this, $total, init?)");
-  it.todo("FP-AGG-002: sum()");
-  it.todo("FP-AGG-003: min() / max()");
-  it.todo("FP-AGG-004: avg()");
+describe("Aggregate (FP-AGG-*)", () => {
+  it("FP-AGG-001: aggregate($this + $total, init=0) reduces a collection to the sum", () => {
+    const r: any = { resourceType: "Observation", component: [{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }] };
+    const sum = (fhirpath<any>("Observation") as any).component.v.aggregate(($this: any) => $this.add($total), 0);
+    expect(sum.evaluate(r)).toEqual([10]);
+  });
+
+  it("FP-AGG-001: aggregate without init starts $total at `{}` (empty) — first element becomes the initial accumulator", () => {
+    const r: any = { resourceType: "Observation", component: [{ v: 5 }, { v: 7 }] };
+    // Without init, first iteration: $total={}, $this=5, aggregator=$this ⇒ [5].
+    // Second: $total=[5], $this=7, aggregator=$this ⇒ [7]. Pin: result is [7].
+    const last = (fhirpath<any>("Observation") as any).component.v.aggregate(($this: any) => $this);
+    expect(last.evaluate(r)).toEqual([7]);
+  });
+
+  it("FP-AGG-002: sum() returns the sum of a numeric collection", () => {
+    const r: any = { resourceType: "Observation", component: [{ v: 1.5 }, { v: 2 }, { v: 3.5 }] };
+    expect((fhirpath<any>("Observation") as any).component.v.sum().evaluate(r)).toEqual([7]);
+  });
+
+  it("FP-AGG-002: sum() returns `[]` on empty or non-numeric collection (§5.3.1)", () => {
+    const empty: any = { resourceType: "Observation", component: [] };
+    expect((fhirpath<any>("Observation") as any).component.v.sum().evaluate(empty)).toEqual([]);
+    const mixed: any = { resourceType: "Observation", component: [{ v: 1 }, { v: "oops" }] };
+    expect((fhirpath<any>("Observation") as any).component.v.sum().evaluate(mixed)).toEqual([]);
+  });
+
+  it("FP-AGG-003: min() / max() over a numeric collection", () => {
+    const r: any = { resourceType: "Observation", component: [{ v: 4 }, { v: 1 }, { v: 9 }, { v: 3 }] };
+    expect((fhirpath<any>("Observation") as any).component.v.min().evaluate(r)).toEqual([1]);
+    expect((fhirpath<any>("Observation") as any).component.v.max().evaluate(r)).toEqual([9]);
+  });
+
+  it("FP-AGG-004: avg() returns the arithmetic mean", () => {
+    const r: any = { resourceType: "Observation", component: [{ v: 2 }, { v: 4 }, { v: 6 }] };
+    expect((fhirpath<any>("Observation") as any).component.v.avg().evaluate(r)).toEqual([4]);
+  });
 });
 
 /* -------------------------------------------------------------------------- */

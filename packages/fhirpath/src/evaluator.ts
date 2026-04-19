@@ -1,3 +1,4 @@
+import { evalAggregate } from "./eval/aggregate.js";
 import { evalArithmetic } from "./eval/arithmetic.js";
 import { evalCombining } from "./eval/combining.js";
 import { evalConversion } from "./eval/conversion.js";
@@ -51,9 +52,20 @@ function buildEvalContext(rootResource: unknown, options?: EvalOptions): EvalCon
     evaluateSub(innerOps, r, locals) {
       // Sub-evals re-focus on `r` (so and/or/xor right-hand eval sees the
       // current item), but preserve rootResource so %rootResource still
-      // points at the original input.
-      const subCtx: EvalContext = { ...ctx, focus: r };
+      // points at the original input. Rebind `evaluateSub`/`evaluateOps`
+      // onto the sub-context so nested calls (e.g. arithmetic evaluating
+      // its right-hand subexpression while inside aggregate's per-item
+      // frame) still see the iteration locals.
+      const subCtx = { ...ctx, focus: r } as EvalContext;
       if (locals !== undefined) subCtx.iterationLocals = locals;
+      subCtx.evaluateSub = (ops2, r2, locals2) => {
+        const next = { ...subCtx, focus: r2 } as EvalContext;
+        if (locals2 !== undefined) next.iterationLocals = locals2;
+        next.evaluateSub = subCtx.evaluateSub;
+        next.evaluateOps = (ops3, start3) => runOps(ops3, start3, next);
+        return runOps(ops2, [r2], next);
+      };
+      subCtx.evaluateOps = (ops2, start2) => runOps(ops2, start2, subCtx);
       return runOps(innerOps, [r], subCtx);
     },
     evaluateOps(innerOps, startCollection) {
@@ -79,8 +91,13 @@ function resolveVar(op: VarOp, ctx: EvalContext): unknown[] {
   }
   if (name === "$total") {
     const locals: IterationLocals | undefined = ctx.iterationLocals;
-    if (!locals) throw new FhirPathEvaluationError("$total is only defined inside where/select/repeat iteration");
-    return [locals.total];
+    if (!locals) {
+      throw new FhirPathEvaluationError("$total is only defined inside where/select/repeat/aggregate iteration");
+    }
+    // $total is a number in where/select/repeat but a collection-valued
+    // accumulator inside aggregate. Use collection-wrap semantics so both
+    // round-trip correctly.
+    return wrap(locals.total);
   }
   // Built-in environment names.
   if (name === "%context" || name === "%resource" || name === "%rootResource") {
@@ -251,5 +268,13 @@ function dispatch(op: PathOp, collection: unknown[], ctx: EvalContext): unknown[
     case "htmlChecks":
     case "resolve":
       return evalFhirFn(op, collection, ctx);
+
+    // --- Aggregates (§5.3) ---
+    case "aggregate":
+    case "sum":
+    case "min":
+    case "max":
+    case "avg":
+      return evalAggregate(op, collection, ctx);
   }
 }

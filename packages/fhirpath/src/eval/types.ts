@@ -2,7 +2,13 @@ import type { PathOp } from "../ops.js";
 
 export interface IterationLocals {
   index: number;
-  total: number;
+  /**
+   * `$total` carries different meanings depending on the iteration frame:
+   * in `where`/`select`/`repeat` it is the size of the iterated collection
+   * (a number); in `aggregate` it is the running accumulator (any value or
+   * collection). `resolveVar` wraps it via FHIRPath collection semantics.
+   */
+  total: unknown;
 }
 
 /** Context passed to eval modules for recursive evaluation */

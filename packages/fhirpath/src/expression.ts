@@ -162,6 +162,20 @@ export function createPredicateProxy(path: string, ops: PathOp[]): unknown {
         return (typeName: string) => createPredicateProxy(`${path} as ${typeName}`, [...ops, { type: "as", typeName }]);
       }
 
+      // --- Arithmetic (§6.6). Needed by aggregate() aggregators where
+      //     `$this + $total` is the natural expression. Mirrors the builder
+      //     ARITHMETIC_OPS table — the predicate proxy runs the same ops.
+      const arith = ARITHMETIC_OPS[prop as keyof typeof ARITHMETIC_OPS];
+      if (arith) {
+        return (other: unknown) => {
+          const otherPred = resolveArithmeticOperand(other);
+          return createPredicateProxy(`(${path} ${arith.symbol} ${otherPred.compiledPath})`, [
+            ...ops,
+            { type: arith.opType, other: otherPred } as PathOp,
+          ]);
+        };
+      }
+
       // --- Property navigation (default) ---
       return createPredicateProxy(`${path}.${prop}`, [...ops, { type: "nav", prop }]);
     },
@@ -173,6 +187,31 @@ function resolveValue(value: unknown): unknown {
     return extractPredicate(value);
   }
   return value;
+}
+
+const ARITHMETIC_OPS = {
+  add: { opType: "add", symbol: "+" },
+  sub: { opType: "subtract", symbol: "-" },
+  mul: { opType: "multiply", symbol: "*" },
+  div: { opType: "divide", symbol: "/" },
+  divTrunc: { opType: "divTrunc", symbol: "div" },
+  mod: { opType: "mod", symbol: "mod" },
+  concat: { opType: "concat", symbol: "&" },
+} as const;
+
+function resolveArithmeticOperand(other: unknown): CompiledPredicate {
+  if (other != null && typeof other === "object" && PREDICATE_SYMBOL in other) {
+    return extractPredicate(other);
+  }
+  // FhirPathExpr (external expression, e.g. `$total` global). Drain via ops.
+  const ops = (other as { [k: symbol]: unknown })?.[Symbol.for("fhirpath.ops")];
+  if (Array.isArray(ops)) {
+    const path = (other as { compile?: () => string })?.compile?.() ?? "";
+    return { ops: ops as PathOp[], compiledPath: path };
+  }
+  // Literal scalar.
+  const compiled = typeof other === "string" ? `'${other}'` : String(other);
+  return { ops: [{ type: "literal", value: other }], compiledPath: compiled };
 }
 
 function formatValue(value: unknown): string {

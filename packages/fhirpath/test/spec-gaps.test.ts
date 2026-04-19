@@ -59,10 +59,6 @@ describe("FHIRPath spec gaps (pins current behavior — see AUDIT.md)", () => {
     it.todo("'Smith' ~ 'smith' returns true (case-insensitive equivalence, spec §6.3.1.4)");
   });
 
-  describe("aggregate() — missing", () => {
-    it.todo("aggregate($this, $total, init?) reduces a collection");
-  });
-
   describe("UCUM-aware Quantity equality — not implemented", () => {
     // toQuantity() stores the raw unit string; semantically-equal quantities
     // with different unit spellings compare as unequal.

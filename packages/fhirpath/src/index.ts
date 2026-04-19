@@ -12,6 +12,7 @@ export { FhirPathEvaluationError } from "./eval/types.js";
 export { type EvalOptions, evaluate } from "./evaluator.js";
 export { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
 export type {
+  AggregateOp,
   ArithmeticOp,
   CombineOp,
   CompiledPredicate,

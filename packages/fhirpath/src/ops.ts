@@ -145,6 +145,19 @@ export type OperatorOp =
 
 export type LiteralOp = { type: "literal"; value: unknown };
 
+// --- Aggregates (§5.3) -----------------------------------------------------
+//
+// `aggregate(aggregator, init?)` walks the input collection and accumulates
+// into `$total` (set to `init` or `{}` at the start, then the result of the
+// aggregator after each iteration). `sum`/`min`/`max`/`avg` are STU-status
+// numeric convenience aggregates.
+export type AggregateOp =
+  | { type: "aggregate"; aggregator: CompiledPredicate; init?: CompiledPredicate }
+  | { type: "sum" }
+  | { type: "min" }
+  | { type: "max" }
+  | { type: "avg" };
+
 // --- FHIR-specific functions (§2.1.9 / FP.12) ---
 
 export type FhirFnOp = { type: "hasValue" } | { type: "getValue" } | { type: "htmlChecks" } | { type: "resolve" };
@@ -171,4 +184,5 @@ export type PathOp =
   | OperatorOp
   | LiteralOp
   | VarOp
-  | FhirFnOp;
+  | FhirFnOp
+  | AggregateOp;
