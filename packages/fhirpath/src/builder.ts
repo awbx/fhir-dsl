@@ -1,3 +1,4 @@
+import type { EvalOptions } from "./evaluator.js";
 import { evaluate } from "./evaluator.js";
 import { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
 import type { CompiledPredicate, PathOp } from "./ops.js";
@@ -113,7 +114,7 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
 
       if (prop === "compile") return () => path;
 
-      if (prop === "evaluate") return (resource: unknown) => evaluate(ops, resource);
+      if (prop === "evaluate") return (resource: unknown, options?: EvalOptions) => evaluate(ops, resource, options);
 
       // --- Nullary functions ---
 

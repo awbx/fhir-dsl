@@ -10,4 +10,15 @@ export interface EvalContext {
    * where the spec says the criterion is evaluated on the input collection
    * rather than per-element). */
   evaluateOps: (ops: PathOp[], startCollection: unknown[]) => unknown[];
+  /** Strict mode (§4.5): multi-element singleton-eval throws instead of
+   *  silently returning `[]`. Default false (matches HAPI/fhirpath.js/Firely). */
+  strict?: boolean;
+}
+
+/** Thrown when strict-mode evaluation detects a spec violation. */
+export class FhirPathEvaluationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FhirPathEvaluationError";
+  }
 }

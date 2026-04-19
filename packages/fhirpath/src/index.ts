@@ -1,7 +1,9 @@
 export { fhirpath } from "./builder.js";
-export { evaluate } from "./evaluator.js";
+export { FhirPathEvaluationError } from "./eval/types.js";
+export { type EvalOptions, evaluate } from "./evaluator.js";
 export { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
 export type {
+  ArithmeticOp,
   CombineOp,
   CompiledPredicate,
   ConversionOp,

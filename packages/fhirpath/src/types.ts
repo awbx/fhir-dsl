@@ -113,8 +113,11 @@ export interface PredicateOps<T> {
 export interface FhirPathCoreOps<T> {
   /** Return the compiled FHIRPath expression string */
   compile(): string;
-  /** Evaluate the expression against a resource, returning a collection */
-  evaluate(resource: unknown): Unwrap<T>[];
+  /**
+   * Evaluate the expression against a resource, returning a collection.
+   * Pass `{ strict: true }` to raise on §4.5 singleton-eval violations.
+   */
+  evaluate(resource: unknown, options?: { strict?: boolean }): Unwrap<T>[];
 }
 
 export interface FhirPathExistenceOps<T> {

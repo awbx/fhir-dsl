@@ -29,7 +29,16 @@ import { evaluate } from "../src/evaluator.js";
 import type { PathOp } from "../src/ops.js";
 import type { TestPatient } from "../src/test-types.js";
 
-const makeCtx = () => ({ rootResource: null, evaluateSub: evaluate });
+const makeCtx = (opts?: { strict?: boolean }) => ({
+  rootResource: null,
+  evaluateSub: evaluate,
+  evaluateOps: (innerOps: PathOp[], startCollection: unknown[]) => {
+    let coll = startCollection;
+    for (const op of innerOps) coll = evaluate([op], coll[0]);
+    return coll;
+  },
+  strict: opts?.strict,
+});
 
 function fp() {
   return fhirpath<TestPatient>("Patient");
@@ -110,22 +119,32 @@ describe("Navigation (FP-NAV-*)", () => {
    * `collection.length === 1 ? collection[0] : collection[0]` that
    * silently uses the first item for multi-element left operands.
    */
-  test.fails("FP-NAV-005: multi-element collection in boolean context throws (spec §4.5)", () => {
-    // Mimic `and` on a multi-element collection: dispatch evalOperator
-    // directly so we exercise toSingletonBoolean for the left operand.
+  it("FP-NAV-005: multi-element collection in boolean context throws in strict mode (spec §4.5, #29)", () => {
     const op: PathOp = {
       type: "and",
       other: { ops: [{ type: "literal", value: true }], compiledPath: "true" },
     };
     const multiBoolInput = [true, true];
-    // Spec §4.5: must signal error. Impl returns [] silently.
-    expect(() => evalOperator(op, multiBoolInput, makeCtx())).toThrow();
+    // Lenient (default): silently returns [].
+    expect(evalOperator(op, multiBoolInput, makeCtx())).toEqual([]);
+    // Strict mode: raises FhirPathEvaluationError per §4.5.
+    expect(() => evalOperator(op, multiBoolInput, makeCtx({ strict: true }))).toThrow(/singleton evaluation/i);
   });
 
-  test.fails("FP-CMP-002: `=` on multi-element left operand errors (spec §4.5)", () => {
+  it("FP-CMP-002: `=` on multi-element left operand errors in strict mode (spec §4.5, #29)", () => {
     const op: PathOp = { type: "eq", value: "Smith" };
     const multiLeft = ["Jones", "Smith"];
-    expect(() => evalOperator(op, multiLeft, makeCtx())).toThrow();
+    expect(evalOperator(op, multiLeft, makeCtx())).toEqual([]);
+    expect(() => evalOperator(op, multiLeft, makeCtx({ strict: true }))).toThrow(/singleton evaluation/i);
+  });
+
+  it("strict mode surfaces via .evaluate(resource, { strict: true }) on the builder proxy (#29)", () => {
+    // Multi-name patient → .where(n => n.given.eq("Alice")) forces the `eq`
+    // left operand (n.given) to be a multi-element collection inside the
+    // where callback — a §4.5 singleton-eval violation.
+    const expr = fp().name.where(($this) => $this.given.eq("Alice"));
+    expect(() => expr.evaluate(patientMultipleNames)).not.toThrow(); // lenient default
+    expect(() => expr.evaluate(patientMultipleNames, { strict: true })).toThrow(/singleton evaluation/i);
   });
 });
 
@@ -685,16 +704,17 @@ describe("Collection operators (FP-COL-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("Type operators (FP-TYP-*)", () => {
-  test.fails("FP-TYP-001: `is` on empty collection returns empty (spec §6.4)", () => {
-    // Impl: eval/operators.ts:65-66 returns `[collection.length === 1 && matchesType(...)]`.
-    // For empty input this is [false]; spec requires [].
+  it("FP-TYP-001: `is` on empty collection returns empty (spec §6.4)", () => {
     const op: PathOp = { type: "is", typeName: "string" };
     expect(evalOperator(op, [], makeCtx())).toEqual([]);
   });
 
-  test.fails("FP-TYP-001: `is` on multi-element collection errors (spec §4.5)", () => {
+  it("FP-TYP-001: `is` on multi-element collection errors in strict mode (spec §4.5, #29)", () => {
     const op: PathOp = { type: "is", typeName: "string" };
-    expect(() => evalOperator(op, ["a", "b"], makeCtx())).toThrow();
+    // Lenient default: returns [false] (degenerate) — kept for backward compat.
+    expect(evalOperator(op, ["a", "b"], makeCtx())).toEqual([false]);
+    // Strict: errors per §4.5.
+    expect(() => evalOperator(op, ["a", "b"], makeCtx({ strict: true }))).toThrow(/singleton evaluation/i);
   });
 
   it("FP-TYP-002: `as` passes matching items through", () => {

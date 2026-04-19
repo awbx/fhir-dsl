@@ -1,6 +1,6 @@
 import type { CompiledPredicate, OperatorOp } from "../ops.js";
 import { fhirpathEqual } from "./_internal/equality.js";
-import type { EvalContext } from "./types.js";
+import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 
 export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalContext): unknown[] {
   switch (op.type) {
@@ -23,40 +23,40 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
       return evalComparison(collection, op.value, ctx, (a, b) => (a as number) >= (b as number));
 
     case "and": {
-      const left = toSingletonBoolean(collection);
+      const left = toSingletonBoolean(collection, ctx, "and (left)");
       if (left === false) return [false];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource));
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "and (right)");
       if (left === true && right === true) return [true];
       if (right === false) return [false];
       return [];
     }
 
     case "or": {
-      const left = toSingletonBoolean(collection);
+      const left = toSingletonBoolean(collection, ctx, "or (left)");
       if (left === true) return [true];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource));
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "or (right)");
       if (right === true) return [true];
       if (left === false && right === false) return [false];
       return [];
     }
 
     case "xor": {
-      const left = toSingletonBoolean(collection);
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource));
+      const left = toSingletonBoolean(collection, ctx, "xor (left)");
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "xor (right)");
       if (left == null || right == null) return [];
       return [left !== right];
     }
 
     case "not": {
-      const val = toSingletonBoolean(collection);
+      const val = toSingletonBoolean(collection, ctx, "not");
       if (val == null) return [];
       return [!val];
     }
 
     case "implies": {
-      const left = toSingletonBoolean(collection);
+      const left = toSingletonBoolean(collection, ctx, "implies (left)");
       if (left === false) return [true];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource));
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "implies (right)");
       if (left === true && right === true) return [true];
       if (right === true) return [true];
       if (left === true && right === false) return [false];
@@ -64,6 +64,13 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
     }
 
     case "is":
+      if (collection.length > 1 && ctx.strict) {
+        throw new FhirPathEvaluationError(
+          `Singleton evaluation (§4.5): 'is' received ${collection.length} items; expected 0 or 1.`,
+        );
+      }
+      // §6.4: `is` on empty collection returns empty (not [false]).
+      if (collection.length === 0) return [];
       return [collection.length === 1 && matchesType(collection[0], op.typeName)];
 
     case "as":
@@ -80,6 +87,11 @@ function evalComparison(
   // §4.5 Singleton Evaluation: empty → empty propagation; multi-element is
   // outside the singleton-eval contract. Lenient default returns [] rather
   // than silently coercing to collection[0] (was a dead-ternary bug).
+  if (collection.length > 1 && ctx.strict) {
+    throw new FhirPathEvaluationError(
+      `Singleton evaluation (§4.5): comparison operand received ${collection.length} items; expected 0 or 1.`,
+    );
+  }
   if (collection.length !== 1) return [];
   const left = collection[0];
 
@@ -99,7 +111,12 @@ function isCompiledPredicate(value: unknown): value is CompiledPredicate {
   return value != null && typeof value === "object" && "ops" in value && "compiledPath" in value;
 }
 
-function toSingletonBoolean(collection: unknown[]): boolean | undefined {
+function toSingletonBoolean(collection: unknown[], ctx: EvalContext, where: string): boolean | undefined {
+  if (collection.length > 1 && ctx.strict) {
+    throw new FhirPathEvaluationError(
+      `Singleton evaluation (§4.5): ${where} received ${collection.length} items; expected 0 or 1.`,
+    );
+  }
   if (collection.length !== 1) return undefined;
   const val = collection[0];
   if (typeof val === "boolean") return val;

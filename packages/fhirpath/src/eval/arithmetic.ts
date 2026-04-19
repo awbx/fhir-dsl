@@ -1,5 +1,5 @@
 import type { ArithmeticOp } from "../ops.js";
-import type { EvalContext } from "./types.js";
+import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 
 // FHIRPath N1 §6.6: binary arithmetic operators are singleton-only. If either
 // operand is empty or not a singleton of the expected primitive, the result is
@@ -16,6 +16,11 @@ export function evalArithmetic(op: ArithmeticOp, collection: unknown[], ctx: Eva
     return [as + bs];
   }
 
+  if (ctx.strict && (left.length > 1 || right.length > 1)) {
+    throw new FhirPathEvaluationError(
+      `Singleton evaluation (§4.5): arithmetic '${op.type}' received ${left.length}/${right.length} operands; expected 0 or 1.`,
+    );
+  }
   if (left.length !== 1 || right.length !== 1) return [];
   const a = left[0];
   const b = right[0];

@@ -12,15 +12,24 @@ import type { EvalContext } from "./eval/types.js";
 import { evalUtility } from "./eval/utility.js";
 import type { PathOp } from "./ops.js";
 
+export interface EvalOptions {
+  /**
+   * Strict mode raises `FhirPathEvaluationError` on multi-element
+   * singleton-eval (§4.5) instead of returning `[]`. Default: false.
+   */
+  strict?: boolean;
+}
+
 /**
  * Evaluate a sequence of FHIRPath operations against a resource.
  * Returns the resulting collection.
  */
-export function evaluate(ops: PathOp[], resource: unknown): unknown[] {
+export function evaluate(ops: PathOp[], resource: unknown, options?: EvalOptions): unknown[] {
   const ctx: EvalContext = {
     rootResource: resource,
-    evaluateSub: evaluate,
+    evaluateSub: (innerOps, r) => evaluate(innerOps, r, options),
     evaluateOps: (innerOps, startCollection) => runOps(innerOps, startCollection, ctx),
+    strict: options?.strict,
   };
   return runOps(ops, [resource], ctx);
 }
