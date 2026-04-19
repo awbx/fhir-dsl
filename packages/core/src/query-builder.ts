@@ -48,6 +48,25 @@ export interface SearchResult<Primary extends Resource, Included extends Resourc
 
 // --- Execute / Stream Options ---
 
+/**
+ * FHIR R5 §3.2.0.1.6 / §3.2.0.1.9 — typed `Prefer:` directives. The strings
+ * this compiles to follow RFC 7240 syntax (semicolon-separated tokens).
+ */
+export interface PreferOptions {
+  /**
+   * `return=minimal` (no body), `return=representation` (full resource), or
+   * `return=OperationOutcome` (issues-only).
+   */
+  return?: "minimal" | "representation" | "OperationOutcome";
+  /**
+   * `handling=strict` — reject unknown search params with 400.
+   * `handling=lenient` — best-effort processing.
+   */
+  handling?: "strict" | "lenient";
+  /** `respond-async` — request async execution per §3.2.6. */
+  respondAsync?: boolean;
+}
+
 export interface ExecuteOptions {
   /**
    * AbortSignal that cancels the in-flight request. If the signal is already
@@ -55,10 +74,34 @@ export interface ExecuteOptions {
    * an `AbortError`; otherwise the in-flight `fetch()` is aborted.
    */
   signal?: AbortSignal;
+  /** Typed `Prefer:` directives merged into request headers before dispatch. */
+  prefer?: PreferOptions;
 }
 
 export interface StreamOptions {
   signal?: AbortSignal;
+  prefer?: PreferOptions;
+}
+
+export function compilePreferHeader(options: PreferOptions | undefined): string | undefined {
+  if (!options) return undefined;
+  const parts: string[] = [];
+  if (options.return) parts.push(`return=${options.return}`);
+  if (options.handling) parts.push(`handling=${options.handling}`);
+  if (options.respondAsync) parts.push("respond-async");
+  return parts.length > 0 ? parts.join(", ") : undefined;
+}
+
+export function mergePreferIntoQuery<Q extends { headers?: Record<string, string> | undefined }>(
+  query: Q,
+  prefer: PreferOptions | undefined,
+): Q {
+  const header = compilePreferHeader(prefer);
+  if (header === undefined) return query;
+  return {
+    ...query,
+    headers: { ...query.headers, Prefer: header },
+  };
 }
 
 // --- Resolve included resource types from the resource map ---

@@ -1,6 +1,6 @@
 import type { Parameters, Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
-import type { ExecuteOptions } from "./query-builder.js";
+import { type ExecuteOptions, mergePreferIntoQuery } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
 
 export type OperationScope =
@@ -55,7 +55,7 @@ export class OperationBuilderImpl implements OperationBuilder {
   }
 
   async execute(options?: ExecuteOptions): Promise<Resource | Parameters> {
-    const query = this.compile();
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
     return (await this.#executor(query, options?.signal)) as Resource | Parameters;
   }
 }

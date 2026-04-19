@@ -1,6 +1,6 @@
 import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
-import type { ExecuteOptions } from "./query-builder.js";
+import { type ExecuteOptions, mergePreferIntoQuery } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
 import type { FhirSchema } from "./types.js";
 
@@ -60,7 +60,8 @@ export class CreateBuilderImpl<S extends FhirSchema, RT extends string> implemen
   }
 
   async execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource> {
-    return (await this.#executor(this.compile(), options?.signal)) as S["resources"][RT] & Resource;
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
+    return (await this.#executor(query, options?.signal)) as S["resources"][RT] & Resource;
   }
 }
 
@@ -110,7 +111,8 @@ export class UpdateBuilderImpl<S extends FhirSchema, RT extends string> implemen
   }
 
   async execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource> {
-    return (await this.#executor(this.compile(), options?.signal)) as S["resources"][RT] & Resource;
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
+    return (await this.#executor(query, options?.signal)) as S["resources"][RT] & Resource;
   }
 }
 
@@ -152,7 +154,8 @@ export class DeleteBuilderImpl implements DeleteBuilder {
   }
 
   async execute(options?: ExecuteOptions): Promise<void> {
-    await this.#executor(this.compile(), options?.signal);
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
+    await this.#executor(query, options?.signal);
   }
 }
 
@@ -217,7 +220,8 @@ export class PatchBuilderImpl<S extends FhirSchema, RT extends string> implement
   }
 
   async execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource> {
-    return (await this.#executor(this.compile(), options?.signal)) as S["resources"][RT] & Resource;
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
+    return (await this.#executor(query, options?.signal)) as S["resources"][RT] & Resource;
   }
 }
 

@@ -3,18 +3,19 @@ import { escapeSearchValue } from "./_internal/escape-search-value.js";
 import { classifyOp } from "./_internal/op-classifier.js";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import { compileConditionTree } from "./condition-tree.js";
-import type {
-  ApplySelection,
-  BundleLink,
-  ContainedMode,
-  ContainedTypeMode,
-  ExecuteOptions,
-  ResolveIncluded,
-  SearchQueryBuilder,
-  SearchResult,
-  StreamOptions,
-  SummaryMode,
-  TotalMode,
+import {
+  type ApplySelection,
+  type BundleLink,
+  type ContainedMode,
+  type ContainedTypeMode,
+  type ExecuteOptions,
+  mergePreferIntoQuery,
+  type ResolveIncluded,
+  type SearchQueryBuilder,
+  type SearchResult,
+  type StreamOptions,
+  type SummaryMode,
+  type TotalMode,
 } from "./query-builder.js";
 import type {
   CompositeKeys,
@@ -735,7 +736,7 @@ export class SearchQueryBuilderImpl<
       [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
     >
   > {
-    const query = this.compile();
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
     const bundle = (await this.#executor(query, options?.signal)) as Bundle;
 
     const entries = bundle.entry ?? [];
@@ -777,7 +778,7 @@ export class SearchQueryBuilderImpl<
   async *stream(options?: StreamOptions): AsyncIterable<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource> {
     type R = ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource;
 
-    const query = this.compile();
+    const query = mergePreferIntoQuery(this.compile(), options?.prefer);
     let bundle = (await this.#executor(query, options?.signal)) as Bundle;
 
     let schema: ReturnType<typeof resolveSchema> | undefined;

@@ -545,6 +545,52 @@ describe("operations framework (OP-*)", () => {
 });
 
 /* -------------------------------------------------------------------------- */
+/* REST-HDR-* — Prefer header plumbing                                        */
+/* -------------------------------------------------------------------------- */
+
+describe("Prefer header (REST-HDR-*)", () => {
+  it("REST-HDR-001: Prefer: return=minimal", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "new" } }]);
+    const client = makeClient(fetchFn);
+    await client.create({ resourceType: "Patient" }).execute({ prefer: { return: "minimal" } });
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers.Prefer).toBe("return=minimal");
+  });
+
+  it("REST-HDR-002: Prefer: return=representation on update", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "1" } }]);
+    const client = makeClient(fetchFn);
+    await client.update({ resourceType: "Patient", id: "1" }).execute({ prefer: { return: "representation" } });
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers.Prefer).toBe("return=representation");
+  });
+
+  it("REST-HDR-005: Prefer: handling=strict on search", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "searchset", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.search("Patient").execute({ prefer: { handling: "strict" } });
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers.Prefer).toBe("handling=strict");
+  });
+
+  it("REST-HDR-006: Prefer: respond-async", async () => {
+    const fetchFn = queuedFetch([{ status: 202, body: null, headers: { "content-location": "/async/1" } }]);
+    const client = makeClient(fetchFn);
+    await client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers.Prefer).toBe("respond-async");
+  });
+
+  it("REST-HDR-*: multiple Prefer directives join with `, `", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "searchset", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.search("Patient").execute({ prefer: { handling: "lenient", return: "representation" } });
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers.Prefer).toBe("return=representation, handling=lenient");
+  });
+});
+
+/* -------------------------------------------------------------------------- */
 /* Auth: 401 onUnauthorized retry                                             */
 /* -------------------------------------------------------------------------- */
 

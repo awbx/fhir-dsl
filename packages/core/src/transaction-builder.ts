@@ -1,5 +1,6 @@
 import type { Bundle, BundleEntry, Resource } from "@fhir-dsl/types";
-import type { ExecuteOptions } from "./query-builder.js";
+import type { CompiledQuery } from "./compiled-query.js";
+import { type ExecuteOptions, mergePreferIntoQuery } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
 import type { FhirSchema } from "./types.js";
 
@@ -151,15 +152,13 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
 
   async execute(options?: ExecuteOptions): Promise<Bundle> {
     const bundle = this.compile();
-    return (await this.#executor(
-      {
-        method: "POST",
-        path: "",
-        params: [],
-        body: bundle,
-      },
-      options?.signal,
-    )) as Bundle;
+    const query: CompiledQuery = {
+      method: "POST",
+      path: "",
+      params: [],
+      body: bundle,
+    };
+    return (await this.#executor(mergePreferIntoQuery(query, options?.prefer), options?.signal)) as Bundle;
   }
 }
 
