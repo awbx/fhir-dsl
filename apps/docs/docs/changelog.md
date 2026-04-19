@@ -8,6 +8,17 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.0] - 2026-04-19
+
+### Features
+
+- Add SpecCatalog: per-version FHIR spec derivation (`ad721d9`)
+
+### Other
+
+- Thread SpecCatalog + TypeMapper through parsers and emitters (`73dc1a6`)
+- Document $if/$call and functional where in queries example (`c913c7b`)
+
 ## [0.18.0] - 2026-04-19
 
 ### Features
