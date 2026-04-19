@@ -1,0 +1,29 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/integer64",
+  "name": "integer64",
+  "kind": "primitive-type",
+  "abstract": false,
+  "type": "integer64",
+  "snapshot": {
+    "element": [
+      { "path": "integer64", "min": 0, "max": "*" },
+      {
+        "path": "integer64.value",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhirpath/StructureDefinition/json-type",
+                "valueString": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.Long"
+          }
+        ]
+      }
+    ]
+  }
+}

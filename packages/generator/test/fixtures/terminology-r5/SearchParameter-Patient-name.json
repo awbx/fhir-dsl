@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Patient-name",
+  "name": "name",
+  "code": "name",
+  "base": ["Patient"],
+  "type": "string",
+  "description": "A portion of either family or given name of the patient",
+  "expression": "Patient.name"
+}

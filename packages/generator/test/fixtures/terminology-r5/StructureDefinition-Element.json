@@ -1,0 +1,15 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/Element",
+  "name": "Element",
+  "kind": "complex-type",
+  "abstract": true,
+  "type": "Element",
+  "snapshot": {
+    "element": [
+      { "path": "Element", "min": 0, "max": "*" },
+      { "path": "Element.id", "min": 0, "max": "1", "type": [{ "code": "string" }] },
+      { "path": "Element.extension", "min": 0, "max": "*", "type": [{ "code": "Extension" }] }
+    ]
+  }
+}

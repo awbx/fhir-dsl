@@ -1,0 +1,55 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "name": "Observation",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "snapshot": {
+    "element": [
+      { "path": "Observation", "min": 0, "max": "*" },
+      {
+        "path": "Observation.status",
+        "short": "registered | preliminary | final | amended +",
+        "min": 1,
+        "max": "1",
+        "type": [{ "code": "code" }],
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/ValueSet/observation-status"
+        }
+      },
+      {
+        "path": "Observation.category",
+        "short": "Classification of  type of observation",
+        "min": 0,
+        "max": "*",
+        "type": [{ "code": "CodeableConcept" }],
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
+        }
+      },
+      {
+        "path": "Observation.code",
+        "short": "Type of observation (code / type)",
+        "min": 1,
+        "max": "1",
+        "type": [{ "code": "CodeableConcept" }]
+      },
+      {
+        "path": "Observation.subject",
+        "short": "Who and/or what the observation is about",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          }
+        ]
+      }
+    ]
+  }
+}

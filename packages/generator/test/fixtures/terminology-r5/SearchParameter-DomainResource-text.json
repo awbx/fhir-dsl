@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/DomainResource-text",
+  "name": "_text",
+  "code": "_text",
+  "base": ["DomainResource"],
+  "type": "string",
+  "description": "Search on the narrative text of the resource",
+  "expression": "DomainResource.text"
+}

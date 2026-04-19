@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-id",
+  "name": "_id",
+  "code": "_id",
+  "base": ["Resource"],
+  "type": "token",
+  "description": "Logical id of this artifact",
+  "expression": "Resource.id"
+}

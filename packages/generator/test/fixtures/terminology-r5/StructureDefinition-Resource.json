@@ -1,0 +1,17 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/Resource",
+  "name": "Resource",
+  "kind": "resource",
+  "abstract": true,
+  "type": "Resource",
+  "snapshot": {
+    "element": [
+      { "path": "Resource", "min": 0, "max": "*" },
+      { "path": "Resource.id", "min": 0, "max": "1", "type": [{ "code": "id" }] },
+      { "path": "Resource.meta", "min": 0, "max": "1", "type": [{ "code": "Meta" }] },
+      { "path": "Resource.implicitRules", "min": 0, "max": "1", "type": [{ "code": "uri" }] },
+      { "path": "Resource.language", "min": 0, "max": "1", "type": [{ "code": "code" }] }
+    ]
+  }
+}

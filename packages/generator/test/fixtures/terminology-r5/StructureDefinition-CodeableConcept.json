@@ -1,0 +1,9 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+  "name": "CodeableConcept",
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "CodeableConcept",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element"
+}

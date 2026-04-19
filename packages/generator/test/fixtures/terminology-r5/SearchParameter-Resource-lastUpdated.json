@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated",
+  "name": "_lastUpdated",
+  "code": "_lastUpdated",
+  "base": ["Resource"],
+  "type": "date",
+  "description": "When the resource version last changed",
+  "expression": "Resource.meta.lastUpdated"
+}

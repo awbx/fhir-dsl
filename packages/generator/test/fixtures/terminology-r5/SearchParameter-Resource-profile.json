@@ -1,0 +1,10 @@
+{
+  "resourceType": "SearchParameter",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-profile",
+  "name": "_profile",
+  "code": "_profile",
+  "base": ["Resource"],
+  "type": "uri",
+  "description": "Profiles this resource claims to conform to",
+  "expression": "Resource.meta.profile"
+}

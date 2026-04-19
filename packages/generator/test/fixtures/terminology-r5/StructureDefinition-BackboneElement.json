@@ -1,0 +1,17 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+  "name": "BackboneElement",
+  "kind": "complex-type",
+  "abstract": true,
+  "type": "BackboneElement",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "snapshot": {
+    "element": [
+      { "path": "BackboneElement", "min": 0, "max": "*" },
+      { "path": "BackboneElement.id", "min": 0, "max": "1", "type": [{ "code": "string" }] },
+      { "path": "BackboneElement.extension", "min": 0, "max": "*", "type": [{ "code": "Extension" }] },
+      { "path": "BackboneElement.modifierExtension", "min": 0, "max": "*", "type": [{ "code": "Extension" }] }
+    ]
+  }
+}
