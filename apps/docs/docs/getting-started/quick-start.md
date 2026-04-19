@@ -157,4 +157,5 @@ console.log(query);
 
 - Learn about [Core Concepts](/docs/core-concepts/overview) to understand the type system
 - See more [Examples](/docs/examples/patient) for real-world patterns
+- Compose dynamic queries with [`$if` / `$call`](/docs/core-concepts/dsl-syntax#composition-if-and-call) and the [functional `where(callback)`](/docs/core-concepts/dsl-syntax#functional-where-composable-conditions) overload
 - Set up the [CLI](/docs/cli/usage) for your project

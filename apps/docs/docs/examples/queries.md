@@ -475,6 +475,114 @@ const result = await fhir
   .execute();
 ```
 
+## Composable Conditions (`where(callback)`)
+
+When OR spans **different** parameters or the conditions need to be nested, pass a callback to `where(...)`. The compiler picks the most natural FHIR shape automatically -- comma-OR for the simple case, `_filter` for everything else.
+
+### Same-parameter OR (compiles to comma-join)
+
+```typescript
+const result = await fhir
+  .search("Observation")
+  .where((eb) =>
+    eb.or([
+      ["status", "eq", "final"],
+      ["status", "eq", "amended"],
+    ]),
+  )
+  .execute();
+// → Observation?status=final,amended
+```
+
+### OR across different parameters (compiles to `_filter`)
+
+```typescript
+// Match either condition status — falls back to _filter
+const result = await fhir
+  .search("Observation")
+  .where((eb) =>
+    eb.or([
+      ["status", "eq", "final"],
+      ["code", "eq", "http://loinc.org|85354-9"],
+    ]),
+  )
+  .execute();
+// → Observation?_filter=status eq 'final' or code eq 'http://loinc.org|85354-9'
+```
+
+### Nested groups
+
+```typescript
+// "subject is Patient/123 AND (status is final OR amended)"
+const result = await fhir
+  .search("Observation")
+  .where((eb) =>
+    eb.and([
+      ["subject", "eq", "Patient/123"],
+      eb.or([
+        ["status", "eq", "final"],
+        ["status", "eq", "amended"],
+      ]),
+    ]),
+  )
+  .execute();
+```
+
+:::note
+Operators with no `_filter` equivalent (`exact`, `above`, `below`, `of-type`, `text`, `identifier`, `code-text`, `missing`) cannot appear inside an OR or nested group — use the positional `where(...)` form for those. See [Functional `where`](/docs/core-concepts/dsl-syntax#functional-where-composable-conditions) for the full operator-mapping table.
+:::
+
+## Conditional Clauses (`$if` and `$call`)
+
+Every fluent builder exposes two Kysely-style composition primitives that let you wire optional clauses and reusable fragments without breaking out of the chain.
+
+### Conditionally append clauses with `$if`
+
+```typescript
+async function searchPatients(filters: {
+  family?: string;
+  active?: boolean;
+  withObservations?: boolean;
+}) {
+  return fhir
+    .search("Patient")
+    .$if(filters.family != null, (qb) => qb.where("family", "eq", filters.family!))
+    .$if(filters.active === true, (qb) => qb.where("active", "eq", "true"))
+    .$if(filters.withObservations === true, (qb) => qb.revinclude("Observation", "subject"))
+    .execute();
+}
+```
+
+`$if` returns the same builder type via polymorphic `this`, so include narrowing, profile selection, and `_elements` projection all survive across chained `$if` calls.
+
+### Extract reusable fragments with `$call`
+
+```typescript
+// Define once
+const recentFinal = <T extends { where: any }>(qb: T) =>
+  qb.where("status", "eq", "final").where("date", "ge", "2024-01-01");
+
+// Reuse anywhere
+const obs = await fhir.search("Observation").$call(recentFinal).count(50).execute();
+const enc = await fhir.search("Encounter").$call(recentFinal).execute();
+```
+
+`$call` always invokes the callback and returns whatever it returns — useful for extracting query fragments, or for piping a builder into a non-builder result (e.g. `qb.$call((b) => b.compile())`).
+
+### Combining both
+
+```typescript
+const tenantScope = (tenantId: string) =>
+  <T extends { where: any }>(qb: T) =>
+    qb.where("organization", "eq", `Organization/${tenantId}`);
+
+const result = await fhir
+  .search("Patient")
+  .$call(tenantScope("acme"))
+  .$if(searchTerm.length > 0, (qb) => qb.where("name", "contains", searchTerm))
+  .execute();
+```
+
 ## Error Handling
 
 ```typescript
