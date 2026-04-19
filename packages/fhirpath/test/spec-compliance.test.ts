@@ -569,8 +569,7 @@ describe("Equality (FP-EQ-*)", () => {
     expect(evalOperator(op, ["2012"], makeCtx())).toEqual([]);
   });
 
-  test.fails("FP-EQ-001: Quantity equality by value+unit (not reference) (spec §6.1)", () => {
-    // Two Quantity object literals with identical shape must compare equal.
+  it("FP-EQ-001: Quantity equality by value+unit (not reference) (spec §6.1)", () => {
     const q1 = { value: 120, unit: "mg" };
     const q2 = { value: 120, unit: "mg" };
     const op: PathOp = { type: "eq", value: q2 };

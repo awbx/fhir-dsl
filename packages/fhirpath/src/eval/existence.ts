@@ -1,4 +1,5 @@
 import type { FilterOp } from "../ops.js";
+import { fhirpathEqual } from "./_internal/equality.js";
 import type { EvalContext } from "./types.js";
 
 export function evalExistence(
@@ -55,7 +56,7 @@ export function evalExistence(
     case "distinct": {
       const seen: unknown[] = [];
       return collection.filter((item) => {
-        if (seen.some((s) => deepEqual(s, item))) return false;
+        if (seen.some((s) => fhirpathEqual(s, item))) return false;
         seen.push(item);
         return true;
       });
@@ -64,7 +65,7 @@ export function evalExistence(
     case "isDistinct": {
       const seen: unknown[] = [];
       for (const item of collection) {
-        if (seen.some((s) => deepEqual(s, item))) return [false];
+        if (seen.some((s) => fhirpathEqual(s, item))) return [false];
         seen.push(item);
       }
       return [true];
@@ -72,29 +73,16 @@ export function evalExistence(
 
     case "subsetOf": {
       const otherCollection = ctx.evaluateSub(op.other.ops, ctx.rootResource);
-      return [collection.every((item) => otherCollection.some((o) => deepEqual(item, o)))];
+      return [collection.every((item) => otherCollection.some((o) => fhirpathEqual(item, o)))];
     }
 
     case "supersetOf": {
       const otherCollection = ctx.evaluateSub(op.other.ops, ctx.rootResource);
-      return [otherCollection.every((item) => collection.some((c) => deepEqual(c, item)))];
+      return [otherCollection.every((item) => collection.some((c) => fhirpathEqual(c, item)))];
     }
   }
 }
 
 function isTruthy(result: unknown[]): boolean {
   return result.length === 1 && result[0] === true;
-}
-
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (typeof a !== typeof b) return false;
-  if (typeof a !== "object") return false;
-  const aObj = a as Record<string, unknown>;
-  const bObj = b as Record<string, unknown>;
-  const aKeys = Object.keys(aObj);
-  const bKeys = Object.keys(bObj);
-  if (aKeys.length !== bKeys.length) return false;
-  return aKeys.every((key) => deepEqual(aObj[key], bObj[key]));
 }

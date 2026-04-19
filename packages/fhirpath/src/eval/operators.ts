@@ -1,13 +1,14 @@
 import type { CompiledPredicate, OperatorOp } from "../ops.js";
+import { fhirpathEqual } from "./_internal/equality.js";
 import type { EvalContext } from "./types.js";
 
 export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalContext): unknown[] {
   switch (op.type) {
     case "eq":
-      return evalComparison(collection, op.value, ctx, (a, b) => a === b);
+      return evalComparison(collection, op.value, ctx, fhirpathEqual);
 
     case "neq":
-      return evalComparison(collection, op.value, ctx, (a, b) => a !== b);
+      return evalComparison(collection, op.value, ctx, (a, b) => !fhirpathEqual(a, b));
 
     case "lt":
       return evalComparison(collection, op.value, ctx, (a, b) => (a as number) < (b as number));
