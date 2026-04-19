@@ -180,6 +180,22 @@ export class FhirClient<S extends FhirSchema> {
     return new ReadQueryBuilderImpl<S, RT>(resourceType, id, this.#executor, this.#schemas);
   }
 
+  /**
+   * System-level search: `GET [base]?params` (or `POST [base]/_search`).
+   * The return type carries an unbound search-param record because system
+   * searches run across every resource type on the server (spec §3.1.0).
+   */
+  searchAll(): SearchQueryBuilder<S, string, Record<string, { value: string }>> {
+    return new SearchQueryBuilderImpl<S, string, Record<string, { value: string }>>(
+      "",
+      this.#executor,
+      undefined,
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
   vread<RT extends string & keyof S["resources"]>(resourceType: RT, id: string, vid: string): VreadBuilder<S, RT> {
     return new VreadBuilderImpl<S, RT>(this.#executor, resourceType, id, vid);
   }

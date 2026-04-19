@@ -60,6 +60,10 @@ interface QueryState {
 
 const DEFAULT_AUTO_POST_THRESHOLD = 1900;
 
+// Params that must remain in the URL query string on POST _search — they
+// control response representation, not search criteria.
+const POST_URL_ONLY_PARAMS: ReadonlySet<string> = new Set(["_format", "_pretty"]);
+
 function encodeParam(param: CompiledSearchParam): { name: string; value: string } {
   const name = param.modifier ? `${param.name}:${param.modifier}` : param.name;
   const value = param.prefix ? `${param.prefix}${param.value}` : String(param.value);
@@ -721,12 +725,24 @@ export class SearchQueryBuilderImpl<
     const wouldExceedThreshold = getUrlBytes > threshold;
 
     if (this.#state.usePost || wouldExceedThreshold) {
+      // SRCH-POST-002 / §3.1.0: URL-level controls like `_format` and
+      // `_pretty` are response-representation knobs rather than search
+      // criteria, so they must stay on the URL even when the search body
+      // is moved into the POST form payload. Keeping them out of the form
+      // body also prevents servers from treating them as filter params.
+      const urlParams: CompiledSearchParam[] = [];
+      const bodyParams: CompiledSearchParam[] = [];
+      for (const p of params) {
+        if (POST_URL_ONLY_PARAMS.has(p.name)) urlParams.push(p);
+        else bodyParams.push(p);
+      }
+      const postPath = this.#state.resourceType === "" ? "_search" : `${this.#state.resourceType}/_search`;
       return {
         method: "POST",
-        path: `${this.#state.resourceType}/_search`,
-        params: [],
+        path: postPath,
+        params: urlParams,
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: paramsToFormBody(params),
+        body: paramsToFormBody(bodyParams),
       };
     }
 

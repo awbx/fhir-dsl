@@ -572,7 +572,30 @@ describe("POST _search (SRCH-POST-*)", () => {
     expect(q.method).toBe("GET");
   });
 
-  it.todo("SRCH-POST-002: POST must preserve URL-level params like _format as query string (MISSING)");
+  it("SRCH-POST-002: POST preserves URL-level params (`_format`, `_pretty`) as URL query, not body", () => {
+    // `_format` / `_pretty` are response-representation knobs (§3.1.0) — they
+    // belong on the URL even when filter criteria move to the form body.
+    const seeded = new SearchQueryBuilderImpl<TestSchema, string, FlexibleSP>("Patient", noopExecutor, {
+      resourceType: "Patient",
+      params: [
+        { name: "_format", value: "json" },
+        { name: "_pretty", value: "true" },
+      ],
+      includes: [],
+      revIncludes: [],
+      sorts: [],
+    } as any) as any;
+    const q = seeded.usePost().where("family", "eq", "Smith").compile();
+    expect(q.method).toBe("POST");
+    expect(q.path).toBe("Patient/_search");
+    // URL-level params stayed in `params` (emit as ?...).
+    expect(q.params).toContainEqual({ name: "_format", value: "json" });
+    expect(q.params).toContainEqual({ name: "_pretty", value: "true" });
+    // Filter criteria moved into the form body.
+    expect(String(q.body)).toBe("family=Smith");
+    expect(String(q.body)).not.toContain("_format");
+    expect(String(q.body)).not.toContain("_pretty");
+  });
 
   /**
    * decisions.md SRCH.9a — the auto-POST threshold check measures
@@ -677,8 +700,32 @@ describe("URL structure (SRCH-URL-*)", () => {
     expect((q as any).path).toBe("Patient");
   });
 
-  it.todo("SRCH-URL-001: system-level search (`[base]?...`) — MISSING on FhirClient");
-  it.todo("SRCH-URL-001: history-level filtering — MISSING on FhirClient");
+  it("SRCH-URL-001: system-level search emits path `` (i.e. `[base]?...`) across all resource types (§3.1.0)", () => {
+    // Empty resourceType means system-level: URL is `[base]?params`.
+    const q = (builder("") as any).where("_id", "eq", "abc").compile();
+    expect(q.method).toBe("GET");
+    expect(q.path).toBe("");
+    expect(q.params).toContainEqual({ name: "_id", value: "abc" });
+  });
+
+  it("SRCH-URL-001: system-level search under POST emits `_search` (no resource prefix)", () => {
+    const q = (builder("") as any).usePost().where("_id", "eq", "abc").compile();
+    expect(q.method).toBe("POST");
+    expect(q.path).toBe("_search");
+  });
+
+  it("SRCH-URL-001: history-level filtering emits `_since` / `_count` on `<Type>/_history` (§3.2.1)", async () => {
+    // Filter params on `_history` are spec-level history knobs (REST.14).
+    const { HistoryBuilderImpl } = await import("../src/rest-builders.js");
+    const q = new HistoryBuilderImpl(noopExecutor, { kind: "type", resourceType: "Patient" })
+      .since("2024-01-01")
+      .count(50)
+      .compile();
+    expect(q.method).toBe("GET");
+    expect(q.path).toBe("Patient/_history");
+    expect(q.params).toContainEqual({ name: "_since", value: "2024-01-01" });
+    expect(q.params).toContainEqual({ name: "_count", value: "50" });
+  });
 
   it.todo("SRCH-URL-003: `Prefer: handling=lenient|strict` plumbed through compile() — MISSING");
 });
