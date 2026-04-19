@@ -19,6 +19,7 @@ export interface HttpResponse {
   statusText: string;
   ok: boolean;
   json(): Promise<unknown>;
+  text(): Promise<string>;
   headers: Headers;
 }
 

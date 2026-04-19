@@ -7,7 +7,9 @@ function mockFetch(body: object, status = 200) {
     ok: status >= 200 && status < 300,
     status,
     statusText: status === 200 ? "OK" : "Error",
+    headers: new Headers(),
     json: async () => body,
+    text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
   })) as unknown as typeof globalThis.fetch;
 }
 

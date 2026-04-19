@@ -139,7 +139,7 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
       type: this.#bundleType,
       entry: this.#entries.map((e) => ({
         ...(e.fullUrl != null ? { fullUrl: e.fullUrl } : {}),
-        resource: e.resource,
+        ...(e.resource !== undefined ? { resource: e.resource } : {}),
         request: {
           method: e.request.method,
           url: e.request.url,

@@ -136,10 +136,7 @@ describe("Error surfacing (REST-ERR-*)", () => {
       });
   });
 
-  test.fails("REST-ERR-001 GAP: non-JSON error body (e.g. gateway HTML) is silently discarded today", async () => {
-    // Impl: executor.ts:42 `response.json().catch(() => null)` — text() is never tried.
-    // Spec does not strictly require fallback, but real-world robustness does:
-    // diagnostic info is lost when a proxy returns text/html.
+  it("REST-ERR-001: non-JSON error body (gateway HTML, auth-proxy text) is preserved on FhirError.responseText (BUG-022)", async () => {
     const fetchFn = vi.fn(
       async () =>
         ({
@@ -159,11 +156,7 @@ describe("Error surfacing (REST-ERR-*)", () => {
         path: "Patient/1",
         params: [],
       } as CompiledQuery),
-    ).rejects.toSatisfy((err: FhirError) => {
-      // Spec-correct: the text body should be reachable via some affordance
-      // (e.g. err.responseText, err.message contains the html, etc.).
-      return (err as any).responseText === "<html><body>502 Bad Gateway</body></html>";
-    });
+    ).rejects.toSatisfy((err: FhirError) => err.responseText === "<html><body>502 Bad Gateway</body></html>");
   });
 });
 
@@ -195,9 +188,7 @@ describe("Success-path response handling (REST-DELETE-003 / REST-CREATE-002)", (
     ).resolves.toBeUndefined();
   });
 
-  test.fails("REST-CREATE-002: Location header must be surfaced to caller (currently discarded)", async () => {
-    // Impl: response headers dropped in executor.ts:46. Caller cannot read
-    // the newly-assigned id when `Prefer: return=minimal` suppresses body.
+  it("REST-CREATE-002: Location header surfaced via result.location / result.headers.Location (BUG-020)", async () => {
     const fetchFn = queuedFetch([
       {
         status: 201,
@@ -216,9 +207,6 @@ describe("Success-path response handling (REST-DELETE-003 / REST-CREATE-002)", (
       params: [],
       body: { resourceType: "Patient" },
     } as CompiledQuery);
-    // Spec-correct: some path to retrieve the Location. The current return
-    // type is `Promise<T>` (the JSON body); a fix would widen it to include
-    // headers or expose a sibling `.executeFull()`.
     expect(result?.location ?? result?.headers?.Location).toBe(`${BASE}/Patient/new-id/_history/1`);
   });
 });
@@ -241,7 +229,7 @@ describe("Prefer / ETag / If-Match (REST-HDR-*)", () => {
    * the body; headers never reach the caller. Promoted from `it.todo` to
    * `test.fails` per ratified decisions — this is a BUG, not a SPEC-GAP.
    */
-  test.fails("REST-HDR-007 / decisions.md REST.3: ETag response header must be reachable by caller (spec §2.1.0.6)", async () => {
+  it("REST-HDR-007 / decisions.md REST.3: ETag response header surfaced via result.etag / result.headers.ETag (BUG-021)", async () => {
     const fetchFn = queuedFetch([
       {
         status: 200,
@@ -254,9 +242,6 @@ describe("Prefer / ETag / If-Match (REST-HDR-*)", () => {
       path: "Patient/1",
       params: [],
     } as CompiledQuery);
-    // Spec-correct: some path to read the ETag (e.g. result.etag, or a
-    // sibling `.executeFull()` shape). Today the return type is the raw
-    // body — `W/"7"` is not recoverable.
     expect(result?.etag ?? result?.headers?.ETag).toBe('W/"7"');
   });
 
@@ -383,29 +368,21 @@ describe("Pagination (paginate / fetchAllPages)", () => {
     expect(init.headers?.Authorization).toBeUndefined();
   });
 
-  test.fails("SRCH-PAGE-002 / runtime-impl-map #3: paginate() must detect a cyclic next URL and stop", async () => {
-    // Impl: pagination.ts:18-22 has no `seen` Set. A next.url equal to the
-    // current page (or to a prior page) causes unbounded iteration. We cap
-    // the test with a small script so it doesn't hang the suite even in the
-    // broken case, then assert that paginate() never pulls more than 1 page.
+  it("SRCH-PAGE-002 / runtime-impl-map #3: paginate() detects a cyclic next URL and stops (BUG-019)", async () => {
     const cyclePage = {
       resourceType: "Bundle",
       type: "searchset",
       entry: [{ resource: { resourceType: "Patient", id: "loop" } }],
       link: [{ relation: "next", url: `${BASE}/Patient?loop=1` }],
     };
-    // Script ONE follow-up so if the impl loops, the second executeUrl throws
-    // with "out of scripts" via our queuedFetch default (which yields empty).
-    // A correct impl short-circuits at the first cycle and never calls fetch.
     const fetchFn = queuedFetch(Array.from({ length: 5 }).map(() => ({ status: 200, body: cyclePage })));
     const executor = makeExecutor(fetchFn);
 
     let pagesYielded = 0;
     for await (const _page of paginate<any>(executor, cyclePage as any)) {
       pagesYielded++;
-      if (pagesYielded > 2) break; // hard stop so we don't hang the test
+      if (pagesYielded > 2) break;
     }
-    // Spec-correct: impl should stop at the cycle → 1 page yielded.
     expect(pagesYielded).toBe(1);
   });
 });

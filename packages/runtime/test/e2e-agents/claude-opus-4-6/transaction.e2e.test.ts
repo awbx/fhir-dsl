@@ -27,11 +27,16 @@ describe("claude-opus-4-6 / transaction", () => {
     const bundle = tx.compile();
     expect(bundle.resourceType).toBe("Bundle");
     expect(bundle.type).toBe("transaction");
-    expect(bundle.entry).toEqual([
-      { resource: { resourceType: "Patient", name: [{ family: "New" }] }, request: { method: "POST", url: "Patient" } },
-      { resource: patientAlice, request: { method: "PUT", url: `Patient/${patientAlice.id}` } },
-      { request: { method: "DELETE", url: "Observation/obs-1" } },
-    ]);
+    expect(bundle.entry).toHaveLength(3);
+    // POST entry carries an auto-generated urn:uuid fullUrl (BUG-011 fix).
+    expect(bundle.entry![0]!.fullUrl).toMatch(/^urn:uuid:[0-9a-f-]+$/i);
+    expect(bundle.entry![0]!.resource).toEqual({ resourceType: "Patient", name: [{ family: "New" }] });
+    expect(bundle.entry![0]!.request).toEqual({ method: "POST", url: "Patient" });
+    expect(bundle.entry![1]).toEqual({
+      resource: patientAlice,
+      request: { method: "PUT", url: `Patient/${patientAlice.id}` },
+    });
+    expect(bundle.entry![2]).toEqual({ request: { method: "DELETE", url: "Observation/obs-1" } });
   });
 
   it("execute() POSTs the Bundle to baseUrl root with FHIR headers", async () => {

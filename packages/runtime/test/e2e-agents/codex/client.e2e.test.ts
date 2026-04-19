@@ -250,15 +250,19 @@ describe("codex client e2e", () => {
       .update({ ...patient1, id: "pat-1" })
       .delete("Observation", "obs-1");
 
-    expect(tx.compile()).toEqual({
-      resourceType: "Bundle",
-      type: "transaction",
-      entry: [
-        { resource: patient1, request: { method: "POST", url: "Patient" } },
-        { resource: { ...patient1, id: "pat-1" }, request: { method: "PUT", url: "Patient/pat-1" } },
-        { request: { method: "DELETE", url: "Observation/obs-1" } },
-      ],
+    const compiled = tx.compile();
+    expect(compiled.resourceType).toBe("Bundle");
+    expect(compiled.type).toBe("transaction");
+    expect(compiled.entry).toHaveLength(3);
+    // POST entry carries an auto-generated urn:uuid fullUrl (BUG-011 fix).
+    expect(compiled.entry![0]!.fullUrl).toMatch(/^urn:uuid:[0-9a-f-]+$/i);
+    expect(compiled.entry![0]!.resource).toEqual(patient1);
+    expect(compiled.entry![0]!.request).toEqual({ method: "POST", url: "Patient" });
+    expect(compiled.entry![1]).toEqual({
+      resource: { ...patient1, id: "pat-1" },
+      request: { method: "PUT", url: "Patient/pat-1" },
     });
+    expect(compiled.entry![2]).toEqual({ request: { method: "DELETE", url: "Observation/obs-1" } });
 
     const response = await tx.execute();
 

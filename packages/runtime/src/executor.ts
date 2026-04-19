@@ -1,6 +1,6 @@
 import { type CompiledQuery, type HttpResponse, performRequest } from "@fhir-dsl/core";
 import type { FhirClientConfig } from "./config.js";
-import { FhirError } from "./errors.js";
+import { FhirError, type OperationOutcome } from "./errors.js";
 
 export class FhirExecutor {
   readonly #config: FhirClientConfig;
@@ -38,12 +38,9 @@ export class FhirExecutor {
       ...(body !== undefined ? { body } : {}),
     });
 
-    if (!response.ok) {
-      const errorBody = (await response.json().catch(() => null)) as import("./errors.js").OperationOutcome | null;
-      throw new FhirError(response.status, response.statusText, errorBody);
-    }
+    if (!response.ok) throw await buildFhirError(response);
 
-    return readJsonBody<T>(response);
+    return attachResponseMetadata(await readJsonBody<T>(response), response);
   }
 
   async executeUrl<T = unknown>(url: string): Promise<T> {
@@ -61,13 +58,45 @@ export class FhirExecutor {
 
     const response = await performRequest(config, { url, method: "GET", headers });
 
-    if (!response.ok) {
-      const errorBody = (await response.json().catch(() => null)) as import("./errors.js").OperationOutcome | null;
-      throw new FhirError(response.status, response.statusText, errorBody);
-    }
+    if (!response.ok) throw await buildFhirError(response);
 
-    return readJsonBody<T>(response);
+    return attachResponseMetadata(await readJsonBody<T>(response), response);
   }
+}
+
+// BUG-022: when the server returns a non-JSON error body (gateway HTML,
+// text/plain from an auth proxy, …), falling back to text() preserves the
+// diagnostic so the caller has something to log. JSON bodies remain parsed
+// as `OperationOutcome` on the typed field.
+async function buildFhirError(response: HttpResponse): Promise<FhirError> {
+  const raw = await response.text().catch(() => "");
+  let outcome: OperationOutcome | null = null;
+  if (raw) {
+    try {
+      outcome = JSON.parse(raw) as OperationOutcome;
+    } catch {
+      outcome = null;
+    }
+  }
+  return new FhirError(response.status, response.statusText, outcome, outcome ? undefined : raw);
+}
+
+// BUG-020 / BUG-021: expose response headers (Location, ETag, Last-Modified)
+// to the caller. Non-enumerable so they don't pollute JSON-serialization or
+// equality checks of the payload.
+function attachResponseMetadata<T>(value: T, response: HttpResponse): T {
+  if (value == null || typeof value !== "object") return value;
+  const location = response.headers?.get("location") ?? undefined;
+  const etag = response.headers?.get("etag") ?? undefined;
+  const lastModified = response.headers?.get("last-modified") ?? undefined;
+  const headers: Record<string, string> = {};
+  if (location) headers.Location = location;
+  if (etag) headers.ETag = etag;
+  if (lastModified) headers["Last-Modified"] = lastModified;
+  Object.defineProperty(value, "headers", { value: headers, enumerable: false });
+  if (location) Object.defineProperty(value, "location", { value: location, enumerable: false });
+  if (etag) Object.defineProperty(value, "etag", { value: etag, enumerable: false });
+  return value;
 }
 
 function isSameOrigin(targetUrl: string, baseUrl: string): boolean {
