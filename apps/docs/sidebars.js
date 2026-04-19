@@ -50,6 +50,7 @@ const sidebars = {
       label: 'Architecture',
       items: [
         'architecture/overview',
+        'architecture/spec-catalog',
       ],
     },
     {

@@ -109,6 +109,9 @@ The code generation engine. Handles:
 - Emitting profile interfaces for IGs
 - Emitting markdown spec files (with `--include-spec`)
 
+Every emitted table is derived from the per-version spec via a `SpecCatalog` —
+see [SpecCatalog](./spec-catalog.md) for the pipeline and data shape.
+
 Delegates ValueSet resolution to `@fhir-dsl/terminology`.
 
 ### @fhir-dsl/terminology
