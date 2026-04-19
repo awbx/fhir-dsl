@@ -866,12 +866,7 @@ describe("Math functions (FP-MATHF-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("Conversion (FP-CONV-*)", () => {
-  test.fails("FP-CONV-001: iif(criterion, trueResult) evaluates criterion on input context, not collection[0] only", () => {
-    // Impl: eval/utility.ts:24-37 passes only collection[0] as criterion input.
-    // Spec §5.9.3: criterion is evaluated on the original input collection.
-    // Use a 3-item collection and `count() > 1`:
-    //   Spec-correct: count=3 → true-branch → "multi".
-    //   Impl today:   criterion sees ["a"] → count=1 → otherwise → "single".
+  it("FP-CONV-001: iif(criterion, trueResult) evaluates criterion on input collection (spec §5.9.3)", () => {
     const data = { resourceType: "X", items: ["a", "b", "c"] };
     const expr = fhirpath<any>("X").items.iif(
       ($this: any) => $this.count().gt(1),

@@ -16,17 +16,19 @@ import type { PathOp } from "./ops.js";
  * Returns the resulting collection.
  */
 export function evaluate(ops: PathOp[], resource: unknown): unknown[] {
-  let collection: unknown[] = [resource];
-
   const ctx: EvalContext = {
     rootResource: resource,
     evaluateSub: evaluate,
+    evaluateOps: (innerOps, startCollection) => runOps(innerOps, startCollection, ctx),
   };
+  return runOps(ops, [resource], ctx);
+}
 
+function runOps(ops: PathOp[], initial: unknown[], ctx: EvalContext): unknown[] {
+  let collection = initial;
   for (const op of ops) {
     collection = dispatch(op, collection, ctx);
   }
-
   return collection;
 }
 

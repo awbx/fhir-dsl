@@ -22,17 +22,14 @@ export function evalUtility(op: UtilityOp, collection: unknown[], ctx: EvalConte
       return [new Date().toISOString().slice(0, 10)];
 
     case "iif": {
-      // Evaluate criterion against each item in collection
-      const criterionResult = collection.length > 0 ? ctx.evaluateSub(op.criterion.ops, collection[0]) : [];
-
+      // §5.9.3 / §6.3.1: criterion is evaluated ONCE against the input
+      // collection (not per-element, not just collection[0]) and must yield
+      // a singleton boolean. The chosen branch is likewise evaluated ONCE
+      // against the same input collection — no per-element broadcast.
+      const criterionResult = ctx.evaluateOps(op.criterion.ops, collection);
       const isTrue = criterionResult.length === 1 && criterionResult[0] === true;
-
-      if (isTrue) {
-        return collection.flatMap((item) => ctx.evaluateSub(op.trueResult.ops, item));
-      }
-      if (op.otherwiseResult) {
-        return collection.flatMap((item) => ctx.evaluateSub(op.otherwiseResult!.ops, item));
-      }
+      if (isTrue) return ctx.evaluateOps(op.trueResult.ops, collection);
+      if (op.otherwiseResult) return ctx.evaluateOps(op.otherwiseResult.ops, collection);
       return [];
     }
   }

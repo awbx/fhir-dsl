@@ -48,7 +48,18 @@ const NULLARY_FNS: Record<string, { opType: string; compile: (path: string) => s
 function buildPredicate(callback: (proxy: unknown) => unknown): CompiledPredicate {
   const $this = createPredicateProxy("$this", []);
   const result = callback($this);
+  // Literal branches: iif(pred, () => "multi", () => "single") must compile
+  // to a literal op instead of throwing at extractPredicate.
+  if (result == null || typeof result !== "object" || !(PREDICATE_SYMBOL in result)) {
+    return { ops: [{ type: "literal", value: result }], compiledPath: formatLiteral(result) };
+  }
   return extractPredicate(result);
+}
+
+function formatLiteral(value: unknown): string {
+  if (typeof value === "string") return `'${value}'`;
+  if (value === null || value === undefined) return "{}";
+  return String(value);
 }
 
 function exprFromOther(other: unknown): CompiledPredicate {
