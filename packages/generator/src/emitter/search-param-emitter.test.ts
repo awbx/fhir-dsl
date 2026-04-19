@@ -147,7 +147,24 @@ describe("emitSearchParams", () => {
   it("handles empty params map", () => {
     const output = emitSearchParams(new Map());
     expect(output).toBeDefined();
-    expect(output).not.toContain("SearchParams {");
+    expect(output).toContain("export interface CommonSearchParams");
+    expect(output).not.toMatch(/export interface \w+SearchParams extends CommonSearchParams/);
+  });
+
+  it("emits CommonSearchParams once and extends per resource", () => {
+    const params = new Map([
+      ["Patient", { params: [{ code: "name", type: "string" }] }],
+      ["Observation", { params: [{ code: "code", type: "token" }] }],
+    ]);
+
+    const output = emitSearchParams(params as any);
+
+    const commonMatches = output.match(/export interface CommonSearchParams/g) ?? [];
+    expect(commonMatches.length).toBe(1);
+    expect(output).toContain("export interface PatientSearchParams extends CommonSearchParams");
+    expect(output).toContain("export interface ObservationSearchParams extends CommonSearchParams");
+    expect(output).toContain('"_id": TokenParam');
+    expect(output).toContain('"_lastUpdated": DateParam');
   });
 });
 

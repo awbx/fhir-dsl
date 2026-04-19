@@ -26,9 +26,25 @@ export function emitSearchParams(
   const sortedResources = [...allParams.keys()].sort();
   const paramLines: string[] = [];
 
+  // Common params shared by every FHIR resource type (FHIR R4 §3.1.1 / R5 §3.1.1).
+  paramLines.push("/** Search params common to every FHIR resource. */");
+  paramLines.push("export interface CommonSearchParams {");
+  paramLines.push('  "_id": TokenParam;');
+  paramLines.push('  "_lastUpdated": DateParam;');
+  paramLines.push('  "_tag": TokenParam;');
+  paramLines.push('  "_security": TokenParam;');
+  paramLines.push('  "_source": UriParam;');
+  paramLines.push('  "_profile": UriParam;');
+  paramLines.push('  "_filter": StringParam;');
+  paramLines.push('  "_text": StringParam;');
+  paramLines.push('  "_content": StringParam;');
+  paramLines.push('  "_list": StringParam;');
+  paramLines.push("}");
+  paramLines.push("");
+
   for (const resourceType of sortedResources) {
     const params = allParams.get(resourceType)!;
-    paramLines.push(`export interface ${resourceType}SearchParams {`);
+    paramLines.push(`export interface ${resourceType}SearchParams extends CommonSearchParams {`);
 
     const sortedParams = [...params.params].sort((a, b) => a.code.localeCompare(b.code));
     for (const param of sortedParams) {
