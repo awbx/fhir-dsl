@@ -419,7 +419,7 @@ describe("SearchQueryBuilder", () => {
   describe("functional where (callback overload)", () => {
     it("compiles a single-tuple callback exactly like the positional form", () => {
       const callback = createBuilder("Observation")
-        .where((eb) => ["status" as any, "eq", "final"])
+        .where((_eb) => ["status" as any, "eq", "final"])
         .compile();
       const positional = createBuilder("Observation")
         .where("status" as any, "eq", "final")
