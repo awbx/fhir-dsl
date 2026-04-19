@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/terminology",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "description": "Compile-time FHIR terminology resolver for ValueSets and CodeSystems",
   "type": "module",
   "main": "./dist/index.cjs",

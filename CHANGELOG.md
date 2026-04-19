@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.2] - 2026-04-19
+
+### Removals
+
+- Remove unintentionally committed where-builder.ts (`776a131`)
+
 ## [0.17.1] - 2026-04-19
 
 ### Bug Fixes
