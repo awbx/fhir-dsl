@@ -82,6 +82,52 @@ Pass an array to `where(..., "eq", [...])` to express an OR across values. FHIR 
 
 OR-arrays are only valid with `eq` -- combining an array with a non-eq operator throws at `compile()` time, since FHIR doesn't allow per-value prefixes inside an OR list.
 
+### Functional `where` (composable conditions)
+
+When you need OR across **different** parameters, nested groups, or want to extract reusable query fragments, pass a callback to `where(...)`. The callback receives a builder with `eb.and([...])` and `eb.or([...])` constructors and returns a `Condition` tree.
+
+The compiler picks the most natural FHIR shape automatically:
+
+| Tree shape | Compiled URL |
+|---|---|
+| Single tuple, or `eb.and([...tuples])` | One query param per tuple (FHIR's implicit AND) |
+| `eb.or([...])` of `eq` tuples sharing one param-name | Single comma-joined param (`status=final,amended`) |
+| Anything else (mixed fields, nested groups, non-`eq` inside an OR) | Single `_filter=<FHIRPath>` param |
+
+```typescript
+// Same-param OR — collapses to status=final,amended
+fhir.search("Observation").where(eb =>
+  eb.or([
+    ["status", "eq", "final"],
+    ["status", "eq", "amended"],
+  ]),
+);
+
+// Mixed-field OR — falls back to _filter
+fhir.search("Observation").where(eb =>
+  eb.or([
+    ["status", "eq", "final"],
+    ["code", "eq", "1234-5"],
+  ]),
+);
+// → Observation?_filter=status eq 'final' or code eq '1234-5'
+
+// Nested groups
+fhir.search("Observation").where(eb =>
+  eb.and([
+    ["subject", "eq", "Patient/123"],
+    eb.or([
+      ["status", "eq", "final"],
+      ["status", "eq", "amended"],
+    ]),
+  ]),
+);
+```
+
+**`_filter` operator support.** Inside the FHIR `_filter` grammar, `contains` becomes `co`, `not` becomes `ne`, and `not-in` becomes `ni`. The following operators have no equivalent in `_filter` and will throw if used inside an OR or nested group: `exact`, `above`, `below`, `of-type`, `text`, `identifier`, `code-text`, `missing`. Use the positional `where(...)` form for those.
+
+**`_filter` server support varies.** Not every FHIR server implements `_filter` — that's why the builder only reaches for it when the simpler URL forms can't express your query.
+
 ### `whereMissing(param, isMissing)`
 
 Adds a `:missing` modifier to filter resources where a parameter is (or isn't) populated:

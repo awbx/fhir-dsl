@@ -1,5 +1,7 @@
 import type { Bundle, Resource } from "@fhir-dsl/types";
+import { classifyOp } from "./_internal/op-classifier.js";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
+import { compileConditionTree } from "./condition-tree.js";
 import type {
   ApplySelection,
   BundleLink,
@@ -25,6 +27,7 @@ import type {
   SortDirection,
 } from "./types.js";
 import { resolveSchema, type SchemaRegistry, ValidationUnavailableError, validateOne } from "./validation.js";
+import { type Condition, createWhereBuilder, type WhereBuilder } from "./where-builder.js";
 
 // --- Internal query state ---
 
@@ -71,31 +74,6 @@ function paramsToFormBody(params: CompiledSearchParam[]): string {
 
 export type Executor = (query: CompiledQuery) => Promise<unknown>;
 export type UrlExecutor = (url: string) => Promise<unknown>;
-
-// FHIR prefixes go on the value (date=gt2020). Modifiers go on the name (family:exact=Smith).
-const PREFIX_OPS = new Set(["gt", "ge", "lt", "le", "sa", "eb", "ap", "ne"]);
-const MODIFIER_OPS = new Set([
-  "exact",
-  "contains",
-  "not",
-  "of-type",
-  "in",
-  "not-in",
-  "text",
-  "above",
-  "below",
-  "identifier",
-  "code-text",
-  "missing",
-  "iterate",
-]);
-
-function classifyOp(op: string): { prefix?: string; modifier?: string } {
-  if (op === "eq") return {};
-  if (PREFIX_OPS.has(op)) return { prefix: op };
-  if (MODIFIER_OPS.has(op)) return { modifier: op };
-  return { prefix: op };
-}
 
 // --- Immutable Search Query Builder Implementation ---
 
@@ -144,11 +122,21 @@ export class SearchQueryBuilderImpl<
     op: "eq",
     values: readonly (SP[K] extends { value: infer V } ? V : string)[],
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
-  where<K extends string & keyof SP>(
-    param: K,
-    op: SearchPrefixFor<SP[K]> | "eq",
-    value: unknown,
-  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+  where(callback: (eb: WhereBuilder<SP>) => Condition<SP>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  where(paramOrCallback: unknown, op?: unknown, value?: unknown): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    if (typeof paramOrCallback === "function") {
+      const tree = (paramOrCallback as (eb: WhereBuilder<SP>) => Condition<SP>)(createWhereBuilder<SP>());
+      const newParams = compileConditionTree(tree);
+      return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+        this.#state.resourceType,
+        this.#executor,
+        { ...this.#state, params: [...this.#state.params, ...newParams] },
+        undefined,
+        this.#urlExecutor,
+        this.#schemas,
+      );
+    }
+    const param = paramOrCallback as string;
     if (Array.isArray(value)) {
       if (op !== "eq") {
         throw new Error(

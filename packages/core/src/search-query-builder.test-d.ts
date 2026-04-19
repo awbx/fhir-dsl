@@ -19,6 +19,7 @@ import type {
   TokenModifier,
   UriModifier,
 } from "./types.js";
+import type { Condition, ConditionTuple, WhereBuilder } from "./where-builder.js";
 
 describe("SearchPrefixFor (type-level)", () => {
   it("date params accept all date prefixes (gt/ge/lt/le/sa/eb/ap/ne) plus eq", () => {
@@ -110,5 +111,61 @@ describe("$if / $call composition (type-level)", () => {
     const asBuilder = base.$call((qb) => qb);
     type _1 = Assert<Equals<typeof asNumber, 42>>;
     type _2 = Assert<Equals<typeof asBuilder, Base>>;
+  });
+});
+
+describe("Functional where (callback overload, type-level)", () => {
+  type SP = {
+    status: { type: "token"; value: string };
+    date: { type: "date"; value: string };
+    family: { type: "string"; value: string };
+  };
+
+  it("ConditionTuple for a date param accepts every DatePrefix and rejects unrelated ops", () => {
+    const ok1: ConditionTuple<SP> = ["date", "gt", "2024-01-01"];
+    const ok2: ConditionTuple<SP> = ["date", "ap", "2024-01-01"];
+    // @ts-expect-error - "contains" is a string modifier, not a date prefix
+    const bad: ConditionTuple<SP> = ["date", "contains", "2024"];
+    void ok1;
+    void ok2;
+    void bad;
+  });
+
+  it("ConditionTuple for a string param accepts StringModifier and rejects date prefixes", () => {
+    const ok: ConditionTuple<SP> = ["family", "contains", "Smi"];
+    // @ts-expect-error - "gt" is a date prefix, not a string modifier
+    const bad: ConditionTuple<SP> = ["family", "gt", "Smi"];
+    void ok;
+    void bad;
+  });
+
+  it("eb.or(...).conditions is a ReadonlyArray<Condition<SP>> (group nesting compiles)", () => {
+    const eb = null as unknown as WhereBuilder<SP>;
+    const tree = eb.and([
+      ["status", "eq", "final"],
+      eb.or([
+        ["date", "gt", "2024-01-01"],
+        ["date", "lt", "2024-12-31"],
+      ]),
+    ]);
+    type _ = Assert<Equals<typeof tree.conditions, ReadonlyArray<Condition<SP>>>>;
+  });
+
+  it("callback overload preserves the receiver builder type (include + selection survive)", () => {
+    type LocalSchema = {
+      resources: { Observation: { resourceType: "Observation"; id?: string } };
+      searchParams: { Observation: SP };
+      includes: Record<string, never>;
+      profiles: Record<string, never>;
+    };
+    type B = SearchQueryBuilder<LocalSchema, "Observation", SP>;
+    const b = null as unknown as B;
+    const out = b.where((eb) =>
+      eb.or([
+        ["status", "eq", "final"],
+        ["status", "eq", "amended"],
+      ]),
+    );
+    type _ = Assert<Equals<typeof out, B>>;
   });
 });

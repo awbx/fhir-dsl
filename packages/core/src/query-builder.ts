@@ -13,6 +13,7 @@ import type {
   SearchPrefixFor,
   SortDirection,
 } from "./types.js";
+import type { Condition, WhereBuilder } from "./where-builder.js";
 
 export type SummaryMode = "true" | "false" | "text" | "data" | "count";
 export type TotalMode = "none" | "estimate" | "accurate";
@@ -83,6 +84,20 @@ export interface SearchQueryBuilder<
     op: "eq",
     values: readonly (SP[K] extends { value: infer V } ? V : string)[],
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
+  /**
+   * Composable conditions via callback. Returns a `Condition<SP>` tree built with
+   * `eb.and([...])` / `eb.or([...])`. The compiler picks the most natural FHIR shape:
+   *
+   * - AND of plain tuples → one query param per tuple (FHIR's implicit AND).
+   * - OR of `eq` tuples sharing one param-name → a single comma-joined param.
+   * - Anything else → a single `_filter=<FHIRPath>` param.
+   *
+   * Operators that can't be expressed in `_filter` (`exact`, `above`, `below`,
+   * `of-type`, `text`, `identifier`, `code-text`, `missing`) cannot appear inside
+   * an OR or nested group — use the positional `where` form for those.
+   */
+  where(callback: (eb: WhereBuilder<SP>) => Condition<SP>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   /**
    * Multi-value OR shorthand — equivalent to `where(param, "eq", values)`.

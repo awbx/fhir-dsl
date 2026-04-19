@@ -415,6 +415,83 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("functional where (callback overload)", () => {
+    it("compiles a single-tuple callback exactly like the positional form", () => {
+      const callback = createBuilder("Observation")
+        .where((eb) => ["status" as any, "eq", "final"])
+        .compile();
+      const positional = createBuilder("Observation")
+        .where("status" as any, "eq", "final")
+        .compile();
+
+      expect(callback.params).toEqual(positional.params);
+    });
+
+    it("collapses same-param eq OR into one comma-joined param", () => {
+      const query = createBuilder("Observation")
+        .where((eb) =>
+          eb.or([
+            ["status" as any, "eq", "final"],
+            ["status" as any, "eq", "amended"],
+          ]),
+        )
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "status", value: "final,amended" });
+    });
+
+    it("falls back to _filter for an OR across different params", () => {
+      const query = createBuilder("Observation")
+        .where((eb) =>
+          eb.or([
+            ["status" as any, "eq", "final"],
+            ["code" as any, "eq", "1234-5"],
+          ]),
+        )
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_filter",
+        value: "status eq 'final' or code eq '1234-5'",
+      });
+    });
+
+    it("emits AND of plain tuples as separate params (implicit FHIR AND)", () => {
+      const query = createBuilder("Patient")
+        .where((eb) =>
+          eb.and([
+            ["family", "eq", "Smith"],
+            ["birthdate", "ge", "1990-01-01"],
+          ]),
+        )
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "family", value: "Smith" },
+        { name: "birthdate", prefix: "ge", value: "1990-01-01" },
+      ]);
+    });
+
+    it("interleaves callback where with positional where + other clauses, preserving order", () => {
+      const query = createBuilder("Observation")
+        .where("subject" as any, "eq", "Patient/1")
+        .where((eb) =>
+          eb.or([
+            ["status" as any, "eq", "final"],
+            ["status" as any, "eq", "amended"],
+          ]),
+        )
+        .where("date" as any, "gt", "2024-01-01")
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "subject", value: "Patient/1" },
+        { name: "status", value: "final,amended" },
+        { name: "date", prefix: "gt", value: "2024-01-01" },
+      ]);
+    });
+  });
+
   describe("meta params (Phase 2)", () => {
     it("compiles whereMissing(true/false) as :missing modifier", () => {
       const query = createBuilder("Patient").whereMissing("family", true).whereMissing("birthdate", false).compile();

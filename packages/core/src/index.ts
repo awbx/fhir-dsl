@@ -6,3 +6,4 @@ export * from "./query-builder.js";
 export * from "./transaction-builder.js";
 export * from "./types.js";
 export * from "./validation.js";
+export * from "./where-builder.js";
