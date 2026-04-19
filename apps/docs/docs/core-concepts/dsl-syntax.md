@@ -399,6 +399,51 @@ const compiled = fhir
 
 The builder also auto-switches to POST when the serialized GET URL would exceed ~1900 characters, so most callers never need to opt in explicitly.
 
+## Composition: `$if` and `$call`
+
+Two universal helpers let you compose queries dynamically without breaking out of the chain. They are available on every fluent builder (`search`, `read`, `transaction`, `batch`).
+
+### `$if(condition, callback)`
+
+Conditionally apply a callback. When `condition` is `true`, returns `callback(qb)`; otherwise returns the builder unchanged.
+
+```typescript
+const recent = req.query.from === "today";
+
+const result = await fhir
+  .search("Observation")
+  .where("patient", "eq", "Patient/123")
+  .$if(recent, (qb) => qb.where("date", "ge", new Date().toISOString().slice(0, 10)))
+  .$if(req.query.includeSubject === "true", (qb) => qb.include("subject"))
+  .execute();
+```
+
+The callback receives the same builder type via polymorphic `this`, so chaining inside the callback keeps every generic narrowed (includes, profile, `_elements` selection).
+
+### `$call(callback)`
+
+Always applies the transformer; returns whatever the callback returns. Lets you extract reusable query fragments.
+
+```typescript
+// Reusable fragment, defined once
+const onlyFinal = <T extends { where: (p: "status", op: "eq", v: "final") => T }>(qb: T) =>
+  qb.where("status", "eq", "final");
+
+const labs = await fhir
+  .search("Observation")
+  .where("category", "eq", "laboratory")
+  .$call(onlyFinal)
+  .execute();
+
+const vitals = await fhir
+  .search("Observation")
+  .where("category", "eq", "vital-signs")
+  .$call(onlyFinal)
+  .execute();
+```
+
+`$call` is also handy for committing to a non-builder result mid-chain — for example, `qb.$call((b) => b.compile())` returns the `CompiledQuery` directly.
+
 ## Read Queries
 
 Read a single resource by type and ID:

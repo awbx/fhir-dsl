@@ -280,6 +280,20 @@ export interface SearchQueryBuilder<
   /** FHIR `_list` — restrict results to members of a List resource by id. */
   inList(listId: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /**
+   * Conditionally apply a callback. When `condition` is true, returns
+   * `callback(this)`; otherwise returns the builder unchanged. The callback's
+   * return type is constrained to the same builder so chaining stays inferred.
+   */
+  $if(condition: boolean, callback: (qb: this) => this): this;
+
+  /**
+   * Apply a transformer to the builder. Lets callers extract reusable query
+   * fragments (e.g. `qb.$call(onlyFinal)`). Returns whatever the callback
+   * returns.
+   */
+  $call<R>(callback: (qb: this) => R): R;
+
   compile(): CompiledQuery;
 
   execute(): Promise<
@@ -301,6 +315,12 @@ export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
    * otherwise this call throws `ValidationUnavailableError` immediately.
    */
   validate(): ReadQueryBuilder<S, RT>;
+
+  /** See {@link SearchQueryBuilder.$if}. */
+  $if(condition: boolean, callback: (qb: this) => this): this;
+
+  /** See {@link SearchQueryBuilder.$call}. */
+  $call<R>(callback: (qb: this) => R): R;
 
   compile(): CompiledQuery;
 

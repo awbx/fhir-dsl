@@ -873,4 +873,78 @@ describe("SearchQueryBuilder", () => {
       expect(urlExecutor).toHaveBeenCalledOnce();
     });
   });
+
+  describe("composition ($if / $call)", () => {
+    it("$if applies the callback when condition is true", () => {
+      const query = createBuilder("Patient")
+        .$if(true, (qb) => qb.where("family", "eq", "Smith"))
+        .compile();
+
+      expect(query.params).toEqual([{ name: "family", value: "Smith" }]);
+    });
+
+    it("$if skips the callback when condition is false", () => {
+      const cb = vi.fn((qb: ReturnType<typeof createBuilder>) => qb.where("family", "eq", "Smith"));
+
+      const query = createBuilder("Patient").$if(false, cb).compile();
+
+      expect(cb).not.toHaveBeenCalled();
+      expect(query.params).toEqual([]);
+    });
+
+    it("$if preserves immutability of the original builder", () => {
+      const base = createBuilder("Patient").where("family", "eq", "Smith");
+      const branched = base.$if(true, (qb) => qb.where("birthdate", "ge", "1990-01-01"));
+
+      expect(base.compile().params).toEqual([{ name: "family", value: "Smith" }]);
+      expect(branched.compile().params).toEqual([
+        { name: "family", value: "Smith" },
+        { name: "birthdate", prefix: "ge", value: "1990-01-01" },
+      ]);
+    });
+
+    it("$call always applies the transformer", () => {
+      const onlyFinal = (qb: ReturnType<typeof createBuilder>) => qb.where("family", "eq", "Final");
+
+      const query = createBuilder("Patient").$call(onlyFinal).compile();
+
+      expect(query.params).toEqual([{ name: "family", value: "Final" }]);
+    });
+
+    it("$call shares a reusable fragment across multiple builders", () => {
+      const recent = (qb: ReturnType<typeof createBuilder>) => qb.where("birthdate", "ge", "1990-01-01");
+
+      const a = createBuilder("Patient").$call(recent).compile();
+      const b = createBuilder("Practitioner").$call(recent).compile();
+
+      expect(a.path).toBe("Patient");
+      expect(b.path).toBe("Practitioner");
+      expect(a.params).toEqual([{ name: "birthdate", prefix: "ge", value: "1990-01-01" }]);
+      expect(b.params).toEqual([{ name: "birthdate", prefix: "ge", value: "1990-01-01" }]);
+    });
+
+    it("$call can return a non-builder value (e.g. the compiled query)", () => {
+      const compileNow = (qb: ReturnType<typeof createBuilder>) => qb.compile();
+
+      const compiled = createBuilder("Patient").where("family", "eq", "Smith").$call(compileNow);
+
+      expect(compiled.path).toBe("Patient");
+      expect(compiled.params).toEqual([{ name: "family", value: "Smith" }]);
+    });
+
+    it("chains across $if and $call without losing state", () => {
+      const query = createBuilder("Patient")
+        .where("family", "eq", "Smith")
+        .$if(true, (qb) => qb.where("birthdate", "ge", "1990-01-01"))
+        .$if(false, (qb) => qb.where("family", "eq", "Ignored"))
+        .$call((qb) => qb.count(25))
+        .compile();
+
+      expect(query.params).toEqual([
+        { name: "family", value: "Smith" },
+        { name: "birthdate", prefix: "ge", value: "1990-01-01" },
+        { name: "_count", value: 25 },
+      ]);
+    });
+  });
 });

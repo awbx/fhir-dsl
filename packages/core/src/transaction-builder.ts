@@ -23,6 +23,12 @@ export interface TransactionBuilder<S extends FhirSchema> {
 
   delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): TransactionBuilder<S>;
 
+  /** See {@link SearchQueryBuilder.$if}. */
+  $if(condition: boolean, callback: (qb: this) => this): this;
+
+  /** See {@link SearchQueryBuilder.$call}. */
+  $call<R>(callback: (qb: this) => R): R;
+
   compile(): Bundle;
 
   execute(): Promise<Bundle>;
@@ -34,6 +40,12 @@ export interface BatchBuilder<S extends FhirSchema> {
   update<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): BatchBuilder<S>;
 
   delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): BatchBuilder<S>;
+
+  /** See {@link SearchQueryBuilder.$if}. */
+  $if(condition: boolean, callback: (qb: this) => this): this;
+
+  /** See {@link SearchQueryBuilder.$call}. */
+  $call<R>(callback: (qb: this) => R): R;
 
   compile(): Bundle;
 
@@ -94,6 +106,14 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
         },
       },
     ]);
+  }
+
+  $if(condition: boolean, callback: (qb: this) => this): this {
+    return condition ? callback(this) : this;
+  }
+
+  $call<R>(callback: (qb: this) => R): R {
+    return callback(this);
   }
 
   compile(): Bundle {

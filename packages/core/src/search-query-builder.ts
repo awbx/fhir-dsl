@@ -595,6 +595,14 @@ export class SearchQueryBuilderImpl<
     );
   }
 
+  $if(condition: boolean, callback: (qb: this) => this): this {
+    return condition ? callback(this) : this;
+  }
+
+  $call<R>(callback: (qb: this) => R): R {
+    return callback(this);
+  }
+
   compile(): CompiledQuery {
     const params: CompiledSearchParam[] = [...this.#state.params];
 

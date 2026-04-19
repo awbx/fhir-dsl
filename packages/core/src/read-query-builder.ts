@@ -31,6 +31,14 @@ export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string> imple
     return new ReadQueryBuilderImpl<S, RT>(this.#resourceType, this.#id, this.#executor, this.#schemas, true);
   }
 
+  $if(condition: boolean, callback: (qb: this) => this): this {
+    return condition ? callback(this) : this;
+  }
+
+  $call<R>(callback: (qb: this) => R): R {
+    return callback(this);
+  }
+
   compile(): CompiledQuery {
     return {
       method: "GET",

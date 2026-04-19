@@ -182,4 +182,53 @@ describe("BatchBuilder", () => {
       expect(result).toEqual(responseBundle);
     });
   });
+
+  describe("composition ($if / $call) — shared by Transaction + Batch", () => {
+    it("$if applies the callback when condition is true (transaction)", () => {
+      const executor = vi.fn();
+      const bundle = new TransactionBuilderImpl<TestSchema>(executor)
+        .$if(true, (b) => b.create({ resourceType: "Patient" as const } as any))
+        .compile();
+
+      expect(bundle.entry).toHaveLength(1);
+      expect(bundle.entry![0]!.request.method).toBe("POST");
+    });
+
+    it("$if skips the callback when condition is false (transaction)", () => {
+      const executor = vi.fn();
+      const cb = vi.fn((b: TransactionBuilderImpl<TestSchema>) =>
+        b.create({ resourceType: "Patient" as const } as any),
+      );
+
+      const bundle = new TransactionBuilderImpl<TestSchema>(executor).$if(false, cb as any).compile();
+
+      expect(cb).not.toHaveBeenCalled();
+      expect(bundle.entry).toEqual([]);
+    });
+
+    it("$call composes a reusable bundle fragment across both Transaction and Batch", () => {
+      const executor = vi.fn();
+      const seedPatient = <T extends { create: (r: any) => T }>(b: T) =>
+        b.create({ resourceType: "Patient" as const } as any);
+
+      const tx = new TransactionBuilderImpl<TestSchema>(executor).$call(seedPatient).compile();
+      const bx = new BatchBuilderImpl<TestSchema>(executor).$call(seedPatient).compile();
+
+      expect(tx.type).toBe("transaction");
+      expect(bx.type).toBe("batch");
+      expect(tx.entry).toHaveLength(1);
+      expect(bx.entry).toHaveLength(1);
+    });
+
+    it("$call can return a non-builder value (e.g. the compiled bundle)", () => {
+      const executor = vi.fn();
+
+      const compiled = new TransactionBuilderImpl<TestSchema>(executor)
+        .create({ resourceType: "Patient" as const } as any)
+        .$call((b) => b.compile());
+
+      expect(compiled.resourceType).toBe("Bundle");
+      expect(compiled.entry).toHaveLength(1);
+    });
+  });
 });

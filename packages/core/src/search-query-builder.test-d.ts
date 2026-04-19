@@ -7,8 +7,10 @@
  */
 import { describe, it } from "vitest";
 import type { Assert, Equals } from "./_internal/test-helpers.js";
+import type { ApplySelection, SearchQueryBuilder } from "./query-builder.js";
 import type {
   DatePrefix,
+  FhirSchema,
   NumberPrefix,
   QuantityPrefix,
   ReferenceModifier,
@@ -69,5 +71,44 @@ describe("Modifier vocabulary completeness vs FHIR R5 spec", () => {
   it("does NOT classify :iterate as a search-value modifier — it lives on _include/_revinclude", () => {
     type LeakedIterate = "iterate" extends TokenModifier ? true : false;
     type _ = Assert<Equals<LeakedIterate, false>>;
+  });
+});
+
+describe("$if / $call composition (type-level)", () => {
+  type Schema = {
+    resources: {
+      Observation: { resourceType: "Observation"; id?: string; code?: unknown };
+      Patient: { resourceType: "Patient"; id?: string };
+    };
+    searchParams: {
+      Observation: {
+        status: { type: "token"; value: string };
+        date: { type: "date"; value: string };
+      };
+    };
+    includes: { Observation: { subject: "Patient" } };
+    profiles: Record<string, never>;
+  };
+
+  type Base = SearchQueryBuilder<Schema, "Observation", Schema["searchParams"]["Observation"]>;
+  type _SchemaOk = Assert<Equals<Schema extends FhirSchema ? true : false, true>>;
+  type _AppliesOk = Assert<
+    Equals<ApplySelection<{ resourceType: "X"; a?: 1; b?: 2 }, "a">, { resourceType: "X"; a?: 1 }>
+  >;
+
+  it("$if preserves the exact builder type in both branches", () => {
+    // Using polymorphic `this`, the return type matches the receiver — so
+    // calling $if on a Base returns Base (not a widened SearchQueryBuilder).
+    const base = null as unknown as Base;
+    const out = base.$if(true, (qb) => qb);
+    type _ = Assert<Equals<typeof out, Base>>;
+  });
+
+  it("$call returns whatever the callback returns", () => {
+    const base = null as unknown as Base;
+    const asNumber = base.$call(() => 42 as const);
+    const asBuilder = base.$call((qb) => qb);
+    type _1 = Assert<Equals<typeof asNumber, 42>>;
+    type _2 = Assert<Equals<typeof asBuilder, Base>>;
   });
 });

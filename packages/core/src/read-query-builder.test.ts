@@ -46,4 +46,37 @@ describe("ReadQueryBuilder", () => {
       expect(result).toEqual(patient);
     });
   });
+
+  describe("composition ($if / $call)", () => {
+    it("$if returns the same builder unchanged when condition is false", () => {
+      const executor = vi.fn();
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+      const cb = vi.fn((b: typeof builder) => b);
+
+      const out = builder.$if(false, cb);
+
+      expect(cb).not.toHaveBeenCalled();
+      expect(out).toBe(builder);
+    });
+
+    it("$if invokes the callback when condition is true", () => {
+      const executor = vi.fn();
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+      const cb = vi.fn((b: typeof builder) => b);
+
+      builder.$if(true, cb);
+
+      expect(cb).toHaveBeenCalledOnce();
+      expect(cb).toHaveBeenCalledWith(builder);
+    });
+
+    it("$call always invokes the transformer and returns its result", () => {
+      const executor = vi.fn();
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+
+      const compiled = builder.$call((b) => b.compile());
+
+      expect(compiled.path).toBe("Patient/123");
+    });
+  });
 });
