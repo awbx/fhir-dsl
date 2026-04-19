@@ -8,6 +8,16 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.0] - 2026-04-19
+
+### Features
+
+- Add Kysely-style $if and $call to every fluent builder (`97f8f35`)
+
+### Other
+
+- Document FHIR R5 search additions in DSL reference and query examples (`c78f8a3`)
+
 ## [0.16.0] - 2026-04-19
 
 ### Features
