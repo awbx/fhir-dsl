@@ -1,12 +1,14 @@
-import { isComplexType, isPrimitive, toKebabCase } from "@fhir-dsl/utils";
+import { toKebabCase } from "@fhir-dsl/utils";
 import type { ProfileModel } from "../../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../../model/resource-model.js";
+import type { TypeMapper } from "../../spec/type-mapping.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
 import type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
 
 const BINDABLE_TYPES = new Set(["code", "Coding", "CodeableConcept"]);
 
 interface Ctx {
+  mapper: TypeMapper;
   bindingTypeMap?: BindingTypeMap | undefined;
   strictExtensible?: boolean | undefined;
   datatypeImports: Set<string>;
@@ -36,13 +38,13 @@ function bindingNode(prop: PropertyModel, t: TypeRef, ctx: Ctx): SchemaNode | un
 function typeRefToNode(t: TypeRef, prop: PropertyModel, ctx: Ctx): SchemaNode {
   const bound = bindingNode(prop, t, ctx);
   if (bound) return bound;
-  if (isPrimitive(t.code)) return { kind: "primitive", fhirType: t.code };
+  if (ctx.mapper.isPrimitive(t.code)) return { kind: "primitive", fhirType: t.code };
   if (ctx.availableDatatypes?.has(t.code)) {
     ctx.datatypeImports.add(t.code);
     return { kind: "ref", name: `${t.code}Schema` };
   }
   // Fallback for abstract or unparsed complex types (Element, BackboneElement, …)
-  if (isComplexType(t.code)) return { kind: "unknown" };
+  if (ctx.mapper.isComplexType(t.code)) return { kind: "unknown" };
   return { kind: "unknown" };
 }
 
@@ -60,6 +62,7 @@ export function emitProfileSchema(
   profile: ProfileModel,
   adapter: ValidatorAdapter,
   options: {
+    mapper: TypeMapper;
     bindingTypeMap?: BindingTypeMap | undefined;
     strictExtensible?: boolean | undefined;
     availableDatatypes?: ReadonlySet<string> | undefined;
@@ -67,6 +70,7 @@ export function emitProfileSchema(
   },
 ): string {
   const ctx: Ctx = {
+    mapper: options.mapper,
     bindingTypeMap: options.bindingTypeMap,
     strictExtensible: options.strictExtensible,
     datatypeImports: new Set(),

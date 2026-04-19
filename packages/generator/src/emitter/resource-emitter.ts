@@ -1,16 +1,16 @@
-import { fhirTypeToTs, isComplexType, isPrimitive } from "@fhir-dsl/utils";
 import type { BackboneElementModel, PropertyModel, ResourceModel, TypeRef } from "../model/resource-model.js";
+import type { TypeMapper } from "../spec/type-mapping.js";
 import type { BindingTypeMap } from "./terminology-emitter.js";
 
-export function emitResource(model: ResourceModel, bindingTypeMap?: BindingTypeMap): string {
+export function emitResource(model: ResourceModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string {
   const lines: string[] = [];
   const primitiveImports = new Set<string>();
   const datatypeImports = new Set<string>();
   const terminologyImports = new Set<string>();
 
-  collectImports(model.properties, primitiveImports, datatypeImports, terminologyImports, bindingTypeMap);
+  collectImports(model.properties, mapper, primitiveImports, datatypeImports, terminologyImports, bindingTypeMap);
   for (const bb of model.backboneElements) {
-    collectImports(bb.properties, primitiveImports, datatypeImports, terminologyImports, bindingTypeMap);
+    collectImports(bb.properties, mapper, primitiveImports, datatypeImports, terminologyImports, bindingTypeMap);
   }
 
   // Add base type import
@@ -43,16 +43,16 @@ export function emitResource(model: ResourceModel, bindingTypeMap?: BindingTypeM
   }
 
   for (const bb of model.backboneElements) {
-    lines.push(...emitBackboneInterface(bb, bindingTypeMap));
+    lines.push(...emitBackboneInterface(bb, mapper, bindingTypeMap));
     lines.push("");
   }
 
-  lines.push(...emitResourceInterface(model, bindingTypeMap));
+  lines.push(...emitResourceInterface(model, mapper, bindingTypeMap));
 
   return `${lines.join("\n")}\n`;
 }
 
-function emitResourceInterface(model: ResourceModel, bindingTypeMap?: BindingTypeMap): string[] {
+function emitResourceInterface(model: ResourceModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string[] {
   const lines: string[] = [];
   const baseType = model.baseType ?? "Resource";
   const extendsClause = ` extends ${baseType}`;
@@ -61,41 +61,50 @@ function emitResourceInterface(model: ResourceModel, bindingTypeMap?: BindingTyp
   lines.push(`  resourceType: "${model.name}";`);
 
   for (const prop of model.properties) {
-    lines.push(`  ${formatProperty(prop, bindingTypeMap)}`);
+    lines.push(`  ${formatProperty(prop, mapper, bindingTypeMap)}`);
   }
 
   lines.push("}");
   return lines;
 }
 
-function emitBackboneInterface(bb: BackboneElementModel, bindingTypeMap?: BindingTypeMap): string[] {
+function emitBackboneInterface(
+  bb: BackboneElementModel,
+  mapper: TypeMapper,
+  bindingTypeMap?: BindingTypeMap,
+): string[] {
   const lines: string[] = [];
   lines.push(`export interface ${bb.name} extends BackboneElement {`);
 
   for (const prop of bb.properties) {
-    lines.push(`  ${formatProperty(prop, bindingTypeMap)}`);
+    lines.push(`  ${formatProperty(prop, mapper, bindingTypeMap)}`);
   }
 
   lines.push("}");
   return lines;
 }
 
-function formatProperty(prop: PropertyModel, bindingTypeMap?: BindingTypeMap): string {
+function formatProperty(prop: PropertyModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string {
   const optional = prop.isRequired ? "" : "?";
-  const tsType = formatPropertyType(prop, bindingTypeMap);
+  const tsType = formatPropertyType(prop, mapper, bindingTypeMap);
   const arraySuffix = prop.isArray ? "[]" : "";
   return `${prop.name}${optional}: ${tsType}${arraySuffix};`;
 }
 
-function formatPropertyType(prop: PropertyModel, bindingTypeMap?: BindingTypeMap): string {
+function formatPropertyType(prop: PropertyModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string {
   if (prop.types.length === 0) return "unknown";
   if (prop.types.length === 1) {
-    return formatTypeRef(prop.types[0]!, prop, bindingTypeMap);
+    return formatTypeRef(prop.types[0]!, mapper, prop, bindingTypeMap);
   }
-  return prop.types.map((t) => formatTypeRef(t, prop, bindingTypeMap)).join(" | ");
+  return prop.types.map((t) => formatTypeRef(t, mapper, prop, bindingTypeMap)).join(" | ");
 }
 
-function formatTypeRef(typeRef: TypeRef, prop?: PropertyModel, bindingTypeMap?: BindingTypeMap): string {
+function formatTypeRef(
+  typeRef: TypeRef,
+  mapper: TypeMapper,
+  prop?: PropertyModel,
+  bindingTypeMap?: BindingTypeMap,
+): string {
   if (typeRef.code === "Reference" && typeRef.targetProfiles?.length) {
     const targets = typeRef.targetProfiles.map((t) => `"${t}"`).join(" | ");
     return `Reference<${targets}>`;
@@ -107,7 +116,7 @@ function formatTypeRef(typeRef: TypeRef, prop?: PropertyModel, bindingTypeMap?: 
     return boundTypeName;
   }
 
-  return fhirTypeToTs(typeRef.code);
+  return mapper.fhirTypeToTs(typeRef.code);
 }
 
 /** BINDABLE_TYPES are FHIR types that support generic terminology constraints */
@@ -143,6 +152,7 @@ function resolveBindingType(
 
 function collectImports(
   properties: PropertyModel[],
+  mapper: TypeMapper,
   primitives: Set<string>,
   datatypes: Set<string>,
   terminology: Set<string>,
@@ -159,10 +169,10 @@ function collectImports(
       const boundType = resolveBindingType(typeRef, prop, bindingTypeMap);
       if (boundType) {
         // Still need the base type import (FhirCode, Coding, CodeableConcept)
-        const tsType = fhirTypeToTs(typeRef.code);
-        if (isPrimitive(typeRef.code)) {
+        const tsType = mapper.fhirTypeToTs(typeRef.code);
+        if (mapper.isPrimitive(typeRef.code)) {
           primitives.add(tsType);
-        } else if (isComplexType(typeRef.code)) {
+        } else if (mapper.isComplexType(typeRef.code)) {
           datatypes.add(tsType);
         }
 
@@ -176,10 +186,10 @@ function collectImports(
         continue;
       }
 
-      const tsType = fhirTypeToTs(typeRef.code);
-      if (isPrimitive(typeRef.code)) {
+      const tsType = mapper.fhirTypeToTs(typeRef.code);
+      if (mapper.isPrimitive(typeRef.code)) {
         primitives.add(tsType);
-      } else if (isComplexType(typeRef.code)) {
+      } else if (mapper.isComplexType(typeRef.code)) {
         datatypes.add(tsType);
       }
     }

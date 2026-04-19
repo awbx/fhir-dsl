@@ -1,5 +1,6 @@
-import { isComplexType, isPrimitive, toKebabCase } from "@fhir-dsl/utils";
+import { toKebabCase } from "@fhir-dsl/utils";
 import type { PropertyModel, ResourceModel, TypeRef } from "../../model/resource-model.js";
+import type { TypeMapper } from "../../spec/type-mapping.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
 import type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
 
@@ -7,6 +8,7 @@ const BINDABLE_TYPES = new Set(["code", "Coding", "CodeableConcept"]);
 
 interface EmitContext {
   adapter: ValidatorAdapter;
+  mapper: TypeMapper;
   bindingTypeMap?: BindingTypeMap | undefined;
   /** Names of datatype schemas that live in the same datatypes.ts file. Refs to these need lazy wrapping. */
   sameFileDatatypes: ReadonlySet<string>;
@@ -91,7 +93,7 @@ function typeRefToNode(t: TypeRef, prop: PropertyModel, ctx: EmitContext): Schem
   const bound = bindingNode(prop, t, ctx);
   if (bound) return bound;
 
-  if (isPrimitive(t.code)) return { kind: "primitive", fhirType: t.code };
+  if (ctx.mapper.isPrimitive(t.code)) return { kind: "primitive", fhirType: t.code };
 
   if (ctx.localBackbones.has(t.code)) {
     return makeRef(`${t.code}Schema`, false);
@@ -109,7 +111,7 @@ function typeRefToNode(t: TypeRef, prop: PropertyModel, ctx: EmitContext): Schem
 
   // Known FHIR complex type not in our generated datatypes (likely abstract — e.g. Element,
   // BackboneElement, Resource). Emit as permissive unknown rather than a dangling ref.
-  if (isComplexType(t.code)) {
+  if (ctx.mapper.isComplexType(t.code)) {
     return { kind: "unknown" };
   }
 
@@ -141,11 +143,13 @@ export interface EmitOptions {
   strictExtensible?: boolean | undefined;
   /** Relative path from the emitted file to the native runtime helper. */
   runtimePath?: string | undefined;
+  mapper: TypeMapper;
 }
 
 export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapter, options: EmitOptions): string {
   const ctx: EmitContext = {
     adapter,
+    mapper: options.mapper,
     bindingTypeMap: options.bindingTypeMap,
     sameFileDatatypes: new Set(),
     importedDatatypes: options.importedDatatypes,
@@ -196,6 +200,7 @@ export function emitDatatypeSchemas(
 
   const ctx: EmitContext = {
     adapter,
+    mapper: options.mapper,
     bindingTypeMap: options.bindingTypeMap,
     sameFileDatatypes: sameFile,
     importedDatatypes: new Set(),

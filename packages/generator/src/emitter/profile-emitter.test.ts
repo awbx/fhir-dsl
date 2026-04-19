@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ProfileModel } from "../model/profile-model.js";
+import { makeFallbackMapper } from "../spec/test-helpers.js";
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./profile-emitter.js";
+
+const MAPPER = makeFallbackMapper();
 
 function makeProfile(overrides: Partial<ProfileModel> = {}): ProfileModel {
   return {
@@ -17,17 +20,17 @@ function makeProfile(overrides: Partial<ProfileModel> = {}): ProfileModel {
 
 describe("emitProfile", () => {
   it("generates interface extending base resource", () => {
-    const output = emitProfile(makeProfile());
+    const output = emitProfile(makeProfile(), MAPPER);
     expect(output).toContain("export interface USCorePatient extends Patient");
   });
 
   it("imports base resource type", () => {
-    const output = emitProfile(makeProfile());
+    const output = emitProfile(makeProfile(), MAPPER);
     expect(output).toContain('import type { Patient } from "../resources/patient.js"');
   });
 
   it("adds JSDoc with description and URL", () => {
-    const output = emitProfile(makeProfile());
+    const output = emitProfile(makeProfile(), MAPPER);
     expect(output).toContain("/**");
     expect(output).toContain("* US Core Patient Profile");
     expect(output).toContain("* http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient");
@@ -35,7 +38,7 @@ describe("emitProfile", () => {
   });
 
   it("omits JSDoc when description is missing", () => {
-    const output = emitProfile(makeProfile({ description: undefined }));
+    const output = emitProfile(makeProfile({ description: undefined }), MAPPER);
     expect(output).not.toContain("/**");
   });
 
@@ -52,6 +55,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain("status: FhirCode;");
     expect(output).not.toContain("status?:");
@@ -70,6 +74,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain("note?: Annotation;");
   });
@@ -87,6 +92,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain("category: CodeableConcept[];");
   });
@@ -104,6 +110,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain('subject: Reference<"Patient" | "Group">');
   });
@@ -121,6 +128,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain("value?: Quantity | FhirString;");
   });
@@ -139,6 +147,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain('from "../primitives.js"');
     expect(output).toContain('from "../datatypes.js"');
@@ -157,6 +166,7 @@ describe("emitProfile", () => {
           },
         ],
       }),
+      MAPPER,
     );
     expect(output).toContain("Reference");
     expect(output).toContain('from "../datatypes.js"');

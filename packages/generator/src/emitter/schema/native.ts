@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtraRuntimeFile, LibImportOptions, ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
-import { FHIR_PRIMITIVE_RULES, regexLiteral } from "./primitive-rules.js";
+import { FHIR_PRIMITIVE_RULES, type PrimitiveRules, regexLiteral } from "./primitive-rules.js";
 
 const INDENT = "  ";
 
-function renderPrimitive(fhirType: string): string {
-  const rule = FHIR_PRIMITIVE_RULES[fhirType];
+function renderPrimitive(fhirType: string, rules: PrimitiveRules): string {
+  const rule = rules[fhirType];
   if (!rule) return "s.unknown()";
 
   if (rule.kind === "boolean") return "s.boolean()";
@@ -31,10 +31,10 @@ function renderEnum(values: string[], extensible: boolean): string {
   return extensible ? `s.enum(${list}, true)` : `s.enum(${list})`;
 }
 
-function renderNode(node: SchemaNode, indent: number): string {
+function renderNode(node: SchemaNode, indent: number, rules: PrimitiveRules): string {
   switch (node.kind) {
     case "primitive":
-      return renderPrimitive(node.fhirType);
+      return renderPrimitive(node.fhirType, rules);
     case "literal":
       return `s.literal(${JSON.stringify(node.value)})`;
     case "enum":
@@ -46,63 +46,67 @@ function renderNode(node: SchemaNode, indent: number): string {
     case "unknown":
       return "s.unknown()";
     case "array": {
-      const inner = renderNode(node.inner, indent);
+      const inner = renderNode(node.inner, indent, rules);
       return node.minItems !== undefined && node.minItems > 0
         ? `s.array(${inner}, ${node.minItems})`
         : `s.array(${inner})`;
     }
     case "union": {
       if (node.options.length === 0) return "s.unknown()";
-      if (node.options.length === 1) return renderNode(node.options[0]!, indent);
+      if (node.options.length === 1) return renderNode(node.options[0]!, indent, rules);
       const pad = INDENT.repeat(indent + 1);
       const close = INDENT.repeat(indent);
-      const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1)}`).join(",\n");
+      const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1, rules)}`).join(",\n");
       return `s.union([\n${parts},\n${close}])`;
     }
     case "object":
-      return renderObject(node.fields, indent);
+      return renderObject(node.fields, indent, rules);
   }
 }
 
-function renderObject(fields: ObjectField[], indent: number): string {
+function renderObject(fields: ObjectField[], indent: number, rules: PrimitiveRules): string {
   if (fields.length === 0) return "s.object({})";
   const pad = INDENT.repeat(indent + 1);
   const close = INDENT.repeat(indent);
   const lines = fields.map((f) => {
     const keyOk = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(f.name);
     const key = keyOk ? f.name : JSON.stringify(f.name);
-    const value = renderNode(f.schema, indent + 1);
+    const value = renderNode(f.schema, indent + 1, rules);
     return `${pad}${key}: { schema: ${value}, optional: ${f.optional} },`;
   });
   return `s.object({\n${lines.join("\n")}\n${close}})`;
 }
 
-export const nativeAdapter: ValidatorAdapter = {
-  name: "native",
-  libImport: (opts?: LibImportOptions) => `import * as s from "${opts?.runtimePath ?? "./__runtime.js"}";`,
-  render: (node) => renderNode(node, 0),
-  declareConst(exportName, node) {
-    return `export const ${exportName} = ${renderNode(node, 0)};`;
-  },
-  declareExtend(exportName, baseName, fields) {
-    const pad = INDENT;
-    const lines = fields.map((f) => {
-      const keyOk = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(f.name);
-      const key = keyOk ? f.name : JSON.stringify(f.name);
-      const value = renderNode(f.schema, 1);
-      return `${pad}${key}: { schema: ${value}, optional: ${f.optional} },`;
-    });
-    if (lines.length === 0) return `export const ${exportName} = ${baseName};`;
-    return `export const ${exportName} = s.extend(${baseName}, {\n${lines.join("\n")}\n});`;
-  },
-  runtimeFile(): ExtraRuntimeFile {
-    return { filename: "__runtime.ts", source: loadNativeRuntime() };
-  },
-  datatypeAnnotation: (runtimePath: string) => ({
-    annotation: "StandardSchema<unknown>",
-    importStatement: `import type { StandardSchema } from "${runtimePath}";`,
-  }),
-};
+export function createNativeAdapter(rules: PrimitiveRules): ValidatorAdapter {
+  return {
+    name: "native",
+    libImport: (opts?: LibImportOptions) => `import * as s from "${opts?.runtimePath ?? "./__runtime.js"}";`,
+    render: (node) => renderNode(node, 0, rules),
+    declareConst(exportName, node) {
+      return `export const ${exportName} = ${renderNode(node, 0, rules)};`;
+    },
+    declareExtend(exportName, baseName, fields) {
+      const pad = INDENT;
+      const lines = fields.map((f) => {
+        const keyOk = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(f.name);
+        const key = keyOk ? f.name : JSON.stringify(f.name);
+        const value = renderNode(f.schema, 1, rules);
+        return `${pad}${key}: { schema: ${value}, optional: ${f.optional} },`;
+      });
+      if (lines.length === 0) return `export const ${exportName} = ${baseName};`;
+      return `export const ${exportName} = s.extend(${baseName}, {\n${lines.join("\n")}\n});`;
+    },
+    runtimeFile(): ExtraRuntimeFile {
+      return { filename: "__runtime.ts", source: loadNativeRuntime() };
+    },
+    datatypeAnnotation: (runtimePath: string) => ({
+      annotation: "StandardSchema<unknown>",
+      importStatement: `import type { StandardSchema } from "${runtimePath}";`,
+    }),
+  };
+}
+
+export const nativeAdapter: ValidatorAdapter = createNativeAdapter(FHIR_PRIMITIVE_RULES);
 
 let cachedRuntime: string | undefined;
 function loadNativeRuntime(): string {

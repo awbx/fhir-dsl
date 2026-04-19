@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ResourceModel } from "../model/resource-model.js";
+import { makeFallbackMapper } from "../spec/test-helpers.js";
 import { emitResource } from "./resource-emitter.js";
+
+const MAPPER = makeFallbackMapper();
 
 function makeModel(overrides: Partial<ResourceModel> = {}): ResourceModel {
   return {
@@ -23,6 +26,7 @@ describe("emitResource", () => {
           { name: "status", types: [{ code: "code" }], isRequired: true, isArray: false, isChoiceType: false },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("export interface TestResource extends DomainResource");
@@ -37,6 +41,7 @@ describe("emitResource", () => {
           { name: "name", types: [{ code: "string" }], isRequired: false, isArray: false, isChoiceType: false },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("name?: FhirString;");
@@ -55,6 +60,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("identifier?: Identifier[];");
@@ -73,6 +79,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain('Reference<"Patient" | "Group">');
@@ -100,6 +107,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("export interface TestResourceContact extends BackboneElement");
@@ -114,6 +122,7 @@ describe("emitResource", () => {
           { name: "date", types: [{ code: "dateTime" }], isRequired: false, isArray: false, isChoiceType: false },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain('import type { FhirCode, FhirDateTime } from "../primitives.js"');
@@ -132,6 +141,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("DomainResource");
@@ -153,6 +163,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
       bindingTypeMap,
     );
 
@@ -175,6 +186,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
       bindingTypeMap,
     );
 
@@ -196,6 +208,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
       bindingTypeMap,
     );
 
@@ -218,6 +231,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
       bindingTypeMap,
     );
 
@@ -239,6 +253,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
       bindingTypeMap,
     );
 
@@ -259,6 +274,7 @@ describe("emitResource", () => {
           },
         ],
       }),
+      MAPPER,
     );
 
     expect(output).toContain("status: FhirCode;");

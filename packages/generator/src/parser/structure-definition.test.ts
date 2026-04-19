@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { makeFallbackCatalog } from "../spec/test-helpers.js";
 import { parseStructureDefinition } from "./structure-definition.js";
+
+const CATALOG = makeFallbackCatalog();
 
 function makeSD(overrides: Record<string, any> = {}) {
   return {
@@ -47,7 +50,7 @@ function makeSD(overrides: Record<string, any> = {}) {
 
 describe("parseStructureDefinition", () => {
   it("parses basic resource properties", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
 
     expect(model.name).toBe("TestResource");
     expect(model.kind).toBe("resource");
@@ -56,12 +59,12 @@ describe("parseStructureDefinition", () => {
   });
 
   it("extracts description from root element", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
     expect(model.description).toBe("A test resource");
   });
 
   it("skips inherited DomainResource properties", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
     const propNames = model.properties.map((p) => p.name);
 
     expect(propNames).not.toContain("id");
@@ -73,7 +76,7 @@ describe("parseStructureDefinition", () => {
   });
 
   it("includes resource-specific properties", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
     const propNames = model.properties.map((p) => p.name);
 
     expect(propNames).toContain("status");
@@ -82,7 +85,7 @@ describe("parseStructureDefinition", () => {
   });
 
   it("marks required properties correctly", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
     const status = model.properties.find((p) => p.name === "status")!;
     const name = model.properties.find((p) => p.name === "name")!;
 
@@ -91,7 +94,7 @@ describe("parseStructureDefinition", () => {
   });
 
   it("resolves Reference target profiles", () => {
-    const model = parseStructureDefinition(makeSD());
+    const model = parseStructureDefinition(makeSD(), CATALOG);
     const subject = model.properties.find((p) => p.name === "subject")!;
 
     expect(subject.types[0]!.code).toBe("Reference");
@@ -115,7 +118,7 @@ describe("parseStructureDefinition", () => {
       baseDefinition: undefined,
     });
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
     const propNames = model.properties.map((p) => p.name);
 
     expect(propNames).toContain("valueString");
@@ -152,7 +155,7 @@ describe("parseStructureDefinition", () => {
       baseDefinition: undefined,
     });
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
 
     expect(model.backboneElements).toHaveLength(1);
     expect(model.backboneElements[0]!.name).toBe("TestResourceContact");
@@ -174,7 +177,7 @@ describe("parseStructureDefinition", () => {
       baseDefinition: undefined,
     });
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
     const identifier = model.properties.find((p) => p.name === "identifier")!;
 
     expect(identifier.isArray).toBe(true);
@@ -196,7 +199,7 @@ describe("parseStructureDefinition", () => {
       baseDefinition: undefined,
     });
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
     const active = model.properties.find((p) => p.name === "active")!;
 
     expect(active.types[0]!.code).toBe("boolean");
@@ -248,7 +251,7 @@ describe("parseStructureDefinition", () => {
       baseDefinition: undefined,
     });
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
 
     const status = model.properties.find((p) => p.name === "status")!;
     expect(status.binding).toEqual({
@@ -282,7 +285,7 @@ describe("parseStructureDefinition", () => {
       },
     };
 
-    const model = parseStructureDefinition(sd);
+    const model = parseStructureDefinition(sd, CATALOG);
     expect(model.properties).toHaveLength(1);
     expect(model.properties[0]!.name).toBe("code");
   });

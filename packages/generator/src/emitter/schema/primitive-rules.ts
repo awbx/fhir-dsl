@@ -1,19 +1,20 @@
-/**
- * Adapter-agnostic validation rules for FHIR primitive types.
- * Regexes follow http://hl7.org/fhir/R4/datatypes.html (FHIR R4 §2.24).
- */
+import type { PrimitiveRule, SpecCatalog } from "../../spec/catalog.js";
 
-export interface PrimitiveRule {
-  kind: "string" | "number" | "integer" | "boolean";
-  /** Optional JS regex literal — kept as RegExp so adapters can serialize it. */
-  regex?: RegExp;
-  /** Inclusive minimum for numeric types. */
-  min?: number;
-  /** Maximum string length, if defined. */
-  maxLength?: number;
+export type { PrimitiveRule } from "../../spec/catalog.js";
+
+export type PrimitiveRules = Record<string, PrimitiveRule>;
+
+/** Build a rules map from a SpecCatalog — each primitive entry already carries its rule. */
+export function buildPrimitiveRules(catalog: SpecCatalog): PrimitiveRules {
+  const out: PrimitiveRules = {};
+  for (const [name, entry] of catalog.primitives) {
+    out[name] = entry.rule;
+  }
+  return out;
 }
 
-export const FHIR_PRIMITIVE_RULES: Record<string, PrimitiveRule> = {
+/** Rules matching the R4 hand-tightened forms. Used by tests and as a default for adapter singletons. */
+export const FHIR_PRIMITIVE_RULES: PrimitiveRules = {
   boolean: { kind: "boolean" },
   integer: { kind: "integer" },
   integer64: { kind: "integer" },
@@ -47,8 +48,8 @@ export const FHIR_PRIMITIVE_RULES: Record<string, PrimitiveRule> = {
   time: { kind: "string", regex: /^([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?$/ },
 };
 
-export function isKnownPrimitive(fhirType: string): boolean {
-  return fhirType in FHIR_PRIMITIVE_RULES;
+export function isKnownPrimitive(fhirType: string, rules: PrimitiveRules = FHIR_PRIMITIVE_RULES): boolean {
+  return fhirType in rules;
 }
 
 /** Serialize a RegExp as a JS literal suitable for pasting into emitted source. */

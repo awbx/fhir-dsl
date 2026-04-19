@@ -1,14 +1,15 @@
 import type { ValidatorAdapter } from "./adapter.js";
-import { nativeAdapter } from "./native.js";
-import { zodAdapter } from "./zod.js";
+import { createNativeAdapter, nativeAdapter } from "./native.js";
+import type { PrimitiveRules } from "./primitive-rules.js";
+import { createZodAdapter, zodAdapter } from "./zod.js";
 
 export type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
 
-export function getAdapter(target: "zod" | "native"): ValidatorAdapter {
+export function getAdapter(target: "zod" | "native", rules?: PrimitiveRules): ValidatorAdapter {
   switch (target) {
     case "zod":
-      return zodAdapter;
+      return rules ? createZodAdapter(rules) : zodAdapter;
     case "native":
-      return nativeAdapter;
+      return rules ? createNativeAdapter(rules) : nativeAdapter;
   }
 }

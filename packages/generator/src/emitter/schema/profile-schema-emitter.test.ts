@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ProfileModel } from "../../model/profile-model.js";
+import { makeFallbackMapper } from "../../spec/test-helpers.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
 import { nativeAdapter } from "./native.js";
 import { emitProfileSchema, emitProfileSchemaIndex, emitProfileSchemaRegistry } from "./profile-schema-emitter.js";
+
+const MAPPER = makeFallbackMapper();
 
 function usCorePatient(): ProfileModel {
   return {
@@ -34,20 +37,20 @@ describe("emitProfileSchema", () => {
   const datatypes = new Set(["Identifier", "HumanName"]);
 
   it("generates an extend on the base resource schema", () => {
-    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { availableDatatypes: datatypes });
+    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { mapper: MAPPER, availableDatatypes: datatypes });
     expect(out).toContain('import * as s from "../__runtime.js";');
     expect(out).toContain('import { PatientSchema } from "../resources/patient.schema.js";');
     expect(out).toContain("s.extend(PatientSchema, {");
   });
 
   it("marks required constrained properties as non-optional arrays with minItems=1", () => {
-    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { availableDatatypes: datatypes });
+    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { mapper: MAPPER, availableDatatypes: datatypes });
     expect(out).toContain("identifier: { schema: s.array(IdentifierSchema, 1), optional: false }");
     expect(out).toContain("name: { schema: s.array(HumanNameSchema, 1), optional: false }");
   });
 
   it("pulls in datatype imports used by constrained properties", () => {
-    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { availableDatatypes: datatypes });
+    const out = emitProfileSchema(usCorePatient(), nativeAdapter, { mapper: MAPPER, availableDatatypes: datatypes });
     expect(out).toContain('import { HumanNameSchema, IdentifierSchema } from "../datatypes.js";');
   });
 
@@ -70,7 +73,11 @@ describe("emitProfileSchema", () => {
       ],
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/statuses", "Statuses"]]);
-    const out = emitProfileSchema(profile, nativeAdapter, { bindingTypeMap: map, availableDatatypes: datatypes });
+    const out = emitProfileSchema(profile, nativeAdapter, {
+      mapper: MAPPER,
+      bindingTypeMap: map,
+      availableDatatypes: datatypes,
+    });
     expect(out).toContain('import { StatusesSchema } from "../terminology.js";');
     expect(out).toContain("status: { schema: StatusesSchema, optional: false }");
   });

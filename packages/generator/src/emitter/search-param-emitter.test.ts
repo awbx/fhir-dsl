@@ -148,7 +148,41 @@ describe("emitSearchParams", () => {
     const output = emitSearchParams(new Map());
     expect(output).toBeDefined();
     expect(output).toContain("export interface CommonSearchParams");
-    expect(output).not.toMatch(/export interface \w+SearchParams extends CommonSearchParams/);
+    // No resource-specific interfaces; DomainResourceSearchParams is itself a base interface.
+    expect(output).not.toMatch(
+      /export interface (?!CommonSearchParams|DomainResourceSearchParams)\w+SearchParams extends/,
+    );
+  });
+
+  it("extends DomainResourceSearchParams for DomainResource-based resources", () => {
+    const params = new Map([
+      ["Patient", { params: [{ code: "name", type: "string" }] }],
+      ["Binary", { params: [{ code: "contentType", type: "token" }] }],
+    ]);
+    const baseTypes = new Map<string, string | undefined>([
+      ["Patient", "DomainResource"],
+      ["Binary", "Resource"],
+    ]);
+
+    const output = emitSearchParams(params as any, { resourceBaseTypes: baseTypes });
+
+    expect(output).toContain("export interface PatientSearchParams extends DomainResourceSearchParams");
+    expect(output).toContain("export interface BinarySearchParams extends CommonSearchParams");
+    expect(output).not.toContain("BinarySearchParams extends DomainResourceSearchParams");
+  });
+
+  it("uses catalog-supplied common search params", () => {
+    const output = emitSearchParams(new Map(), {
+      commonSearchParams: [
+        { code: "_id", type: "token", scope: "Resource" },
+        { code: "_has", type: "string", scope: "Resource" },
+        { code: "_text", type: "string", scope: "DomainResource" },
+      ],
+    });
+
+    expect(output).toContain('"_has": StringParam');
+    expect(output).toContain('"_id": TokenParam');
+    expect(output).toMatch(/DomainResourceSearchParams extends CommonSearchParams \{\s*\n\s*"_text": StringParam/);
   });
 
   it("emits CommonSearchParams once and extends per resource", () => {

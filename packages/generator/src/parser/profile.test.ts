@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { makeFallbackCatalog } from "../spec/test-helpers.js";
 import { parseProfile } from "./profile.js";
+
+const CATALOG = makeFallbackCatalog();
 
 function makeSD(overrides: Record<string, unknown> = {}) {
   return {
@@ -26,7 +29,7 @@ describe("parseProfile", () => {
       differential: { element: [makeElement("Observation")] },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
 
     expect(result.name).toBe("TestProfile");
     expect(result.url).toBe("http://example.org/StructureDefinition/test-profile");
@@ -37,7 +40,7 @@ describe("parseProfile", () => {
 
   it("uses sd.name as description when title is missing", () => {
     const sd = makeSD({ differential: { element: [] } });
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.description).toBe("TestProfile");
   });
 
@@ -55,7 +58,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
 
     expect(result.constrainedProperties).toHaveLength(1);
     expect(result.constrainedProperties[0]!.name).toBe("status");
@@ -73,7 +76,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(1);
   });
 
@@ -90,7 +93,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(0);
   });
 
@@ -107,7 +110,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(0);
   });
 
@@ -122,7 +125,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     // id (min=0 default) is skipped, meta (min=1) is included
     expect(result.constrainedProperties).toHaveLength(1);
     expect(result.constrainedProperties[0]!.name).toBe("meta");
@@ -141,7 +144,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     // Reference is filtered out, no usable types remain
     expect(result.constrainedProperties).toHaveLength(0);
   });
@@ -159,7 +162,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(2);
     expect(result.constrainedProperties[0]!.name).toBe("valueQuantity");
     expect(result.constrainedProperties[1]!.name).toBe("valueString");
@@ -179,7 +182,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties[0]!.name).toBe("valueBoolean");
   });
 
@@ -197,7 +200,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties[0]!.isArray).toBe(true);
   });
 
@@ -214,7 +217,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(0);
   });
 
@@ -225,7 +228,7 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(1);
   });
 
@@ -235,7 +238,7 @@ describe("parseProfile", () => {
       differential: { element: [] },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.slug).toBe("us-core-patient");
   });
 
@@ -246,7 +249,7 @@ describe("parseProfile", () => {
       differential: { element: [] },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.slug).toBe("my-custom-profile");
   });
 
@@ -256,7 +259,7 @@ describe("parseProfile", () => {
       differential: { element: [] },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.name).toBe("USCorePatientProfile");
   });
 
@@ -271,13 +274,13 @@ describe("parseProfile", () => {
       },
     });
 
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(1);
   });
 
   it("handles empty element list", () => {
     const sd = makeSD({ differential: { element: [] } });
-    const result = parseProfile(sd as any, "test.ig");
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toEqual([]);
   });
 });

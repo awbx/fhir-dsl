@@ -6,8 +6,7 @@ import type {
   ResourceModel,
   TypeRef,
 } from "../model/resource-model.js";
-
-// --- FHIR StructureDefinition types (minimal for parsing) ---
+import type { SpecCatalog } from "../spec/catalog.js";
 
 interface FhirTypeRef {
   code: string;
@@ -40,34 +39,7 @@ interface FhirStructureDefinition {
   differential?: { element: FhirElementDefinition[] } | undefined;
 }
 
-// Properties defined on Resource and DomainResource base types.
-// These are inherited and should not be re-emitted on concrete resources.
-const RESOURCE_BASE_PROPS = new Set(["id", "meta", "implicitRules", "language"]);
-const DOMAIN_RESOURCE_BASE_PROPS = new Set([
-  ...RESOURCE_BASE_PROPS,
-  "text",
-  "contained",
-  "extension",
-  "modifierExtension",
-]);
-
-// Properties on BackboneElement that are inherited
-const BACKBONE_BASE_PROPS = new Set(["id", "extension", "modifierExtension"]);
-
-// FHIRPath system type URLs that appear as type codes in StructureDefinitions
-const FHIRPATH_SYSTEM_TYPES: Record<string, string> = {
-  "http://hl7.org/fhirpath/System.String": "string",
-  "http://hl7.org/fhirpath/System.Boolean": "boolean",
-  "http://hl7.org/fhirpath/System.Date": "date",
-  "http://hl7.org/fhirpath/System.DateTime": "dateTime",
-  "http://hl7.org/fhirpath/System.Decimal": "decimal",
-  "http://hl7.org/fhirpath/System.Integer": "integer",
-  "http://hl7.org/fhirpath/System.Time": "time",
-};
-
-// --- Parser ---
-
-export function parseStructureDefinition(sd: FhirStructureDefinition): ResourceModel {
+export function parseStructureDefinition(sd: FhirStructureDefinition, catalog: SpecCatalog): ResourceModel {
   const elements = sd.snapshot?.element ?? sd.differential?.element ?? [];
   const rootPath = sd.type;
 
@@ -80,13 +52,7 @@ export function parseStructureDefinition(sd: FhirStructureDefinition): ResourceM
 
   const baseType = sd.baseDefinition ? extractTypeName(sd.baseDefinition) : undefined;
 
-  // Determine which properties to skip (inherited from base)
-  const skipProps =
-    baseType === "DomainResource"
-      ? DOMAIN_RESOURCE_BASE_PROPS
-      : baseType === "Resource"
-        ? RESOURCE_BASE_PROPS
-        : new Set<string>();
+  const skipProps = resolveBaseProps(catalog, baseType);
 
   const backboneElements: BackboneElementModel[] = [];
   const properties: PropertyModel[] = [];
@@ -94,21 +60,20 @@ export function parseStructureDefinition(sd: FhirStructureDefinition): ResourceM
   for (const element of directChildren) {
     const propName = fhirPathToPropertyName(element.path);
 
-    // Skip inherited properties
     if (skipProps.has(propName)) continue;
 
     const types = element.type ?? [];
     const isChoiceType = element.path.endsWith("[x]");
 
     if (isChoiceType) {
-      const choiceProps = expandChoiceType(element);
+      const choiceProps = expandChoiceType(element, catalog);
       properties.push(...choiceProps);
       continue;
     }
 
     const isBackbone = types.some((t) => t.code === "BackboneElement");
     if (isBackbone) {
-      const bbModel = parseBackboneElement(element, elements, sd.name, backboneElements);
+      const bbModel = parseBackboneElement(element, elements, sd.name, backboneElements, catalog);
       backboneElements.push(bbModel);
       properties.push({
         name: propName,
@@ -121,7 +86,7 @@ export function parseStructureDefinition(sd: FhirStructureDefinition): ResourceM
       continue;
     }
 
-    properties.push(elementToProperty(element, sd.name));
+    properties.push(elementToProperty(element, sd.name, catalog));
   }
 
   return {
@@ -136,13 +101,25 @@ export function parseStructureDefinition(sd: FhirStructureDefinition): ResourceM
   };
 }
 
-function elementToProperty(element: FhirElementDefinition, resourceName?: string): PropertyModel {
+function resolveBaseProps(catalog: SpecCatalog, baseType: string | undefined): Set<string> {
+  if (baseType === "DomainResource") {
+    return catalog.baseProperties.get("DomainResource") ?? new Set();
+  }
+  if (baseType === "Resource") {
+    return catalog.baseProperties.get("Resource") ?? new Set();
+  }
+  return new Set();
+}
+
+function elementToProperty(
+  element: FhirElementDefinition,
+  resourceName: string | undefined,
+  catalog: SpecCatalog,
+): PropertyModel {
   const name = fhirPathToPropertyName(element.path);
 
-  // Handle contentReference (e.g., "#Observation.referenceRange")
   if (element.contentReference && resourceName) {
     const refPath = element.contentReference.replace(/^#/, "");
-    // Build backbone name from full path (e.g., "ClaimResponse.item.adjudication" → "ClaimResponseItemAdjudication")
     const pathSuffix = refPath.slice(resourceName.length + 1);
     const bbName = resourceName + pathSuffix.split(".").map(capitalizeFirst).join("");
     return {
@@ -155,7 +132,7 @@ function elementToProperty(element: FhirElementDefinition, resourceName?: string
     };
   }
 
-  const types: TypeRef[] = (element.type ?? []).map(fhirTypeRefToTypeRef);
+  const types: TypeRef[] = (element.type ?? []).map((t) => fhirTypeRefToTypeRef(t, catalog));
   const binding = extractBinding(element);
 
   return {
@@ -169,14 +146,14 @@ function elementToProperty(element: FhirElementDefinition, resourceName?: string
   };
 }
 
-function expandChoiceType(element: FhirElementDefinition): PropertyModel[] {
+function expandChoiceType(element: FhirElementDefinition, catalog: SpecCatalog): PropertyModel[] {
   const baseName = fhirPathToPropertyName(element.path).replace("[x]", "");
   const types = element.type ?? [];
   const binding = extractBinding(element);
 
   return types.map((type) => ({
-    name: baseName + capitalizeFirst(resolveFhirPathType(type.code)),
-    types: [fhirTypeRefToTypeRef(type)],
+    name: baseName + capitalizeFirst(resolveFhirPathType(type.code, catalog)),
+    types: [fhirTypeRefToTypeRef(type, catalog)],
     isRequired: false,
     isArray: element.max === "*",
     isChoiceType: true,
@@ -190,6 +167,7 @@ function parseBackboneElement(
   allElements: FhirElementDefinition[],
   resourceName: string,
   allBackboneElements: BackboneElementModel[],
+  catalog: SpecCatalog,
 ): BackboneElementModel {
   const bbPath = element.path;
   const children = allElements.filter((el) => {
@@ -199,27 +177,25 @@ function parseBackboneElement(
     return !suffix.includes(".");
   });
 
-  // Build name from full path to avoid collisions (e.g., ClaimResponse.item.detail vs ClaimResponse.addItem.detail)
-  const pathSuffix = bbPath.slice(resourceName.length + 1); // e.g., "item.detail"
+  const pathSuffix = bbPath.slice(resourceName.length + 1);
   const name = resourceName + pathSuffix.split(".").map(capitalizeFirst).join("");
 
+  const backboneBaseProps = catalog.baseProperties.get("BackboneElement") ?? new Set<string>();
   const properties: PropertyModel[] = [];
   for (const child of children) {
     const childPropName = fhirPathToPropertyName(child.path);
-    // Skip inherited BackboneElement properties
-    if (BACKBONE_BASE_PROPS.has(childPropName)) continue;
+    if (backboneBaseProps.has(childPropName)) continue;
 
     const isChoice = child.path.endsWith("[x]");
     if (isChoice) {
-      properties.push(...expandChoiceType(child));
+      properties.push(...expandChoiceType(child, catalog));
       continue;
     }
 
-    // Recursively handle nested backbone elements
     const childTypes = child.type ?? [];
     const isChildBackbone = childTypes.some((t) => t.code === "BackboneElement");
     if (isChildBackbone) {
-      const nestedBb = parseBackboneElement(child, allElements, resourceName, allBackboneElements);
+      const nestedBb = parseBackboneElement(child, allElements, resourceName, allBackboneElements, catalog);
       allBackboneElements.push(nestedBb);
       properties.push({
         name: childPropName,
@@ -232,23 +208,23 @@ function parseBackboneElement(
       continue;
     }
 
-    properties.push(elementToProperty(child, resourceName));
+    properties.push(elementToProperty(child, resourceName, catalog));
   }
 
   return { name, path: bbPath, properties };
 }
 
-function fhirTypeRefToTypeRef(fhirType: FhirTypeRef): TypeRef {
+function fhirTypeRefToTypeRef(fhirType: FhirTypeRef, catalog: SpecCatalog): TypeRef {
   const targets = fhirType.targetProfile?.map(extractTypeName);
-  const code = resolveFhirPathType(fhirType.code);
+  const code = resolveFhirPathType(fhirType.code, catalog);
   return {
     code,
     targetProfiles: targets?.length ? targets : undefined,
   };
 }
 
-function resolveFhirPathType(code: string): string {
-  return FHIRPATH_SYSTEM_TYPES[code] ?? code;
+function resolveFhirPathType(code: string, catalog: SpecCatalog): string {
+  return catalog.fhirpathSystemTypes.get(code) ?? code;
 }
 
 function extractTypeName(url: string): string {

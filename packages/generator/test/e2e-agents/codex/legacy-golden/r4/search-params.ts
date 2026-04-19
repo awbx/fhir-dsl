@@ -10,17 +10,21 @@ export interface CommonSearchParams {
   "_source": UriParam;
   "_profile": UriParam;
   "_filter": StringParam;
-  "_text": StringParam;
   "_content": StringParam;
   "_list": StringParam;
 }
 
-export interface ObservationSearchParams extends CommonSearchParams {
+/** Search params common to every DomainResource (adds to CommonSearchParams). */
+export interface DomainResourceSearchParams extends CommonSearchParams {
+  "_text": StringParam;
+}
+
+export interface ObservationSearchParams extends DomainResourceSearchParams {
   "status": TokenParam;
   "subject": ReferenceParam;
 }
 
-export interface PatientSearchParams extends CommonSearchParams {
+export interface PatientSearchParams extends DomainResourceSearchParams {
   "gender": TokenParam;
   "name": StringParam;
 }

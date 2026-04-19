@@ -1,13 +1,14 @@
-import { fhirTypeToTs, isComplexType, isPrimitive, toKebabCase } from "@fhir-dsl/utils";
+import { toKebabCase } from "@fhir-dsl/utils";
 import type { ProfileModel } from "../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../model/resource-model.js";
+import type { TypeMapper } from "../spec/type-mapping.js";
 
-export function emitProfile(model: ProfileModel): string {
+export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
   const lines: string[] = [];
   const primitiveImports = new Set<string>();
   const datatypeImports = new Set<string>();
 
-  collectImports(model.constrainedProperties, primitiveImports, datatypeImports);
+  collectImports(model.constrainedProperties, mapper, primitiveImports, datatypeImports);
 
   // Import the base resource type
   const baseFileName = toKebabCase(model.baseResourceType);
@@ -37,7 +38,7 @@ export function emitProfile(model: ProfileModel): string {
   lines.push(`export interface ${model.name} extends ${model.baseResourceType} {`);
 
   for (const prop of model.constrainedProperties) {
-    lines.push(`  ${formatProperty(prop)}`);
+    lines.push(`  ${formatProperty(prop, mapper)}`);
   }
 
   lines.push("}");
@@ -96,40 +97,45 @@ export function emitProfileRegistry(profiles: ProfileModel[]): string {
   return `${lines.join("\n")}\n`;
 }
 
-function formatProperty(prop: PropertyModel): string {
+function formatProperty(prop: PropertyModel, mapper: TypeMapper): string {
   const optional = prop.isRequired ? "" : "?";
-  const tsType = formatPropertyType(prop);
+  const tsType = formatPropertyType(prop, mapper);
   const arraySuffix = prop.isArray ? "[]" : "";
   return `${prop.name}${optional}: ${tsType}${arraySuffix};`;
 }
 
-function formatPropertyType(prop: PropertyModel): string {
+function formatPropertyType(prop: PropertyModel, mapper: TypeMapper): string {
   if (prop.types.length === 0) return "unknown";
   if (prop.types.length === 1) {
-    return formatTypeRef(prop.types[0]!);
+    return formatTypeRef(prop.types[0]!, mapper);
   }
-  return prop.types.map(formatTypeRef).join(" | ");
+  return prop.types.map((t) => formatTypeRef(t, mapper)).join(" | ");
 }
 
-function formatTypeRef(typeRef: TypeRef): string {
+function formatTypeRef(typeRef: TypeRef, mapper: TypeMapper): string {
   if (typeRef.code === "Reference" && typeRef.targetProfiles?.length) {
     const targets = typeRef.targetProfiles.map((t) => `"${t}"`).join(" | ");
     return `Reference<${targets}>`;
   }
-  return fhirTypeToTs(typeRef.code);
+  return mapper.fhirTypeToTs(typeRef.code);
 }
 
-function collectImports(properties: PropertyModel[], primitives: Set<string>, datatypes: Set<string>): void {
+function collectImports(
+  properties: PropertyModel[],
+  mapper: TypeMapper,
+  primitives: Set<string>,
+  datatypes: Set<string>,
+): void {
   for (const prop of properties) {
     for (const typeRef of prop.types) {
       if (typeRef.code === "Reference") {
         datatypes.add("Reference");
         continue;
       }
-      const tsType = fhirTypeToTs(typeRef.code);
-      if (isPrimitive(typeRef.code)) {
+      const tsType = mapper.fhirTypeToTs(typeRef.code);
+      if (mapper.isPrimitive(typeRef.code)) {
         primitives.add(tsType);
-      } else if (isComplexType(typeRef.code)) {
+      } else if (mapper.isComplexType(typeRef.code)) {
         datatypes.add(tsType);
       }
     }

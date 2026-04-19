@@ -4,10 +4,12 @@ import { type ResolvedValueSet, TerminologyRegistry } from "@fhir-dsl/terminolog
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
 import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
+import { emitDatatypes, emitPrimitives } from "./emitter/primitives-emitter.js";
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/profile-emitter.js";
 import { emitRegistry } from "./emitter/registry-emitter.js";
 import { emitResource } from "./emitter/resource-emitter.js";
 import { getAdapter } from "./emitter/schema/index.js";
+import { buildPrimitiveRules } from "./emitter/schema/primitive-rules.js";
 import {
   emitProfileSchema,
   emitProfileSchemaIndex,
@@ -30,6 +32,8 @@ import type { ResourceModel, ResourceSearchParams } from "./model/resource-model
 import { parseProfile } from "./parser/profile.js";
 import { parseSearchParameters } from "./parser/search-parameter.js";
 import { parseStructureDefinition } from "./parser/structure-definition.js";
+import { buildSpecCatalog } from "./spec/build-catalog.js";
+import { makeTypeMapper } from "./spec/type-mapping.js";
 
 interface FhirStructureDefinition {
   resourceType: "StructureDefinition";
@@ -87,13 +91,16 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     const cache = cacheDir ?? join(outDir, ".cache");
     spec = await downloadSpec(version, cache, {
       expandValueSets: options.expandValueSets,
-      includeTypes: Boolean(options.validator),
     });
   }
 
   console.info(
     `Loaded ${spec.resourceDefinitions.length} definitions, ${spec.searchParameters.length} search parameters`,
   );
+
+  const catalog = buildSpecCatalog(spec, version);
+  const mapper = makeTypeMapper(catalog);
+  const primitiveRules = buildPrimitiveRules(catalog);
 
   // Parse StructureDefinitions
   let resourceModels: ResourceModel[] = [];
@@ -105,14 +112,14 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
     if (sd.kind === "resource") {
       try {
-        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
+        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0], catalog);
         resourceModels.push(model);
       } catch (err) {
         console.warn(`Failed to parse ${sd.name}: ${err}`);
       }
     } else if (sd.kind === "complex-type" && options.validator) {
       try {
-        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0]);
+        const model = parseStructureDefinition(sd as Parameters<typeof parseStructureDefinition>[0], catalog);
         complexTypeModels.push(model);
       } catch (err) {
         console.warn(`Failed to parse complex type ${sd.name}: ${err}`);
@@ -136,15 +143,9 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   const resourcesDir = join(versionDir, "resources");
   await mkdir(resourcesDir, { recursive: true });
 
-  // Only write primitives/datatypes if they don't already exist (don't overwrite hand-written ones)
-  const primitivesPath = join(versionDir, "primitives.ts");
-  const datatypesPath = join(versionDir, "datatypes.ts");
-  if (!(await fileExists(primitivesPath))) {
-    await writeFile(primitivesPath, PRIMITIVES_TEMPLATE, "utf-8");
-  }
-  if (!(await fileExists(datatypesPath))) {
-    await writeFile(datatypesPath, DATATYPES_STUB, "utf-8");
-  }
+  // Always regenerate primitives/datatypes from the per-version catalog.
+  await writeFile(join(versionDir, "primitives.ts"), emitPrimitives(catalog), "utf-8");
+  await writeFile(join(versionDir, "datatypes.ts"), emitDatatypes(catalog), "utf-8");
 
   // Emit search param types
   await writeFile(join(versionDir, "search-param-types.ts"), emitSearchParamTypes(), "utf-8");
@@ -202,13 +203,13 @@ export async function generate(options: GeneratorOptions): Promise<void> {
   // Emit resource files
   for (const model of resourceModels) {
     const fileName = `${toKebabCase(model.name)}.ts`;
-    const content = emitResource(model, bindingTypeMap);
+    const content = emitResource(model, mapper, bindingTypeMap);
     await writeFile(join(resourcesDir, fileName), content, "utf-8");
   }
 
   // --- Schema (Standard Schema) generation ---
   if (options.validator) {
-    const adapter = getAdapter(options.validator);
+    const adapter = getAdapter(options.validator, primitiveRules);
     const schemasDir = join(versionDir, "schemas");
     const schemaResourcesDir = join(schemasDir, "resources");
     await mkdir(schemaResourcesDir, { recursive: true });
@@ -228,6 +229,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
     // Datatype schemas (HumanName, Coding, etc.) — from parsed complex types
     const datatypeSource = emitDatatypeSchemas(complexTypeModels, adapter, {
+      mapper,
       bindingTypeMap,
       strictExtensible: options.strictExtensible,
     });
@@ -238,6 +240,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     for (const model of resourceModels) {
       const fileName = `${toKebabCase(model.name)}.schema.ts`;
       const content = emitResourceSchema(model, adapter, {
+        mapper,
         bindingTypeMap,
         importedDatatypes: datatypeNames,
         strictExtensible: options.strictExtensible,
@@ -284,9 +287,15 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     const sp = searchParamsMap.get(model.name);
     if (sp) filteredSearchParams.set(model.name, sp);
   }
+  const resourceBaseTypes = new Map<string, string | undefined>();
+  for (const m of resourceModels) resourceBaseTypes.set(m.name, m.baseType);
   await writeFile(
     join(versionDir, "search-params.ts"),
-    emitSearchParams(filteredSearchParams, searchParamBindingMap),
+    emitSearchParams(filteredSearchParams, {
+      commonSearchParams: catalog.commonSearchParams,
+      resourceBaseTypes,
+      searchParamBindingMap,
+    }),
     "utf-8",
   );
 
@@ -314,7 +323,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       for (const sd of ig.profiles) {
         if (!isStructureDefinition(sd)) continue;
         try {
-          const profile = parseProfile(sd as Parameters<typeof parseProfile>[0], ig.name);
+          const profile = parseProfile(sd as Parameters<typeof parseProfile>[0], ig.name, catalog);
           allProfiles.push(profile);
         } catch (err) {
           console.warn(`Failed to parse profile ${sd.name}: ${err}`);
@@ -328,7 +337,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
       for (const profile of allProfiles) {
         const fileName = `${toKebabCase(profile.name)}.ts`;
-        await writeFile(join(profilesDir, fileName), emitProfile(profile), "utf-8");
+        await writeFile(join(profilesDir, fileName), emitProfile(profile, mapper), "utf-8");
       }
 
       await writeFile(join(profilesDir, "index.ts"), emitProfileIndex(allProfiles), "utf-8");
@@ -336,7 +345,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
 
       // Profile schemas
       if (options.validator) {
-        const adapter = getAdapter(options.validator);
+        const adapter = getAdapter(options.validator, primitiveRules);
         const profileSchemasDir = join(versionDir, "schemas", "profiles");
         await mkdir(profileSchemasDir, { recursive: true });
 
@@ -344,6 +353,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
         for (const profile of allProfiles) {
           const fileName = `${toKebabCase(profile.name)}.schema.ts`;
           const content = emitProfileSchema(profile, adapter, {
+            mapper,
             bindingTypeMap,
             strictExtensible: options.strictExtensible,
             availableDatatypes: profileDatatypeNames,
@@ -440,30 +450,3 @@ async function fileExists(path: string): Promise<boolean> {
     return false;
   }
 }
-
-const PRIMITIVES_TEMPLATE = `export type FhirString = string;
-export type FhirBoolean = boolean;
-export type FhirDate = string;
-export type FhirDateTime = string;
-export type FhirInstant = string;
-export type FhirDecimal = number;
-export type FhirInteger = number;
-export type FhirPositiveInt = number;
-export type FhirUnsignedInt = number;
-export type FhirCode<T extends string = string> = T;
-export type FhirUri = string;
-export type FhirUrl = string;
-export type FhirCanonical = string;
-export type FhirId = string;
-export type FhirOid = string;
-export type FhirUuid = string;
-export type FhirMarkdown = string;
-export type FhirBase64Binary = string;
-export type FhirTime = string;
-export type FhirXhtml = string;
-`;
-
-const DATATYPES_STUB = `// Re-exports base FHIR datatypes from @fhir-dsl/types
-// Bundle/BundleEntry/BundleLink are omitted here — they come from the generated resources/bundle.ts
-export { type Element, type Extension, type Coding, type CodeableConcept, type Identifier, type Period, type HumanName, type Address, type ContactPoint, type Quantity, type Range, type Ratio, type Attachment, type Annotation, type SampledData, type Duration, type Age, type SimpleQuantity, type Reference, type Narrative, type Meta, type Resource, type DomainResource, type BackboneElement, type Timing, type Dosage, type Money, type ContactDetail, type UsageContext, type RelatedArtifact, type Expression, type DataRequirement, type TriggerDefinition, type Signature, type Distance, type Count, type SubstanceAmount, type Contributor, type ParameterDefinition, type Population, type ProdCharacteristic, type ProductShelfLife, type MarketingStatus, type ElementDefinition } from "@fhir-dsl/types";
-`;

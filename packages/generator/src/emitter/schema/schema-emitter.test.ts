@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ResourceModel } from "../../model/resource-model.js";
+import { makeFallbackMapper } from "../../spec/test-helpers.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
 import { nativeAdapter } from "./native.js";
 import {
@@ -9,6 +10,8 @@ import {
   emitSchemaRegistry,
   emitSchemaRootIndex,
 } from "./schema-emitter.js";
+
+const MAPPER = makeFallbackMapper();
 
 function patientModel(): ResourceModel {
   return {
@@ -74,6 +77,7 @@ function makeBindingMap(): BindingTypeMap {
 describe("emitResourceSchema (native adapter)", () => {
   it("emits resourceType literal and required fields", () => {
     const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(["HumanName"]),
       bindingTypeMap: makeBindingMap(),
     });
@@ -83,6 +87,7 @@ describe("emitResourceSchema (native adapter)", () => {
 
   it("emits backbone element schemas before the main schema", () => {
     const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(["HumanName"]),
       bindingTypeMap: makeBindingMap(),
     });
@@ -96,6 +101,7 @@ describe("emitResourceSchema (native adapter)", () => {
 
   it("imports bound terminology and uses enum ref for required code binding", () => {
     const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(["HumanName"]),
       bindingTypeMap: makeBindingMap(),
     });
@@ -105,6 +111,7 @@ describe("emitResourceSchema (native adapter)", () => {
 
   it("imports cross-type datatypes from ../datatypes.js", () => {
     const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(["HumanName"]),
     });
     expect(out).toContain('import { HumanNameSchema } from "../datatypes.js";');
@@ -127,12 +134,13 @@ describe("emitResourceSchema (native adapter)", () => {
       ],
       backboneElements: [],
     };
-    const out = emitResourceSchema(model, nativeAdapter, { importedDatatypes: new Set() });
+    const out = emitResourceSchema(model, nativeAdapter, { mapper: MAPPER, importedDatatypes: new Set() });
     expect(out).toMatch(/tag: \{ schema: s\.array\(s\.string\(.*?\), 1\), optional: false \}/);
   });
 
   it("emits s.union for choice types", () => {
     const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(["HumanName"]),
     });
     expect(out).toContain("s.union([");
@@ -160,6 +168,7 @@ describe("emitResourceSchema (native adapter)", () => {
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/kinds", "Kinds"]]);
     const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(),
       bindingTypeMap: map,
     });
@@ -189,6 +198,7 @@ describe("emitResourceSchema (native adapter)", () => {
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/kinds", "Kinds"]]);
     const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(),
       bindingTypeMap: map,
       strictExtensible: true,
@@ -217,6 +227,7 @@ describe("emitResourceSchema (native adapter)", () => {
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/tags", "Tags"]]);
     const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(),
       bindingTypeMap: map,
     });
@@ -244,6 +255,7 @@ describe("emitResourceSchema (native adapter)", () => {
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/cats", "Cats"]]);
     const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
       importedDatatypes: new Set(),
       bindingTypeMap: map,
     });
@@ -274,7 +286,7 @@ describe("emitDatatypeSchemas", () => {
       ],
       backboneElements: [],
     };
-    const out = emitDatatypeSchemas([humanName, period], nativeAdapter, {});
+    const out = emitDatatypeSchemas([humanName, period], nativeAdapter, { mapper: MAPPER });
     expect(out).toContain("export const HumanNameSchema: StandardSchema<unknown> = s.object({");
     expect(out).toContain("export const PeriodSchema: StandardSchema<unknown> = s.object({");
     expect(out).toContain("s.lazy(() => PeriodSchema)");
@@ -297,7 +309,7 @@ describe("emitDatatypeSchemas", () => {
       properties: [],
       backboneElements: [],
     };
-    const out = emitDatatypeSchemas([b, a], nativeAdapter, {});
+    const out = emitDatatypeSchemas([b, a], nativeAdapter, { mapper: MAPPER });
     expect(out.indexOf("AppleSchema")).toBeLessThan(out.indexOf("BananaSchema"));
   });
 });

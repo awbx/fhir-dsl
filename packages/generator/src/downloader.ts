@@ -23,8 +23,6 @@ export interface DownloadedSpec {
 
 export interface DownloadSpecOptions {
   expandValueSets?: boolean | undefined;
-  /** Also fetch profiles-types.json (complex datatype StructureDefinitions). */
-  includeTypes?: boolean | undefined;
 }
 
 export async function downloadSpec(
@@ -38,18 +36,14 @@ export async function downloadSpec(
 
   const profilesPath = join(cacheDir, "profiles-resources.json");
   const searchParamsPath = join(cacheDir, "search-parameters.json");
+  const typesPath = join(cacheDir, "profiles-types.json");
 
   const resourceDefinitions = await loadOrDownload(profilesPath, `${baseUrl}/profiles-resources.json`);
-
   const searchParameters = await loadOrDownload(searchParamsPath, `${baseUrl}/search-parameters.json`);
+  const typeDefinitions = await loadOrDownload(typesPath, `${baseUrl}/profiles-types.json`);
 
   const allDefinitions = extractEntries(resourceDefinitions);
-
-  if (options?.includeTypes) {
-    const typesPath = join(cacheDir, "profiles-types.json");
-    const typeDefinitions = await loadOrDownload(typesPath, `${baseUrl}/profiles-types.json`);
-    allDefinitions.push(...extractEntries(typeDefinitions));
-  }
+  allDefinitions.push(...extractEntries(typeDefinitions));
 
   const result: DownloadedSpec = {
     resourceDefinitions: allDefinitions,

@@ -1,6 +1,7 @@
 import { capitalizeFirst, fhirPathToPropertyName } from "@fhir-dsl/utils";
 import type { ProfileModel } from "../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../model/resource-model.js";
+import type { SpecCatalog } from "../spec/catalog.js";
 
 interface FhirTypeRef {
   code: string;
@@ -38,30 +39,9 @@ interface FhirProfileSD {
   differential?: { element: FhirElementDefinition[] } | undefined;
 }
 
-// FHIRPath system type URLs
-const FHIRPATH_SYSTEM_TYPES: Record<string, string> = {
-  "http://hl7.org/fhirpath/System.String": "string",
-  "http://hl7.org/fhirpath/System.Boolean": "boolean",
-  "http://hl7.org/fhirpath/System.Date": "date",
-  "http://hl7.org/fhirpath/System.DateTime": "dateTime",
-  "http://hl7.org/fhirpath/System.Decimal": "decimal",
-  "http://hl7.org/fhirpath/System.Integer": "integer",
-  "http://hl7.org/fhirpath/System.Time": "time",
-};
-
-// Properties inherited from Resource/DomainResource that shouldn't be re-emitted
-const BASE_PROPS = new Set([
-  "id",
-  "meta",
-  "implicitRules",
-  "language",
-  "text",
-  "contained",
-  "extension",
-  "modifierExtension",
-]);
-
-export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
+export function parseProfile(sd: FhirProfileSD, igName: string, catalog: SpecCatalog): ProfileModel {
+  const basePropsSet =
+    catalog.baseProperties.get("DomainResource") ?? catalog.baseProperties.get("Resource") ?? new Set<string>();
   // Always use sd.type for the base resource type — it's the root FHIR resource (e.g., "Observation")
   // even when baseDefinition points to another profile
   const baseResourceType = sd.type;
@@ -86,11 +66,11 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
     const propName = fhirPathToPropertyName(element.path);
 
     // Skip base inherited properties unless they're being constrained with min > 0
-    if (BASE_PROPS.has(propName) && !(element.min && element.min > 0)) continue;
+    if (basePropsSet.has(propName) && !(element.min && element.min > 0)) continue;
 
     // Build types list, filtering out Reference-only types (profile URL narrowing
     // produces Reference<"us-core-patient"> which isn't assignable to Reference<"Patient">)
-    const rawTypes: TypeRef[] = (element.type ?? []).map(fhirTypeRefToTypeRef);
+    const rawTypes: TypeRef[] = (element.type ?? []).map((t) => fhirTypeRefToTypeRef(t, catalog));
     const types = rawTypes.filter((t) => t.code !== "Reference");
 
     // Skip properties with no usable types — they just inherit from the base interface
@@ -105,7 +85,7 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
       // For choice types in profiles, they often narrow to fewer types
       const baseName = propName.replace("[x]", "");
       for (const type of types) {
-        const code = FHIRPATH_SYSTEM_TYPES[type.code] ?? type.code;
+        const code = catalog.fhirpathSystemTypes.get(type.code) ?? type.code;
         const choiceName = baseName + capitalizeFirst(code);
         if (seenNames.has(choiceName)) continue;
         seenNames.add(choiceName);
@@ -150,8 +130,8 @@ export function parseProfile(sd: FhirProfileSD, igName: string): ProfileModel {
   };
 }
 
-function fhirTypeRefToTypeRef(fhirType: FhirTypeRef): TypeRef {
-  const code = FHIRPATH_SYSTEM_TYPES[fhirType.code] ?? fhirType.code;
+function fhirTypeRefToTypeRef(fhirType: FhirTypeRef, catalog: SpecCatalog): TypeRef {
+  const code = catalog.fhirpathSystemTypes.get(fhirType.code) ?? fhirType.code;
   // For Reference targets, extract a clean resource type name
   // Profile URLs like ".../us-core-patient" should resolve to "Patient" (the resource type)
   // but we can't always know that mapping. Use the last segment and let the emitter handle it.

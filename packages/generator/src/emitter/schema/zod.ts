@@ -1,10 +1,10 @@
 import type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
-import { FHIR_PRIMITIVE_RULES, regexLiteral } from "./primitive-rules.js";
+import { FHIR_PRIMITIVE_RULES, type PrimitiveRules, regexLiteral } from "./primitive-rules.js";
 
 const INDENT = "  ";
 
-function renderPrimitive(fhirType: string): string {
-  const rule = FHIR_PRIMITIVE_RULES[fhirType];
+function renderPrimitive(fhirType: string, rules: PrimitiveRules): string {
+  const rule = rules[fhirType];
   if (!rule) return "z.unknown()";
 
   if (rule.kind === "boolean") return "z.boolean()";
@@ -16,7 +16,6 @@ function renderPrimitive(fhirType: string): string {
     return expr;
   }
 
-  // string
   let expr = "z.string()";
   if (rule.regex) expr += `.regex(${regexLiteral(rule.regex)})`;
   if (rule.maxLength !== undefined) expr += `.max(${rule.maxLength})`;
@@ -29,10 +28,10 @@ function renderEnum(values: string[], extensible: boolean): string {
   return extensible ? `z.union([${literal}, z.string()])` : literal;
 }
 
-function renderNode(node: SchemaNode, indent: number): string {
+function renderNode(node: SchemaNode, indent: number, rules: PrimitiveRules): string {
   switch (node.kind) {
     case "primitive":
-      return renderPrimitive(node.fhirType);
+      return renderPrimitive(node.fhirType, rules);
     case "literal":
       return `z.literal(${JSON.stringify(node.value)})`;
     case "enum":
@@ -44,53 +43,57 @@ function renderNode(node: SchemaNode, indent: number): string {
     case "unknown":
       return "z.unknown()";
     case "array": {
-      const inner = renderNode(node.inner, indent);
+      const inner = renderNode(node.inner, indent, rules);
       const expr = `z.array(${inner})`;
       return node.minItems !== undefined && node.minItems > 0 ? `${expr}.min(${node.minItems})` : expr;
     }
     case "union": {
       if (node.options.length === 0) return "z.unknown()";
-      if (node.options.length === 1) return renderNode(node.options[0]!, indent);
+      if (node.options.length === 1) return renderNode(node.options[0]!, indent, rules);
       const pad = INDENT.repeat(indent + 1);
       const close = INDENT.repeat(indent);
-      const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1)}`).join(",\n");
+      const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1, rules)}`).join(",\n");
       return `z.union([\n${parts},\n${close}])`;
     }
     case "object":
-      return renderObject(node.fields, indent);
+      return renderObject(node.fields, indent, rules);
   }
 }
 
-function renderObject(fields: ObjectField[], indent: number): string {
+function renderObject(fields: ObjectField[], indent: number, rules: PrimitiveRules): string {
   if (fields.length === 0) return "z.object({}).catchall(z.unknown())";
   const pad = INDENT.repeat(indent + 1);
   const close = INDENT.repeat(indent);
   const lines = fields.map((f) => {
     const keyOk = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(f.name);
     const key = keyOk ? f.name : JSON.stringify(f.name);
-    const value = renderNode(f.schema, indent + 1);
+    const value = renderNode(f.schema, indent + 1, rules);
     const final = f.optional ? `${value}.optional()` : value;
     return `${pad}${key}: ${final},`;
   });
   return `z.object({\n${lines.join("\n")}\n${close}}).catchall(z.unknown())`;
 }
 
-export const zodAdapter: ValidatorAdapter = {
-  name: "zod",
-  libImport: () => 'import { z } from "zod";',
-  render: (node) => renderNode(node, 0),
-  declareConst(exportName, node) {
-    return `export const ${exportName} = ${renderNode(node, 0)};`;
-  },
-  declareExtend(exportName, baseName, fields) {
-    const obj = renderObject(fields, 0);
-    // z.object(...).extend takes another z.object shape — strip the outer
-    // `z.object({ ... }).catchall(...)` down to the shape object and use
-    // .extend({ ... }) directly.
-    const shape = extractShape(obj);
-    return `export const ${exportName} = ${baseName}.extend(${shape});`;
-  },
-};
+export function createZodAdapter(rules: PrimitiveRules): ValidatorAdapter {
+  return {
+    name: "zod",
+    libImport: () => 'import { z } from "zod";',
+    render: (node) => renderNode(node, 0, rules),
+    declareConst(exportName, node) {
+      return `export const ${exportName} = ${renderNode(node, 0, rules)};`;
+    },
+    declareExtend(exportName, baseName, fields) {
+      const obj = renderObject(fields, 0, rules);
+      // z.object(...).extend takes another z.object shape — strip the outer
+      // `z.object({ ... }).catchall(...)` down to the shape object and use
+      // .extend({ ... }) directly.
+      const shape = extractShape(obj);
+      return `export const ${exportName} = ${baseName}.extend(${shape});`;
+    },
+  };
+}
+
+export const zodAdapter: ValidatorAdapter = createZodAdapter(FHIR_PRIMITIVE_RULES);
 
 /** Extract `{ ... }` from `z.object({ ... }).catchall(z.unknown())`. */
 function extractShape(objectExpr: string): string {
