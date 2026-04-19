@@ -244,7 +244,10 @@ describe("Modifiers (SRCH-MOD-*)", () => {
     expect(paramEntry(q as any)).toContainEqual({ name: "family", modifier: "missing", value: "false" });
   });
 
-  it.todo("SRCH-MOD-013 :type — reference target-type filter (MISSING; op-classifier.ts:4-18 lacks `:type` entry)");
+  it("SRCH-MOD-013 :type — reference target-type filter emits as `param:Type=id` (spec §3.2.1.5.5.16)", () => {
+    const q = (builder("Patient") as any).where("subject", "type", "Patient").compile();
+    expect(paramEntry(q)).toContainEqual({ name: "subject", modifier: "type", value: "Patient" });
+  });
 
   it("SRCH-MOD-016: using :exact on a date param must be rejected (spec §3.2.1.5.5)", () => {
     // modifier-validation rejects string-only modifiers on well-known non-string params.

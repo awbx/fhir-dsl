@@ -17,6 +17,10 @@ export const MODIFIER_OPS: ReadonlySet<string> = new Set([
   "code-text",
   "missing",
   "iterate",
+  // SRCH-MOD-013 / §3.2.1.5.5.16: `:type` filters a reference param by the
+  // target resource type. e.g. subject:Patient=123 — the `:Patient` here is a
+  // *modifier* on `subject`, not a chain segment.
+  "type",
 ]);
 
 // paramName enables modifier-applicability validation per §3.2.1.5.5 (BUG-025).
