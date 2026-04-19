@@ -2,7 +2,7 @@ import type { CombineOp } from "../ops.js";
 import type { EvalContext } from "./types.js";
 
 export function evalCombining(op: CombineOp, collection: unknown[], ctx: EvalContext): unknown[] {
-  const otherCollection = ctx.evaluateSub(op.other.ops, ctx.rootResource);
+  const otherCollection = ctx.evaluateSub(op.other.ops, ctx.focus);
 
   switch (op.type) {
     case "union": {

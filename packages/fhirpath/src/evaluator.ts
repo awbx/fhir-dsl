@@ -8,9 +8,9 @@ import { evalNav } from "./eval/nav.js";
 import { evalOperator } from "./eval/operators.js";
 import { evalString } from "./eval/strings.js";
 import { evalSubsetting } from "./eval/subsetting.js";
-import type { EvalContext } from "./eval/types.js";
+import { type EvalContext, FhirPathEvaluationError, type IterationLocals } from "./eval/types.js";
 import { evalUtility } from "./eval/utility.js";
-import type { PathOp } from "./ops.js";
+import type { PathOp, VarOp } from "./ops.js";
 
 export interface EvalOptions {
   /**
@@ -18,20 +18,85 @@ export interface EvalOptions {
    * singleton-eval (§4.5) instead of returning `[]`. Default: false.
    */
   strict?: boolean;
+  /**
+   * Environment variable bag for `%foo` references (FP-VAR-010). Keys may be
+   * supplied with or without the leading `%` — lookup tries both. Unknown
+   * `%foo` references throw `FhirPathEvaluationError`.
+   *
+   * Built-in names (`%context`, `%resource`, `%rootResource`, `%ucum`) are
+   * resolved from the evaluation context and do not require an env entry.
+   */
+  env?: Readonly<Record<string, unknown>>;
 }
+
+const UCUM_URI = "http://unitsofmeasure.org";
 
 /**
  * Evaluate a sequence of FHIRPath operations against a resource.
  * Returns the resulting collection.
  */
 export function evaluate(ops: PathOp[], resource: unknown, options?: EvalOptions): unknown[] {
-  const ctx: EvalContext = {
-    rootResource: resource,
-    evaluateSub: (innerOps, r) => evaluate(innerOps, r, options),
-    evaluateOps: (innerOps, startCollection) => runOps(innerOps, startCollection, ctx),
-    strict: options?.strict,
-  };
+  const ctx = buildEvalContext(resource, options);
   return runOps(ops, [resource], ctx);
+}
+
+function buildEvalContext(rootResource: unknown, options?: EvalOptions): EvalContext {
+  const env = options?.env ?? {};
+  const strict = options?.strict;
+  const ctx: EvalContext = {
+    rootResource,
+    focus: rootResource,
+    env,
+    evaluateSub(innerOps, r, locals) {
+      // Sub-evals re-focus on `r` (so and/or/xor right-hand eval sees the
+      // current item), but preserve rootResource so %rootResource still
+      // points at the original input.
+      const subCtx: EvalContext = { ...ctx, focus: r };
+      if (locals !== undefined) subCtx.iterationLocals = locals;
+      return runOps(innerOps, [r], subCtx);
+    },
+    evaluateOps(innerOps, startCollection) {
+      return runOps(innerOps, startCollection, ctx);
+    },
+    ...(strict !== undefined ? { strict } : {}),
+  };
+  return ctx;
+}
+
+function resolveVar(op: VarOp, ctx: EvalContext): unknown[] {
+  const name = op.name;
+  if (name === "$this") {
+    // $this is handled by the predicate proxy at build time, but evaluate()
+    // may still encounter a bare `{type:"var", name:"$this"}` — fall through
+    // to a no-op (the current item is already the input collection).
+    throw new FhirPathEvaluationError("$this is only valid inside a predicate; evaluate $this via the proxy");
+  }
+  if (name === "$index") {
+    const locals: IterationLocals | undefined = ctx.iterationLocals;
+    if (!locals) throw new FhirPathEvaluationError("$index is only defined inside where/select/repeat iteration");
+    return [locals.index];
+  }
+  if (name === "$total") {
+    const locals: IterationLocals | undefined = ctx.iterationLocals;
+    if (!locals) throw new FhirPathEvaluationError("$total is only defined inside where/select/repeat iteration");
+    return [locals.total];
+  }
+  // Built-in environment names.
+  if (name === "%context" || name === "%resource" || name === "%rootResource") {
+    return ctx.rootResource === undefined ? [] : [ctx.rootResource];
+  }
+  if (name === "%ucum") return [UCUM_URI];
+
+  // User-supplied env bag. Accept both `%foo` and `foo` as keys for ergonomics.
+  const stripped = name.startsWith("%") ? name.slice(1) : name;
+  if (Object.hasOwn(ctx.env, name)) return wrap(ctx.env[name]);
+  if (Object.hasOwn(ctx.env, stripped)) return wrap(ctx.env[stripped]);
+  throw new FhirPathEvaluationError(`Undefined FHIRPath environment variable: ${name}`);
+}
+
+function wrap(value: unknown): unknown[] {
+  if (value === undefined || value === null) return [];
+  return Array.isArray(value) ? value : [value];
 }
 
 function runOps(ops: PathOp[], initial: unknown[], ctx: EvalContext): unknown[] {
@@ -174,5 +239,9 @@ function dispatch(op: PathOp, collection: unknown[], ctx: EvalContext): unknown[
     // --- Literal ---
     case "literal":
       return [op.value];
+
+    // --- Environment / iteration variables ---
+    case "var":
+      return resolveVar(op, ctx);
   }
 }

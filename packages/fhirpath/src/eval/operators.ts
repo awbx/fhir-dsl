@@ -25,7 +25,7 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
     case "and": {
       const left = toSingletonBoolean(collection, ctx, "and (left)");
       if (left === false) return [false];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "and (right)");
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.focus), ctx, "and (right)");
       if (left === true && right === true) return [true];
       if (right === false) return [false];
       return [];
@@ -34,7 +34,7 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
     case "or": {
       const left = toSingletonBoolean(collection, ctx, "or (left)");
       if (left === true) return [true];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "or (right)");
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.focus), ctx, "or (right)");
       if (right === true) return [true];
       if (left === false && right === false) return [false];
       return [];
@@ -42,7 +42,7 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
 
     case "xor": {
       const left = toSingletonBoolean(collection, ctx, "xor (left)");
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "xor (right)");
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.focus), ctx, "xor (right)");
       if (left == null || right == null) return [];
       return [left !== right];
     }
@@ -56,7 +56,7 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
     case "implies": {
       const left = toSingletonBoolean(collection, ctx, "implies (left)");
       if (left === false) return [true];
-      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.rootResource), ctx, "implies (right)");
+      const right = toSingletonBoolean(ctx.evaluateSub(op.other.ops, ctx.focus), ctx, "implies (right)");
       if (left === true && right === true) return [true];
       if (right === true) return [true];
       if (left === true && right === false) return [false];
@@ -97,7 +97,7 @@ function evalComparison(
 
   let right: unknown;
   if (isCompiledPredicate(operand)) {
-    const rightCollection = ctx.evaluateSub(operand.ops, ctx.rootResource);
+    const rightCollection = ctx.evaluateSub(operand.ops, ctx.focus);
     if (rightCollection.length === 0) return [];
     right = rightCollection[0];
   } else {

@@ -95,6 +95,12 @@ const ARITHMETIC_OPS: Record<string, { opType: string; symbol: string }> = {
 
 function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
   return new Proxy({} as FhirPathExpr<T>, {
+    has(_, prop) {
+      // Predicate-extraction probe: `PREDICATE_SYMBOL in exprProxy` must be
+      // true so `where(() => expr)` treats the returned expression as a
+      // predicate instead of falling through to the literal branch.
+      return prop === PREDICATE_SYMBOL;
+    },
     get(_, prop) {
       // --- Symbols ---
       if (typeof prop === "symbol") {
@@ -384,4 +390,42 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
  */
 export function fhirpath<T extends FhirPathResource>(resourceType: string): FhirPathExpr<T> {
   return createExprProxy<T>(resourceType, []);
+}
+
+// --- Environment variables & iteration locals (§5 intro / §9) ---
+// FHIRPath names these with a prefix character: `%foo` for the env bag and
+// built-in context names, `$foo` for iteration locals. The JS builder can't
+// use those characters in identifiers, so we mirror them as conventional
+// exports (`$context`, `$index`, …). The op carries the spec-correct name
+// so behavior matches the FHIRPath name, not the JS export name.
+
+function varProxy<T>(name: string): FhirPathExpr<T> {
+  return createExprProxy<T>(name, [{ type: "var", name }]);
+}
+
+/** `%context` — resource at the start of evaluation. */
+export const $context: FhirPathExpr<unknown> = varProxy("%context");
+
+/** `%resource` — the resource containing the current element. */
+export const $resource: FhirPathExpr<unknown> = varProxy("%resource");
+
+/** `%rootResource` — outermost resource (same as %resource unless inside a Bundle). */
+export const $rootResource: FhirPathExpr<unknown> = varProxy("%rootResource");
+
+/** `%ucum` — URI of the UCUM code system. */
+export const $ucum: FhirPathExpr<string> = varProxy("%ucum");
+
+/** `$index` — 0-based index of the current item in a where/select/repeat iteration. */
+export const $index: FhirPathExpr<number> = varProxy("$index");
+
+/** `$total` — size of the collection being iterated. */
+export const $total: FhirPathExpr<number> = varProxy("$total");
+
+/**
+ * Reference a user-supplied environment variable. `name` may include or omit
+ * the leading `%`. Undefined variables at evaluate-time throw per FP-VAR-010.
+ */
+export function envVar<T = unknown>(name: string): FhirPathExpr<T> {
+  const normalized = name.startsWith("%") ? name : `%${name}`;
+  return varProxy<T>(normalized);
 }

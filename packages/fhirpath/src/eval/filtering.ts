@@ -47,14 +47,18 @@ export function evalFiltering(
         (item) => item != null && typeof item === "object" && (item as Record<string, unknown>)[op.field] === op.value,
       );
 
-    case "where":
-      return collection.filter((item) => {
-        const result = ctx.evaluateSub(op.predicate.ops, item);
+    case "where": {
+      const total = collection.length;
+      return collection.filter((item, index) => {
+        const result = ctx.evaluateSub(op.predicate.ops, item, { index, total });
         return result.length === 1 && result[0] === true;
       });
+    }
 
-    case "select":
-      return collection.flatMap((item) => ctx.evaluateSub(op.projection.ops, item));
+    case "select": {
+      const total = collection.length;
+      return collection.flatMap((item, index) => ctx.evaluateSub(op.projection.ops, item, { index, total }));
+    }
 
     case "repeat": {
       const result: unknown[] = [];
@@ -62,8 +66,10 @@ export function evalFiltering(
       let current = [...collection];
       while (current.length > 0) {
         const next: unknown[] = [];
-        for (const item of current) {
-          const projected = ctx.evaluateSub(op.projection.ops, item);
+        const total = current.length;
+        for (let index = 0; index < current.length; index++) {
+          const item = current[index];
+          const projected = ctx.evaluateSub(op.projection.ops, item, { index, total });
           for (const p of projected) {
             if (!seen.has(p)) {
               seen.add(p);

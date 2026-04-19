@@ -22,7 +22,7 @@
  */
 
 import { describe, expect, it, test, vi } from "vitest";
-import { fhirpath } from "../src/builder.js";
+import { $context, $index, $resource, $rootResource, $total, $ucum, envVar, fhirpath } from "../src/builder.js";
 import { evalFiltering } from "../src/eval/filtering.js";
 import { evalOperator } from "../src/eval/operators.js";
 import { evaluate } from "../src/evaluator.js";
@@ -1081,15 +1081,60 @@ describe("Environment variables (FP-VAR-*)", () => {
     expect(expr.compile()).toContain("$this");
   });
 
-  it.todo("FP-VAR-002: $index inside select / where");
-  it.todo("FP-VAR-003: $total inside aggregate");
-  it.todo("FP-VAR-004: %context");
-  it.todo("FP-VAR-005: %resource");
-  it.todo("FP-VAR-006: %rootResource");
-  it.todo("FP-VAR-007: %ucum");
+  it("FP-VAR-002: $index is 0-based inside select", () => {
+    const r: TestPatient = { resourceType: "Patient", name: [{ family: "A" }, { family: "B" }, { family: "C" }] };
+    expect(
+      fp()
+        .name.select(() => $index)
+        .evaluate(r),
+    ).toEqual([0, 1, 2]);
+  });
+
+  it("FP-VAR-003: $total reports the size of the iterated collection", () => {
+    const r: TestPatient = { resourceType: "Patient", name: [{ family: "A" }, { family: "B" }] };
+    expect(
+      fp()
+        .name.select(() => $total)
+        .evaluate(r),
+    ).toEqual([2, 2]);
+  });
+
+  it("FP-VAR-004: %context resolves to the evaluation root", () => {
+    const r: TestPatient = { resourceType: "Patient", id: "p1", name: [{ family: "A" }] };
+    expect($context.evaluate(r)).toEqual([r]);
+  });
+
+  it("FP-VAR-005: %resource resolves to the containing resource", () => {
+    const r: TestPatient = { resourceType: "Patient", id: "p1" };
+    expect($resource.evaluate(r)).toEqual([r]);
+  });
+
+  it("FP-VAR-006: %rootResource is preserved through nested navigation", () => {
+    const r: TestPatient = { resourceType: "Patient", id: "p1", name: [{ family: "A" }] };
+    expect($rootResource.evaluate(r)).toEqual([r]);
+    // Still resolves to the top-level resource when referenced from within a select.
+    expect(
+      fp()
+        .name.select(() => $rootResource)
+        .evaluate(r),
+    ).toEqual([r]);
+  });
+
+  it("FP-VAR-007: %ucum resolves to the UCUM code-system URI", () => {
+    expect($ucum.evaluate({} as unknown)).toEqual(["http://unitsofmeasure.org"]);
+  });
+
   it.todo("FP-VAR-008: %vs-[name]");
   it.todo("FP-VAR-009: %ext-[url]");
-  it.todo("FP-VAR-010: evaluate() accepts an env-bag parameter");
+
+  it("FP-VAR-010: evaluate() accepts an env bag; undefined %foo throws", () => {
+    const r: TestPatient = { resourceType: "Patient" };
+    expect(envVar("%myVar").evaluate(r, { env: { "%myVar": 42 } })).toEqual([42]);
+    // Key may be supplied without the leading %.
+    expect(envVar("%myVar").evaluate(r, { env: { myVar: "hello" } })).toEqual(["hello"]);
+    // Undefined %foo throws per the spec.
+    expect(() => envVar("%missing").evaluate(r)).toThrow(/Undefined FHIRPath environment variable/);
+  });
 });
 
 /* -------------------------------------------------------------------------- */

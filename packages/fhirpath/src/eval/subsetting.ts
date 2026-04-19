@@ -32,7 +32,7 @@ export function evalSubsetting(op: SubsetOp, collection: unknown[], _ctx: EvalCo
     // duplicates in the result. Dedupe is done on the input side while
     // filtering so we preserve first-occurrence order from the left input.
     case "intersect": {
-      const otherCollection = _ctx.evaluateSub(op.other.ops, _ctx.rootResource);
+      const otherCollection = _ctx.evaluateSub(op.other.ops, _ctx.focus);
       const seen: unknown[] = [];
       return collection.filter((item) => {
         if (!otherCollection.some((other) => fhirpathEqual(item, other))) return false;
@@ -43,7 +43,7 @@ export function evalSubsetting(op: SubsetOp, collection: unknown[], _ctx: EvalCo
     }
 
     case "exclude": {
-      const otherCollection = _ctx.evaluateSub(op.other.ops, _ctx.rootResource);
+      const otherCollection = _ctx.evaluateSub(op.other.ops, _ctx.focus);
       return collection.filter((item) => !otherCollection.some((other) => fhirpathEqual(item, other)));
     }
   }

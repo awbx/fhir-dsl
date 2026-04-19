@@ -6,7 +6,7 @@ import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 // empty (`[]`). Division or modulo by zero is also empty.
 export function evalArithmetic(op: ArithmeticOp, collection: unknown[], ctx: EvalContext): unknown[] {
   const left = collection;
-  const right = ctx.evaluateOps(op.other.ops, [ctx.rootResource]);
+  const right = ctx.evaluateOps(op.other.ops, [ctx.focus]);
 
   // §6.6.4: `&` treats empty as "" rather than propagating empty.
   if (op.type === "concat") {

@@ -74,12 +74,12 @@ export function evalExistence(
     }
 
     case "subsetOf": {
-      const otherCollection = ctx.evaluateSub(op.other.ops, ctx.rootResource);
+      const otherCollection = ctx.evaluateSub(op.other.ops, ctx.focus);
       return [collection.every((item) => otherCollection.some((o) => fhirpathEqual(item, o)))];
     }
 
     case "supersetOf": {
-      const otherCollection = ctx.evaluateSub(op.other.ops, ctx.rootResource);
+      const otherCollection = ctx.evaluateSub(op.other.ops, ctx.focus);
       return [otherCollection.every((item) => collection.some((c) => fhirpathEqual(c, item)))];
     }
   }

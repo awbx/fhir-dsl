@@ -145,6 +145,13 @@ export type OperatorOp =
 
 export type LiteralOp = { type: "literal"; value: unknown };
 
+// --- Environment / iteration variables (§5 intro / §9) ---
+
+// `name` is the raw FHIRPath identifier including prefix: `%context`,
+// `%resource`, `%rootResource`, `%ucum`, `$index`, `$total`, or any custom
+// `%foo` supplied via the env bag. Lookup rules live in evaluator.ts.
+export type VarOp = { type: "var"; name: string };
+
 // --- Union of all ops ---
 
 export type PathOp =
@@ -158,4 +165,5 @@ export type PathOp =
   | ConversionOp
   | UtilityOp
   | OperatorOp
-  | LiteralOp;
+  | LiteralOp
+  | VarOp;

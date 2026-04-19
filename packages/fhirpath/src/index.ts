@@ -1,4 +1,13 @@
-export { fhirpath } from "./builder.js";
+export {
+  $context,
+  $index,
+  $resource,
+  $rootResource,
+  $total,
+  $ucum,
+  envVar,
+  fhirpath,
+} from "./builder.js";
 export { FhirPathEvaluationError } from "./eval/types.js";
 export { type EvalOptions, evaluate } from "./evaluator.js";
 export { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
@@ -16,6 +25,7 @@ export type {
   StringOp,
   SubsetOp,
   UtilityOp,
+  VarOp,
 } from "./ops.js";
 export type {
   FhirPathExpr,
