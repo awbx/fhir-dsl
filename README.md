@@ -15,7 +15,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 ## Features
 
 - **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, composite parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
-- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers ~85% of the official FHIRPath spec including 60+ functions, expression predicates, and operators.
+- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers the core of the FHIRPath N1 spec (60+ functions across navigation, filtering, subsetting, combining, conversions, strings, math, existence, boolean logic, type operators, tree navigation, and utility). See [AUDIT.md](./AUDIT.md) for the current spec-coverage breakdown and known gaps (arithmetic operators, environment variables, `extension()` / `resolve()`).
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 - **Runtime validation (optional)** — Opt in with `--validator native|zod` to emit [Standard Schema V1](https://standardschema.dev/) validators for every resource, datatype, binding, and profile. See [Validation](https://awbx.github.io/fhir-dsl/docs/guides/validation).
