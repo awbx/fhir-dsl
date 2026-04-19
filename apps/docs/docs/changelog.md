@@ -8,7 +8,7 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
-## [0.20.0] - 2026-04-19
+## [0.21.0] - 2026-04-19
 
 ### Features
 
@@ -17,8 +17,47 @@ All notable changes to this project will be documented in this file.
 - Add spec-compliance test scaffolding (`023482b`)
 - Add AUDIT.md with v0.19.0 spec-compliance snapshot (`14ecc52`)
 
+### Improvements
+
+- Update README and documentation proposal with v0.20.0 audit results and bug reconciliation (`3d436aa`)
+
+### Bug Fixes
+
+- fix: TextEncoder-measured auto-POST threshold + arithmetic dead arm (#49) (`3ee7b7b`)
+- fix(types): Reference<T> narrows `type` field to allowed targets (BUG-027) (`190257c`)
+- fix: validate modifier-applicability and preserve null-valued properties (BUG-024, BUG-025) (`f6c1d66`)
+- fix(runtime): cycle-safe pagination + response metadata + non-JSON error body (BUG-019, BUG-020, BUG-021, BUG-022) (`c946f4e`)
+- fix(core): auto-POST threshold measures GET URL bytes and exposes getUrlByteLimit() (BUG-017) (`58fea58`)
+- fix(core): whereChain drops :Type on terminal hop (BUG-016) (`2109353`)
+- fix(core): :not modifier emits not(param eq v) in _filter, not ne (BUG-015) (`573a0ff`)
+- fix(fhirpath): subsetting semantics for skip/take/intersect (BUG-013, BUG-014) (`7d69917`)
+- fix(fhirpath): allTrue/allFalse on empty return [true] per §5.1.4/§5.1.6 (BUG-012) (`95f64de`)
+- fix(core): auto-generate urn:uuid fullUrl on transaction POST entries (BUG-011) (`d597195`)
+- fix(fhirpath): NFC-normalize string ops + code-point length (BUG-010) (`b179794`)
+- fix(fhirpath): tighten ofType duck-type matching (BUG-009) (`e6db573`)
+- fix(fhirpath): deep structural equality for compound types (BUG-008) (`5ef5d88`)
+- fix(fhirpath): iif evaluates criterion/branches on input collection (BUG-007) (`d24e9ee`)
+- fix(fhirpath): terminate descendants() on cyclic graphs (BUG-006) (`fd6e6ce`)
+- fix(fhirpath): dispatch value[x] at nav-eval time (BUG-002) (`f0c6b66`)
+
 ### Other
 
+- feat(core): async pattern polling — Prefer: respond-async + 202 + Content-Location (#42) (`abb84f8`)
+- feat(fhirpath): primitive \`_field\` extension siblings (#47) (`6a71f72`)
+- docs: disambiguate client-side .validate() vs server-side \$validate (#31) (`1f4fa8a`)
+- feat(core): system-level search + POST _format preservation (#44) (`b2a1246`)
+- feat(fhirpath): aggregate() + sum/min/max/avg (#48) (`82ff4d1`)
+- feat(core): :type modifier on reference params (#43) (`427d852`)
+- feat(core): REST capabilities/vread/history builders (#41, #40, #39) (`4d21abc`)
+- feat(fhirpath): FHIR-specific functions — extension/hasValue/getValue/htmlChecks/resolve (#37) (`3452133`)
+- feat(fhirpath): FHIRPath environment variables + iteration locals (#36) (`b036e42`)
+- feat(core): thread Prefer header through all executors (#35) (`8361527`)
+- feat(core): direct CRUD + conditional headers (#33, #32, #34) (`111205d`)
+- feat(core): FHIR operations framework — client.operation(name, options) (#30) (`a7e4cc2`)
+- feat(fhirpath): strict-mode evaluator flag (#29, closes BUG-023) (`a27555b`)
+- feat(fhirpath): binary arithmetic operators +, -, *, /, div, mod, & (#28) (`0307107`)
+- feat: retry 429/503 with Retry-After + full-jitter backoff (BUG-029, FEAT #27) (`e6bfd6b`)
+- feat: thread AbortSignal through fetch pipeline (BUG-028, FEAT #26) (`bb24a94`)
 - Document the SpecCatalog generator pipeline (`4f91589`)
 
 ## [0.19.0] - 2026-04-19
