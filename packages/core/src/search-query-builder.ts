@@ -414,7 +414,17 @@ export class SearchQueryBuilderImpl<
     if (hops.length === 0) {
       throw new Error("whereChain requires at least one hop");
     }
-    const name = `${hops.map(([ref, type]) => `${ref}:${type}`).join(".")}.${terminalParam}`;
+    // R5 §3.2.1.5: type-scope disambiguates a reference that could resolve to
+    // more than one resource type. The terminal hop's type is already fixed
+    // by `terminalParam` (the search-param lookup is resolved against it),
+    // so the last hop doesn't need a `:Type` suffix. Intermediate hops keep
+    // their type so servers can pick the right join target. Without this,
+    // queries like `subject:Patient.general-practitioner:Practitioner.name`
+    // were strictly noisier than necessary and could collide with servers
+    // that reject type-scope on the terminal reference.
+    const lastIdx = hops.length - 1;
+    const parts = hops.map(([ref, type], i) => (i === lastIdx ? ref : `${ref}:${type}`));
+    const name = `${parts.join(".")}.${terminalParam}`;
     return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,

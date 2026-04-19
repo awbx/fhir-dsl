@@ -244,7 +244,8 @@ describe("SearchQueryBuilder", () => {
         .whereChain([["subject", "Patient"]], "name", "eq", "Smith")
         .compile();
 
-      expect(query.params).toContainEqual({ name: "subject:Patient.name", value: "Smith" });
+      // Terminal hop drops its :Type (BUG-016 / §3.2.1.5).
+      expect(query.params).toContainEqual({ name: "subject.name", value: "Smith" });
     });
 
     it("compiles a two-hop chain with prefix on terminal date param", () => {
@@ -261,7 +262,7 @@ describe("SearchQueryBuilder", () => {
         .compile();
 
       expect(query.params).toContainEqual({
-        name: "subject:Patient.organization:Organization.name",
+        name: "subject:Patient.organization.name",
         value: "Acme",
       });
     });
@@ -281,7 +282,7 @@ describe("SearchQueryBuilder", () => {
         .compile();
 
       expect(query.params).toContainEqual({
-        name: "subject:Patient.organization:Organization.partOf:Organization.name",
+        name: "subject:Patient.organization:Organization.partOf.name",
         modifier: "exact",
         value: "Top",
       });

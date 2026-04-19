@@ -325,12 +325,10 @@ describe("Chained parameters (SRCH-CHAIN-*)", () => {
     });
   });
 
-  it("SRCH-CHAIN-003 / decisions.md SRCH.8 regression pin: whereChain UNCONDITIONALLY emits `:Type` on every hop today", () => {
-    // Pin the current (partial-bug) behavior so a caller reading the suite
-    // knows the public API has no way to emit the cleaner monomorphic form.
-    // When the escape-hatch lands and the bug is fixed, the sibling
-    // test.fails() below flips to it() and this pin moves to a regression
-    // test of the opt-out path.
+  it("SRCH-CHAIN-003: whereChain drops `:Type` on the terminal hop (spec §3.2.1.5)", () => {
+    // Intermediate hops keep `:Type` to disambiguate polymorphic refs; the
+    // terminal hop's type is already fixed by the target search-param lookup,
+    // so repeating `:Type` before it is redundant.
     const q = (builder("Patient") as any)
       .whereChain(
         [
@@ -343,31 +341,6 @@ describe("Chained parameters (SRCH-CHAIN-*)", () => {
       )
       .compile();
     const entry = paramEntry(q).find((p: any) => p.name.endsWith(".name"));
-    expect(entry?.name).toBe("subject:Patient.general-practitioner:Practitioner.name");
-  });
-
-  test.fails("SRCH-CHAIN-003: multi-hop whereChain must NOT type-scope the terminal hop unnecessarily", () => {
-    // Impl: search-query-builder.ts:412 joins ALL hops with `:type`, producing
-    //   a:Ta.b:Tb.terminal
-    // Spec: terminal hop has just `.<terminalParam>`; type-scope on the LAST
-    // hop is only needed when that reference is polymorphic. Impl emits
-    // unconditional type-scope even when the final reference is monomorphic.
-    const q = (builder("Patient") as any)
-      .whereChain(
-        [
-          ["subject", "Patient"],
-          ["general-practitioner", "Practitioner"],
-        ],
-        "name",
-        "eq",
-        "Joe",
-      )
-      .compile();
-    const entry = paramEntry(q).find((p: any) => p.name.endsWith(".name"));
-    // Spec-correct: intermediate hops keep `:Type`, terminal hop's `:Type` is
-    // dropped when monomorphic. Since the DSL has no monomorphism signal, the
-    // cleanest assertion is that the emitted name does NOT repeat `:Practitioner`
-    // immediately before the terminal.
     expect(entry?.name).toBe("subject:Patient.general-practitioner.name");
   });
 });
