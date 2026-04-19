@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.1] - 2026-04-19
+
+### Bug Fixes
+
+- Fix type errors in builder composition tests (`ecbd16f`)
+
 ## [0.17.0] - 2026-04-19
 
 ### Features
