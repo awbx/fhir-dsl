@@ -1,6 +1,9 @@
 import type { MathOp } from "../ops.js";
+import { unwrapPrimitive } from "./_internal/primitive-box.js";
 
 export function evalMath(op: MathOp, collection: unknown[]): unknown[] {
+  // FP.9: unbox primitive carriers so math ops see the numeric value.
+  collection = collection.map(unwrapPrimitive);
   switch (op.type) {
     case "abs":
       return collection.flatMap((item) => (typeof item === "number" ? [Math.abs(item)] : []));

@@ -1,12 +1,14 @@
 import type { ArithmeticOp } from "../ops.js";
+import { unwrapPrimitive } from "./_internal/primitive-box.js";
 import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 
 // FHIRPath N1 §6.6: binary arithmetic operators are singleton-only. If either
 // operand is empty or not a singleton of the expected primitive, the result is
 // empty (`[]`). Division or modulo by zero is also empty.
 export function evalArithmetic(op: ArithmeticOp, collection: unknown[], ctx: EvalContext): unknown[] {
-  const left = collection;
-  const right = ctx.evaluateOps(op.other.ops, [ctx.focus]);
+  // FP.9: arithmetic sees through primitive-extension boxes.
+  const left = collection.map(unwrapPrimitive);
+  const right = ctx.evaluateOps(op.other.ops, [ctx.focus]).map(unwrapPrimitive);
 
   // §6.6.4: `&` treats empty as "" rather than propagating empty.
   if (op.type === "concat") {
@@ -51,7 +53,7 @@ export function evalArithmetic(op: ArithmeticOp, collection: unknown[], ctx: Eva
 function singletonToString(coll: unknown[]): string | undefined {
   if (coll.length === 0) return "";
   if (coll.length > 1) return undefined;
-  const v = coll[0];
+  const v = unwrapPrimitive(coll[0]);
   if (typeof v === "string") return v;
   if (v == null) return "";
   return undefined;

@@ -1,10 +1,13 @@
 import type { FhirFnOp } from "../ops.js";
+import { isPrimitiveBox, unwrapPrimitive } from "./_internal/primitive-box.js";
 import type { EvalContext } from "./types.js";
 
 // FHIR R5 §2.1.9.6: hasValue()/getValue() operate on a singleton whose value
-// is a FHIR primitive. In the JS representation of FHIR resources primitives
-// are plain strings/numbers/booleans, so the check is `typeof`-based.
+// is a FHIR primitive. Plain JS primitives qualify; a boxed primitive
+// (FP.9: carrying `_field` extension metadata) also qualifies — its
+// value-axis is a primitive.
 function isPrimitive(value: unknown): boolean {
+  if (isPrimitiveBox(value)) return true;
   const t = typeof value;
   return t === "string" || t === "number" || t === "boolean";
 }
@@ -15,7 +18,7 @@ export function evalFhirFn(op: FhirFnOp, collection: unknown[], ctx: EvalContext
       return [collection.length === 1 && isPrimitive(collection[0])];
 
     case "getValue":
-      return collection.length === 1 && isPrimitive(collection[0]) ? [collection[0]] : [];
+      return collection.length === 1 && isPrimitive(collection[0]) ? [unwrapPrimitive(collection[0])] : [];
 
     // FP-FHIR-010: htmlChecks() is a FHIR narrative sanity check. Per the spec
     // its exact semantics are implementation-defined; the reference impls

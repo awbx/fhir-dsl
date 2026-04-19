@@ -8,7 +8,14 @@
  * concern. This helper handles the common structural-equality cases that
  * `===` misses.
  */
+import { unwrapPrimitive } from "./primitive-box.js";
+
 export function fhirpathEqual(a: unknown, b: unknown): boolean {
+  // FP.9: a boxed primitive (a value that carries `_field` extension
+  // metadata) still compares as the underlying primitive — only the
+  // value-axis participates in equality, not the Element metadata.
+  a = unwrapPrimitive(a);
+  b = unwrapPrimitive(b);
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (typeof a !== typeof b) return false;

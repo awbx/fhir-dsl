@@ -1305,6 +1305,86 @@ describe("FHIR-specific functions (FP-FHIR-*)", () => {
   });
 
   it.todo("FP-FHIR-014: primitive `.value` implicit property");
+
+  /**
+   * FP-FHIR-015 — FHIR JSON primitive-extension siblings (FP.9 / §2.1.9.2).
+   *
+   * A FHIR primitive property may carry Element metadata (id / extension)
+   * on a sibling named `_<prop>`. The FHIRPath type model merges the two:
+   * `.extension` and `.id` navigation MUST reach the sibling.
+   */
+  it("FP-FHIR-015a: scalar primitive with `_prop` sibling exposes extension via `.extension`", () => {
+    const r = {
+      resourceType: "Patient",
+      id: "pat1",
+      _id: { extension: [{ url: "http://example.org/meta", valueString: "m" }] },
+    };
+    // `id.extension` navigation: the builder reserves `.extension` for the
+    // sugared `extension(url)` form, so drop to the op stream for plain nav.
+    const exts = evaluate(
+      [
+        { type: "nav", prop: "id" },
+        { type: "nav", prop: "extension" },
+      ],
+      r,
+    );
+    expect(exts).toEqual([{ url: "http://example.org/meta", valueString: "m" }]);
+  });
+
+  it("FP-FHIR-015b: array primitive with `_prop[i]` positional sibling exposes extension", () => {
+    const r = {
+      resourceType: "Patient",
+      name: [
+        {
+          family: "Smith",
+          _family: { extension: [{ url: "http://example.org/alt", valueString: "Smithee" }] },
+          given: ["Joe", "Q"],
+          _given: [null, { extension: [{ url: "http://example.org/mi", valueString: "Quincy" }] }],
+        },
+      ],
+    };
+    const familyExts = evaluate(
+      [
+        { type: "nav", prop: "name" },
+        { type: "nav", prop: "family" },
+        { type: "nav", prop: "extension" },
+      ],
+      r,
+    );
+    expect(familyExts).toEqual([{ url: "http://example.org/alt", valueString: "Smithee" }]);
+    // Positional: only the second `given` has metadata; the first's bare
+    // primitive yields nothing from `.extension`.
+    const givenExts = evaluate(
+      [
+        { type: "nav", prop: "name" },
+        { type: "nav", prop: "given" },
+        { type: "nav", prop: "extension" },
+      ],
+      r,
+    );
+    expect(givenExts).toEqual([{ url: "http://example.org/mi", valueString: "Quincy" }]);
+  });
+
+  it("FP-FHIR-015c: boxed primitive still compares as its value (eq / getValue / hasValue)", () => {
+    const r = {
+      resourceType: "Patient",
+      id: "pat1",
+      _id: { extension: [{ url: "http://example.org/meta" }] },
+    };
+    // Equality and getValue operate on the value-axis; the Element metadata
+    // is orthogonal.
+    expect(
+      evaluate(
+        [
+          { type: "nav", prop: "id" },
+          { type: "eq", value: "pat1" },
+        ],
+        r,
+      ),
+    ).toEqual([true]);
+    expect(evaluate([{ type: "nav", prop: "id" }, { type: "getValue" }], r)).toEqual(["pat1"]);
+    expect(evaluate([{ type: "nav", prop: "id" }, { type: "hasValue" }], r)).toEqual([true]);
+  });
 });
 
 /* -------------------------------------------------------------------------- */

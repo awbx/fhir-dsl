@@ -1,6 +1,9 @@
 import type { ConversionOp } from "../ops.js";
+import { unwrapPrimitive } from "./_internal/primitive-box.js";
 
 export function evalConversion(op: ConversionOp, collection: unknown[]): unknown[] {
+  // FP.9: conversions operate on the primitive value-axis of a box.
+  collection = collection.map(unwrapPrimitive);
   switch (op.type) {
     case "toBoolean":
       return collection.flatMap((item) => {

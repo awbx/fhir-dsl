@@ -1,4 +1,5 @@
 import type { NavOp } from "../ops.js";
+import { boxPrimitive } from "./_internal/primitive-box.js";
 
 // FHIRPath §2.1.9.4 / FHIR §2.1.9.1.1: navigating to a `value[x]` base label
 // must dispatch to whichever variant is present on the element (`valueQuantity`,
@@ -33,6 +34,34 @@ const CHOICE_TYPE_BASES: ReadonlySet<string> = new Set([
   "source",
 ]);
 
+function isPrimitiveValue(v: unknown): v is string | number | boolean {
+  const t = typeof v;
+  return t === "string" || t === "number" || t === "boolean";
+}
+
+/**
+ * Merge a FHIR primitive value with its `_prop` sibling. Parallel-array
+ * primitives use positional siblings (`_prop[i]` describes `prop[i]`);
+ * scalars merge one-to-one. Non-primitive values are returned as-is — the
+ * spec's "Element with metadata" merge applies only to primitive types.
+ */
+function mergePrimitiveSibling(value: unknown, sibling: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    const siblings = Array.isArray(sibling) ? sibling : [];
+    return value.map((v, i) => {
+      const s = siblings[i];
+      if (isPrimitiveValue(v) && s != null && typeof s === "object") {
+        return boxPrimitive(v, s as Record<string, unknown>);
+      }
+      return v;
+    });
+  }
+  if (isPrimitiveValue(value) && sibling != null && typeof sibling === "object") {
+    return [boxPrimitive(value, sibling as Record<string, unknown>)];
+  }
+  return [value];
+}
+
 function dispatchChoiceType(item: Record<string, unknown>, prop: string): unknown {
   if (!CHOICE_TYPE_BASES.has(prop)) return undefined;
   for (const key of Object.keys(item)) {
@@ -57,6 +86,11 @@ export function evalNav(op: NavOp, collection: unknown[]): unknown[] {
         // empty return; an explicit `null` is a present collection member.
         if (val === undefined) val = dispatchChoiceType(obj, op.prop);
         if (val === undefined) return [];
+        // FP.9 / §2.1.9.2: primitive properties may carry metadata on a
+        // `_<prop>` sibling (id, extension, …). Merge the sibling with the
+        // primitive so `.extension` / `.id` navigation reaches it.
+        const sibling = obj[`_${op.prop}`];
+        if (sibling !== undefined) return mergePrimitiveSibling(val, sibling);
         return Array.isArray(val) ? val : [val];
       });
 

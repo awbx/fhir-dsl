@@ -1,4 +1,5 @@
 import type { StringOp } from "../ops.js";
+import { unwrapPrimitive } from "./_internal/primitive-box.js";
 import { codePointIndexOf, codePointLength, codePointSlice, toNFC } from "./_internal/strings.js";
 
 // §2.1.20 MUST: string inputs are NFC-normalized and indexed by code points.
@@ -7,6 +8,10 @@ import { codePointIndexOf, codePointLength, codePointSlice, toNFC } from "./_int
 // and astral-plane characters count as one character, not two UTF-16 units.
 
 export function evalString(op: StringOp, collection: unknown[]): unknown[] {
+  // FP.9: unbox primitive carriers (a FHIR string with `_field.extension`
+  // metadata) so string ops operate on the value. The `_field` metadata is
+  // orthogonal to string content.
+  collection = collection.map(unwrapPrimitive);
   switch (op.type) {
     case "indexOf":
       return collection.flatMap((item) => {
