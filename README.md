@@ -189,6 +189,26 @@ const bundle = await fhir
 
 See the full [DSL Syntax Reference](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax) for all query methods, operators, and patterns.
 
+## Spec Compliance
+
+fhir-dsl went through a spec-driven audit pass against FHIRPath N1, FHIR R5 search, and FHIR R5 REST. Results live under [`audit/output/`](./audit/output/) — bug reports, spec-coverage matrix, missing-features ranking, and the full test-suite index.
+
+**v0.20.0 status (current release):**
+
+- **4 of 5 blocker-tier bugs fixed.** `BUG-001` (FHIRPath comparison dead-ternary — lenient §4.5 default now returns `[]` instead of silently comparing the first element), `BUG-003` (search-value escape family for `,`, `$`, `\` at the 3 join sites — `|` in single-value still ambiguous), `BUG-004` (204 No Content / `Content-Length: 0` → `undefined` instead of `SyntaxError`), and `BUG-005` (cross-origin `Authorization` leak when following an off-origin `Bundle.link[rel=next]`) all landed in v0.20.0. See [`AUDIT.md`](./AUDIT.md) "Fixes landed".
+- **1 blocker-tier bug still open.** `BUG-002` (`Observation.value` and other `value[x]` choice-type navigation returns `[]` — needs builder-layer polymorphic expansion). Workaround: use `.valueQuantity`, `.valueString`, etc. directly.
+- **~55 medium / high bugs pinned by failing tests.** Every known defect has an on-disk `test.fails(...)` in [`packages/fhirpath/test/spec-compliance.test.ts`](./packages/fhirpath/test/spec-compliance.test.ts), [`packages/core/test/search-spec-compliance.test.ts`](./packages/core/test/search-spec-compliance.test.ts), [`packages/runtime/test/rest-spec-compliance.test.ts`](./packages/runtime/test/rest-spec-compliance.test.ts), and [`packages/core/test/rest-operations.test.ts`](./packages/core/test/rest-operations.test.ts). When a bug is fixed, flip `test.fails` → `it`.
+- **HTTP resilience capability gaps (not spec violations):** no `AbortSignal` plumbing into `fetch()`; no 429 / 503 retry with `Retry-After` / exponential backoff. Tracked in [`audit/output/missing-features.md`](./audit/output/missing-features.md) Priority 1.
+- **Roadmap gaps** (not-yet-built, SPEC-GAP-BY-DESIGN): FHIRPath arithmetic (`+ - * / div mod &`), environment variables (`%context`, `%resource`, `%rootResource`, …), `extension()` / `resolve()`, strict-mode evaluator flag, FHIR operations framework (`$validate`, `$everything`, `$expand`, `$lookup`, `$translate`), PATCH verb, direct `client.create/update/delete`, conditional headers (`If-Match`, `If-None-Exist`, `If-None-Match`, `If-Modified-Since`), `Prefer` header plumbing, async pattern. See [`audit/output/missing-features.md`](./audit/output/missing-features.md) for the prioritized list.
+
+For the full audit, read:
+
+- [`audit/output/bugs.md`](./audit/output/bugs.md) — every bug with spec citation, impl file:line, failing test file:line, suggested fix location.
+- [`audit/output/spec-coverage-matrix.md`](./audit/output/spec-coverage-matrix.md) — per-section FHIRPath / search / REST coverage.
+- [`audit/output/missing-features.md`](./audit/output/missing-features.md) — prioritized roadmap items with impact class, cost estimate, acceptance tests.
+- [`audit/output/test-suite-index.md`](./audit/output/test-suite-index.md) — index of every spec-compliance test file.
+- [`audit/debate/decisions.md`](./audit/debate/decisions.md) — verdict trace (BUG / SPEC-GAP-BY-DESIGN / AMBIGUITY-DOCUMENTED / FALSE-ALARM) per contested finding.
+
 ## Search Parameter Operators
 
 Operators are constrained by parameter type — TypeScript won't let you use `"contains"` on a date parameter.

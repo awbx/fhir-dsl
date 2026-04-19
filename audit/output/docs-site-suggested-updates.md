@@ -2,6 +2,8 @@
 
 **Status:** PROPOSAL for maintainer review. **Do not** apply to `apps/docs/docs/**` directly — per task #18 rules, all edits live in this file as proposed diffs.
 
+**⚠️ PRE-v0.20.0 — NEEDS RECONCILIATION BEFORE SHIPPING.** This proposal was written against the v0.19.0 bug state. Since then, v0.20.0 has landed fixes for 4 blocker-tier bugs (BUG-001 FHIRPath dead-ternary, BUG-003 search-value escape family for `,`/`$`/`\`, BUG-004 204 No Content, BUG-005 cross-origin auth leak). Any section below that describes those four defects as "currently broken" is stale. Before this proposal is applied, reconcile against `AUDIT.md` "Fixes landed" and `audit/output/bugs.md` current status. BUG-002 (`Observation.value` polymorphic expansion) remains open.
+
 **Scope.** Reconcile each docs-site page with `audit/output/bugs.md`, `audit/output/missing-features.md`, `audit/output/spec-coverage-matrix.md`, and the ratified `audit/debate/decisions.md`. Every proposed change cites a bug ID, finding ID, or coverage-matrix row.
 
 **Voice.** Match the existing site voice — terse, factual, sparing with cautionary tone. No marketing. No emoji. Callouts use Docusaurus admonitions (`:::note`, `:::caution`, `:::tip`).
