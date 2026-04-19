@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { SearchQueryBuilder } from "./query-builder.js";
 import { SearchQueryBuilderImpl } from "./search-query-builder.js";
 
 // Concrete test schema
@@ -45,7 +46,7 @@ const noopExecutor = vi.fn(async () => ({
 
 type FlexibleSearchParams = Record<string, { type: "date"; value: string }>;
 
-function createBuilder(resourceType = "Patient") {
+function createBuilder(resourceType = "Patient"): SearchQueryBuilder<TestSchema, string, FlexibleSearchParams> {
   return new SearchQueryBuilderImpl<TestSchema, string, FlexibleSearchParams>(resourceType, noopExecutor);
 }
 

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CompiledQuery } from "./compiled-query.js";
-import { BatchBuilderImpl, TransactionBuilderImpl } from "./transaction-builder.js";
+import {
+  type BatchBuilder,
+  BatchBuilderImpl,
+  type TransactionBuilder,
+  TransactionBuilderImpl,
+} from "./transaction-builder.js";
 
 type TestSchema = {
   resources: {
@@ -186,21 +191,19 @@ describe("BatchBuilder", () => {
   describe("composition ($if / $call) — shared by Transaction + Batch", () => {
     it("$if applies the callback when condition is true (transaction)", () => {
       const executor = vi.fn();
-      const bundle = new TransactionBuilderImpl<TestSchema>(executor)
-        .$if(true, (b) => b.create({ resourceType: "Patient" as const } as any))
-        .compile();
+      const base: TransactionBuilder<TestSchema> = new TransactionBuilderImpl<TestSchema>(executor);
+      const bundle = base.$if(true, (b) => b.create({ resourceType: "Patient" as const } as any)).compile();
 
       expect(bundle.entry).toHaveLength(1);
-      expect(bundle.entry![0]!.request.method).toBe("POST");
+      expect(bundle.entry![0]!.request!.method).toBe("POST");
     });
 
     it("$if skips the callback when condition is false (transaction)", () => {
       const executor = vi.fn();
-      const cb = vi.fn((b: TransactionBuilderImpl<TestSchema>) =>
-        b.create({ resourceType: "Patient" as const } as any),
-      );
+      const cb = vi.fn((b: TransactionBuilder<TestSchema>) => b.create({ resourceType: "Patient" as const } as any));
 
-      const bundle = new TransactionBuilderImpl<TestSchema>(executor).$if(false, cb as any).compile();
+      const base: TransactionBuilder<TestSchema> = new TransactionBuilderImpl<TestSchema>(executor);
+      const bundle = base.$if(false, cb).compile();
 
       expect(cb).not.toHaveBeenCalled();
       expect(bundle.entry).toEqual([]);
@@ -211,8 +214,10 @@ describe("BatchBuilder", () => {
       const seedPatient = <T extends { create: (r: any) => T }>(b: T) =>
         b.create({ resourceType: "Patient" as const } as any);
 
-      const tx = new TransactionBuilderImpl<TestSchema>(executor).$call(seedPatient).compile();
-      const bx = new BatchBuilderImpl<TestSchema>(executor).$call(seedPatient).compile();
+      const txBase: TransactionBuilder<TestSchema> = new TransactionBuilderImpl<TestSchema>(executor);
+      const bxBase: BatchBuilder<TestSchema> = new BatchBuilderImpl<TestSchema>(executor);
+      const tx = txBase.$call(seedPatient).compile();
+      const bx = bxBase.$call(seedPatient).compile();
 
       expect(tx.type).toBe("transaction");
       expect(bx.type).toBe("batch");
@@ -223,9 +228,8 @@ describe("BatchBuilder", () => {
     it("$call can return a non-builder value (e.g. the compiled bundle)", () => {
       const executor = vi.fn();
 
-      const compiled = new TransactionBuilderImpl<TestSchema>(executor)
-        .create({ resourceType: "Patient" as const } as any)
-        .$call((b) => b.compile());
+      const base: TransactionBuilder<TestSchema> = new TransactionBuilderImpl<TestSchema>(executor);
+      const compiled = base.create({ resourceType: "Patient" as const } as any).$call((b) => b.compile());
 
       expect(compiled.resourceType).toBe("Bundle");
       expect(compiled.entry).toHaveLength(1);
