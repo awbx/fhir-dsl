@@ -134,6 +134,7 @@ export interface SearchQueryBuilder<
 
   include<K extends string & keyof IncludeFor<S, RT>>(
     param: K,
+    options?: { iterate?: boolean },
   ): SearchQueryBuilder<
     S,
     RT,
@@ -146,6 +147,7 @@ export interface SearchQueryBuilder<
   revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
     sourceResource: SrcRT,
     param: Param,
+    options?: { iterate?: boolean },
   ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel>;
 
   whereChained<

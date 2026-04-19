@@ -31,8 +31,8 @@ import { resolveSchema, type SchemaRegistry, ValidationUnavailableError, validat
 interface QueryState {
   resourceType: string;
   params: CompiledSearchParam[];
-  includes: string[];
-  revIncludes: string[];
+  includes: Array<{ value: string; iterate?: boolean }>;
+  revIncludes: Array<{ value: string; iterate?: boolean }>;
   sorts: Array<{ param: string; direction: SortDirection }>;
   count?: number | undefined;
   offset?: number | undefined;
@@ -335,6 +335,7 @@ export class SearchQueryBuilderImpl<
 
   include<K extends string & keyof IncludeFor<S, RT>>(
     param: K,
+    options?: { iterate?: boolean },
   ): SearchQueryBuilder<
     S,
     RT,
@@ -343,12 +344,15 @@ export class SearchQueryBuilderImpl<
     Prof,
     Sel
   > {
+    const entry: { value: string; iterate?: boolean } = options?.iterate
+      ? { value: param, iterate: true }
+      : { value: param };
     return new SearchQueryBuilderImpl(
       this.#state.resourceType,
       this.#executor,
       {
         ...this.#state,
-        includes: [...this.#state.includes, param],
+        includes: [...this.#state.includes, entry],
       },
       undefined,
       this.#urlExecutor,
@@ -359,13 +363,16 @@ export class SearchQueryBuilderImpl<
   revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
     sourceResource: SrcRT,
     param: Param,
+    options?: { iterate?: boolean },
   ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel> {
+    const value = `${sourceResource}:${param}`;
+    const entry: { value: string; iterate?: boolean } = options?.iterate ? { value, iterate: true } : { value };
     return new SearchQueryBuilderImpl(
       this.#state.resourceType,
       this.#executor,
       {
         ...this.#state,
-        revIncludes: [...this.#state.revIncludes, `${sourceResource}:${param}`],
+        revIncludes: [...this.#state.revIncludes, entry],
       },
       undefined,
       this.#urlExecutor,
@@ -559,17 +566,16 @@ export class SearchQueryBuilderImpl<
     }
 
     for (const inc of this.#state.includes) {
-      params.push({
-        name: "_include",
-        value: `${this.#state.resourceType}:${inc}`,
-      });
+      const value = `${this.#state.resourceType}:${inc.value}`;
+      params.push(inc.iterate ? { name: "_include", modifier: "iterate", value } : { name: "_include", value });
     }
 
     for (const revInc of this.#state.revIncludes) {
-      params.push({
-        name: "_revinclude",
-        value: revInc,
-      });
+      params.push(
+        revInc.iterate
+          ? { name: "_revinclude", modifier: "iterate", value: revInc.value }
+          : { name: "_revinclude", value: revInc.value },
+      );
     }
 
     if (this.#state.summary !== undefined) {

@@ -204,6 +204,45 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("iterate on _include / _revinclude (Phase 5)", () => {
+    it("emits _include:iterate when include({ iterate: true })", () => {
+      const query = createBuilder("Observation")
+        .include("subject" as any, { iterate: true })
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_include",
+        modifier: "iterate",
+        value: "Observation:subject",
+      });
+    });
+
+    it("emits plain _include when iterate is false or omitted", () => {
+      const query = createBuilder("Observation")
+        .include("subject" as any)
+        .include("performer" as any, { iterate: false })
+        .compile();
+
+      const includes = query.params.filter((p) => p.name === "_include");
+      expect(includes).toEqual([
+        { name: "_include", value: "Observation:subject" },
+        { name: "_include", value: "Observation:performer" },
+      ]);
+    });
+
+    it("emits _revinclude:iterate when revinclude({ iterate: true })", () => {
+      const query = createBuilder("Patient")
+        .revinclude("Observation" as any, "subject" as any, { iterate: true })
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "_revinclude",
+        modifier: "iterate",
+        value: "Observation:subject",
+      });
+    });
+  });
+
   describe("POST _search (Phase 4)", () => {
     it("emits POST [type]/_search with form-encoded body when usePost() is set", () => {
       const query = createBuilder("Patient")
