@@ -537,7 +537,6 @@ describe("Interaction matrix — MISSING on FhirClient (runtime-impl-map §23)",
   it.todo("REST-COND-CREATE-001: create(rt, body, { ifNoneExist })");
   it.todo("REST-HEAD-001: head(rt, id) — HEAD /<rt>/<id>");
   it.todo("REST-ASYNC-001..006: async pattern with Prefer: respond-async");
-  it.todo("REST-BUND-004: transaction entry.fullUrl for urn:uuid: cross-refs");
   it.todo("REST-BUND-006: entry.request.ifNoneExist inside transaction");
   it.todo("OP-INV-001..005: operation() — POST /$op / /<rt>/$op / /<rt>/<id>/$op");
   it.todo("OP-VAL-001..005: $validate with mode + profile");

@@ -13,7 +13,7 @@
  *   audit/impl/core-impl-map.md       — interaction matrix §23
  */
 
-import { beforeEach, describe, expect, it, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFhirClient, type FhirRequestError } from "../src/fhir-client.js";
 
 const BASE = "https://example.org/fhir";
@@ -270,10 +270,10 @@ describe("transaction / batch (REST-BUND-*)", () => {
     expect(result).toEqual(responseBundle);
   });
 
-  test.fails("REST-BUND-004: transaction entry.fullUrl must be populated for cross-entry references", async () => {
-    // Impl: transaction-builder.ts:119-131 emits entries WITHOUT `fullUrl`.
-    // Spec: `urn:uuid:<id>` placeholders allow referencing newly-created
-    // resources in the same transaction.
+  it("REST-BUND-004: transaction entry.fullUrl is populated as urn:uuid for cross-entry references", async () => {
+    // Spec R5 §3.2.0.11.3: `urn:uuid:<id>` placeholders let later entries
+    // reference a resource being created in the same transaction; the server
+    // rewrites the placeholders during commit.
     const fetchFn = queuedFetch([
       { status: 200, body: { resourceType: "Bundle", type: "transaction-response", entry: [] } },
     ]);
@@ -284,7 +284,7 @@ describe("transaction / batch (REST-BUND-*)", () => {
       .execute();
     const [, init] = (fetchFn as any).mock.calls[0];
     const body = JSON.parse(init.body as string);
-    expect(body.entry[0].fullUrl).toBeDefined();
+    expect(body.entry[0].fullUrl).toMatch(/^urn:uuid:[0-9a-f-]+$/i);
   });
 
   it.todo("REST-BUND-006: entry.request.ifNoneExist for conditional-create inside transaction (MISSING)");

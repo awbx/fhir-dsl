@@ -6,10 +6,26 @@ import type { FhirSchema } from "./types.js";
 
 interface TransactionEntry {
   resource?: Resource;
+  fullUrl?: string;
   request: {
     method: string;
     url: string;
   };
+}
+
+// FHIR R5 §3.2.0.11.3: entries in a transaction bundle use `fullUrl` as the
+// identity for cross-entry references. For newly-created resources (POST),
+// the server rewrites `urn:uuid:<id>` placeholders into permanent refs, which
+// is how "create Patient + Observation referencing it" works atomically.
+function newPlaceholderFullUrl(): string {
+  const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  const uuid =
+    c?.randomUUID?.() ??
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
+      const r = (Math.random() * 16) | 0;
+      return (ch === "x" ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  return `urn:uuid:${uuid}`;
 }
 
 type MutationBundleType = "transaction" | "batch";
@@ -69,6 +85,7 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
     return this.clone([
       ...this.#entries,
       {
+        fullUrl: newPlaceholderFullUrl(),
         resource,
         request: {
           method: "POST",
@@ -121,6 +138,7 @@ abstract class MutationBundleBuilderBase<S extends FhirSchema, TBuilder> {
       resourceType: "Bundle",
       type: this.#bundleType,
       entry: this.#entries.map((e) => ({
+        ...(e.fullUrl != null ? { fullUrl: e.fullUrl } : {}),
         resource: e.resource,
         request: {
           method: e.request.method,
