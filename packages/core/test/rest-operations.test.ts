@@ -121,8 +121,29 @@ describe("read (REST-READ-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("vread (REST-VREAD-*)", () => {
-  it.todo("REST-VREAD-001: GET /<Type>/<id>/_history/<vid>");
-  it.todo("REST-VREAD-002: 410 Gone for deleted versions");
+  it("REST-VREAD-001: GET /<Type>/<id>/_history/<vid>", async () => {
+    const fetchFn = queuedFetch([
+      { status: 200, body: { resourceType: "Patient", id: "123", meta: { versionId: "7" } } },
+    ]);
+    const client = makeClient(fetchFn);
+    const result = await client.vread("Patient", "123", "7").execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123/_history/7`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("GET");
+    expect(init.headers.Accept).toBe("application/fhir+json");
+    expect(result).toMatchObject({ resourceType: "Patient", id: "123" });
+  });
+
+  it("REST-VREAD-002: 410 Gone for deleted versions surfaces as FhirRequestError(410)", async () => {
+    const fetchFn = queuedFetch([
+      { status: 410, statusText: "Gone", body: { resourceType: "OperationOutcome", issue: [] } },
+    ]);
+    const client = makeClient(fetchFn);
+    await expect(client.vread("Patient", "123", "3").execute()).rejects.toMatchObject({
+      name: "FhirRequestError",
+      status: 410,
+    });
+  });
 });
 
 /* -------------------------------------------------------------------------- */
@@ -428,10 +449,53 @@ describe("transaction / batch (REST-BUND-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("history / capabilities (REST-HIST-* / REST-CAP-*)", () => {
-  it.todo("REST-HIST-001: GET /<Type>/<id>/_history (instance history) — MISSING");
-  it.todo("REST-HIST-001: GET /<Type>/_history (type history) — MISSING");
-  it.todo("REST-HIST-001: GET /_history (system history) — MISSING");
-  it.todo("REST-CAP-001: GET /metadata → CapabilityStatement — MISSING");
+  it("REST-HIST-001: GET /<Type>/<id>/_history (instance history)", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "history", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    const result = await client.history("Patient", "123").execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123/_history`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("GET");
+    expect(result).toMatchObject({ resourceType: "Bundle", type: "history" });
+  });
+
+  it("REST-HIST-001: GET /<Type>/_history (type history)", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "history", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.history("Patient").execute();
+    const [url] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/_history`);
+  });
+
+  it("REST-HIST-001: GET /_history (system history)", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "history", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.history().execute();
+    const [url] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/_history`);
+  });
+
+  it("REST-HIST-001: _since/_count/_sort history filter/paging params", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Bundle", type: "history", entry: [] } }]);
+    const client = makeClient(fetchFn);
+    await client.history("Patient").since("2026-01-01T00:00:00Z").count(50).sort("-_lastUpdated").execute();
+    const [url] = (fetchFn as any).mock.calls[0];
+    const u = new URL(String(url));
+    expect(u.searchParams.get("_since")).toBe("2026-01-01T00:00:00Z");
+    expect(u.searchParams.get("_count")).toBe("50");
+    expect(u.searchParams.get("_sort")).toBe("-_lastUpdated");
+  });
+
+  it("REST-CAP-001: GET /metadata → CapabilityStatement", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "CapabilityStatement", fhirVersion: "5.0.0" } }]);
+    const client = makeClient(fetchFn);
+    const result = await client.capabilities().execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/metadata`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("GET");
+    expect(result).toMatchObject({ resourceType: "CapabilityStatement" });
+  });
+
   it.todo("REST-CAP-004: OPTIONS [base] alternative — MISSING");
 });
 

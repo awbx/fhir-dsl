@@ -17,6 +17,15 @@ import { type HttpResponse, performRequest } from "./http.js";
 import { type OperationBuilder, OperationBuilderImpl, type OperationOptions } from "./operation-builder.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
+import {
+  type CapabilitiesBuilder,
+  CapabilitiesBuilderImpl,
+  type HistoryBuilder,
+  HistoryBuilderImpl,
+  type HistoryScope,
+  type VreadBuilder,
+  VreadBuilderImpl,
+} from "./rest-builders.js";
 import type { RetryConfig } from "./retry.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
 import {
@@ -169,6 +178,27 @@ export class FhirClient<S extends FhirSchema> {
 
   read<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): ReadQueryBuilder<S, RT> {
     return new ReadQueryBuilderImpl<S, RT>(resourceType, id, this.#executor, this.#schemas);
+  }
+
+  vread<RT extends string & keyof S["resources"]>(resourceType: RT, id: string, vid: string): VreadBuilder<S, RT> {
+    return new VreadBuilderImpl<S, RT>(this.#executor, resourceType, id, vid);
+  }
+
+  history(): HistoryBuilder;
+  history<RT extends string & keyof S["resources"]>(resourceType: RT): HistoryBuilder;
+  history<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): HistoryBuilder;
+  history(resourceType?: string, id?: string): HistoryBuilder {
+    const scope: HistoryScope =
+      resourceType == null
+        ? { kind: "system" }
+        : id == null
+          ? { kind: "type", resourceType }
+          : { kind: "instance", resourceType, id };
+    return new HistoryBuilderImpl(this.#executor, scope);
+  }
+
+  capabilities(): CapabilitiesBuilder {
+    return new CapabilitiesBuilderImpl(this.#executor);
   }
 
   transaction(): TransactionBuilder<S> {

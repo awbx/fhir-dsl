@@ -5,6 +5,7 @@ export * from "./fhir-client.js";
 export * from "./http.js";
 export * from "./operation-builder.js";
 export * from "./query-builder.js";
+export * from "./rest-builders.js";
 export * from "./retry.js";
 export * from "./transaction-builder.js";
 export * from "./types.js";
