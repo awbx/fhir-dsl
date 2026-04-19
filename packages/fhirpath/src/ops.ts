@@ -84,6 +84,17 @@ export type MathOp =
   | { type: "sqrt" }
   | { type: "truncate" };
 
+// --- Arithmetic (binary operators, §6.6) ---
+
+export type ArithmeticOp =
+  | { type: "add"; other: CompiledPredicate }
+  | { type: "subtract"; other: CompiledPredicate }
+  | { type: "multiply"; other: CompiledPredicate }
+  | { type: "divide"; other: CompiledPredicate }
+  | { type: "divTrunc"; other: CompiledPredicate }
+  | { type: "mod"; other: CompiledPredicate }
+  | { type: "concat"; other: CompiledPredicate };
+
 // --- Conversion ---
 
 export type ConversionOp =
@@ -143,6 +154,7 @@ export type PathOp =
   | CombineOp
   | StringOp
   | MathOp
+  | ArithmeticOp
   | ConversionOp
   | UtilityOp
   | OperatorOp

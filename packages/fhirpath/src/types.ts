@@ -232,6 +232,21 @@ export interface FhirPathMathOps {
   sqrt(): FhirPathExpr<number>;
   /** Truncate to integer */
   truncate(): FhirPathExpr<number>;
+
+  /** Arithmetic add (§6.6): `this + other`, empty if either side is empty. */
+  add(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** Arithmetic subtract (§6.6). */
+  sub(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** Arithmetic multiply (§6.6). */
+  mul(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** Arithmetic divide (§6.6); `[]` on divide-by-zero. */
+  div(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** Integer divide (§6.6 `div`); `[]` on divide-by-zero. */
+  divTrunc(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** Modulo (§6.6 `mod`); `[]` on zero modulus. */
+  mod(other: number | FhirPathExpr<number>): FhirPathExpr<number>;
+  /** String concatenation (§6.6.4 `&`); empty collections become "". */
+  concat(other: string | FhirPathExpr<string>): FhirPathExpr<string>;
 }
 
 export interface FhirPathConversionOps {

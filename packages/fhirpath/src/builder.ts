@@ -72,6 +72,26 @@ function exprFromOther(other: unknown): CompiledPredicate {
   return { ops: ops ?? [], compiledPath: compiled ?? "" };
 }
 
+// Arithmetic operands can be literal numbers/strings in addition to chained
+// expressions, so compile a bare literal to a singleton `literal` op.
+function scalarToPredicate(other: unknown): CompiledPredicate {
+  if (other != null && typeof other === "object") {
+    if (PREDICATE_SYMBOL in other) return extractPredicate(other);
+    if (typeof (other as { compile?: unknown }).compile === "function") return exprFromOther(other);
+  }
+  return { ops: [{ type: "literal", value: other }], compiledPath: formatLiteral(other) };
+}
+
+const ARITHMETIC_OPS: Record<string, { opType: string; symbol: string }> = {
+  add: { opType: "add", symbol: "+" },
+  sub: { opType: "subtract", symbol: "-" },
+  mul: { opType: "multiply", symbol: "*" },
+  div: { opType: "divide", symbol: "/" },
+  divTrunc: { opType: "divTrunc", symbol: "div" },
+  mod: { opType: "mod", symbol: "mod" },
+  concat: { opType: "concat", symbol: "&" },
+};
+
 function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
   return new Proxy({} as FhirPathExpr<T>, {
     get(_, prop) {
@@ -256,6 +276,19 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
       }
       if (prop === "length") {
         return () => createExprProxy(`${path}.length()`, [...ops, { type: "str_length" }]);
+      }
+
+      // --- Arithmetic (binary) ---
+
+      if (typeof prop === "string" && prop in ARITHMETIC_OPS) {
+        const { opType, symbol } = ARITHMETIC_OPS[prop]!;
+        return (other: unknown) => {
+          const otherPred = scalarToPredicate(other);
+          return createExprProxy(`(${path} ${symbol} ${otherPred.compiledPath})`, [
+            ...ops,
+            { type: opType, other: otherPred } as PathOp,
+          ]);
+        };
       }
 
       // --- Math with params ---

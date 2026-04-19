@@ -26,11 +26,26 @@ function fp() {
 }
 
 describe("FHIRPath spec gaps (pins current behavior — see AUDIT.md)", () => {
-  describe("arithmetic operators — missing entirely", () => {
-    it.todo("supports integer addition: 1 + 2 = 3 (spec §6.6)");
-    it.todo("supports subtraction, multiplication, division");
-    it.todo("supports integer divide (`div`) and modulo (`mod`)");
-    it.todo("supports string concatenation via `&` (spec §6.6.4)");
+  describe("arithmetic operators (spec §6.6)", () => {
+    it("supports integer addition via .add()", () => {
+      const resource: any = { resourceType: "Observation", valueInteger: 10 };
+      expect((fp() as any).valueInteger.add(2).evaluate(resource)).toEqual([12]);
+    });
+    it("supports subtraction/multiplication/division on a navigated number", () => {
+      const resource: any = { resourceType: "Observation", valueInteger: 20 };
+      expect((fp() as any).valueInteger.sub(5).evaluate(resource)).toEqual([15]);
+      expect((fp() as any).valueInteger.mul(2).evaluate(resource)).toEqual([40]);
+      expect((fp() as any).valueInteger.div(4).evaluate(resource)).toEqual([5]);
+    });
+    it("supports integer divide (`divTrunc`) and modulo (`mod`)", () => {
+      const resource: any = { resourceType: "Observation", valueInteger: 17 };
+      expect((fp() as any).valueInteger.divTrunc(5).evaluate(resource)).toEqual([3]);
+      expect((fp() as any).valueInteger.mod(5).evaluate(resource)).toEqual([2]);
+    });
+    it("supports string concatenation via `&` (concat)", () => {
+      const resource: any = { resourceType: "Patient", id: "abc" };
+      expect((fp() as any).id.concat("-suffix").evaluate(resource)).toEqual(["abc-suffix"]);
+    });
   });
 
   describe("bracket indexer [n] — missing", () => {

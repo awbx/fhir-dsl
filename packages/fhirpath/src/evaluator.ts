@@ -1,3 +1,4 @@
+import { evalArithmetic } from "./eval/arithmetic.js";
 import { evalCombining } from "./eval/combining.js";
 import { evalConversion } from "./eval/conversion.js";
 import { evalExistence } from "./eval/existence.js";
@@ -107,6 +108,16 @@ function dispatch(op: PathOp, collection: unknown[], ctx: EvalContext): unknown[
     case "sqrt":
     case "truncate":
       return evalMath(op, collection);
+
+    // --- Arithmetic (binary) ---
+    case "add":
+    case "subtract":
+    case "multiply":
+    case "divide":
+    case "divTrunc":
+    case "mod":
+    case "concat":
+      return evalArithmetic(op, collection, ctx);
 
     // --- Conversion ---
     case "toBoolean":

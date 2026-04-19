@@ -632,13 +632,40 @@ describe("Comparison (FP-CMP-*)", () => {
 /* 10. Math operators (§6.6) — ALL MISSING as binary operators                */
 /* -------------------------------------------------------------------------- */
 
-describe("Math operators (FP-MATH-*) — MISSING", () => {
-  it.todo("FP-MATH-001: integer addition `1 + 2 = 3`");
-  it.todo("FP-MATH-001: subtraction / multiplication / division");
-  it.todo("FP-MATH-002: div (integer division) returns empty on div-by-zero");
-  it.todo("FP-MATH-003: div operator");
-  it.todo("FP-MATH-004: mod operator returns empty on zero modulus");
-  it.todo("FP-MATH-005: `&` string concatenation with empty-as-empty-string");
+describe("Math operators (FP-MATH-*)", () => {
+  const obs: any = {
+    resourceType: "Observation",
+    valueQuantity: { value: 10, unit: "mg" },
+    status: "final",
+  };
+
+  it("FP-MATH-001: addition, subtraction, multiplication, division", () => {
+    expect(fp().valueQuantity.value.add(5).evaluate(obs)).toEqual([15]);
+    expect(fp().valueQuantity.value.sub(3).evaluate(obs)).toEqual([7]);
+    expect(fp().valueQuantity.value.mul(2).evaluate(obs)).toEqual([20]);
+    expect(fp().valueQuantity.value.div(4).evaluate(obs)).toEqual([2.5]);
+  });
+
+  it("FP-MATH-002: divide-by-zero returns empty (§6.6)", () => {
+    expect(fp().valueQuantity.value.div(0).evaluate(obs)).toEqual([]);
+  });
+
+  it("FP-MATH-003: divTrunc (integer `div` operator) truncates and returns empty on zero", () => {
+    expect(fp().valueQuantity.value.divTrunc(3).evaluate(obs)).toEqual([3]);
+    expect(fp().valueQuantity.value.divTrunc(0).evaluate(obs)).toEqual([]);
+  });
+
+  it("FP-MATH-004: mod returns empty on zero modulus", () => {
+    expect(fp().valueQuantity.value.mod(3).evaluate(obs)).toEqual([1]);
+    expect(fp().valueQuantity.value.mod(0).evaluate(obs)).toEqual([]);
+  });
+
+  it("FP-MATH-005: `&` concatenation coerces empty collections to empty string (§6.6.4)", () => {
+    expect(fp().status.concat("-done").evaluate(obs)).toEqual(["final-done"]);
+    // Missing field on the left → empty collection, concat treats it as "".
+    expect((fp() as any).nonexistent.concat("x").evaluate(obs)).toEqual(["x"]);
+  });
+
   it.todo("FP-MATH-006: Quantity arithmetic with UCUM");
   it.todo("FP-MATH-007: unary plus / minus");
 });
