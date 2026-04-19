@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.1] - 2026-04-19
+
+### Bug Fixes
+
+- fix(docs): escape < in changelog generator to keep MDX build green (`244788c`)
+- fix(tests): update callback parameter name in functional where test (`4258f15`)
+
+### Other
+
+- docs: comprehensive rewrite — API reference, recipes, edge cases, LLM guide (`d2a3dc8`)
+
 ## [0.21.0] - 2026-04-19
 
 ### Features
