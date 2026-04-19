@@ -44,6 +44,11 @@ const NULLARY_FNS: Record<string, { opType: string; compile: (path: string) => s
   not: { opType: "not", compile: (p) => `${p}.not()` },
   children: { opType: "children", compile: (p) => `${p}.children()` },
   descendants: { opType: "descendants", compile: (p) => `${p}.descendants()` },
+  // FHIR-specific (§2.1.9 / FP.12)
+  hasValue: { opType: "hasValue", compile: (p) => `${p}.hasValue()` },
+  getValue: { opType: "getValue", compile: (p) => `${p}.getValue()` },
+  htmlChecks: { opType: "htmlChecks", compile: (p) => `${p}.htmlChecks()` },
+  resolve: { opType: "resolve", compile: (p) => `${p}.resolve()` },
 };
 
 function buildPredicate(callback: (proxy: unknown) => unknown): CompiledPredicate {
@@ -205,6 +210,25 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
       if (prop === "ofType") {
         return (typeName: string) =>
           createExprProxy(`${path}.ofType(${typeName})`, [...ops, { type: "ofType", typeName }]);
+      }
+
+      // --- extension(url) — sugar for `.extension.where(url = '<url>')` ---
+
+      if (prop === "extension") {
+        return (url: string) => {
+          const predicate: CompiledPredicate = {
+            ops: [
+              { type: "nav", prop: "url" },
+              { type: "eq", value: url },
+            ],
+            compiledPath: `url = '${url}'`,
+          };
+          return createExprProxy(`${path}.extension.where(url = '${url}')`, [
+            ...ops,
+            { type: "nav", prop: "extension" },
+            { type: "where", predicate },
+          ]);
+        };
       }
 
       // --- Collection ops that take another expression ---

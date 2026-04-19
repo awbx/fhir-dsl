@@ -1170,10 +1170,53 @@ describe("Date/time arithmetic (FP-DT-*) — MISSING", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("FHIR-specific functions (FP-FHIR-*)", () => {
-  it.todo("FP-FHIR-001: extension(url) returns the Extension by url");
-  it.todo("FP-FHIR-002: hasValue()");
-  it.todo("FP-FHIR-003: getValue()");
-  it.todo("FP-FHIR-004: resolve() dereferences a Reference");
+  it("FP-FHIR-001: extension(url) returns the Extension by url", () => {
+    const r = {
+      resourceType: "Patient",
+      extension: [
+        { url: "http://example.org/a", valueString: "alpha" },
+        { url: "http://example.org/b", valueString: "beta" },
+      ],
+    };
+    const expr = fhirpath<any>("Patient").extension("http://example.org/b");
+    expect(expr.compile()).toBe("Patient.extension.where(url = 'http://example.org/b')");
+    expect(expr.evaluate(r)).toEqual([{ url: "http://example.org/b", valueString: "beta" }]);
+  });
+
+  it("FP-FHIR-002: hasValue() is true for a primitive singleton, false otherwise", () => {
+    const r: TestPatient = { resourceType: "Patient", name: [{ family: "Smith" }] };
+    // Singleton primitive.
+    expect(fhirpath<TestPatient>("Patient").name.family.hasValue().evaluate(r)).toEqual([true]);
+    // Singleton object (non-primitive).
+    expect(fhirpath<TestPatient>("Patient").name.hasValue().evaluate(r)).toEqual([false]);
+    // Empty collection.
+    expect(fhirpath<TestPatient>("Patient").name.given.hasValue().evaluate(r)).toEqual([false]);
+  });
+
+  it("FP-FHIR-003: getValue() returns the primitive value or []", () => {
+    const r: TestPatient = { resourceType: "Patient", name: [{ family: "Smith" }] };
+    expect(fhirpath<TestPatient>("Patient").name.family.getValue().evaluate(r)).toEqual(["Smith"]);
+    expect(fhirpath<TestPatient>("Patient").name.getValue().evaluate(r)).toEqual([]);
+  });
+
+  it("FP-FHIR-004: resolve() dereferences a Reference against the containing Bundle", () => {
+    const bundle = {
+      resourceType: "Bundle",
+      entry: [
+        { fullUrl: "Patient/p1", resource: { resourceType: "Patient", id: "p1", active: true } },
+        { fullUrl: "urn:uuid:abc", resource: { resourceType: "Observation", id: "o1" } },
+      ],
+    };
+    // Matched by ResourceType/id.
+    expect(fhirpath<any>("Bundle").entry[0].resource.resolve().evaluate(bundle)).toEqual([]);
+    const byRef = fhirpath<any>("Bundle")
+      .entry.select(($this: any) => $this.resource)
+      .evaluate(bundle);
+    expect(byRef.length).toBe(2);
+    // Input is a Reference-shaped object against this Bundle.
+    const result = evaluate([{ type: "literal", value: { reference: "Patient/p1" } }, { type: "resolve" }], bundle);
+    expect(result).toEqual([{ resourceType: "Patient", id: "p1", active: true }]);
+  });
 
   test.fails("FP-FHIR-005: ofType() rejects profile URLs (must be a concrete core type)", () => {
     // Impl: eval/filtering.ts:63-99 accepts any string. Spec §2.1.9.1.5:
@@ -1194,7 +1237,11 @@ describe("FHIR-specific functions (FP-FHIR-*)", () => {
   it.todo("FP-FHIR-007: memberOf()");
   it.todo("FP-FHIR-008: subsumes()");
   it.todo("FP-FHIR-009: subsumedBy()");
-  it.todo("FP-FHIR-010: htmlChecks()");
+  it("FP-FHIR-010: htmlChecks() returns [true] for a singleton", () => {
+    const r: TestPatient = { resourceType: "Patient", name: [{ family: "Smith" }] };
+    expect(fhirpath<TestPatient>("Patient").name.family.htmlChecks().evaluate(r)).toEqual([true]);
+    expect(fhirpath<TestPatient>("Patient").name.given.htmlChecks().evaluate(r)).toEqual([]);
+  });
   it.todo("FP-FHIR-011: lowBoundary() / highBoundary()");
   it.todo("FP-FHIR-012: comparable()");
 

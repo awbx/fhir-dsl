@@ -2,6 +2,7 @@ import { evalArithmetic } from "./eval/arithmetic.js";
 import { evalCombining } from "./eval/combining.js";
 import { evalConversion } from "./eval/conversion.js";
 import { evalExistence } from "./eval/existence.js";
+import { evalFhirFn } from "./eval/fhir-fns.js";
 import { evalFiltering } from "./eval/filtering.js";
 import { evalMath } from "./eval/math.js";
 import { evalNav } from "./eval/nav.js";
@@ -243,5 +244,12 @@ function dispatch(op: PathOp, collection: unknown[], ctx: EvalContext): unknown[
     // --- Environment / iteration variables ---
     case "var":
       return resolveVar(op, ctx);
+
+    // --- FHIR-specific functions ---
+    case "hasValue":
+    case "getValue":
+    case "htmlChecks":
+    case "resolve":
+      return evalFhirFn(op, collection, ctx);
   }
 }

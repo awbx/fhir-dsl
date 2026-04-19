@@ -16,6 +16,7 @@ export type {
   CombineOp,
   CompiledPredicate,
   ConversionOp,
+  FhirFnOp,
   FilterOp,
   LiteralOp,
   MathOp,

@@ -52,32 +52,11 @@ describe("FHIRPath spec gaps (pins current behavior — see AUDIT.md)", () => {
     it.todo("supports Patient.name[0] equivalent via .at(n) or bracket syntax");
   });
 
-  describe("environment variables (%context / %resource / %ucum) — missing", () => {
-    it.todo("evaluate(ops, resource, env) accepts an environment bag");
-    it.todo("exposes %resource and %rootResource inside where() predicates");
-  });
-
-  describe("FHIR extensions: extension(url), resolve(), hasValue() — missing", () => {
-    it.todo("extension(url) returns the Extension by url");
-    it.todo("resolve() dereferences a Reference to its resource");
-    it.todo("hasValue() returns true when a primitive has a value");
-
-    // GAP: the proxy builder silently treats `.extension` as a field
-    // navigation. When real extension(url) lands, this compile() output
-    // will change and the test should be rewritten to call
-    // `.extension("http://...")` instead.
-    it("proxy currently compiles `.extension` as a field navigation", () => {
-      const compiled = (fp() as any).extension.compile();
-      expect(compiled).toBe("Patient.extension");
-    });
-  });
+  // environment variables + FHIR-specific functions are now implemented — see
+  // FP-VAR-* and FP-FHIR-* in spec-compliance.test.ts.
 
   describe("string equivalence operators ~ and !~ — missing", () => {
     it.todo("'Smith' ~ 'smith' returns true (case-insensitive equivalence, spec §6.3.1.4)");
-  });
-
-  describe("$index and $total context variables in projections — missing", () => {
-    it.todo("select() callback exposes $index alongside $this");
   });
 
   describe("aggregate() — missing", () => {

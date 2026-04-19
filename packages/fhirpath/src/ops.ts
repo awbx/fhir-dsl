@@ -145,6 +145,10 @@ export type OperatorOp =
 
 export type LiteralOp = { type: "literal"; value: unknown };
 
+// --- FHIR-specific functions (§2.1.9 / FP.12) ---
+
+export type FhirFnOp = { type: "hasValue" } | { type: "getValue" } | { type: "htmlChecks" } | { type: "resolve" };
+
 // --- Environment / iteration variables (§5 intro / §9) ---
 
 // `name` is the raw FHIRPath identifier including prefix: `%context`,
@@ -166,4 +170,5 @@ export type PathOp =
   | UtilityOp
   | OperatorOp
   | LiteralOp
-  | VarOp;
+  | VarOp
+  | FhirFnOp;
