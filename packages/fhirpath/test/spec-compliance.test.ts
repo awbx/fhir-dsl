@@ -203,6 +203,23 @@ describe("Filtering & projection (FP-SEL-*)", () => {
     expect(expr.evaluate(obs)).toEqual([{ resourceType: "Patient", id: "p1" }]);
   });
 
+  it("FP-SEL-004b: ofType(Identifier) does not match Coding/ContactPoint (BUG-009)", () => {
+    const data = {
+      resourceType: "X",
+      items: [
+        { system: "http://loinc.org", code: "8480-6" }, // Coding
+        { system: "phone", value: "+1-555-0100", use: "mobile" }, // ContactPoint
+        { system: "http://hospital.example/mrn", value: "12345" }, // Identifier
+      ],
+    };
+    const ids = fhirpath<any>("X").items.ofType("Identifier").evaluate(data);
+    expect(ids).toEqual([{ system: "http://hospital.example/mrn", value: "12345" }]);
+    const cps = fhirpath<any>("X").items.ofType("ContactPoint").evaluate(data);
+    expect(cps).toEqual([{ system: "phone", value: "+1-555-0100", use: "mobile" }]);
+    const codings = fhirpath<any>("X").items.ofType("Coding").evaluate(data);
+    expect(codings).toEqual([{ system: "http://loinc.org", code: "8480-6" }]);
+  });
+
   test.fails("FP-SEL-004: ofType() must not use hardcoded duck-type map (spec §5.2.4 requires StructureDefinition-driven)", () => {
     // TYPE_CHECKS has 14 entries; Duration/Age/Count/etc. are MISSING.
     // Spec says "all items that are of the given type or subclass".
