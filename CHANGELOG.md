@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.16.0] - 2026-04-19
+
+### Features
+
+- Add _filter, _query, _text, _content, _list escape hatches (Phase 7) (`46875d4`)
+- Add multi-hop whereChain (Phase 6) (`af0b5c0`)
+- Add :iterate option for _include and _revinclude (Phase 5) (`4011b23`)
+- Add POST _search with form-urlencoded body (Phase 4) (`a5eb5bc`)
+- Add OR-via-comma multi-value search (Phase 3) (`2aebb1a`)
+- Add per-package test-prompt folders for multi-model test generation (`72a7029`)
+
+### Other
+
+- Document FHIR R5 search coverage and add round-trip tests (`f5e1cf9`)
+- Hoist common FHIR search params into shared CommonSearchParams interface (`e003cec`)
+- Split prefix vs modifier in search URLs and add meta params (`c8af9b8`)
+
 ## [0.15.0] - 2026-04-18
 
 ### Features
