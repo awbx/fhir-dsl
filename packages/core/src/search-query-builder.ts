@@ -554,6 +554,17 @@ export class SearchQueryBuilderImpl<
     );
   }
 
+  getUrlByteLimit(bytes: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      { ...this.#state, autoPostThreshold: bytes },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
   filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
     return this.#withParam("_filter", expression);
   }
@@ -689,8 +700,14 @@ export class SearchQueryBuilderImpl<
       params.push({ name: "_elements", value: this.#state.fieldSelection.join(",") });
     }
 
+    // §3.1.1.1: auto-POST upgrades trigger on the GET URL's own wire length.
+    // Measuring the form-body (BUG-017) under-counts by the path + "?" bytes,
+    // so borderline queries slip past the threshold and then get rejected by
+    // servers with URL length caps. Include the path and the separator.
     const threshold = this.#state.autoPostThreshold ?? DEFAULT_AUTO_POST_THRESHOLD;
-    const wouldExceedThreshold = paramsToFormBody(params).length > threshold;
+    const queryString = paramsToFormBody(params);
+    const getUrlBytes = this.#state.resourceType.length + (queryString.length > 0 ? 1 : 0) + queryString.length;
+    const wouldExceedThreshold = getUrlBytes > threshold;
 
     if (this.#state.usePost || wouldExceedThreshold) {
       return {

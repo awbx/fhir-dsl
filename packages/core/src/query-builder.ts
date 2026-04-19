@@ -280,6 +280,14 @@ export interface SearchQueryBuilder<
    */
   usePost(): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /**
+   * Configure the byte ceiling that triggers an automatic upgrade from GET to
+   * POST `[type]/_search`. The decision is measured against the GET URL's own
+   * wire bytes — resourceType + "?" + query string — not against a separate
+   * form-body encoding (spec §3.1.1.1, BUG-017). Defaults to 1900 bytes.
+   */
+  getUrlByteLimit(bytes: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   /** FHIR `_filter` — server-side advanced filter expression (untyped string passthrough). */
   filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 

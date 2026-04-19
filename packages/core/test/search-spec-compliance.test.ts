@@ -600,23 +600,19 @@ describe("POST _search (SRCH-POST-*)", () => {
    * payload-specific tripwire: show that when GET is chosen, the
    * decision input is not the GET URL's byte length.
    */
-  test.fails("SRCH-POST / decisions.md SRCH.9a: auto-POST decision must read the chosen branch's wire bytes (spec §3.1.1.1)", () => {
-    // Build a moderately sized GET that stays below the threshold on
-    // the form-body measurement (current impl) AND below on the GET-URL
-    // measurement (so the pass/fail isn't about the specific bytes).
-    // Then observe that the DECISION was taken against a non-GET
-    // encoding. We surface this by monkey-patching `paramsToFormBody`
-    // via a proxy — but that's invasive. Instead, assert the weaker
-    // invariant that the public builder exposes a way to separately
-    // configure GET-byte vs POST-byte thresholds. A spec-correct fix
-    // introduces that separation; today only one threshold exists and
-    // it's measured on the form body.
-    //
-    // This test.fails() locks the missing-separation contract: the
-    // spec-required fix exposes BOTH `autoPostThreshold` (POST-body
-    // bytes) and `getUrlByteLimit` (GET-URL bytes) as distinct knobs.
+  it("SRCH-POST / decisions.md SRCH.9a: auto-POST decision reads GET URL wire bytes (spec §3.1.1.1)", () => {
+    // The builder exposes `getUrlByteLimit(bytes)` so callers can tune the
+    // GET-URL ceiling that drives the auto-POST upgrade. The decision
+    // measures the GET URL's actual wire form — resourceType + "?" +
+    // query string — not a separate form-body encoding.
     const b: any = builder("Patient");
     expect(typeof b.getUrlByteLimit).toBe("function");
+
+    // Tight limit forces POST upgrade; lax limit leaves it as GET.
+    const tight: any = b.getUrlByteLimit(5).where("family", "eq", "Smith").compile();
+    expect(tight.method).toBe("POST");
+    const lax: any = b.getUrlByteLimit(5000).where("family", "eq", "Smith").compile();
+    expect(lax.method).toBe("GET");
   });
 
   /**
