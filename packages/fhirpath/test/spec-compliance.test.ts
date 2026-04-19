@@ -274,8 +274,7 @@ describe("Subsetting (FP-SUB-*)", () => {
     expect(expr.evaluate(data)).toEqual([3, 4, 5]);
   });
 
-  test.fails("FP-SUB-005: skip(-1) returns input unchanged (spec §5.3.6: num ≤ 0 → input as-is)", () => {
-    // Impl: eval/subsetting.ts:21-22 uses `arr.slice(-1)` which returns last element.
+  it("FP-SUB-005: skip(-1) returns input unchanged (spec §5.3.6: num ≤ 0 → input as-is)", () => {
     const expr = fhirpath<any>("X").items.skip(-1);
     const data = { resourceType: "X", items: [1, 2, 3] };
     expect(expr.evaluate(data)).toEqual([1, 2, 3]);
@@ -287,18 +286,16 @@ describe("Subsetting (FP-SUB-*)", () => {
     expect(expr.evaluate(data)).toEqual([]);
   });
 
-  test.fails("FP-SUB-006: take(-1) returns empty (spec §5.3.7: num ≤ 0 → empty)", () => {
-    // Impl: eval/subsetting.ts:24-25 uses `arr.slice(0, -1)` which returns all but last.
+  it("FP-SUB-006: take(-1) returns empty (spec §5.3.7: num ≤ 0 → empty)", () => {
     const expr = fhirpath<any>("X").items.take(-1);
     const data = { resourceType: "X", items: [1, 2, 3] };
     expect(expr.evaluate(data)).toEqual([]);
   });
 
-  test.fails("FP-SUB-007: intersect() eliminates duplicates in result (spec §5.3.8)", () => {
+  it("FP-SUB-007: intersect() eliminates duplicates in result (spec §5.3.8)", () => {
     const data = { resourceType: "X", a: [1, 1, 2, 3], b: [1, 2] };
     const expr = fhirpath<any>("X").a.intersect(fhirpath<any>("X").b);
-    // Spec: duplicates eliminated; result should be [1, 2] not [1, 1, 2].
-    expect(expr.evaluate(data).sort()).toEqual([1, 2]);
+    expect(expr.evaluate(data)).toEqual([1, 2]);
   });
 
   it("FP-SUB-008: exclude() preserves duplicates and order", () => {
