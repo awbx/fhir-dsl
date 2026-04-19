@@ -215,6 +215,16 @@ describe("SearchQueryBuilder", () => {
       });
     });
 
+    it("accepts a compilable expression (e.g. FhirPathExpr) in filter()", () => {
+      const expr = { compile: () => "name.family eq 'Smith'" };
+      const query = createBuilder("Patient").filter(expr).compile();
+
+      expect(query.params).toContainEqual({
+        name: "_filter",
+        value: "name.family eq 'Smith'",
+      });
+    });
+
     it("compiles namedQuery() as _query plus extra params", () => {
       const query = createBuilder("Patient")
         .namedQuery("patient-by-meds", { medication: "rxnorm|123", onset: "2024" })

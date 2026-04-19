@@ -340,8 +340,14 @@ export interface SearchQueryBuilder<
    */
   getUrlByteLimit(bytes: number): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
-  /** FHIR `_filter` — server-side advanced filter expression (untyped string passthrough). */
-  filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  /**
+   * FHIR `_filter` — server-side advanced filter expression.
+   *
+   * Accepts either a raw FHIRPath string or any object with a `compile(): string`
+   * method (including `FhirPathExpr` from `@fhir-dsl/fhirpath`), so the typed
+   * expression builder can be passed directly without calling `.compile()`.
+   */
+  filter(expression: string | { compile(): string }): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
   /** FHIR `_query` — invoke a named search (e.g. `_query=patient-by-meds`) with optional extra params. */
   namedQuery(name: string, params?: Record<string, string | number>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;

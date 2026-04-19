@@ -571,8 +571,9 @@ export class SearchQueryBuilderImpl<
     );
   }
 
-  filter(expression: string): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
-    return this.#withParam("_filter", expression);
+  filter(expression: string | { compile(): string }): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    const compiled = typeof expression === "string" ? expression : expression.compile();
+    return this.#withParam("_filter", compiled);
   }
 
   namedQuery(name: string, extras?: Record<string, string | number>): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {

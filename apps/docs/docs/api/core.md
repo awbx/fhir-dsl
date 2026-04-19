@@ -169,7 +169,7 @@ interface SearchQueryBuilder<
   offset(n: number): this;
 
   // Full-text / named queries
-  filter(expression: string): this;                 // _filter
+  filter(expression: string | { compile(): string }): this; // _filter — accepts FhirPathExpr
   text(query: string): this;                        // _text
   content(query: string): this;                     // _content
   inList(listId: string): this;                     // _list
