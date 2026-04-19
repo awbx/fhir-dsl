@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.2] - 2026-04-19
+
+### Other
+
+- feat(core): accept FhirPathExpr in .filter() + guide (`fcbf93b`)
+
 ## [0.21.1] - 2026-04-19
 
 ### Bug Fixes
