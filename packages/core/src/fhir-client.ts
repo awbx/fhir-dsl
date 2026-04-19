@@ -39,6 +39,20 @@ import type { SchemaRegistry } from "./validation.js";
 
 // --- Client Configuration ---
 
+/**
+ * REST-16 / FHIR R5 §3.2.6 async pattern config.
+ *
+ * When the server responds with 202 Accepted + `Content-Location: <status>`
+ * (typically in reply to `Prefer: respond-async`), the executor polls the
+ * status URL until it returns a non-202 status, then returns that body.
+ */
+export interface AsyncPollingConfig {
+  /** Polling interval when the server does not send `Retry-After`. Default: 2000ms. */
+  pollingInterval?: number;
+  /** Maximum number of poll attempts before giving up. Default: 60. */
+  maxAttempts?: number;
+}
+
 export interface FhirClientConfig {
   baseUrl: string;
   auth?: AuthConfig | undefined;
@@ -46,6 +60,13 @@ export interface FhirClientConfig {
   fetch?: typeof globalThis.fetch | undefined;
   schemas?: SchemaRegistry | undefined;
   retry?: RetryConfig;
+  /**
+   * Enable async-pattern polling. When set, a 202 response carrying a
+   * `Content-Location` header causes the executor to poll that URL until
+   * the operation completes. Omit to disable — 202 responses are then
+   * returned as-is (their body, if any, is handed to the caller).
+   */
+  async?: AsyncPollingConfig;
 }
 
 // --- Default executor using fetch ---
@@ -83,6 +104,8 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
       throw new FhirRequestError(response.status, response.statusText, errorBody);
     }
 
+    const polled = await maybePollAsync(config, response, signal);
+    if (polled !== undefined) return polled;
     return readJsonBody(response);
   };
 }
@@ -108,6 +131,8 @@ function createUrlExecutor(config: FhirClientConfig): UrlExecutor {
       throw new FhirRequestError(response.status, response.statusText, errorBody);
     }
 
+    const polled = await maybePollAsync(config, response, signal);
+    if (polled !== undefined) return polled;
     return readJsonBody(response);
   };
 }
@@ -121,6 +146,87 @@ async function readJsonBody(response: HttpResponse): Promise<unknown> {
   return response.json();
 }
 
+// --- Async pattern (§3.2.6) ---
+
+const DEFAULT_ASYNC_POLL_INTERVAL_MS = 2000;
+const DEFAULT_ASYNC_MAX_ATTEMPTS = 60;
+
+/**
+ * If the response is a 202 with a `Content-Location` header AND async
+ * polling is enabled on the client, poll the status URL until it returns
+ * a terminal (non-202) status. Returns the final body, or `undefined` if
+ * polling is not applicable (caller falls back to reading the original
+ * response body).
+ */
+async function maybePollAsync(
+  config: FhirClientConfig,
+  response: HttpResponse,
+  signal: AbortSignal | undefined,
+): Promise<unknown> {
+  if (!config.async) return undefined;
+  if (response.status !== 202) return undefined;
+  const statusUrl = response.headers?.get("content-location");
+  if (!statusUrl) return undefined;
+
+  const pollInterval = config.async.pollingInterval ?? DEFAULT_ASYNC_POLL_INTERVAL_MS;
+  const maxAttempts = config.async.maxAttempts ?? DEFAULT_ASYNC_MAX_ATTEMPTS;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Respect Retry-After from the just-seen 202 response if provided;
+    // otherwise wait the configured pollInterval.
+    const retryAfterMs = parseRetryAfterToMs(response.headers?.get("retry-after"));
+    await sleepWithAbort(retryAfterMs ?? pollInterval, signal);
+
+    const polled = await performRequest(config, {
+      url: statusUrl,
+      method: "GET",
+      headers: {
+        Accept: "application/fhir+json",
+        ...config.headers,
+      },
+      ...(signal !== undefined ? { signal } : {}),
+    });
+
+    if (polled.status === 202) {
+      response = polled;
+      continue;
+    }
+    if (!polled.ok) {
+      const errorBody = await polled.json().catch(() => null);
+      throw new FhirRequestError(polled.status, polled.statusText, errorBody);
+    }
+    return readJsonBody(polled);
+  }
+  throw new AsyncPollingTimeoutError(statusUrl, maxAttempts);
+}
+
+function parseRetryAfterToMs(header: string | null | undefined): number | undefined {
+  if (!header) return undefined;
+  const asNum = Number(header);
+  if (Number.isFinite(asNum) && asNum >= 0) return asNum * 1000;
+  const asDate = Date.parse(header);
+  if (Number.isFinite(asDate)) return Math.max(0, asDate - Date.now());
+  return undefined;
+}
+
+function sleepWithAbort(ms: number, signal: AbortSignal | undefined): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason ?? new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
 // --- Error class ---
 
 export class FhirRequestError extends Error {
@@ -131,6 +237,16 @@ export class FhirRequestError extends Error {
   ) {
     super(`FHIR request failed: ${status} ${statusText}`);
     this.name = "FhirRequestError";
+  }
+}
+
+export class AsyncPollingTimeoutError extends Error {
+  constructor(
+    public readonly statusUrl: string,
+    public readonly attempts: number,
+  ) {
+    super(`Async operation did not complete after ${attempts} polls of ${statusUrl}`);
+    this.name = "AsyncPollingTimeoutError";
   }
 }
 

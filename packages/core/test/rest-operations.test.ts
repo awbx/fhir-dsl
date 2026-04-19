@@ -14,7 +14,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createFhirClient, type FhirRequestError } from "../src/fhir-client.js";
+import { AsyncPollingTimeoutError, createFhirClient, type FhirRequestError } from "../src/fhir-client.js";
 
 const BASE = "https://example.org/fhir";
 
@@ -677,5 +677,131 @@ describe("401 onUnauthorized retry (core/fhir-client)", () => {
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({ id: "ok" });
     expect((fetchFn as any).mock.calls).toHaveLength(2);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* REST-ASYNC-* — §3.2.6 async pattern (202 + Content-Location polling)       */
+/* -------------------------------------------------------------------------- */
+
+describe("async pattern — Prefer: respond-async + 202 polling (REST-ASYNC-*)", () => {
+  it("REST-ASYNC-001: 202 + Content-Location polls status URL until 200, returns final body", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchFn = queuedFetch([
+        { status: 202, body: null, headers: { "content-location": "https://example.org/fhir/async/job-1" } },
+        { status: 200, body: { resourceType: "Bundle", type: "batch-response", id: "done" } },
+      ]);
+      const client = createFhirClient<TestSchema>({
+        baseUrl: BASE,
+        fetch: fetchFn,
+        async: { pollingInterval: 100 },
+      });
+      const promise = client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+      await vi.advanceTimersByTimeAsync(100);
+      const result = await promise;
+      expect(result).toMatchObject({ resourceType: "Bundle", id: "done" });
+      expect((fetchFn as any).mock.calls).toHaveLength(2);
+      expect(String((fetchFn as any).mock.calls[1][0])).toBe("https://example.org/fhir/async/job-1");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("REST-ASYNC-002: multiple 202 polls before terminal 200", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchFn = queuedFetch([
+        { status: 202, body: null, headers: { "content-location": "/async/job-2" } },
+        { status: 202, body: null, headers: { "content-location": "/async/job-2" } },
+        { status: 202, body: null, headers: { "content-location": "/async/job-2" } },
+        { status: 200, body: { resourceType: "Bundle", id: "finished" } },
+      ]);
+      const client = createFhirClient<TestSchema>({
+        baseUrl: BASE,
+        fetch: fetchFn,
+        async: { pollingInterval: 50 },
+      });
+      const promise = client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+      await vi.advanceTimersByTimeAsync(50 * 3);
+      const result = await promise;
+      expect(result).toMatchObject({ id: "finished" });
+      expect((fetchFn as any).mock.calls).toHaveLength(4);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("REST-ASYNC-003: Retry-After (seconds) overrides pollingInterval", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchFn = queuedFetch([
+        { status: 202, body: null, headers: { "content-location": "/async/job-3", "retry-after": "5" } },
+        { status: 200, body: { resourceType: "Bundle", id: "ok" } },
+      ]);
+      const client = createFhirClient<TestSchema>({
+        baseUrl: BASE,
+        fetch: fetchFn,
+        async: { pollingInterval: 100 },
+      });
+      const promise = client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+      // Not enough for Retry-After (5000ms); poll has not fired yet.
+      await vi.advanceTimersByTimeAsync(100);
+      expect((fetchFn as any).mock.calls).toHaveLength(1);
+      // Remaining 4900ms completes the Retry-After wait.
+      await vi.advanceTimersByTimeAsync(4900);
+      const result = await promise;
+      expect(result).toMatchObject({ id: "ok" });
+      expect((fetchFn as any).mock.calls).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("REST-ASYNC-004: maxAttempts exceeded throws AsyncPollingTimeoutError", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchFn = queuedFetch([
+        { status: 202, body: null, headers: { "content-location": "/async/stuck" } },
+        { status: 202, body: null, headers: { "content-location": "/async/stuck" } },
+        { status: 202, body: null, headers: { "content-location": "/async/stuck" } },
+      ]);
+      const client = createFhirClient<TestSchema>({
+        baseUrl: BASE,
+        fetch: fetchFn,
+        async: { pollingInterval: 10, maxAttempts: 2 },
+      });
+      const promise = client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+      const caught = promise.catch((err: unknown) => err);
+      await vi.advanceTimersByTimeAsync(10 * 5);
+      const err = (await caught) as AsyncPollingTimeoutError;
+      expect(err).toBeInstanceOf(AsyncPollingTimeoutError);
+      expect(err.attempts).toBe(2);
+      expect(err.statusUrl).toBe("/async/stuck");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("REST-ASYNC-005: without async config, 202 passes through (no polling)", async () => {
+    const body = { resourceType: "Bundle", id: "pending" };
+    const fetchFn = queuedFetch([{ status: 202, body, headers: { "content-location": "/async/ignored" } }]);
+    const client = makeClient(fetchFn);
+    const result = await client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+    expect(result).toEqual(body);
+    expect((fetchFn as any).mock.calls).toHaveLength(1);
+  });
+
+  it("REST-ASYNC-006: 202 without Content-Location is not polled (body passes through)", async () => {
+    const body = { resourceType: "Bundle", id: "no-location" };
+    const fetchFn = queuedFetch([{ status: 202, body }]);
+    const client = createFhirClient<TestSchema>({
+      baseUrl: BASE,
+      fetch: fetchFn,
+      async: { pollingInterval: 10 },
+    });
+    const result = await client.read("Patient", "1").execute({ prefer: { respondAsync: true } });
+    expect(result).toEqual(body);
+    expect((fetchFn as any).mock.calls).toHaveLength(1);
   });
 });
