@@ -154,4 +154,25 @@ describe("type-level tests", () => {
       expectTypeOf(expr.valueQuantity.value.compile).toBeFunction();
     });
   });
+
+  describe("Reference<T> target-type narrowing (BUG-027)", () => {
+    // The generic `T` now narrows the `type` field, giving typed references
+    // a form of nominal distinction. Literals without a `type` stay
+    // structurally assignable to any Reference<T>; literals with a wrong
+    // `type` are rejected.
+    it("literal without `type` is assignable to any Reference<T>", () => {
+      const a: Reference<"Patient"> = { reference: "Patient/abc" };
+      const b: Reference<"Practitioner"> = { reference: "Practitioner/xyz" };
+      expectTypeOf(a).toMatchTypeOf<Reference<"Patient">>();
+      expectTypeOf(b).toMatchTypeOf<Reference<"Practitioner">>();
+    });
+
+    it("matching `type` literal assigns; mismatched literal is rejected", () => {
+      const ok: Reference<"Patient"> = { reference: "Patient/abc", type: "Patient" };
+      // @ts-expect-error — `type: "Practitioner"` is not assignable to Reference<"Patient">.type (`"Patient"`)
+      const bad: Reference<"Patient"> = { reference: "Patient/abc", type: "Practitioner" };
+      void ok;
+      void bad;
+    });
+  });
 });

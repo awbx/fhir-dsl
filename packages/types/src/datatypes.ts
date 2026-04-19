@@ -201,9 +201,14 @@ export interface DataRequirement extends Element {
 
 // --- Reference ---
 
-export interface Reference<_T extends string = string> extends Element {
+// The generic `T` records the allowed target resource type(s). It's used to
+// narrow the `type` field: e.g. `Reference<"Patient">` only accepts `type`
+// values that satisfy `"Patient"`, making cross-assignment between
+// differently-parameterized references a type error. Plain `Reference` (no
+// generic) falls back to any string, preserving spec-permissiveness.
+export interface Reference<T extends string = string> extends Element {
   reference?: FhirString;
-  type?: FhirUri;
+  type?: T;
   identifier?: Identifier;
   display?: FhirString;
 }
