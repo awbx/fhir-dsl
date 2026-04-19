@@ -10,6 +10,21 @@ fhir-dsl generates TypeScript *types* by default. Types catch mistakes at compil
 
 Passing `--validator <target>` emits a parallel `schemas/` tree of runtime validators alongside the types. Every exported schema conforms to [**Standard Schema V1**](https://standardschema.dev/) -- a tiny library-agnostic interface co-designed by the authors of Zod, Valibot, and ArkType. Consumers validate via a single `schema["~standard"].validate(value)` call, so switching validator libraries later never touches your call sites.
 
+:::info Client-side `.validate()` vs server-side `$validate`
+
+Two different validations ship under similar names. The page below is about the **client-side** one.
+
+| | `.validate()` | `$validate` |
+|---|---|---|
+| Runs where | Locally, in your process | On the FHIR server |
+| What it checks | Generated Standard Schema (types + bindings + profile cardinality) | Whatever the server decides — terminology, invariants, references, business rules |
+| How to call | Chained on a builder: `client.read(...).validate().execute()` | FHIR operation: `client.operation("$validate", { resource: { Type: "Patient" }, body })` (FHIR R5 §3.1.0.8) |
+| Returns | Typed value or throws `ValidationError` | Server-emitted `OperationOutcome` |
+| Network | None | One POST per call |
+
+Use `.validate()` to harden your own process against bad upstream data at zero network cost. Use `$validate` when a server is the source of truth (terminology servers, conformance testing, pre-commit validation against an IG). They're complementary, not alternatives.
+:::
+
 ## Enabling validation
 
 Pass `--validator` when generating:
