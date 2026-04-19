@@ -95,6 +95,23 @@ describe("read (REST-READ-*)", () => {
     );
   });
 
+  it("REST-READ-002: If-None-Match conditional read header", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    await client.read("Patient", "123").ifNoneMatch('W/"7"').execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-None-Match"]).toBe('W/"7"');
+  });
+
+  it("REST-READ-002: If-Modified-Since conditional read header (Date → HTTP-date)", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    const when = new Date(Date.UTC(2026, 0, 1, 12, 0, 0));
+    await client.read("Patient", "123").ifModifiedSince(when).execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-Modified-Since"]).toBe(when.toUTCString());
+  });
+
   it.todo("REST-READ-003: HEAD /<Type>/<id> — header-only probe (MISSING)");
   it.todo("REST-READ-004: _format override via typed API (MISSING)");
 });
@@ -137,8 +154,33 @@ describe("update (REST-UPDATE-*)", () => {
     expect(body.entry[0].request.url).toBe("Patient/123");
   });
 
-  it.todo("REST-UPDATE-001: direct client.update(resource) outside transaction (MISSING)");
-  it.todo("REST-UPDATE-006: If-Match request header — version-aware update (MISSING)");
+  it("REST-UPDATE-001: direct client.update(resource) emits PUT /<rt>/<id>", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123", active: true } }]);
+    const client = makeClient(fetchFn);
+    const result = await client.update({ resourceType: "Patient", id: "123", active: true }).execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("PUT");
+    expect(JSON.parse(init.body as string)).toEqual({ resourceType: "Patient", id: "123", active: true });
+    expect(result).toMatchObject({ resourceType: "Patient", id: "123" });
+  });
+
+  it("REST-UPDATE-006: If-Match request header — version-aware update", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    await client.update({ resourceType: "Patient", id: "123", active: true }).ifMatch('W/"7"').execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-Match"]).toBe('W/"7"');
+  });
+
+  it("REST-UPDATE-006: If-None-Match: * — create-if-absent semantics", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    await client.update({ resourceType: "Patient", id: "123" }).ifNoneMatch("*").execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-None-Match"]).toBe("*");
+  });
+
   it.todo("REST-UPDATE-004: Location / ETag / Last-Modified response headers readable (MISSING)");
 });
 
@@ -169,8 +211,35 @@ describe("create (REST-CREATE-*)", () => {
     expect(body.entry[0].request.url).toBe("Patient");
   });
 
-  it.todo("REST-CREATE-001: direct client.create(resource) outside transaction (MISSING)");
-  it.todo("REST-COND-CREATE-001: conditional create via If-None-Exist header (MISSING)");
+  it("REST-CREATE-001: direct client.create(resource) emits POST /<rt>", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "new" } }]);
+    const client = makeClient(fetchFn);
+    const result = await client.create({ resourceType: "Patient", active: true }).execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("POST");
+    expect(JSON.parse(init.body as string)).toEqual({ resourceType: "Patient", active: true });
+    expect(result).toMatchObject({ id: "new" });
+  });
+
+  it("REST-COND-CREATE-001: conditional create via If-None-Exist header", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "new" } }]);
+    const client = makeClient(fetchFn);
+    await client
+      .create({ resourceType: "Patient", active: true })
+      .ifNoneExist({ family: "Smith", birthdate: "1990-01-01" })
+      .execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-None-Exist"]).toBe("family=Smith&birthdate=1990-01-01");
+  });
+
+  it("REST-COND-CREATE-001: ifNoneExist(string) passes through verbatim", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "new" } }]);
+    const client = makeClient(fetchFn);
+    await client.create({ resourceType: "Patient" }).ifNoneExist("identifier=urn%3Aoid%3A1.2.3%7C42").execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-None-Exist"]).toBe("identifier=urn%3Aoid%3A1.2.3%7C42");
+  });
 });
 
 /* -------------------------------------------------------------------------- */
@@ -197,7 +266,23 @@ describe("delete (REST-DELETE-*)", () => {
     expect(body.entry[0].request.url).toBe("Patient/123");
   });
 
-  it.todo("REST-DELETE-001: direct client.delete(rt, id) outside transaction (MISSING)");
+  it("REST-DELETE-001: direct client.delete(rt, id) emits DELETE /<rt>/<id>", async () => {
+    const fetchFn = queuedFetch([{ status: 204 }]);
+    const client = makeClient(fetchFn);
+    await client.delete("Patient", "123").execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("DELETE");
+  });
+
+  it("REST-DELETE-001: direct delete with If-Match — version-aware delete", async () => {
+    const fetchFn = queuedFetch([{ status: 204 }]);
+    const client = makeClient(fetchFn);
+    await client.delete("Patient", "123").ifMatch('W/"3"').execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-Match"]).toBe('W/"3"');
+  });
+
   it.todo("REST-COND-DELETE-001: DELETE /<Type>?<search> conditional delete (MISSING)");
 });
 
@@ -206,10 +291,58 @@ describe("delete (REST-DELETE-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("patch (REST-PATCH-*)", () => {
-  it.todo("REST-PATCH-001: PATCH with application/json-patch+json (MISSING)");
-  it.todo("REST-PATCH-001: PATCH with application/xml-patch+xml (MISSING)");
-  it.todo("REST-PATCH-001: PATCH with FHIRPath Patch as Parameters resource (MISSING)");
-  it.todo("REST-PATCH-003: If-Match required on PATCH (MISSING)");
+  it("REST-PATCH-001: PATCH with application/json-patch+json", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    const patch = [{ op: "replace" as const, path: "/active", value: false }];
+    await client.patch("Patient", "123", patch).execute();
+    const [url, init] = (fetchFn as any).mock.calls[0];
+    expect(String(url)).toBe(`${BASE}/Patient/123`);
+    expect((init.method ?? "GET").toUpperCase()).toBe("PATCH");
+    expect(init.headers["Content-Type"]).toBe("application/json-patch+json");
+    expect(JSON.parse(init.body as string)).toEqual(patch);
+  });
+
+  it("REST-PATCH-001: PATCH with application/xml-patch+xml", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    const xmlBody = "<diff><replace sel='@active'>false</replace></diff>";
+    await client.patch("Patient", "123", xmlBody, "xml-patch").execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["Content-Type"]).toBe("application/xml-patch+xml");
+    expect(init.body).toBe(xmlBody);
+  });
+
+  it("REST-PATCH-001: PATCH with FHIRPath Patch as Parameters resource", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    const params = {
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "operation",
+          part: [
+            { name: "type", valueCode: "replace" },
+            { name: "path", valueString: "Patient.active" },
+            { name: "value", valueBoolean: false },
+          ],
+        },
+      ],
+    };
+    await client.patch("Patient", "123", params, "fhirpath-patch").execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["Content-Type"]).toBe("application/fhir+json");
+    expect(JSON.parse(init.body as string)).toEqual(params);
+  });
+
+  it("REST-PATCH-003: If-Match required on PATCH", async () => {
+    const fetchFn = queuedFetch([{ status: 200, body: { resourceType: "Patient", id: "123" } }]);
+    const client = makeClient(fetchFn);
+    await client.patch("Patient", "123", []).ifMatch('W/"42"').execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect(init.headers["If-Match"]).toBe('W/"42"');
+  });
+
   it.todo("REST-COND-PATCH-001: conditional patch via search URL (MISSING)");
 });
 

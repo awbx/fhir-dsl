@@ -1,5 +1,6 @@
 export * from "./auth.js";
 export * from "./compiled-query.js";
+export * from "./direct-crud-builder.js";
 export * from "./fhir-client.js";
 export * from "./http.js";
 export * from "./operation-builder.js";

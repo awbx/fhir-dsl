@@ -350,6 +350,18 @@ export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
    */
   validate(): ReadQueryBuilder<S, RT>;
 
+  /**
+   * FHIR R5 §3.1.0.2: `If-None-Match` — conditional read; server returns 304 when the
+   * supplied ETag matches the current version.
+   */
+  ifNoneMatch(etag: string): ReadQueryBuilder<S, RT>;
+
+  /**
+   * FHIR R5 §3.1.0.2: `If-Modified-Since` — conditional read; server returns 304 when
+   * the resource has not changed since the supplied HTTP-date.
+   */
+  ifModifiedSince(value: Date | string): ReadQueryBuilder<S, RT>;
+
   /** See {@link SearchQueryBuilder.$if}. */
   $if(condition: boolean, callback: (qb: this) => this): this;
 

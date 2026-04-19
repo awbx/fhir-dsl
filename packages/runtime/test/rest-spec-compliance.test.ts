@@ -538,10 +538,44 @@ describe("Interaction matrix — MISSING on FhirClient (runtime-impl-map §23)",
   it.todo("REST-CAP-001: capabilities() — GET /metadata");
   it.todo("REST-VREAD-001: vread(rt, id, vid) — GET /<rt>/<id>/_history/<vid>");
   it.todo("REST-HIST-001: history(rt?, id?) — GET /<rt>/<id>/_history");
-  it.todo("REST-PATCH-001: patch(rt, id, body) with JSON-Patch / XML-Patch / FHIRPath-Patch");
+  it("REST-PATCH-001: patch(rt, id, body) with JSON-Patch / XML-Patch / FHIRPath-Patch", async () => {
+    const calls: Array<{ url: string; method: string; contentType: string | undefined }> = [];
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
+      const headers = init?.headers as Record<string, string> | undefined;
+      calls.push({
+        url: String(url),
+        method: (init?.method ?? "GET").toUpperCase(),
+        contentType: headers?.["Content-Type"],
+      });
+      return {
+        status: 200,
+        statusText: "OK",
+        ok: true,
+        headers: new Headers(),
+        json: async () => ({ resourceType: "Patient", id: "1" }),
+        text: async () => "",
+      } as unknown as Response;
+    });
+    const client = createFhirClient<any>({ baseUrl: BASE, fetch: fetchFn as any });
+    await client.patch("Patient", "1", [{ op: "replace", path: "/active", value: false }]).execute();
+    await client.patch("Patient", "1", "<diff/>", "xml-patch").execute();
+    await client.patch("Patient", "1", { resourceType: "Parameters", parameter: [] }, "fhirpath-patch").execute();
+    expect(calls[0]?.contentType).toBe("application/json-patch+json");
+    expect(calls[1]?.contentType).toBe("application/xml-patch+xml");
+    expect(calls[2]?.contentType).toBe("application/fhir+json");
+    expect(calls.every((c) => c.method === "PATCH")).toBe(true);
+  });
+
+  it("REST-COND-CREATE-001: create(rt, body).ifNoneExist(search)", async () => {
+    const fetchFn = queuedFetch([{ status: 201, body: { resourceType: "Patient", id: "new" } }]);
+    const client = createFhirClient<any>({ baseUrl: BASE, fetch: fetchFn });
+    await client.create({ resourceType: "Patient", active: true }).ifNoneExist({ family: "Doe" }).execute();
+    const [, init] = (fetchFn as any).mock.calls[0];
+    expect((init.headers as any)["If-None-Exist"]).toBe("family=Doe");
+  });
+
   it.todo("REST-COND-UPDATE-001: conditionalUpdate(rt, search, body)");
   it.todo("REST-COND-DELETE-001: conditionalDelete(rt, search)");
-  it.todo("REST-COND-CREATE-001: create(rt, body, { ifNoneExist })");
   it.todo("REST-HEAD-001: head(rt, id) — HEAD /<rt>/<id>");
   it.todo("REST-ASYNC-001..006: async pattern with Prefer: respond-async");
   it.todo("REST-BUND-006: entry.request.ifNoneExist inside transaction");

@@ -1,5 +1,18 @@
+import type { Resource } from "@fhir-dsl/types";
 import type { AuthConfig } from "./auth.js";
 import type { CompiledQuery } from "./compiled-query.js";
+import {
+  type CreateBuilder,
+  CreateBuilderImpl,
+  type DeleteBuilder,
+  DeleteBuilderImpl,
+  type JsonPatchBody,
+  type PatchBuilder,
+  PatchBuilderImpl,
+  type PatchFormat,
+  type UpdateBuilder,
+  UpdateBuilderImpl,
+} from "./direct-crud-builder.js";
 import { type HttpResponse, performRequest } from "./http.js";
 import { type OperationBuilder, OperationBuilderImpl, type OperationOptions } from "./operation-builder.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
@@ -168,6 +181,32 @@ export class FhirClient<S extends FhirSchema> {
 
   operation(name: string, options?: OperationOptions): OperationBuilder {
     return new OperationBuilderImpl(this.#executor, name, options);
+  }
+
+  create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): CreateBuilder<S, RT> {
+    return new CreateBuilderImpl<S, RT>(this.#executor, resource);
+  }
+
+  update<RT extends string & keyof S["resources"]>(
+    resource: S["resources"][RT] & Resource & { id: string },
+  ): UpdateBuilder<S, RT> {
+    if (!resource.id) {
+      throw new Error("Resource must have an id for update operations");
+    }
+    return new UpdateBuilderImpl<S, RT>(this.#executor, resource as Resource & { id: string });
+  }
+
+  delete<RT extends string & keyof S["resources"]>(resourceType: RT, id: string): DeleteBuilder {
+    return new DeleteBuilderImpl(this.#executor, resourceType, id);
+  }
+
+  patch<RT extends string & keyof S["resources"]>(
+    resourceType: RT,
+    id: string,
+    body: JsonPatchBody | string | Record<string, unknown>,
+    format: PatchFormat = "json-patch",
+  ): PatchBuilder<S, RT> {
+    return new PatchBuilderImpl<S, RT>(this.#executor, resourceType, id, body, format);
   }
 }
 
