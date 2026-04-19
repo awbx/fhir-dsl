@@ -803,6 +803,26 @@ describe("String manipulation (FP-STR-*)", () => {
     expect(fhirpath<any>("X").s.length().evaluate({ resourceType: "X" })).toEqual([]);
   });
 
+  it("FP-STR-010b: length() counts NFC code points (spec §2.1.20) — BUG-010", () => {
+    const nfd = "cafe\u0301"; // NFD form of "café"
+    const nfc = "caf\u00e9"; // NFC form
+    expect(nfd.length).toBe(5);
+    expect(nfc.length).toBe(4);
+    // Both must report 4 code points after NFC normalization.
+    expect(fhirpath<any>("X").s.length().evaluate({ resourceType: "X", s: nfd })).toEqual([4]);
+    expect(fhirpath<any>("X").s.length().evaluate({ resourceType: "X", s: nfc })).toEqual([4]);
+  });
+
+  it("FP-STR-010c: where-predicate string equality compares under NFC (BUG-010)", () => {
+    const nfd = "cafe\u0301";
+    const nfc = "caf\u00e9";
+    const data = { resourceType: "X", items: [{ name: nfd }, { name: "other" }] };
+    const result = fhirpath<any>("X")
+      .items.where(($this: any) => $this.name.eq(nfc))
+      .evaluate(data);
+    expect(result).toEqual([{ name: nfd }]);
+  });
+
   it("FP-STR-011: toChars() splits string into character collection", () => {
     const data = { resourceType: "X", s: "abc" };
     expect(fhirpath<any>("X").s.toChars().evaluate(data)).toEqual(["a", "b", "c"]);

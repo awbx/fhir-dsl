@@ -12,6 +12,9 @@ export function fhirpathEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (typeof a !== typeof b) return false;
+  // §2.1.20: string equality is NFC-normalized — identically-looking strings
+  // in composed vs decomposed forms must compare equal.
+  if (typeof a === "string" && typeof b === "string") return a.normalize("NFC") === b.normalize("NFC");
   if (typeof a !== "object") return false;
   if (Array.isArray(a) || Array.isArray(b)) {
     if (!Array.isArray(a) || !Array.isArray(b)) return false;
