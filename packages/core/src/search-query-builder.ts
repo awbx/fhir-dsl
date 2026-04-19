@@ -412,6 +412,29 @@ export class SearchQueryBuilderImpl<
     );
   }
 
+  whereChain(
+    hops: readonly (readonly [string, string])[],
+    terminalParam: string,
+    op: string,
+    value: unknown,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
+    if (hops.length === 0) {
+      throw new Error("whereChain requires at least one hop");
+    }
+    const name = `${hops.map(([ref, type]) => `${ref}:${type}`).join(".")}.${terminalParam}`;
+    return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
+      this.#state.resourceType,
+      this.#executor,
+      {
+        ...this.#state,
+        params: [...this.#state.params, { name, ...classifyOp(op), value: value as string | number }],
+      },
+      undefined,
+      this.#urlExecutor,
+      this.#schemas,
+    );
+  }
+
   has<
     SrcRT extends string & keyof RevIncludeFor<S, RT>,
     RefParam extends string & RevIncludeFor<S, RT>[SrcRT],

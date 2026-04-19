@@ -162,6 +162,65 @@ export interface SearchQueryBuilder<
     value: SearchParamFor<S, TargetRT>[K] extends { value: infer V } ? V : string,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
 
+  /**
+   * Multi-hop typed chain. Each hop is `[refParam, targetResourceType]`. The terminal
+   * param is searched on the last resource in the chain.
+   *
+   * Example:
+   * ```ts
+   * client.search("Observation").whereChain(
+   *   [["subject", "Patient"], ["organization", "Organization"]],
+   *   "name", "eq", "Acme",
+   * )
+   * // emits: subject:Patient.organization:Organization.name=Acme
+   * ```
+   *
+   * Typing narrows each hop. Up to 3 hops are typed end-to-end; for deeper chains
+   * pass `[string, string][]` and rely on the runtime to validate.
+   */
+  whereChain<
+    R1 extends string & keyof IncludeFor<S, RT>,
+    T1 extends string & (IncludeFor<S, RT>[R1] extends string ? IncludeFor<S, RT>[R1] : never),
+    K extends string & keyof SearchParamFor<S, T1>,
+  >(
+    hops: readonly [readonly [R1, T1]],
+    terminalParam: K,
+    op: SearchPrefixFor<SearchParamFor<S, T1>[K]>,
+    value: SearchParamFor<S, T1>[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  whereChain<
+    R1 extends string & keyof IncludeFor<S, RT>,
+    T1 extends string & (IncludeFor<S, RT>[R1] extends string ? IncludeFor<S, RT>[R1] : never),
+    R2 extends string & keyof IncludeFor<S, T1>,
+    T2 extends string & (IncludeFor<S, T1>[R2] extends string ? IncludeFor<S, T1>[R2] : never),
+    K extends string & keyof SearchParamFor<S, T2>,
+  >(
+    hops: readonly [readonly [R1, T1], readonly [R2, T2]],
+    terminalParam: K,
+    op: SearchPrefixFor<SearchParamFor<S, T2>[K]>,
+    value: SearchParamFor<S, T2>[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  whereChain<
+    R1 extends string & keyof IncludeFor<S, RT>,
+    T1 extends string & (IncludeFor<S, RT>[R1] extends string ? IncludeFor<S, RT>[R1] : never),
+    R2 extends string & keyof IncludeFor<S, T1>,
+    T2 extends string & (IncludeFor<S, T1>[R2] extends string ? IncludeFor<S, T1>[R2] : never),
+    R3 extends string & keyof IncludeFor<S, T2>,
+    T3 extends string & (IncludeFor<S, T2>[R3] extends string ? IncludeFor<S, T2>[R3] : never),
+    K extends string & keyof SearchParamFor<S, T3>,
+  >(
+    hops: readonly [readonly [R1, T1], readonly [R2, T2], readonly [R3, T3]],
+    terminalParam: K,
+    op: SearchPrefixFor<SearchParamFor<S, T3>[K]>,
+    value: SearchParamFor<S, T3>[K] extends { value: infer V } ? V : string,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+  whereChain(
+    hops: readonly (readonly [string, string])[],
+    terminalParam: string,
+    op: string,
+    value: string | number,
+  ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>;
+
   has<
     SrcRT extends string & keyof RevIncludeFor<S, RT>,
     RefParam extends string & RevIncludeFor<S, RT>[SrcRT],

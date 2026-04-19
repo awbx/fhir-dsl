@@ -204,6 +204,60 @@ describe("SearchQueryBuilder", () => {
     });
   });
 
+  describe("whereChain multi-hop (Phase 6)", () => {
+    it("compiles a single-hop chain", () => {
+      const query = createBuilder("Observation")
+        .whereChain([["subject", "Patient"]], "name", "eq", "Smith")
+        .compile();
+
+      expect(query.params).toContainEqual({ name: "subject:Patient.name", value: "Smith" });
+    });
+
+    it("compiles a two-hop chain with prefix on terminal date param", () => {
+      const query = createBuilder("Observation")
+        .whereChain(
+          [
+            ["subject", "Patient"],
+            ["organization", "Organization"],
+          ],
+          "name",
+          "eq",
+          "Acme",
+        )
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "subject:Patient.organization:Organization.name",
+        value: "Acme",
+      });
+    });
+
+    it("compiles a three-hop chain with terminal modifier", () => {
+      const query = createBuilder("Observation")
+        .whereChain(
+          [
+            ["subject", "Patient"],
+            ["organization", "Organization"],
+            ["partOf", "Organization"],
+          ],
+          "name",
+          "exact" as any,
+          "Top",
+        )
+        .compile();
+
+      expect(query.params).toContainEqual({
+        name: "subject:Patient.organization:Organization.partOf:Organization.name",
+        modifier: "exact",
+        value: "Top",
+      });
+    });
+
+    it("throws when hops is empty", () => {
+      expect(() => createBuilder("Observation").whereChain([] as any, "name", "eq", "x")).toThrow(/at least one hop/);
+    });
+  });
+
   describe("iterate on _include / _revinclude (Phase 5)", () => {
     it("emits _include:iterate when include({ iterate: true })", () => {
       const query = createBuilder("Observation")
