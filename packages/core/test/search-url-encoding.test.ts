@@ -105,9 +105,7 @@ describe("Composite `$` encoding (SRCH-TYP-008 / SRCH-COMP-001)", () => {
     expect(entry?.value).toBe("http://loinc.org|8480-6$gt120");
   });
 
-  test.fails("GAP: literal `$` in a component value is NOT escaped today (spec §3.2.1.5.8)", () => {
-    // Impl: search-query-builder.ts:304 uses `Object.values(values).join("$")`.
-    // Spec-correct: `$` inside a component value → `\$`.
+  it("SRCH-TYP-008: literal `$` in a component value is escaped with `\\$` (spec §3.2.1.5.8)", () => {
     const q = builder("Observation")
       .whereComposite("code-value-quantity", { code: "http://loinc.org|85354-9", value: "pre$ent" })
       .compile() as any;
@@ -115,12 +113,11 @@ describe("Composite `$` encoding (SRCH-TYP-008 / SRCH-COMP-001)", () => {
     expect(String(entry?.value)).toContain("\\$");
   });
 
-  test.fails("GAP: `$` in BOTH components makes the value indistinguishable from a 4-component composite", () => {
+  it("SRCH-TYP-008: `$` in BOTH components leaves exactly one unescaped `$` (the separator)", () => {
     const q = builder("Observation")
       .whereComposite("code-value-quantity", { code: "a$b", value: "c$d" })
       .compile() as any;
     const entry = q.params.find((p: any) => p.name === "code-value-quantity");
-    // Spec-correct: exactly one unescaped `$` (the component separator).
     const unescaped = (String(entry?.value).match(/(^|[^\\])\$/g) || []).length;
     expect(unescaped).toBe(1);
   });
@@ -131,7 +128,7 @@ describe("Composite `$` encoding (SRCH-TYP-008 / SRCH-COMP-001)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("Literal separator escapes (SRCH-COMB-003 / SRCH-COMB-004)", () => {
-  test.fails("GAP: literal `,` in an OR-array value is NOT escaped today", () => {
+  it("SRCH-COMB-003: literal `,` in an OR-array value is escaped with `\\,` (spec §3.2.1.5.7)", () => {
     const q = builder("Patient").where("family", "eq", ["O'Brien, Jr.", "Smith"]).compile() as any;
     const entry = q.params.find((p: any) => p.name === "family");
     expect(String(entry?.value)).toContain("\\,");

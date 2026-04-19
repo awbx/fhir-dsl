@@ -144,6 +144,23 @@ SRCH.9a remains **BUG** (the wrong-encoding-measured claim is independent and st
 
 ---
 
+## Fixes landed in v0.20.0 (2026-04-19)
+
+Tight first-pass remediation for blocker-tier + escape family:
+
+| Row | Verdict → Status | Fix |
+|---|---|---|
+| FP.2 (BUG-001) | BUG → **RESOLVED (lenient default)** | `operators.ts:79-81` — dead ternary replaced; multi-element comparison returns `[]` per §4.5 lenient path. Strict-mode flag (FP.1a opt-in) remains a Missing-Features roadmap item. |
+| SRCH.1 + SRCH.2 + SRCH.3 (BUG-003, escape family) | BUG → **RESOLVED (partial)** | New `_internal/escape-search-value.ts` escapes `,`, `$`, `\` (not `|` — see note below). Wired at 3 join sites: array OR, `whereComposite` `$`-join, `condition-tree.ts` OR-tuple join. |
+| REST.9 (BUG-004) | BUG → **RESOLVED** | `readJsonBody` helper added to both `fhir-client.ts` and `executor.ts`: short-circuits to `undefined` on status 204 or `Content-Length: 0`. |
+| REST.8 (BUG-005, security) | BUG → **RESOLVED** | `executor.ts#executeUrl` compares origins (`new URL().origin`) and passes `{...config, auth: undefined}` to `performRequest` for cross-origin next links; also strips any pre-baked `Authorization` header. |
+
+**Note on `|` escape.** `escapeSearchValue` deliberately does NOT escape `|` because the DSL cannot distinguish a literal `|` inside a string value from the `system|code` / `value|system|code` separator that users pass as a single raw string. Full remediation requires a typed token/quantity API, tracked in Missing-Features.
+
+**Test flips (8 total).** `REST-DELETE-003`, REST.8 cross-host auth, `SRCH-TYP-008` composite `$` (×2), `SRCH-COMB-003` comma (×2 across compliance and url-encoding suites), + `search-url-edge-cases` commas GAP test rewritten. Remaining 55 `test.fails(...)` unchanged and still pin open bugs.
+
+---
+
 <a id="fp1-arbiter"></a>
 ## FP.1-ARBITER — Policy brief cross-reference (2026-04-19)
 

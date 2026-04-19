@@ -1,6 +1,6 @@
 import type { AuthConfig } from "./auth.js";
 import type { CompiledQuery } from "./compiled-query.js";
-import { performRequest } from "./http.js";
+import { type HttpResponse, performRequest } from "./http.js";
 import type { ReadQueryBuilder, SearchQueryBuilder } from "./query-builder.js";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
@@ -57,7 +57,7 @@ function createFetchExecutor(config: FhirClientConfig): Executor {
       throw new FhirRequestError(response.status, response.statusText, errorBody);
     }
 
-    return response.json();
+    return readJsonBody(response);
   };
 }
 
@@ -77,8 +77,17 @@ function createUrlExecutor(config: FhirClientConfig): UrlExecutor {
       throw new FhirRequestError(response.status, response.statusText, errorBody);
     }
 
-    return response.json();
+    return readJsonBody(response);
   };
+}
+
+// 204 No Content has no body; calling `.json()` throws. Treat any empty-body
+// success response (204 or Content-Length: 0) as `undefined`.
+async function readJsonBody(response: HttpResponse): Promise<unknown> {
+  if (response.status === 204 || response.headers?.get("content-length") === "0") {
+    return undefined;
+  }
+  return response.json();
 }
 
 // --- Error class ---

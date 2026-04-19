@@ -1,4 +1,5 @@
 import type { Bundle, Resource } from "@fhir-dsl/types";
+import { escapeSearchValue } from "./_internal/escape-search-value.js";
 import { classifyOp } from "./_internal/op-classifier.js";
 import type { CompiledQuery, CompiledSearchParam } from "./compiled-query.js";
 import { compileConditionTree } from "./condition-tree.js";
@@ -143,7 +144,8 @@ export class SearchQueryBuilderImpl<
           `where(${JSON.stringify(param)}, ...): array values require the "eq" operator (got "${String(op)}"). FHIR forbids per-value prefixes inside an OR list.`,
         );
       }
-      const joined = (value as readonly (string | number)[]).map((v) => String(v)).join(",");
+      // §3.2.1.5.7: escape separator chars in each OR value before joining on `,`.
+      const joined = (value as readonly (string | number)[]).map((v) => escapeSearchValue(v)).join(",");
       return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
         this.#state.resourceType,
         this.#executor,
@@ -301,7 +303,10 @@ export class SearchQueryBuilderImpl<
     param: K,
     values: CompositeValues<SP[K]>,
   ): SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel> {
-    const compositeValue = Object.values(values as Record<string, string | number>).join("$");
+    // §3.2.1.5.8: escape separator chars in each component before joining on `$`.
+    const compositeValue = Object.values(values as Record<string, string | number>)
+      .map((v) => escapeSearchValue(v))
+      .join("$");
     return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
       this.#state.resourceType,
       this.#executor,

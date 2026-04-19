@@ -76,8 +76,11 @@ function evalComparison(
   ctx: EvalContext,
   comparator: (a: unknown, b: unknown) => boolean,
 ): unknown[] {
-  if (collection.length === 0) return [];
-  const left = collection.length === 1 ? collection[0] : collection[0];
+  // §4.5 Singleton Evaluation: empty → empty propagation; multi-element is
+  // outside the singleton-eval contract. Lenient default returns [] rather
+  // than silently coercing to collection[0] (was a dead-ternary bug).
+  if (collection.length !== 1) return [];
+  const left = collection[0];
 
   let right: unknown;
   if (isCompiledPredicate(operand)) {

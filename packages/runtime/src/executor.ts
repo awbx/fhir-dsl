@@ -1,4 +1,4 @@
-import { type CompiledQuery, performRequest } from "@fhir-dsl/core";
+import { type CompiledQuery, type HttpResponse, performRequest } from "@fhir-dsl/core";
 import type { FhirClientConfig } from "./config.js";
 import { FhirError } from "./errors.js";
 
@@ -43,7 +43,7 @@ export class FhirExecutor {
       throw new FhirError(response.status, response.statusText, errorBody);
     }
 
-    return response.json() as Promise<T>;
+    return readJsonBody<T>(response);
   }
 
   async executeUrl<T = unknown>(url: string): Promise<T> {
@@ -52,13 +52,37 @@ export class FhirExecutor {
       ...this.#config.headers,
     };
 
-    const response = await performRequest(this.#config, { url, method: "GET", headers });
+    // RFC 6750 §5.3: bearer tokens MUST NOT be sent to arbitrary third parties.
+    // Server-controlled `next` links may point off-origin (attacker-controlled
+    // host); strip both the credential provider and any pre-baked Authorization
+    // header before following.
+    const config = isSameOrigin(url, this.#config.baseUrl) ? this.#config : { ...this.#config, auth: undefined };
+    if (!isSameOrigin(url, this.#config.baseUrl)) delete headers.Authorization;
+
+    const response = await performRequest(config, { url, method: "GET", headers });
 
     if (!response.ok) {
       const errorBody = (await response.json().catch(() => null)) as import("./errors.js").OperationOutcome | null;
       throw new FhirError(response.status, response.statusText, errorBody);
     }
 
-    return response.json() as Promise<T>;
+    return readJsonBody<T>(response);
   }
+}
+
+function isSameOrigin(targetUrl: string, baseUrl: string): boolean {
+  try {
+    return new URL(targetUrl).origin === new URL(baseUrl).origin;
+  } catch {
+    return false;
+  }
+}
+
+// 204 No Content has no body; calling `.json()` throws. Treat any empty-body
+// success response (204 or Content-Length: 0) as `undefined`.
+async function readJsonBody<T>(response: HttpResponse): Promise<T> {
+  if (response.status === 204 || response.headers?.get("content-length") === "0") {
+    return undefined as T;
+  }
+  return response.json() as Promise<T>;
 }

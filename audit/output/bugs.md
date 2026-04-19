@@ -16,6 +16,19 @@
 
 ---
 
+## Fixes landed in v0.20.0
+
+| Bug | Verdict | Fix site |
+|---|---|---|
+| BUG-001 (FP.2) | **RESOLVED** (lenient default; strict-mode flag still Missing-Features) | `packages/fhirpath/src/eval/operators.ts:79-81` — dead ternary replaced; multi-element comparison returns `[]` per §4.5 lenient path. |
+| BUG-003 (SRCH.1/.2/.3) | **RESOLVED (partial)** — array OR, composite `$`, OR-tuple join all escape `,`, `$`, `\`. `|` in single-value path still ambiguous pending typed token API. | `packages/core/src/_internal/escape-search-value.ts` + wired in `search-query-builder.ts` (array-join, whereComposite) and `condition-tree.ts` (OR-tuple join). |
+| BUG-004 (REST.9) | **RESOLVED** — 204 No Content + `Content-Length: 0` short-circuit to `undefined`. | `packages/core/src/fhir-client.ts` `readJsonBody` helper; `packages/runtime/src/executor.ts` `readJsonBody` helper. |
+| BUG-005 (REST.8) | **RESOLVED** — `executeUrl` compares origins and drops auth provider + pre-baked `Authorization` header when following cross-origin next links. | `packages/runtime/src/executor.ts` `isSameOrigin` + config override. |
+
+All remaining bugs in this report are still pinned by `test.fails(...)` and unchanged.
+
+---
+
 ## Blocker-tier bugs (team-lead nominated)
 
 ### BUG-001 — FHIRPath comparison/equality silently corrupts on multi-element operand
@@ -430,7 +443,7 @@ The on-disk `test.fails` at `packages/core/test/search-spec-compliance.test.ts:6
 | Spec citation | §3.2.1.3.3 |
 | Severity | medium |
 | Impl sites | `packages/core/src/search-query-builder.ts:769-774`; `packages/runtime/src/pagination.ts:18-22` |
-| Failing test | `packages/runtime/test/rest-spec-compliance.test.ts:341` — `test.fails("SRCH-PAGE-002 / runtime-impl-map #3: paginate() must detect a cyclic next URL and stop", ...)` |
+| Failing test | `packages/runtime/test/rest-spec-compliance.test.ts:388` — `test.fails("SRCH-PAGE-002 / runtime-impl-map #3: paginate() must detect a cyclic next URL and stop", ...)` |
 
 ---
 
@@ -482,7 +495,7 @@ Per spec-challenger review: the items below are HTTP-resilience capability gaps 
 | Source | runtime-impl-map #1 |
 | Severity | high (DX / long-running queries) |
 | Impl site | `packages/runtime/src/executor.ts` (no signal plumbing); `packages/runtime/src/pagination.ts:30-38` (only checks signal between pages) |
-| Failing test | `packages/runtime/test/rest-spec-compliance.test.ts:373` — `test.fails("AbortSignal should cancel an in-flight fetch (spec expectation via standard web-fetch semantics)", ...)` |
+| Failing test | `packages/runtime/test/rest-spec-compliance.test.ts:420` — `test.fails("AbortSignal should cancel an in-flight fetch (spec expectation via standard web-fetch semantics)", ...)` |
 
 **Summary.** `AbortSignal` is not threaded into `fetch()`. The pagination helper checks a signal *between* pages but never inside the in-flight request. The failing test pins one API shape (second-arg options bag on `execute`), but this is **not prescriptive** — a spec-correct remediation could instead thread `signal` via `FhirClientConfig` or `CompiledQuery`. The Bug Report captures the capability gap; the exact API shape is TBD and should be decided as part of the fix PR.
 
@@ -498,7 +511,7 @@ Per spec-challenger review: the items below are HTTP-resilience capability gaps 
 | Source | runtime-impl-map #2 |
 | Severity | medium — production servers routinely emit 429 under load; clients that fail-fast appear brittle |
 | Impl site | `packages/runtime/src/executor.ts` (no retry logic of any kind); `packages/core/src/fhir-client.ts` (same) |
-| Failing tests | `packages/runtime/test/rest-spec-compliance.test.ts:410` — `test.fails("429 Too Many Requests must retry honoring Retry-After", ...)`; `:426` — `test.fails("503 Service Unavailable must retry with exponential backoff", ...)` |
+| Failing tests | `packages/runtime/test/rest-spec-compliance.test.ts:457` — `test.fails("429 Too Many Requests must retry honoring Retry-After", ...)`; `:473` — `test.fails("503 Service Unavailable must retry with exponential backoff", ...)` |
 
 **Summary.** The executor has no retry logic for transient server errors. 429 responses with `Retry-After` are surfaced directly as `FhirError`, and 503 is treated identically to a hard failure. This is an HTTP-level resilience pattern expected by production servers, but NOT a FHIR spec requirement — the FHIR REST spec is silent on retry semantics.
 

@@ -127,13 +127,12 @@ describe("Search URL edge cases", () => {
       );
     });
 
-    // GAP: FHIR §3.1.1.3.2 requires escaping of literal commas and backslashes in search values.
-    // Current implementation naively joins with "," so a value containing a literal comma is
-    // indistinguishable from an OR separator. When the bug is fixed (escape `\` and `,` with `\`),
-    // rewrite this test to assert the escaped form, e.g. `"O'Brien\\, Jr.,Smith"`.
-    it("GAP: literal commas in values are NOT escaped today (produces ambiguous URL)", () => {
+    // Spec §3.2.1.5.7: a literal comma inside an OR-array value must be
+    // prepended with `\` so the server can distinguish it from the OR
+    // separator. Fixed in v0.20.0.
+    it("SRCH-COMB-003: literal comma in OR-array value is escaped with `\\,`", () => {
       const q = createBuilder("Patient").where("family", "eq", ["O'Brien, Jr.", "Smith"]).compile();
-      expect(q.params).toContainEqual({ name: "family", value: "O'Brien, Jr.,Smith" });
+      expect(q.params).toContainEqual({ name: "family", value: "O'Brien\\, Jr.,Smith" });
     });
 
     // GAP: FHIR §3.1.1.3.2 also requires escaping of backslashes themselves.

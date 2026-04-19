@@ -1,3 +1,4 @@
+import { escapeSearchValue } from "./_internal/escape-search-value.js";
 import { classifyOp } from "./_internal/op-classifier.js";
 import type { CompiledSearchParam } from "./compiled-query.js";
 import { type Condition, type ConditionGroup, type ConditionTuple, isConditionGroup } from "./where-builder.js";
@@ -23,7 +24,13 @@ export function compileConditionTree<SP>(root: Condition<SP>): CompiledSearchPar
       const [firstName, firstOp] = tuples[0]!;
       const allSameNameAndEq = tuples.every(([name, op]) => name === firstName && op === "eq");
       if (allSameNameAndEq && firstOp === "eq") {
-        return [{ name: firstName as string, value: tuples.map(([, , v]) => String(v)).join(",") }];
+        // §3.2.1.5.7: escape separator chars in each OR value before joining on `,`.
+        return [
+          {
+            name: firstName as string,
+            value: tuples.map(([, , v]) => escapeSearchValue(v as string | number)).join(","),
+          },
+        ];
       }
     }
   }

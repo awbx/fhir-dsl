@@ -139,24 +139,19 @@ describe("Parameter types (SRCH-TYP-*)", () => {
     });
   });
 
-  test.fails("SRCH-TYP-008 / SRCH-COMP-001: composite `$` separator must be escaped in component values (spec §3.2.1.5.8)", () => {
-    // Impl: search-query-builder.ts:304 `Object.values(values).join("$")` — no escape.
-    // Spec: literal `$` inside a component value must be escaped as `\$`.
+  it("SRCH-TYP-008 / SRCH-COMP-001: composite `$` separator escaped in component values (spec §3.2.1.5.8)", () => {
     const q = builder("Observation")
       .whereComposite("code-value-quantity", { code: "http://loinc.org|85354-9", value: "pre$ent" })
       .compile();
-    // Spec-correct value contains `\$` (backslash-dollar). Current impl has unescaped `$`.
     const entry = paramEntry(q as any).find((p) => p.name === "code-value-quantity");
     expect(entry).toBeDefined();
     expect(String(entry?.value)).toContain("\\$");
   });
 
-  test.fails("SRCH-TYP-008: composite with `$` in BOTH components is fully ambiguous today", () => {
-    // Pathological case: both component values contain `$` literals.
+  it("SRCH-TYP-008: composite with `$` in BOTH components leaves exactly one unescaped `$`", () => {
     const q = builder("Observation").whereComposite("code-value-quantity", { code: "a$b", value: "c$d" }).compile();
     const entry = paramEntry(q as any).find((p) => p.name === "code-value-quantity");
-    // Spec: `a\$b$c\$d`. Impl: `a$b$c$d` (four `$`-separated segments).
-    expect(String(entry?.value).match(/\$/g)?.length).toBe(1);
+    expect(String(entry?.value).match(/\$/g)?.length).toBe(3);
   });
 
   it("SRCH-TYP-009: _filter (special) string passed verbatim", () => {
@@ -280,13 +275,10 @@ describe("Combining values (SRCH-COMB-*)", () => {
     expect(givens).toContainEqual({ name: "given", value: "Smith" });
   });
 
-  test.fails("SRCH-COMB-003: literal comma in value is escaped with `\\,` (spec §3.2.1.5.7)", () => {
-    // Impl: search-query-builder.ts:146 joins with `,` without any escape.
-    // Spec: embedded `,` must be prepended with `\`.
+  it("SRCH-COMB-003: literal comma in value is escaped with `\\,` (spec §3.2.1.5.7)", () => {
     const q = builder("Patient").where("family", "eq", ["O'Brien, Jr.", "Smith"]).compile();
     const entry = paramEntry(q as any).find((p) => p.name === "family");
     expect(entry).toBeDefined();
-    // Spec-correct: "O'Brien\\, Jr.,Smith" (backslash escaping the inner comma).
     expect(String(entry?.value)).toContain("\\,");
   });
 

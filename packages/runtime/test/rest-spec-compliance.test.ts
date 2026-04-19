@@ -172,9 +172,7 @@ describe("Error surfacing (REST-ERR-*)", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("Success-path response handling (REST-DELETE-003 / REST-CREATE-002)", () => {
-  test.fails("REST-DELETE-003: 204 No Content must NOT throw on .json()", async () => {
-    // Impl bug: fhir-client.ts:60 / executor.ts:46 call .json() unconditionally.
-    // For 204 there's no body; .json() throws SyntaxError.
+  it("REST-DELETE-003: 204 No Content resolves to undefined (no .json() call)", async () => {
     const fetchFn = vi.fn(
       async () =>
         ({
@@ -194,7 +192,7 @@ describe("Success-path response handling (REST-DELETE-003 / REST-CREATE-002)", (
         path: "Patient/1",
         params: [],
       } as CompiledQuery),
-    ).resolves.toBeDefined();
+    ).resolves.toBeUndefined();
   });
 
   test.fails("REST-CREATE-002: Location header must be surfaced to caller (currently discarded)", async () => {
@@ -352,7 +350,7 @@ describe("Pagination (paginate / fetchAllPages)", () => {
    * A spec-compliant DSL MUST either refuse cross-host next URLs or
    * strip credentials before following them.
    */
-  test.fails("runtime-impl-map / decisions.md REST.8 (SECURITY): Authorization header must NOT be forwarded to a cross-host next link", async () => {
+  it("runtime-impl-map / decisions.md REST.8 (SECURITY): Authorization header must NOT be forwarded to a cross-host next link", async () => {
     const firstPage = {
       resourceType: "Bundle",
       type: "searchset",

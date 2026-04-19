@@ -1,10 +1,19 @@
 # fhir-dsl Spec Compliance Audit
 
 **Audit date:** 2026-04-19
-**Target release:** v0.19.0
+**Initial snapshot:** v0.19.0
+**Remediation landed:** v0.20.0 (tight first pass — blocker-tier + escape family)
 **Scope:** FHIRPath N1 normative spec, FHIR R5 REST/search spec, StructureDefinition parsing, SMART App Launch v2, runtime HTTP semantics.
 
 This audit is a point-in-time snapshot produced by reading source and comparing against the HL7 specs listed above. Every finding cites a file path and line. Severity reflects real-world impact, not spec-letter completeness.
+
+**v0.20.0 fixes (4 of 5 blocker-tier bugs resolved).** See `audit/output/bugs.md` "Fixes landed" table for site-level details and `audit/debate/decisions.md` "Fixes landed" for the verdict trace. Summary:
+- **BUG-001** — dead-ternary in FHIRPath comparison: multi-element LHS now returns `[]` (lenient §4.5 default).
+- **BUG-003** — search-value escape family (`,`, `$`, `\`): escaped at the 3 join sites (array OR, composite `$`, OR-tuple join). `|` in single-value still ambiguous pending typed token API.
+- **BUG-004** — 204 No Content: `readJsonBody` helper short-circuits to `undefined` on 204 or `Content-Length: 0`.
+- **BUG-005** — cross-origin auth leak on pagination: `executor.ts#executeUrl` strips auth provider + pre-baked `Authorization` header when following off-origin next links (RFC 6750 §5.3).
+
+**BUG-002** (Observation `value[x]` polymorphic dispatch) remains open — structural builder/planner change deferred.
 
 ---
 

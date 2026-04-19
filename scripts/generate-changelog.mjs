@@ -129,6 +129,7 @@ export function writeChangelog(newVersion) {
   writeFileSync(docsChangelogPath, DOCS_FRONTMATTER + content);
   console.log(`  changelog: CHANGELOG.md`);
   console.log(`  changelog: apps/docs/docs/changelog.md`);
+  return [changelogPath, docsChangelogPath];
 }
 
 // Allow standalone execution: node scripts/generate-changelog.mjs [--write] [newVersion]

@@ -8,6 +8,19 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.0] - 2026-04-19
+
+### Features
+
+- Add FHIRPath, search, and REST spec-compliance test suites (`e00169f`)
+- Add spec-driven audit pass artifacts (`47c06a8`)
+- Add spec-compliance test scaffolding (`023482b`)
+- Add AUDIT.md with v0.19.0 spec-compliance snapshot (`14ecc52`)
+
+### Other
+
+- Document the SpecCatalog generator pipeline (`4f91589`)
+
 ## [0.19.0] - 2026-04-19
 
 ### Features

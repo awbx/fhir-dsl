@@ -13,11 +13,17 @@ if (!version || !/^\d+\.\d+\.\d+/.test(version)) {
 
 const root = new URL("..", import.meta.url).pathname;
 
+// Track every file the script writes so we can stage them explicitly.
+// Using `git add -A` here would sweep unrelated untracked work into the
+// release commit; list exactly what we touched instead.
+const touched = [];
+
 // Update root package.json
 const rootPkg = join(root, "package.json");
 const rootJson = JSON.parse(readFileSync(rootPkg, "utf-8"));
 rootJson.version = version;
 writeFileSync(rootPkg, `${JSON.stringify(rootJson, null, 2)}\n`);
+touched.push(rootPkg);
 console.log(`  fhir-dsl -> ${version}`);
 
 // Update every workspace package (public and private) so docs, examples,
@@ -36,12 +42,16 @@ for (const pkg of packages) {
 	const json = JSON.parse(readFileSync(pkgPath, "utf-8"));
 	json.version = version;
 	writeFileSync(pkgPath, `${JSON.stringify(json, null, 2)}\n`);
+	touched.push(pkgPath);
 	console.log(`  ${json.name} -> ${version}`);
 }
 
-writeChangelog(version);
+const changelogPaths = writeChangelog(version);
+if (Array.isArray(changelogPaths)) touched.push(...changelogPaths);
 
-execSync("git add -A", { stdio: "inherit" });
+execSync(`git add -- ${touched.map((p) => JSON.stringify(p)).join(" ")}`, {
+	stdio: "inherit",
+});
 execSync(`git commit -m "v${version}"`, { stdio: "inherit" });
 execSync(`git tag v${version}`, { stdio: "inherit" });
 execSync(`git push origin main v${version}`, { stdio: "inherit" });
