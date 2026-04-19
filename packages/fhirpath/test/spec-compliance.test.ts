@@ -1079,23 +1079,16 @@ describe("FHIR-specific functions (FP-FHIR-*)", () => {
    * `.value` returns `[]` unconditionally — (b) fails. When the builder
    * gains polymorphic expansion, (a) remains a regression pin.
    */
-  test.fails("FP-FHIR-013a: fp<Obs>().valueQuantity.evaluate(obs-with-string) returns [] (spec §2.1.9.4)", () => {
-    // Observation with valueString chosen — `valueQuantity` is not set.
+  it("FP-FHIR-013a: fp<Obs>().valueQuantity on obs-with-valueString returns [] (spec §2.1.9.4)", () => {
+    // The un-chosen explicit variant must yield []. Regression pin for the
+    // day someone extends choice-type dispatch to explicit variant names and
+    // starts silently merging siblings (`valueString` bleeding into `valueQuantity`).
     const obs = { resourceType: "Observation", valueString: "hello" };
-    // Spec-correct: asking for the un-chosen variant yields `[]`.
-    // Current impl: `nav` on an object with no `valueQuantity` key already
-    // returns `[]`, so this test passes today. test.fails flips it: it's
-    // pinned against the DAY the builder starts emitting both variants
-    // and silently merging — at that moment this assertion must still hold.
-    expect(fhirpath<any>("Observation").valueQuantity.evaluate(obs)).not.toEqual([]);
+    expect(fhirpath<any>("Observation").valueQuantity.evaluate(obs)).toEqual([]);
   });
 
-  test.fails("FP-FHIR-013b: fp<Obs>().value.evaluate(obs) dispatches to the chosen valueQuantity payload (spec §2.1.9.4)", () => {
-    // Observation has valueQuantity chosen. Spec: `.value` must resolve to
-    // the payload of the chosen variant, not do a literal field lookup.
+  it("FP-FHIR-013b: fp<Obs>().value dispatches to the chosen valueQuantity payload (spec §2.1.9.4)", () => {
     const obs = { resourceType: "Observation", valueQuantity: { value: 120, unit: "mmHg" } };
-    // Current impl: nav("value") finds no such field on Observation and
-    // returns []. Spec-correct: should return [{value:120, unit:"mmHg"}].
     expect(fhirpath<any>("Observation").value.evaluate(obs)).toEqual([{ value: 120, unit: "mmHg" }]);
   });
 
