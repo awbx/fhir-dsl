@@ -18978,6 +18978,9 @@ export interface IncludeExpressions {
     patient: "subject";
     subject: "subject";
   };
+  ActivityDefinition: {
+    "depends-on": "library";
+  };
   AdverseEvent: {
     location: "location";
     recorder: "recorder";
@@ -18988,6 +18991,7 @@ export interface IncludeExpressions {
   };
   AllergyIntolerance: {
     asserter: "asserter";
+    patient: "patient";
     recorder: "recorder";
   };
   Appointment: {
@@ -19035,6 +19039,7 @@ export interface IncludeExpressions {
     goal: "goal";
     "instantiates-canonical": "instantiatesCanonical";
     "part-of": "partOf";
+    patient: "subject";
     performer: "activity.detail.performer";
     replaces: "replaces";
     subject: "subject";
@@ -19042,6 +19047,7 @@ export interface IncludeExpressions {
   CareTeam: {
     encounter: "encounter";
     participant: "participant.member";
+    patient: "subject";
     subject: "subject";
   };
   ChargeItem: {
@@ -19080,6 +19086,7 @@ export interface IncludeExpressions {
     encounter: "encounter";
     "finding-ref": "finding.itemReference";
     investigation: "investigation.item";
+    patient: "subject";
     previous: "previous";
     problem: "problem";
     subject: "subject";
@@ -19111,7 +19118,9 @@ export interface IncludeExpressions {
   Composition: {
     attester: "attester.party";
     author: "author";
+    encounter: "encounter";
     entry: "section.entry";
+    patient: "subject";
     subject: "subject";
   };
   ConceptMap: {
@@ -19121,6 +19130,7 @@ export interface IncludeExpressions {
     asserter: "asserter";
     encounter: "encounter";
     "evidence-detail": "evidence.detail";
+    patient: "subject";
     subject: "subject";
   };
   Consent: {
@@ -19128,6 +19138,7 @@ export interface IncludeExpressions {
     consentor: "performer";
     data: "provision.data";
     organization: "organization";
+    patient: "patient";
     "source-reference": "source";
   };
   Contract: {
@@ -19159,6 +19170,7 @@ export interface IncludeExpressions {
   DetectedIssue: {
     author: "author";
     implicated: "implicated";
+    patient: "patient";
   };
   Device: {
     location: "location";
@@ -19174,8 +19186,10 @@ export interface IncludeExpressions {
   };
   DeviceRequest: {
     "based-on": "basedOn";
+    encounter: "encounter";
     "instantiates-canonical": "instantiatesCanonical";
     insurance: "insurance";
+    patient: "subject";
     performer: "performer";
     "prior-request": "priorRequest";
     requester: "requester";
@@ -19183,11 +19197,14 @@ export interface IncludeExpressions {
   };
   DeviceUseStatement: {
     device: "device";
+    patient: "subject";
     subject: "subject";
   };
   DiagnosticReport: {
     "based-on": "basedOn";
+    encounter: "encounter";
     media: "media.link";
+    patient: "subject";
     performer: "performer";
     result: "result";
     "results-interpreter": "resultsInterpreter";
@@ -19197,6 +19214,7 @@ export interface IncludeExpressions {
   DocumentManifest: {
     author: "author";
     item: "content";
+    patient: "subject";
     recipient: "recipient";
     "related-ref": "related.ref";
     subject: "subject";
@@ -19205,6 +19223,8 @@ export interface IncludeExpressions {
     authenticator: "authenticator";
     author: "author";
     custodian: "custodian";
+    encounter: "context.encounter";
+    patient: "subject";
     related: "context.related";
     relatesto: "relatesTo.target";
     subject: "subject";
@@ -19218,6 +19238,7 @@ export interface IncludeExpressions {
     location: "location.location";
     "part-of": "partOf";
     participant: "participant.individual";
+    patient: "subject";
     practitioner: "participant.individual";
     "reason-reference": "reasonReference";
     "service-provider": "serviceProvider";
@@ -19238,6 +19259,7 @@ export interface IncludeExpressions {
     condition: "diagnosis.condition";
     "incoming-referral": "referralRequest";
     organization: "managingOrganization";
+    patient: "patient";
   };
   ExplanationOfBenefit: {
     "care-team": "careTeam.provider";
@@ -19256,12 +19278,16 @@ export interface IncludeExpressions {
   };
   FamilyMemberHistory: {
     "instantiates-canonical": "instantiatesCanonical";
+    patient: "patient";
   };
   Flag: {
     author: "author";
+    encounter: "encounter";
+    patient: "subject";
     subject: "subject";
   };
   Goal: {
+    patient: "subject";
     subject: "subject";
   };
   Group: {
@@ -19283,6 +19309,7 @@ export interface IncludeExpressions {
     encounter: "encounter";
     endpoint: "endpoint" | "series.endpoint";
     interpreter: "interpreter";
+    patient: "subject";
     performer: "series.performer.actor";
     referrer: "referrer";
     subject: "subject";
@@ -19290,6 +19317,7 @@ export interface IncludeExpressions {
   Immunization: {
     location: "location";
     manufacturer: "manufacturer";
+    patient: "patient";
     performer: "performer.actor";
     reaction: "reaction.detail";
     "reason-reference": "reasonReference";
@@ -19327,7 +19355,9 @@ export interface IncludeExpressions {
     source: "item.resource";
   };
   List: {
+    encounter: "encounter";
     item: "entry.item";
+    patient: "subject";
     source: "source";
     subject: "subject";
   };
@@ -19335,6 +19365,9 @@ export interface IncludeExpressions {
     endpoint: "endpoint";
     organization: "managingOrganization";
     partof: "partOf";
+  };
+  Measure: {
+    "depends-on": "library";
   };
   MeasureReport: {
     "evaluated-resource": "evaluatedResource";
@@ -19357,6 +19390,7 @@ export interface IncludeExpressions {
   MedicationAdministration: {
     context: "context";
     device: "device";
+    patient: "subject";
     performer: "performer.actor";
     request: "request";
     subject: "subject";
@@ -19364,6 +19398,7 @@ export interface IncludeExpressions {
   MedicationDispense: {
     context: "context";
     destination: "destination";
+    patient: "subject";
     performer: "performer.actor";
     prescription: "authorizingPrescription";
     receiver: "receiver";
@@ -19378,12 +19413,14 @@ export interface IncludeExpressions {
     encounter: "encounter";
     "intended-dispenser": "dispenseRequest.performer";
     "intended-performer": "performer";
+    patient: "subject";
     requester: "requester";
     subject: "subject";
   };
   MedicationStatement: {
     context: "context";
     "part-of": "partOf";
+    patient: "subject";
     source: "informationSource";
     subject: "subject";
   };
@@ -19422,16 +19459,20 @@ export interface IncludeExpressions {
     patient: "patient";
   };
   NutritionOrder: {
+    encounter: "encounter";
     "instantiates-canonical": "instantiatesCanonical";
+    patient: "patient";
     provider: "orderer";
   };
   Observation: {
     "based-on": "basedOn";
     "derived-from": "derivedFrom";
     device: "device";
+    encounter: "encounter";
     focus: "focus";
     "has-member": "hasMember";
     "part-of": "partOf";
+    patient: "subject";
     performer: "performer";
     specimen: "specimen";
     subject: "subject";
@@ -19477,6 +19518,7 @@ export interface IncludeExpressions {
   };
   PlanDefinition: {
     definition: "action.definition";
+    "depends-on": "library";
   };
   PractitionerRole: {
     endpoint: "endpoint";
@@ -19487,9 +19529,11 @@ export interface IncludeExpressions {
   };
   Procedure: {
     "based-on": "basedOn";
+    encounter: "encounter";
     "instantiates-canonical": "instantiatesCanonical";
     location: "location";
     "part-of": "partOf";
+    patient: "subject";
     performer: "performer.actor";
     "reason-reference": "reasonReference";
     subject: "subject";
@@ -19521,6 +19565,12 @@ export interface IncludeExpressions {
     patient: "subject";
     subject: "subject";
   };
+  ResearchDefinition: {
+    "depends-on": "library";
+  };
+  ResearchElementDefinition: {
+    "depends-on": "library";
+  };
   ResearchStudy: {
     partof: "partOf";
     principalinvestigator: "principalInvestigator";
@@ -19535,6 +19585,8 @@ export interface IncludeExpressions {
   };
   RiskAssessment: {
     condition: "condition";
+    encounter: "encounter";
+    patient: "subject";
     performer: "performer";
     subject: "subject";
   };
@@ -19547,7 +19599,9 @@ export interface IncludeExpressions {
   };
   ServiceRequest: {
     "based-on": "basedOn";
+    encounter: "encounter";
     "instantiates-canonical": "instantiatesCanonical";
+    patient: "subject";
     performer: "performer";
     replaces: "replaces";
     requester: "requester";
@@ -19568,6 +19622,7 @@ export interface IncludeExpressions {
     valueset: "snapshot.element.binding.valueSet";
   };
   SupplyDelivery: {
+    patient: "patient";
     receiver: "receiver";
     supplier: "supplier";
   };
@@ -19593,6 +19648,8 @@ export interface IncludeExpressions {
     target: "target";
   };
   VisionPrescription: {
+    encounter: "encounter";
+    patient: "patient";
     prescriber: "prescriber";
   };
 }
@@ -19602,6 +19659,9 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     owner: "owner",
     patient: "subject",
     subject: "subject",
+  },
+  ActivityDefinition: {
+    "depends-on": "library",
   },
   AdverseEvent: {
     location: "location",
@@ -19613,6 +19673,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   AllergyIntolerance: {
     asserter: "asserter",
+    patient: "patient",
     recorder: "recorder",
   },
   Appointment: {
@@ -19660,6 +19721,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     goal: "goal",
     "instantiates-canonical": "instantiatesCanonical",
     "part-of": "partOf",
+    patient: "subject",
     performer: "activity.detail.performer",
     replaces: "replaces",
     subject: "subject",
@@ -19667,6 +19729,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   CareTeam: {
     encounter: "encounter",
     participant: "participant.member",
+    patient: "subject",
     subject: "subject",
   },
   ChargeItem: {
@@ -19705,6 +19768,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     encounter: "encounter",
     "finding-ref": "finding.itemReference",
     investigation: "investigation.item",
+    patient: "subject",
     previous: "previous",
     problem: "problem",
     subject: "subject",
@@ -19736,7 +19800,9 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   Composition: {
     attester: "attester.party",
     author: "author",
+    encounter: "encounter",
     entry: "section.entry",
+    patient: "subject",
     subject: "subject",
   },
   ConceptMap: {
@@ -19746,6 +19812,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     asserter: "asserter",
     encounter: "encounter",
     "evidence-detail": "evidence.detail",
+    patient: "subject",
     subject: "subject",
   },
   Consent: {
@@ -19753,6 +19820,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     consentor: "performer",
     data: "provision.data",
     organization: "organization",
+    patient: "patient",
     "source-reference": "source",
   },
   Contract: {
@@ -19784,6 +19852,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   DetectedIssue: {
     author: "author",
     implicated: "implicated",
+    patient: "patient",
   },
   Device: {
     location: "location",
@@ -19799,8 +19868,10 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   DeviceRequest: {
     "based-on": "basedOn",
+    encounter: "encounter",
     "instantiates-canonical": "instantiatesCanonical",
     insurance: "insurance",
+    patient: "subject",
     performer: "performer",
     "prior-request": "priorRequest",
     requester: "requester",
@@ -19808,11 +19879,14 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   DeviceUseStatement: {
     device: "device",
+    patient: "subject",
     subject: "subject",
   },
   DiagnosticReport: {
     "based-on": "basedOn",
+    encounter: "encounter",
     media: "media.link",
+    patient: "subject",
     performer: "performer",
     result: "result",
     "results-interpreter": "resultsInterpreter",
@@ -19822,6 +19896,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   DocumentManifest: {
     author: "author",
     item: "content",
+    patient: "subject",
     recipient: "recipient",
     "related-ref": "related.ref",
     subject: "subject",
@@ -19830,6 +19905,8 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     authenticator: "authenticator",
     author: "author",
     custodian: "custodian",
+    encounter: "context.encounter",
+    patient: "subject",
     related: "context.related",
     relatesto: "relatesTo.target",
     subject: "subject",
@@ -19843,6 +19920,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     location: "location.location",
     "part-of": "partOf",
     participant: "participant.individual",
+    patient: "subject",
     practitioner: "participant.individual",
     "reason-reference": "reasonReference",
     "service-provider": "serviceProvider",
@@ -19863,6 +19941,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     condition: "diagnosis.condition",
     "incoming-referral": "referralRequest",
     organization: "managingOrganization",
+    patient: "patient",
   },
   ExplanationOfBenefit: {
     "care-team": "careTeam.provider",
@@ -19881,12 +19960,16 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   FamilyMemberHistory: {
     "instantiates-canonical": "instantiatesCanonical",
+    patient: "patient",
   },
   Flag: {
     author: "author",
+    encounter: "encounter",
+    patient: "subject",
     subject: "subject",
   },
   Goal: {
+    patient: "subject",
     subject: "subject",
   },
   Group: {
@@ -19908,6 +19991,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     encounter: "encounter",
     endpoint: ["endpoint", "series.endpoint"],
     interpreter: "interpreter",
+    patient: "subject",
     performer: "series.performer.actor",
     referrer: "referrer",
     subject: "subject",
@@ -19915,6 +19999,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   Immunization: {
     location: "location",
     manufacturer: "manufacturer",
+    patient: "patient",
     performer: "performer.actor",
     reaction: "reaction.detail",
     "reason-reference": "reasonReference",
@@ -19952,7 +20037,9 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     source: "item.resource",
   },
   List: {
+    encounter: "encounter",
     item: "entry.item",
+    patient: "subject",
     source: "source",
     subject: "subject",
   },
@@ -19960,6 +20047,9 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     endpoint: "endpoint",
     organization: "managingOrganization",
     partof: "partOf",
+  },
+  Measure: {
+    "depends-on": "library",
   },
   MeasureReport: {
     "evaluated-resource": "evaluatedResource",
@@ -19982,6 +20072,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   MedicationAdministration: {
     context: "context",
     device: "device",
+    patient: "subject",
     performer: "performer.actor",
     request: "request",
     subject: "subject",
@@ -19989,6 +20080,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   MedicationDispense: {
     context: "context",
     destination: "destination",
+    patient: "subject",
     performer: "performer.actor",
     prescription: "authorizingPrescription",
     receiver: "receiver",
@@ -20003,12 +20095,14 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     encounter: "encounter",
     "intended-dispenser": "dispenseRequest.performer",
     "intended-performer": "performer",
+    patient: "subject",
     requester: "requester",
     subject: "subject",
   },
   MedicationStatement: {
     context: "context",
     "part-of": "partOf",
+    patient: "subject",
     source: "informationSource",
     subject: "subject",
   },
@@ -20047,16 +20141,20 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     patient: "patient",
   },
   NutritionOrder: {
+    encounter: "encounter",
     "instantiates-canonical": "instantiatesCanonical",
+    patient: "patient",
     provider: "orderer",
   },
   Observation: {
     "based-on": "basedOn",
     "derived-from": "derivedFrom",
     device: "device",
+    encounter: "encounter",
     focus: "focus",
     "has-member": "hasMember",
     "part-of": "partOf",
+    patient: "subject",
     performer: "performer",
     specimen: "specimen",
     subject: "subject",
@@ -20102,6 +20200,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   PlanDefinition: {
     definition: "action.definition",
+    "depends-on": "library",
   },
   PractitionerRole: {
     endpoint: "endpoint",
@@ -20112,9 +20211,11 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   Procedure: {
     "based-on": "basedOn",
+    encounter: "encounter",
     "instantiates-canonical": "instantiatesCanonical",
     location: "location",
     "part-of": "partOf",
+    patient: "subject",
     performer: "performer.actor",
     "reason-reference": "reasonReference",
     subject: "subject",
@@ -20146,6 +20247,12 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     patient: "subject",
     subject: "subject",
   },
+  ResearchDefinition: {
+    "depends-on": "library",
+  },
+  ResearchElementDefinition: {
+    "depends-on": "library",
+  },
   ResearchStudy: {
     partof: "partOf",
     principalinvestigator: "principalInvestigator",
@@ -20160,6 +20267,8 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   RiskAssessment: {
     condition: "condition",
+    encounter: "encounter",
+    patient: "subject",
     performer: "performer",
     subject: "subject",
   },
@@ -20172,7 +20281,9 @@ export const includeExpressions: Record<string, Record<string, string | string[]
   },
   ServiceRequest: {
     "based-on": "basedOn",
+    encounter: "encounter",
     "instantiates-canonical": "instantiatesCanonical",
+    patient: "subject",
     performer: "performer",
     replaces: "replaces",
     requester: "requester",
@@ -20193,6 +20304,7 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     valueset: "snapshot.element.binding.valueSet",
   },
   SupplyDelivery: {
+    patient: "patient",
     receiver: "receiver",
     supplier: "supplier",
   },
@@ -20218,6 +20330,8 @@ export const includeExpressions: Record<string, Record<string, string | string[]
     target: "target",
   },
   VisionPrescription: {
+    encounter: "encounter",
+    patient: "patient",
     prescriber: "prescriber",
   },
 };

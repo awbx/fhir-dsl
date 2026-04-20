@@ -11,8 +11,17 @@ import type { ResourceModel, ResourceSearchParams } from "../model/resource-mode
 // - `.as(X)` / `.ofType(X)`  `Encounter.subject.as(Reference)`  → `subject`
 // - `.resolve()`             `Encounter.subject.resolve()`      → `subject`
 // - trailing `.reference`    `Encounter.subject.reference`      → `subject`
-// - `|` unions               split, normalize each, dedupe
+// - `|` unions               split, normalize each for the current resource,
+//                            skip parts that reference other resources
 // - surrounding parens       stripped
+//
+// Many FHIR common search params have expressions that union across every
+// resource the param applies to (e.g. `patient` on Encounter reads
+// `AllergyIntolerance.patient | ... | Encounter.subject.where(...) | ...`).
+// We only keep the parts that point at the current resource — a single
+// cross-resource part that we can't normalize must NOT kill the whole
+// emission, otherwise aliases like `patient` silently drop off the
+// `includeExpressions` table and `.transform()` can't auto-dereference.
 //
 // The runtime never sees the resource prefix: it matches activated expressions
 // against *canonical dotted paths* taken from the caller's input, which start
@@ -26,12 +35,23 @@ export interface NormalizedExpression {
 export function normalizeIncludeExpression(expression: string, resourceType: string): NormalizedExpression | null {
   const parts = splitTopLevel(expression, "|");
   const out: string[] = [];
+  let anyUnparseable = false;
   for (const part of parts) {
     const one = normalizeOne(part, resourceType);
-    if (one === null) return null;
+    if (one === null) {
+      // Part either references another resource, or uses a FHIRPath construct
+      // we can't reduce. Skip it — other parts of the union may still match.
+      anyUnparseable = true;
+      continue;
+    }
     if (one !== "" && !out.includes(one)) out.push(one);
   }
-  if (out.length === 0) return null;
+  if (out.length === 0) {
+    // Every part was unparseable. If the input was a single expression rooted
+    // at another resource (very common for cross-resource search params), we
+    // emit nothing and return null so the emitter skips this param.
+    return anyUnparseable ? null : null;
+  }
   return { paths: out };
 }
 

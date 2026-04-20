@@ -56,6 +56,19 @@ describe("normalizeIncludeExpression", () => {
   it("returns null when the expression doesn't start with the given resource", () => {
     expect(normalizeIncludeExpression("Patient.organization", "Encounter")).toBeNull();
   });
+
+  it("keeps the current-resource parts of a cross-resource union", () => {
+    // R4 Encounter.patient — the real expression unions one path per base
+    // resource. We want to recover just the `Encounter.*` part, not bail out.
+    const expr =
+      "AllergyIntolerance.patient | CarePlan.subject.where(resolve() is Patient) | Encounter.subject.where(resolve() is Patient) | Immunization.patient";
+    expect(normalizeIncludeExpression(expr, "Encounter")).toEqual({ paths: ["subject"] });
+  });
+
+  it("returns null when no part of a union matches the current resource", () => {
+    const expr = "AllergyIntolerance.patient | Immunization.patient";
+    expect(normalizeIncludeExpression(expr, "Encounter")).toBeNull();
+  });
 });
 
 function makeResource(name: string) {
