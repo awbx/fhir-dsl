@@ -70,6 +70,20 @@ export interface T<Scope> extends TExtensions<Scope> {
     table: ReadonlyMap<string, R> | Readonly<Record<string, R>>,
     fallback: R,
   ) => R;
+
+  /**
+   * **Type-unsafe escape hatch** — same runtime behavior as `t(path, fallback, map?)`
+   * but accepts `path: string` directly, bypassing the `Path<Scope>` constraint.
+   *
+   * Use this when you're projecting a high-row-count dataset with a wide scope
+   * (e.g. Encounter + 3 includes) and IntelliSense on the typed form is
+   * noticeably slow. The runtime still walks and auto-dereferences through
+   * activated expressions — you just lose compile-time path validation and
+   * return-type inference (result is `R | D`, where `R` defaults to `unknown`).
+   *
+   * Prefer the typed `t(...)` callable for normal use.
+   */
+  raw: <R = unknown, D = null>(path: string, fallback: D, map?: (value: unknown) => R) => R | D;
 }
 
 /**
@@ -268,6 +282,12 @@ export function makeT<Scope>(
     }
     return Object.hasOwn(table, v) ? (table as Record<string, unknown>)[v] : fallback;
   }) as T<Scope>["enum"];
+
+  base.raw = ((path: string, fallback: unknown, map?: (v: unknown) => unknown) => {
+    const v = walk(path);
+    if (v == null) return fallback;
+    return map ? map(v) : v;
+  }) as T<Scope>["raw"];
 
   if (registeredHelpers.size > 0) {
     const ctx: WalkerCtx = { activatedExpressions, includedMap, compile, walk };

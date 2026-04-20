@@ -305,6 +305,35 @@ describe("makeT — t.enum", () => {
   });
 });
 
+describe("makeT — t.raw (type-unsafe escape hatch)", () => {
+  it("returns the value at the path using the same walker as t()", () => {
+    const t = makeT<{ id: string }>({ id: "abc" }, new Set(), new Map(), new Map());
+    expect(t.raw("id", "")).toBe("abc");
+  });
+
+  it("returns the fallback when the path is missing", () => {
+    const t = makeT<{ id: string }>({ id: "abc" }, new Set(), new Map(), new Map());
+    expect(t.raw("missing.path", "fallback")).toBe("fallback");
+  });
+
+  it("applies the map function when the value is present", () => {
+    const t = makeT<{ n: number }>({ n: 4 }, new Set(), new Map(), new Map());
+    expect(t.raw("n", 0, (v) => (v as number) * 2)).toBe(8);
+  });
+
+  it("skips the map function when the value is nullish", () => {
+    const t = makeT<{ n: number | null }>({ n: null }, new Set(), new Map(), new Map());
+    expect(t.raw("n", -1, (v) => (v as number) * 2)).toBe(-1);
+  });
+
+  it("dereferences through activated expressions like the typed callable", () => {
+    const activated = new Set(["subject"]);
+    const included = new Map([["Patient/1", { resourceType: "Patient", id: "1", name: [{ family: "Doe" }] }]]);
+    const t = makeT<unknown>({ subject: { reference: "Patient/1" } }, activated, included, new Map());
+    expect(t.raw("subject.name.0.family", null)).toBe("Doe");
+  });
+});
+
 describe("TExtensions — registerTHelper / unregisterTHelper", () => {
   afterEach(() => {
     unregisterTHelper("age");
