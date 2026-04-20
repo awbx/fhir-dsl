@@ -232,3 +232,115 @@ describe("Scope — interface-shaped IncludeExpressions (Bug 1 regression)", () 
     type _ = Assert<Equals<Extract<P, "id">, "id">>;
   });
 });
+
+// R5-style schema: EncounterParticipant is a named interface (extending a
+// BackboneElement-like base), `participant` is an array of it, and the
+// include expression hops through the array: `participant.actor`. This is the
+// shape real generated schemas produce. The bug report claimed Scope didn't
+// hydrate through the array hop — these tests guard against regression.
+interface BackboneElement {
+  id?: string;
+  extension?: { url: string }[];
+}
+interface R5EncounterParticipant extends BackboneElement {
+  type?: { text?: string }[];
+  actor?: Reference<"Patient" | "Practitioner" | "RelatedPerson">;
+}
+interface R5Encounter {
+  resourceType: "Encounter";
+  id?: string;
+  status?: string;
+  subject?: Reference<"Patient" | "Group">;
+  participant?: R5EncounterParticipant[];
+  location?: Array<{ location: Reference<"Location"> }>; // required sub-field
+  diagnosis?: Array<{ condition: Reference<"Condition"> }>;
+}
+interface R5Location {
+  resourceType: "Location";
+  id?: string;
+  name?: string;
+}
+interface R5Condition {
+  resourceType: "Condition";
+  id?: string;
+  code?: { text?: string };
+}
+interface R5Schema {
+  resources: {
+    Encounter: R5Encounter;
+    Patient: Patient;
+    Practitioner: Practitioner;
+    Location: R5Location;
+    Condition: R5Condition;
+  };
+  searchParams: Record<string, never>;
+  includes: {
+    Encounter: {
+      patient: "Patient";
+      practitioner: "Practitioner";
+      location: "Location";
+      diagnosis: "Condition";
+    };
+  };
+  revIncludes: Record<string, never>;
+  includeExpressions: {
+    Encounter: {
+      patient: "subject";
+      practitioner: "participant.actor";
+      location: "location.location";
+      diagnosis: "diagnosis.condition";
+    };
+  };
+  profiles: Record<string, never>;
+}
+
+describe("Scope — array-hop include expressions (named-interface regression)", () => {
+  it("hydrates participant.actor through a named EncounterParticipant interface", () => {
+    type S = Scope<R5Schema, "Encounter", { practitioner: "Practitioner" }>;
+    type Family = S extends { participant?: Array<{ actor?: { name?: Array<{ family?: infer F }> } }> }
+      ? F
+      : "NOT_HYDRATED";
+    type _ = Assert<Equals<Family extends string | undefined ? true : false, true>>;
+    type P = Path<S>;
+    type _2 = Assert<
+      Equals<
+        Extract<P, `participant.${number}.actor.name.${number}.family`>,
+        `participant.${number}.actor.name.${number}.family`
+      >
+    >;
+  });
+
+  it("hydrates location.location (required sub-field)", () => {
+    type S = Scope<R5Schema, "Encounter", { location: "Location" }>;
+    type P = Path<S>;
+    type _ = Assert<Equals<Extract<P, `location.${number}.location.name`>, `location.${number}.location.name`>>;
+  });
+
+  it("hydrates diagnosis.condition", () => {
+    type S = Scope<R5Schema, "Encounter", { diagnosis: "Condition" }>;
+    type P = Path<S>;
+    type _ = Assert<
+      Equals<Extract<P, `diagnosis.${number}.condition.code.text`>, `diagnosis.${number}.condition.code.text`>
+    >;
+  });
+
+  it("does NOT hydrate participant.actor when practitioner include is absent", () => {
+    type S = Scope<R5Schema, "Encounter", Record<string, never>>;
+    type P = Path<S>;
+    // Without the include, the actor stays Reference-only — no Practitioner fields.
+    type HasNameHop = `participant.${number}.actor.name.${number}.family` extends P ? true : false;
+    type _ = Assert<Equals<HasNameHop, false>>;
+  });
+
+  it("hydrates both a single-reference and an array-hop expression in one scope", () => {
+    type S = Scope<R5Schema, "Encounter", { patient: "Patient"; practitioner: "Practitioner" }>;
+    type P = Path<S>;
+    type _1 = Assert<Equals<Extract<P, `subject.name.${number}.family`>, `subject.name.${number}.family`>>;
+    type _2 = Assert<
+      Equals<
+        Extract<P, `participant.${number}.actor.name.${number}.family`>,
+        `participant.${number}.actor.name.${number}.family`
+      >
+    >;
+  });
+});
