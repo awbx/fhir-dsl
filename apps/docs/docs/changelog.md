@@ -8,7 +8,13 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
-## [0.21.2] - 2026-04-19
+## [0.22.0] - 2026-04-20
+
+### Other
+
+- feat(core): .transform(fn) with auto-dereferencing paths + guide (`abc369c`)
+
+## [0.21.2] - 2026-04-20
 
 ### Other
 
