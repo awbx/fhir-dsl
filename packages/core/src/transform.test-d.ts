@@ -176,3 +176,59 @@ describe("Scope — include-activated substitution", () => {
     type _ = Assert<Equals<HasMale, true>>;
   });
 });
+
+// Regression for Bug 1 (v0.22.0): `Scope` collapsed to `never` whenever
+// `IncludeExpressions` was emitted as an `interface` — interfaces don't
+// satisfy the old `Record<string, unknown>` gate on `IncludeExpressionsFor`
+// (declaration merging could add incompatible fields), so the whole chain
+// fell through to the `Record<string, never>` fallback, which then cascaded
+// a `never` through `ApplyAll` → `ApplyOne` → `SetAtPath`.
+//
+// Generated schemas always emit an interface, so this is the shape we have
+// to test against — the TestSchema above uses a plain object type and
+// silently passed the gate.
+interface InterfaceIncludeExpressions {
+  Encounter: {
+    patient: "subject";
+    practitioner: "participant.actor";
+  };
+}
+interface InterfaceSchema {
+  resources: { Encounter: Encounter; Patient: Patient; Practitioner: Practitioner };
+  searchParams: Record<string, never>;
+  includes: {
+    Encounter: { patient: "Patient"; practitioner: "Practitioner" };
+  };
+  revIncludes: Record<string, never>;
+  includeExpressions: InterfaceIncludeExpressions;
+  profiles: Record<string, never>;
+}
+
+describe("Scope — interface-shaped IncludeExpressions (Bug 1 regression)", () => {
+  it("does not collapse to never on empty IncMap", () => {
+    type S = Scope<InterfaceSchema, "Encounter", Record<string, never>>;
+    type P = Path<S>;
+    type _ = Assert<Equals<Extract<P, "id">, "id">>;
+  });
+
+  it("activates reference paths when include is present", () => {
+    type S = Scope<InterfaceSchema, "Encounter", { patient: "Patient" }>;
+    type P = Path<S>;
+    type _1 = Assert<Equals<Extract<P, "id">, "id">>;
+    type _2 = Assert<Equals<Extract<P, "subject.reference">, "subject.reference">>;
+    type _3 = Assert<Equals<Extract<P, `subject.name.${number}.family`>, `subject.name.${number}.family`>>;
+  });
+
+  it("no-ops when IncMap keys aren't in ExprMap", () => {
+    type S = Scope<InterfaceSchema, "Encounter", { foo: "Bar" }>;
+    type P = Path<S>;
+    // Still resolves to plain Encounter — no crash, no widening
+    type _ = Assert<Equals<Extract<P, "id">, "id">>;
+  });
+
+  it("short-circuits to base resource when IncMap is `any` (wildcard builders)", () => {
+    type S = Scope<InterfaceSchema, "Encounter", any>;
+    type P = Path<S>;
+    type _ = Assert<Equals<Extract<P, "id">, "id">>;
+  });
+});

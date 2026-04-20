@@ -12,14 +12,22 @@ import type { FhirSchema } from "./types.js";
 // walks the Patient, `subject.reference` walks the Reference. The runtime
 // decides at access time which to use based on the next path segment.
 
+// Interfaces don't satisfy `Record<string, X>` constraints (declaration
+// merging could add incompatible fields), which is why we can't gate on
+// `extends Record<string, unknown>` here — generated `IncludeExpressions` is
+// almost always emitted as an interface. Check `object` instead.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
 export type IncludeExpressionsFor<S extends FhirSchema, RT extends string> = S extends {
   includeExpressions: infer IE;
 }
-  ? IE extends Record<string, unknown>
-    ? RT extends keyof IE
-      ? IE[RT]
+  ? IsAny<IE> extends true
+    ? Record<string, never>
+    : IE extends object
+      ? RT extends keyof IE
+        ? IE[RT]
+        : Record<string, never>
       : Record<string, never>
-    : Record<string, never>
   : Record<string, never>;
 
 type ResolveResource<S extends FhirSchema, Name extends string> = Name extends keyof S["resources"]
@@ -57,14 +65,25 @@ type SetAtPath<T, P extends string, V> = T extends readonly (infer U)[]
         }
       : T;
 
-// For multi-expression params (e.g. `Encounter.subject | Encounter.patient`)
-// `IncludeExpressions[K]` may be a string *union*. Apply the substitution at
-// each path independently.
-type ApplyOne<T, Expr, V> = [Expr] extends [string] ? (Expr extends string ? SetAtPath<T, Expr, V> : T) : T;
+// ApplyOne handles the case where `IncludeExpressions[K]` may be a single
+// string literal OR a union of literals (multi-expression params like
+// `Encounter.subject | Encounter.patient`). We distribute over the union so
+// the substitution lands on every path independently. If `Expr` isn't a
+// string for whatever reason (missing expression, schema drift), no-op.
+type ApplyOne<T, Expr, V> = [Expr] extends [never] ? T : Expr extends string ? SetAtPath<T, Expr, V> : T;
 
+// ApplyAll — iterate each `[param, target]` entry in IncMap and substitute the
+// target resource at the corresponding expression path. Arms (top to bottom):
+//   1. Keys tuple is empty               → return T unchanged (base case).
+//   2. Head not a string                 → skip, recurse.
+//   3. Head not in IncMap                → skip (defensive — keys always from IncMap).
+//   4. Head not in ExprMap               → no-op skip (param has no canonical
+//                                          expression — still recurse so other
+//                                          keys apply).
+//   5. Head has a usable expression      → apply substitution, recurse.
 type ApplyAll<
   T,
-  ExprMap extends Record<string, string>,
+  ExprMap,
   IncMap extends Record<string, string>,
   S extends FhirSchema,
   Keys extends readonly unknown[],
@@ -78,14 +97,11 @@ type ApplyAll<
     : ApplyAll<T, ExprMap, IncMap, S, Rest>
   : T;
 
-export type Scope<
-  S extends FhirSchema,
-  RT extends string,
-  IncMap extends Record<string, string>,
-> = RT extends keyof S["resources"]
-  ? IncludeExpressionsFor<S, RT> extends infer ExprMap
-    ? ExprMap extends Record<string, string>
-      ? ApplyAll<S["resources"][RT], ExprMap, IncMap, S, UnionToTuple<keyof IncMap & string>>
-      : S["resources"][RT]
-    : S["resources"][RT]
-  : never;
+export type Scope<S extends FhirSchema, RT extends string, IncMap extends Record<string, string>> =
+  IsAny<IncMap> extends true
+    ? RT extends keyof S["resources"]
+      ? S["resources"][RT]
+      : never
+    : RT extends keyof S["resources"]
+      ? ApplyAll<S["resources"][RT], IncludeExpressionsFor<S, RT>, IncMap, S, UnionToTuple<keyof IncMap & string>>
+      : never;
