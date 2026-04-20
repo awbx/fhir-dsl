@@ -43,6 +43,7 @@ const sidebars = {
       items: [
         'guides/streaming',
         'guides/transform',
+        'guides/extending',
         'guides/terminology',
         'guides/validation',
         'guides/smart',

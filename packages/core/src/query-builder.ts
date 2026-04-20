@@ -417,6 +417,120 @@ export interface SearchQueryBuilder<
   transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out>;
 }
 
+// --- Consumer-facing helper types (Kysely-style) ---
+
+/**
+ * Wildcard `SearchQueryBuilder` assignable to any concrete variant.
+ *
+ * Use this as the upper bound in helper signatures — `applyFilters<QB extends
+ * AnySearchBuilder<S>>(qb: QB): QB` preserves the caller's concrete builder
+ * through the call so `.include()` / `.transform()` keep working after.
+ *
+ * Every slot is wildcarded with `any`. That used to collapse `Scope<S, any,
+ * any>` to `never` (kicking out `.transform()` entirely); `Scope` now
+ * short-circuits `IsAny<IncMap>` and returns the base resource, so assignment
+ * flows in both directions cleanly.
+ */
+export type AnySearchBuilder<S extends FhirSchema = FhirSchema> = SearchQueryBuilder<S, any, any, any, any, any>;
+
+/**
+ * `SearchQueryBuilder` bound to a known resource type, open on every other
+ * slot. Common shape for resource-scoped helpers that pass any builder state
+ * through unchanged.
+ *
+ * Declared as a structural interface (rather than `SearchQueryBuilder<S, RT,
+ * any, any, any, any>`) because chained methods like `.include(...).transform`
+ * push a widened `Inc` into `Scope` / `T`, and the post-include `.transform`
+ * slot ends up variance-incompatible when compared property-by-property against
+ * the wildcard alias. Keeping every chainable method self-returning and typing
+ * `.transform` through `T<any>` breaks that cycle cleanly.
+ */
+export interface SearchBuilderOf<S extends FhirSchema, RT extends string> {
+  where(...args: any[]): SearchBuilderOf<S, RT>;
+  whereIn(...args: any[]): SearchBuilderOf<S, RT>;
+  whereMissing(...args: any[]): SearchBuilderOf<S, RT>;
+  whereId(...ids: string[]): SearchBuilderOf<S, RT>;
+  whereLastUpdated(op: DatePrefix, value: string): SearchBuilderOf<S, RT>;
+  withTag(value: string): SearchBuilderOf<S, RT>;
+  withSecurity(value: string): SearchBuilderOf<S, RT>;
+  fromSource(uri: string): SearchBuilderOf<S, RT>;
+  summary(mode: SummaryMode): SearchBuilderOf<S, RT>;
+  total(mode: TotalMode): SearchBuilderOf<S, RT>;
+  contained(mode: ContainedMode): SearchBuilderOf<S, RT>;
+  containedType(mode: ContainedTypeMode): SearchBuilderOf<S, RT>;
+  whereComposite(...args: any[]): SearchBuilderOf<S, RT>;
+  whereChained(...args: any[]): SearchBuilderOf<S, RT>;
+  whereChain(...args: any[]): SearchBuilderOf<S, RT>;
+  has(...args: any[]): SearchBuilderOf<S, RT>;
+  filter(expression: string | { compile(): string }): SearchBuilderOf<S, RT>;
+  text(query: string): SearchBuilderOf<S, RT>;
+  content(query: string): SearchBuilderOf<S, RT>;
+  inList(listId: string): SearchBuilderOf<S, RT>;
+  namedQuery(name: string, params?: Record<string, string | number>): SearchBuilderOf<S, RT>;
+  sort(param: any, direction?: SortDirection): SearchBuilderOf<S, RT>;
+  count(n: number): SearchBuilderOf<S, RT>;
+  offset(n: number): SearchBuilderOf<S, RT>;
+  include(param: any, options?: { iterate?: boolean }): SearchBuilderOf<S, RT>;
+  revinclude(sourceResource: any, param: any, options?: { iterate?: boolean }): SearchBuilderOf<S, RT>;
+  select(fields: readonly any[]): SearchBuilderOf<S, RT>;
+  validate(): SearchBuilderOf<S, RT>;
+  usePost(): SearchBuilderOf<S, RT>;
+  getUrlByteLimit(bytes: number): SearchBuilderOf<S, RT>;
+  $if(condition: boolean, callback: (qb: any) => any): SearchBuilderOf<S, RT>;
+  $call<R>(callback: (qb: any) => R): R;
+  compile(): CompiledQuery;
+  execute(options?: ExecuteOptions): Promise<SearchResult<any, any>>;
+  stream(options?: StreamOptions): AsyncIterable<any>;
+  transform<Out>(fn: (t: T<any>) => Out): TransformedQuery<Out>;
+}
+
+/**
+ * Just the filter surface of `SearchQueryBuilder` — no `.include()`,
+ * `.transform()`, or `.execute()`. The narrow shape most consumer helpers
+ * actually want; sidesteps the contravariance trap entirely because none of
+ * these methods reference `Inc` or `Scope`.
+ */
+export type FilterableBuilder<S extends FhirSchema, RT extends string> = Pick<
+  SearchQueryBuilder<S, RT>,
+  | "where"
+  | "whereIn"
+  | "whereMissing"
+  | "whereId"
+  | "whereLastUpdated"
+  | "withTag"
+  | "withSecurity"
+  | "fromSource"
+  | "summary"
+  | "total"
+  | "contained"
+  | "containedType"
+  | "whereComposite"
+  | "whereChained"
+  | "whereChain"
+  | "has"
+  | "filter"
+  | "text"
+  | "content"
+  | "inList"
+  | "namedQuery"
+  | "sort"
+  | "count"
+  | "offset"
+  | "$if"
+  | "$call"
+>;
+
+/** Extract the resource type from a `SearchQueryBuilder`. */
+export type ResourceOf<QB> = QB extends SearchQueryBuilder<any, infer RT, any, any, any, any> ? RT : never;
+
+/** Extract the include-map from a `SearchQueryBuilder`. */
+export type IncludesOf<QB> =
+  QB extends SearchQueryBuilder<any, any, any, infer Inc, any, any>
+    ? Inc extends Record<string, string>
+      ? Inc
+      : Record<string, never>
+    : never;
+
 // --- Read Query Builder Interface ---
 
 export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
