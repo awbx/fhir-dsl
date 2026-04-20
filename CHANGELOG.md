@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.1] - 2026-04-20
+
+### Features
+
+- add consumer-facing wildcard builder types + extending guide (`18ba12d`)
+
+### Bug Fixes
+
+- fix(generator): emit alias keys for cross-resource include expression unions (`9096a56`)
+- fix(core): Scope no longer collapses to never on interface-shaped IncludeExpressions (`0083171`)
+
 ## [0.22.0] - 2026-04-20
 
 ### Other
