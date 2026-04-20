@@ -31,3 +31,9 @@ export interface RevIncludeRegistry {
 
 export interface ProfileRegistry {}
 
+export interface IncludeExpressions {
+}
+
+export const includeExpressions: Record<string, Record<string, string | string[]>> = {
+};
+

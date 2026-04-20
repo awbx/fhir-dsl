@@ -1,5 +1,6 @@
 import { toKebabCase } from "@fhir-dsl/utils";
 import type { ResourceModel, ResourceSearchParams } from "../model/resource-model.js";
+import { emitIncludeExpressions } from "./include-expressions-emitter.js";
 
 export function emitRegistry(
   resources: ResourceModel[],
@@ -103,6 +104,17 @@ export function emitRegistry(
     lines.push("export interface ProfileRegistry {}");
     lines.push("");
   }
+
+  // IncludeExpressions: maps each include param to its canonical FHIRPath.
+  // Used by `.transform()` at both type level (to activate auto-dereference)
+  // and runtime (see the `includeExpressions` const below). Params whose
+  // expressions couldn't be mechanically reduced are skipped — `.include()`
+  // still works for them but `.transform()` paths won't auto-dereference.
+  const includeEmission = emitIncludeExpressions(resources, searchParams);
+  lines.push(includeEmission.typeDecl);
+  lines.push("");
+  lines.push(includeEmission.runtimeDecl);
+  lines.push("");
 
   return `${lines.join("\n")}\n`;
 }

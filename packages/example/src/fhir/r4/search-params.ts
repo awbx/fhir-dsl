@@ -22,7 +22,24 @@ export type {
   UriParam,
 };
 
-export interface AccountSearchParams {
+/** Search params common to every FHIR resource. */
+export interface CommonSearchParams {
+  _content: StringParam;
+  _id: TokenParam;
+  _lastUpdated: DateParam;
+  _profile: UriParam;
+  _query: TokenParam;
+  _security: TokenParam;
+  _source: UriParam;
+  _tag: TokenParam;
+}
+
+/** Search params common to every DomainResource (adds to CommonSearchParams). */
+export interface DomainResourceSearchParams extends CommonSearchParams {
+  _text: StringParam;
+}
+
+export interface AccountSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   name: StringParam;
   owner: ReferenceParam;
@@ -33,13 +50,13 @@ export interface AccountSearchParams {
   type: TokenParam;
 }
 
-export interface ActivityDefinitionSearchParams {
+export interface ActivityDefinitionSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -58,7 +75,7 @@ export interface ActivityDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface AdverseEventSearchParams {
+export interface AdverseEventSearchParams extends DomainResourceSearchParams {
   actuality: TokenParam;
   category: TokenParam;
   date: DateParam;
@@ -73,7 +90,7 @@ export interface AdverseEventSearchParams {
   substance: ReferenceParam;
 }
 
-export interface AllergyIntoleranceSearchParams {
+export interface AllergyIntoleranceSearchParams extends DomainResourceSearchParams {
   asserter: ReferenceParam;
   category: TokenParam;
   "clinical-status": TokenParam;
@@ -92,7 +109,7 @@ export interface AllergyIntoleranceSearchParams {
   "verification-status": TokenParam;
 }
 
-export interface AppointmentSearchParams {
+export interface AppointmentSearchParams extends DomainResourceSearchParams {
   actor: ReferenceParam;
   "appointment-type": TokenParam;
   "based-on": ReferenceParam;
@@ -112,7 +129,7 @@ export interface AppointmentSearchParams {
   "supporting-info": ReferenceParam;
 }
 
-export interface AppointmentResponseSearchParams {
+export interface AppointmentResponseSearchParams extends DomainResourceSearchParams {
   actor: ReferenceParam;
   appointment: ReferenceParam;
   identifier: TokenParam;
@@ -122,7 +139,7 @@ export interface AppointmentResponseSearchParams {
   practitioner: ReferenceParam;
 }
 
-export interface AuditEventSearchParams {
+export interface AuditEventSearchParams extends DomainResourceSearchParams {
   action: TokenParam;
   address: StringParam;
   agent: ReferenceParam;
@@ -143,7 +160,7 @@ export interface AuditEventSearchParams {
   type: TokenParam;
 }
 
-export interface BasicSearchParams {
+export interface BasicSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   code: TokenParam;
   created: DateParam;
@@ -152,14 +169,14 @@ export interface BasicSearchParams {
   subject: ReferenceParam;
 }
 
-export interface BodyStructureSearchParams {
+export interface BodyStructureSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   location: TokenParam;
   morphology: TokenParam;
   patient: ReferenceParam;
 }
 
-export interface BundleSearchParams {
+export interface BundleSearchParams extends CommonSearchParams {
   composition: ReferenceParam;
   identifier: TokenParam;
   message: ReferenceParam;
@@ -167,12 +184,12 @@ export interface BundleSearchParams {
   type: TokenParam;
 }
 
-export interface CapabilityStatementSearchParams {
+export interface CapabilityStatementSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   fhirversion: TokenParam;
@@ -193,7 +210,7 @@ export interface CapabilityStatementSearchParams {
   version: TokenParam;
 }
 
-export interface CarePlanSearchParams {
+export interface CarePlanSearchParams extends DomainResourceSearchParams {
   "activity-code": TokenParam;
   "activity-date": DateParam;
   "activity-reference": ReferenceParam;
@@ -216,7 +233,7 @@ export interface CarePlanSearchParams {
   subject: ReferenceParam;
 }
 
-export interface CareTeamSearchParams {
+export interface CareTeamSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   date: DateParam;
   encounter: ReferenceParam;
@@ -227,7 +244,7 @@ export interface CareTeamSearchParams {
   subject: ReferenceParam;
 }
 
-export interface ChargeItemSearchParams {
+export interface ChargeItemSearchParams extends DomainResourceSearchParams {
   account: ReferenceParam;
   code: TokenParam;
   context: ReferenceParam;
@@ -247,12 +264,12 @@ export interface ChargeItemSearchParams {
   subject: ReferenceParam;
 }
 
-export interface ChargeItemDefinitionSearchParams {
+export interface ChargeItemDefinitionSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   effective: DateParam;
@@ -265,7 +282,7 @@ export interface ChargeItemDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface ClaimSearchParams {
+export interface ClaimSearchParams extends DomainResourceSearchParams {
   "care-team": ReferenceParam;
   created: DateParam;
   "detail-udi": ReferenceParam;
@@ -285,7 +302,7 @@ export interface ClaimSearchParams {
   use: TokenParam;
 }
 
-export interface ClaimResponseSearchParams {
+export interface ClaimResponseSearchParams extends DomainResourceSearchParams {
   created: DateParam;
   disposition: StringParam;
   identifier: TokenParam;
@@ -299,7 +316,7 @@ export interface ClaimResponseSearchParams {
   use: TokenParam;
 }
 
-export interface ClinicalImpressionSearchParams {
+export interface ClinicalImpressionSearchParams extends DomainResourceSearchParams {
   assessor: ReferenceParam;
   date: DateParam;
   encounter: ReferenceParam;
@@ -315,14 +332,14 @@ export interface ClinicalImpressionSearchParams {
   "supporting-info": ReferenceParam;
 }
 
-export interface CodeSystemSearchParams {
+export interface CodeSystemSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   "content-mode": TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   identifier: TokenParam;
@@ -338,7 +355,7 @@ export interface CodeSystemSearchParams {
   version: TokenParam;
 }
 
-export interface CommunicationSearchParams {
+export interface CommunicationSearchParams extends DomainResourceSearchParams {
   "based-on": ReferenceParam;
   category: TokenParam;
   encounter: ReferenceParam;
@@ -356,7 +373,7 @@ export interface CommunicationSearchParams {
   subject: ReferenceParam;
 }
 
-export interface CommunicationRequestSearchParams {
+export interface CommunicationRequestSearchParams extends DomainResourceSearchParams {
   authored: DateParam;
   "based-on": ReferenceParam;
   category: TokenParam;
@@ -375,13 +392,13 @@ export interface CommunicationRequestSearchParams {
   subject: ReferenceParam;
 }
 
-export interface CompartmentDefinitionSearchParams {
+export interface CompartmentDefinitionSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   name: StringParam;
@@ -392,7 +409,7 @@ export interface CompartmentDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface CompositionSearchParams {
+export interface CompositionSearchParams extends DomainResourceSearchParams {
   attester: ReferenceParam;
   author: ReferenceParam;
   category: TokenParam;
@@ -413,12 +430,12 @@ export interface CompositionSearchParams {
   type: TokenParam;
 }
 
-export interface ConceptMapSearchParams {
+export interface ConceptMapSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   dependson: UriParam;
   description: StringParam;
@@ -442,7 +459,7 @@ export interface ConceptMapSearchParams {
   version: TokenParam;
 }
 
-export interface ConditionSearchParams {
+export interface ConditionSearchParams extends DomainResourceSearchParams {
   "abatement-age": QuantityParam;
   "abatement-date": DateParam;
   "abatement-string": StringParam;
@@ -466,7 +483,7 @@ export interface ConditionSearchParams {
   "verification-status": TokenParam;
 }
 
-export interface ConsentSearchParams {
+export interface ConsentSearchParams extends DomainResourceSearchParams {
   action: TokenParam;
   actor: ReferenceParam;
   category: TokenParam;
@@ -484,7 +501,7 @@ export interface ConsentSearchParams {
   status: TokenParam;
 }
 
-export interface ContractSearchParams {
+export interface ContractSearchParams extends DomainResourceSearchParams {
   authority: ReferenceParam;
   domain: ReferenceParam;
   identifier: TokenParam;
@@ -497,7 +514,7 @@ export interface ContractSearchParams {
   url: UriParam;
 }
 
-export interface CoverageSearchParams {
+export interface CoverageSearchParams extends DomainResourceSearchParams {
   beneficiary: ReferenceParam;
   "class-type": TokenParam;
   "class-value": StringParam;
@@ -511,7 +528,7 @@ export interface CoverageSearchParams {
   type: TokenParam;
 }
 
-export interface CoverageEligibilityRequestSearchParams {
+export interface CoverageEligibilityRequestSearchParams extends DomainResourceSearchParams {
   created: DateParam;
   enterer: ReferenceParam;
   facility: ReferenceParam;
@@ -521,7 +538,7 @@ export interface CoverageEligibilityRequestSearchParams {
   status: TokenParam;
 }
 
-export interface CoverageEligibilityResponseSearchParams {
+export interface CoverageEligibilityResponseSearchParams extends DomainResourceSearchParams {
   created: DateParam;
   disposition: StringParam;
   identifier: TokenParam;
@@ -533,7 +550,7 @@ export interface CoverageEligibilityResponseSearchParams {
   status: TokenParam;
 }
 
-export interface DetectedIssueSearchParams {
+export interface DetectedIssueSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   code: TokenParam;
   identified: DateParam;
@@ -542,7 +559,7 @@ export interface DetectedIssueSearchParams {
   patient: ReferenceParam;
 }
 
-export interface DeviceSearchParams {
+export interface DeviceSearchParams extends DomainResourceSearchParams {
   "device-name": StringParam;
   identifier: TokenParam;
   location: ReferenceParam;
@@ -557,13 +574,13 @@ export interface DeviceSearchParams {
   url: UriParam;
 }
 
-export interface DeviceDefinitionSearchParams {
+export interface DeviceDefinitionSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   parent: ReferenceParam;
   type: TokenParam;
 }
 
-export interface DeviceMetricSearchParams {
+export interface DeviceMetricSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   identifier: TokenParam;
   parent: ReferenceParam;
@@ -571,7 +588,7 @@ export interface DeviceMetricSearchParams {
   type: TokenParam;
 }
 
-export interface DeviceRequestSearchParams {
+export interface DeviceRequestSearchParams extends DomainResourceSearchParams {
   "authored-on": DateParam;
   "based-on": ReferenceParam;
   code: TokenParam;
@@ -592,14 +609,14 @@ export interface DeviceRequestSearchParams {
   subject: ReferenceParam;
 }
 
-export interface DeviceUseStatementSearchParams {
+export interface DeviceUseStatementSearchParams extends DomainResourceSearchParams {
   device: ReferenceParam;
   identifier: TokenParam;
   patient: ReferenceParam;
   subject: ReferenceParam;
 }
 
-export interface DiagnosticReportSearchParams {
+export interface DiagnosticReportSearchParams extends DomainResourceSearchParams {
   "based-on": ReferenceParam;
   category: TokenParam;
   code: TokenParam;
@@ -618,7 +635,7 @@ export interface DiagnosticReportSearchParams {
   subject: ReferenceParam;
 }
 
-export interface DocumentManifestSearchParams {
+export interface DocumentManifestSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   created: DateParam;
   description: StringParam;
@@ -634,7 +651,7 @@ export interface DocumentManifestSearchParams {
   type: TokenParam;
 }
 
-export interface DocumentReferenceSearchParams {
+export interface DocumentReferenceSearchParams extends DomainResourceSearchParams {
   authenticator: ReferenceParam;
   author: ReferenceParam;
   category: TokenParam;
@@ -654,7 +671,7 @@ export interface DocumentReferenceSearchParams {
   related: ReferenceParam;
   relatesto: ReferenceParam;
   relation: TokenParam;
-  relationship: CompositeParam;
+  relationship: CompositeParam<{ relatesto: ReferenceParam; relation: TokenParam }>;
   "security-label": TokenParam;
   setting: TokenParam;
   status: TokenParam;
@@ -662,12 +679,12 @@ export interface DocumentReferenceSearchParams {
   type: TokenParam;
 }
 
-export interface EffectEvidenceSynthesisSearchParams {
+export interface EffectEvidenceSynthesisSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   effective: DateParam;
@@ -681,7 +698,7 @@ export interface EffectEvidenceSynthesisSearchParams {
   version: TokenParam;
 }
 
-export interface EncounterSearchParams {
+export interface EncounterSearchParams extends DomainResourceSearchParams {
   account: ReferenceParam;
   appointment: ReferenceParam;
   "based-on": ReferenceParam;
@@ -707,7 +724,7 @@ export interface EncounterSearchParams {
   type: TokenParam;
 }
 
-export interface EndpointSearchParams {
+export interface EndpointSearchParams extends DomainResourceSearchParams {
   "connection-type": TokenParam;
   identifier: TokenParam;
   name: StringParam;
@@ -716,20 +733,20 @@ export interface EndpointSearchParams {
   status: TokenParam;
 }
 
-export interface EnrollmentRequestSearchParams {
+export interface EnrollmentRequestSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   patient: ReferenceParam;
   status: TokenParam;
   subject: ReferenceParam;
 }
 
-export interface EnrollmentResponseSearchParams {
+export interface EnrollmentResponseSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   request: ReferenceParam;
   status: TokenParam;
 }
 
-export interface EpisodeOfCareSearchParams {
+export interface EpisodeOfCareSearchParams extends DomainResourceSearchParams {
   "care-manager": ReferenceParam;
   condition: ReferenceParam;
   date: DateParam;
@@ -741,13 +758,13 @@ export interface EpisodeOfCareSearchParams {
   type: TokenParam;
 }
 
-export interface EventDefinitionSearchParams {
+export interface EventDefinitionSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -766,13 +783,13 @@ export interface EventDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface EvidenceSearchParams {
+export interface EvidenceSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -791,13 +808,13 @@ export interface EvidenceSearchParams {
   version: TokenParam;
 }
 
-export interface EvidenceVariableSearchParams {
+export interface EvidenceVariableSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -816,12 +833,12 @@ export interface EvidenceVariableSearchParams {
   version: TokenParam;
 }
 
-export interface ExampleScenarioSearchParams {
+export interface ExampleScenarioSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   identifier: TokenParam;
   jurisdiction: TokenParam;
@@ -832,7 +849,7 @@ export interface ExampleScenarioSearchParams {
   version: TokenParam;
 }
 
-export interface ExplanationOfBenefitSearchParams {
+export interface ExplanationOfBenefitSearchParams extends DomainResourceSearchParams {
   "care-team": ReferenceParam;
   claim: ReferenceParam;
   coverage: ReferenceParam;
@@ -852,7 +869,7 @@ export interface ExplanationOfBenefitSearchParams {
   "subdetail-udi": ReferenceParam;
 }
 
-export interface FamilyMemberHistorySearchParams {
+export interface FamilyMemberHistorySearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   date: DateParam;
   identifier: TokenParam;
@@ -864,7 +881,7 @@ export interface FamilyMemberHistorySearchParams {
   status: TokenParam;
 }
 
-export interface FlagSearchParams {
+export interface FlagSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   date: DateParam;
   encounter: ReferenceParam;
@@ -873,7 +890,7 @@ export interface FlagSearchParams {
   subject: ReferenceParam;
 }
 
-export interface GoalSearchParams {
+export interface GoalSearchParams extends DomainResourceSearchParams {
   "achievement-status": TokenParam;
   category: TokenParam;
   identifier: TokenParam;
@@ -884,12 +901,12 @@ export interface GoalSearchParams {
   "target-date": DateParam;
 }
 
-export interface GraphDefinitionSearchParams {
+export interface GraphDefinitionSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   jurisdiction: TokenParam;
@@ -901,10 +918,10 @@ export interface GraphDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface GroupSearchParams {
+export interface GroupSearchParams extends DomainResourceSearchParams {
   actual: TokenParam;
   characteristic: TokenParam;
-  "characteristic-value": CompositeParam;
+  "characteristic-value": CompositeParam<{ characteristic: TokenParam; value: TokenParam }>;
   code: TokenParam;
   exclude: TokenParam;
   identifier: TokenParam;
@@ -914,14 +931,14 @@ export interface GroupSearchParams {
   value: TokenParam;
 }
 
-export interface GuidanceResponseSearchParams {
+export interface GuidanceResponseSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   patient: ReferenceParam;
   request: TokenParam;
   subject: ReferenceParam;
 }
 
-export interface HealthcareServiceSearchParams {
+export interface HealthcareServiceSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   characteristic: TokenParam;
   "coverage-area": ReferenceParam;
@@ -936,7 +953,7 @@ export interface HealthcareServiceSearchParams {
   specialty: TokenParam;
 }
 
-export interface ImagingStudySearchParams {
+export interface ImagingStudySearchParams extends DomainResourceSearchParams {
   basedon: ReferenceParam;
   bodysite: TokenParam;
   "dicom-class": TokenParam;
@@ -956,7 +973,7 @@ export interface ImagingStudySearchParams {
   subject: ReferenceParam;
 }
 
-export interface ImmunizationSearchParams {
+export interface ImmunizationSearchParams extends DomainResourceSearchParams {
   date: DateParam;
   identifier: TokenParam;
   location: ReferenceParam;
@@ -975,7 +992,7 @@ export interface ImmunizationSearchParams {
   "vaccine-code": TokenParam;
 }
 
-export interface ImmunizationEvaluationSearchParams {
+export interface ImmunizationEvaluationSearchParams extends DomainResourceSearchParams {
   date: DateParam;
   "dose-status": TokenParam;
   identifier: TokenParam;
@@ -985,7 +1002,7 @@ export interface ImmunizationEvaluationSearchParams {
   "target-disease": TokenParam;
 }
 
-export interface ImmunizationRecommendationSearchParams {
+export interface ImmunizationRecommendationSearchParams extends DomainResourceSearchParams {
   date: DateParam;
   identifier: TokenParam;
   information: ReferenceParam;
@@ -996,12 +1013,12 @@ export interface ImmunizationRecommendationSearchParams {
   "vaccine-type": TokenParam;
 }
 
-export interface ImplementationGuideSearchParams {
+export interface ImplementationGuideSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   description: StringParam;
@@ -1017,7 +1034,7 @@ export interface ImplementationGuideSearchParams {
   version: TokenParam;
 }
 
-export interface InsurancePlanSearchParams {
+export interface InsurancePlanSearchParams extends DomainResourceSearchParams {
   address: StringParam;
   "address-city": StringParam;
   "address-country": StringParam;
@@ -1034,7 +1051,7 @@ export interface InsurancePlanSearchParams {
   type: TokenParam;
 }
 
-export interface InvoiceSearchParams {
+export interface InvoiceSearchParams extends DomainResourceSearchParams {
   account: ReferenceParam;
   date: DateParam;
   identifier: TokenParam;
@@ -1050,14 +1067,14 @@ export interface InvoiceSearchParams {
   type: TokenParam;
 }
 
-export interface LibrarySearchParams {
+export interface LibrarySearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   "content-type": TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -1077,13 +1094,13 @@ export interface LibrarySearchParams {
   version: TokenParam;
 }
 
-export interface LinkageSearchParams {
+export interface LinkageSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   item: ReferenceParam;
   source: ReferenceParam;
 }
 
-export interface ListSearchParams {
+export interface ListSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   date: DateParam;
   "empty-reason": TokenParam;
@@ -1098,7 +1115,7 @@ export interface ListSearchParams {
   title: StringParam;
 }
 
-export interface LocationSearchParams {
+export interface LocationSearchParams extends DomainResourceSearchParams {
   address: StringParam;
   "address-city": StringParam;
   "address-country": StringParam;
@@ -1116,13 +1133,13 @@ export interface LocationSearchParams {
   type: TokenParam;
 }
 
-export interface MeasureSearchParams {
+export interface MeasureSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -1141,7 +1158,7 @@ export interface MeasureSearchParams {
   version: TokenParam;
 }
 
-export interface MeasureReportSearchParams {
+export interface MeasureReportSearchParams extends DomainResourceSearchParams {
   date: DateParam;
   "evaluated-resource": ReferenceParam;
   identifier: TokenParam;
@@ -1153,7 +1170,7 @@ export interface MeasureReportSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MediaSearchParams {
+export interface MediaSearchParams extends DomainResourceSearchParams {
   "based-on": ReferenceParam;
   created: DateParam;
   device: ReferenceParam;
@@ -1169,7 +1186,7 @@ export interface MediaSearchParams {
   view: TokenParam;
 }
 
-export interface MedicationSearchParams {
+export interface MedicationSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   "expiration-date": DateParam;
   form: TokenParam;
@@ -1181,7 +1198,7 @@ export interface MedicationSearchParams {
   status: TokenParam;
 }
 
-export interface MedicationAdministrationSearchParams {
+export interface MedicationAdministrationSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   context: ReferenceParam;
   device: ReferenceParam;
@@ -1197,7 +1214,7 @@ export interface MedicationAdministrationSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicationDispenseSearchParams {
+export interface MedicationDispenseSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   context: ReferenceParam;
   destination: ReferenceParam;
@@ -1215,7 +1232,7 @@ export interface MedicationDispenseSearchParams {
   whenprepared: DateParam;
 }
 
-export interface MedicationKnowledgeSearchParams {
+export interface MedicationKnowledgeSearchParams extends DomainResourceSearchParams {
   classification: TokenParam;
   "classification-type": TokenParam;
   code: TokenParam;
@@ -1231,7 +1248,7 @@ export interface MedicationKnowledgeSearchParams {
   status: TokenParam;
 }
 
-export interface MedicationRequestSearchParams {
+export interface MedicationRequestSearchParams extends DomainResourceSearchParams {
   authoredon: DateParam;
   category: TokenParam;
   code: TokenParam;
@@ -1250,7 +1267,7 @@ export interface MedicationRequestSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicationStatementSearchParams {
+export interface MedicationStatementSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   code: TokenParam;
   context: ReferenceParam;
@@ -1264,13 +1281,13 @@ export interface MedicationStatementSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductSearchParams {
+export interface MedicinalProductSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   name: StringParam;
   "name-language": TokenParam;
 }
 
-export interface MedicinalProductAuthorizationSearchParams {
+export interface MedicinalProductAuthorizationSearchParams extends DomainResourceSearchParams {
   country: TokenParam;
   holder: ReferenceParam;
   identifier: TokenParam;
@@ -1278,40 +1295,40 @@ export interface MedicinalProductAuthorizationSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductContraindicationSearchParams {
+export interface MedicinalProductContraindicationSearchParams extends DomainResourceSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductIndicationSearchParams {
+export interface MedicinalProductIndicationSearchParams extends DomainResourceSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductInteractionSearchParams {
+export interface MedicinalProductInteractionSearchParams extends DomainResourceSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductPackagedSearchParams {
+export interface MedicinalProductPackagedSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   subject: ReferenceParam;
 }
 
-export interface MedicinalProductPharmaceuticalSearchParams {
+export interface MedicinalProductPharmaceuticalSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   route: TokenParam;
   "target-species": TokenParam;
 }
 
-export interface MedicinalProductUndesirableEffectSearchParams {
+export interface MedicinalProductUndesirableEffectSearchParams extends DomainResourceSearchParams {
   subject: ReferenceParam;
 }
 
-export interface MessageDefinitionSearchParams {
+export interface MessageDefinitionSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   event: TokenParam;
@@ -1327,7 +1344,7 @@ export interface MessageDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface MessageHeaderSearchParams {
+export interface MessageHeaderSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   code: TokenParam;
   destination: StringParam;
@@ -1344,15 +1361,31 @@ export interface MessageHeaderSearchParams {
   target: ReferenceParam;
 }
 
-export interface MolecularSequenceSearchParams {
+export interface MolecularSequenceSearchParams extends DomainResourceSearchParams {
   chromosome: TokenParam;
-  "chromosome-variant-coordinate": CompositeParam;
-  "chromosome-window-coordinate": CompositeParam;
+  "chromosome-variant-coordinate": CompositeParam<{
+    chromosome: TokenParam;
+    "variant-start": NumberParam;
+    "variant-end": NumberParam;
+  }>;
+  "chromosome-window-coordinate": CompositeParam<{
+    chromosome: TokenParam;
+    "window-start": NumberParam;
+    "window-end": NumberParam;
+  }>;
   identifier: TokenParam;
   patient: ReferenceParam;
   referenceseqid: TokenParam;
-  "referenceseqid-variant-coordinate": CompositeParam;
-  "referenceseqid-window-coordinate": CompositeParam;
+  "referenceseqid-variant-coordinate": CompositeParam<{
+    referenceseqid: TokenParam;
+    "variant-start": NumberParam;
+    "variant-end": NumberParam;
+  }>;
+  "referenceseqid-window-coordinate": CompositeParam<{
+    referenceseqid: TokenParam;
+    "window-start": NumberParam;
+    "window-end": NumberParam;
+  }>;
   type: TokenParam;
   "variant-end": NumberParam;
   "variant-start": NumberParam;
@@ -1360,13 +1393,13 @@ export interface MolecularSequenceSearchParams {
   "window-start": NumberParam;
 }
 
-export interface NamingSystemSearchParams {
+export interface NamingSystemSearchParams extends DomainResourceSearchParams {
   contact: StringParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   "id-type": TokenParam;
@@ -1382,7 +1415,7 @@ export interface NamingSystemSearchParams {
   value: StringParam;
 }
 
-export interface NutritionOrderSearchParams {
+export interface NutritionOrderSearchParams extends DomainResourceSearchParams {
   additive: TokenParam;
   datetime: DateParam;
   encounter: ReferenceParam;
@@ -1397,23 +1430,29 @@ export interface NutritionOrderSearchParams {
   supplement: TokenParam;
 }
 
-export interface ObservationSearchParams {
+export interface ObservationSearchParams extends DomainResourceSearchParams {
   "based-on": ReferenceParam;
   category: TokenParam;
   code: TokenParam;
-  "code-value-concept": CompositeParam;
-  "code-value-date": CompositeParam;
-  "code-value-quantity": CompositeParam;
-  "code-value-string": CompositeParam;
+  "code-value-concept": CompositeParam<{ code: TokenParam; "value-concept": TokenParam }>;
+  "code-value-date": CompositeParam<{ code: TokenParam; "value-date": DateParam }>;
+  "code-value-quantity": CompositeParam<{ code: TokenParam; "value-quantity": QuantityParam }>;
+  "code-value-string": CompositeParam<{ code: TokenParam; "value-string": StringParam }>;
   "combo-code": TokenParam;
-  "combo-code-value-concept": CompositeParam;
-  "combo-code-value-quantity": CompositeParam;
+  "combo-code-value-concept": CompositeParam<{ "combo-code": TokenParam; "combo-value-concept": TokenParam }>;
+  "combo-code-value-quantity": CompositeParam<{ "combo-code": TokenParam; "combo-value-quantity": QuantityParam }>;
   "combo-data-absent-reason": TokenParam;
   "combo-value-concept": TokenParam;
   "combo-value-quantity": QuantityParam;
   "component-code": TokenParam;
-  "component-code-value-concept": CompositeParam;
-  "component-code-value-quantity": CompositeParam;
+  "component-code-value-concept": CompositeParam<{
+    "component-code": TokenParam;
+    "component-value-concept": TokenParam;
+  }>;
+  "component-code-value-quantity": CompositeParam<{
+    "component-code": TokenParam;
+    "component-value-quantity": QuantityParam;
+  }>;
   "component-data-absent-reason": TokenParam;
   "component-value-concept": TokenParam;
   "component-value-quantity": QuantityParam;
@@ -1438,14 +1477,14 @@ export interface ObservationSearchParams {
   "value-string": StringParam;
 }
 
-export interface OperationDefinitionSearchParams {
+export interface OperationDefinitionSearchParams extends DomainResourceSearchParams {
   base: ReferenceParam;
   code: TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   "input-profile": ReferenceParam;
@@ -1463,7 +1502,7 @@ export interface OperationDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface OrganizationSearchParams {
+export interface OrganizationSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   address: StringParam;
   "address-city": StringParam;
@@ -1479,7 +1518,7 @@ export interface OrganizationSearchParams {
   type: TokenParam;
 }
 
-export interface OrganizationAffiliationSearchParams {
+export interface OrganizationAffiliationSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   date: DateParam;
   email: TokenParam;
@@ -1496,7 +1535,7 @@ export interface OrganizationAffiliationSearchParams {
   telecom: TokenParam;
 }
 
-export interface PatientSearchParams {
+export interface PatientSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   address: StringParam;
   "address-city": StringParam;
@@ -1522,7 +1561,7 @@ export interface PatientSearchParams {
   telecom: TokenParam;
 }
 
-export interface PaymentNoticeSearchParams {
+export interface PaymentNoticeSearchParams extends DomainResourceSearchParams {
   created: DateParam;
   identifier: TokenParam;
   "payment-status": TokenParam;
@@ -1532,7 +1571,7 @@ export interface PaymentNoticeSearchParams {
   status: TokenParam;
 }
 
-export interface PaymentReconciliationSearchParams {
+export interface PaymentReconciliationSearchParams extends DomainResourceSearchParams {
   created: DateParam;
   disposition: StringParam;
   identifier: TokenParam;
@@ -1543,7 +1582,7 @@ export interface PaymentReconciliationSearchParams {
   status: TokenParam;
 }
 
-export interface PersonSearchParams {
+export interface PersonSearchParams extends DomainResourceSearchParams {
   address: StringParam;
   "address-city": StringParam;
   "address-country": StringParam;
@@ -1565,13 +1604,13 @@ export interface PersonSearchParams {
   telecom: TokenParam;
 }
 
-export interface PlanDefinitionSearchParams {
+export interface PlanDefinitionSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   definition: ReferenceParam;
   "depends-on": ReferenceParam;
@@ -1592,7 +1631,7 @@ export interface PlanDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface PractitionerSearchParams {
+export interface PractitionerSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   address: StringParam;
   "address-city": StringParam;
@@ -1612,7 +1651,7 @@ export interface PractitionerSearchParams {
   telecom: TokenParam;
 }
 
-export interface PractitionerRoleSearchParams {
+export interface PractitionerRoleSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   date: DateParam;
   email: TokenParam;
@@ -1628,7 +1667,7 @@ export interface PractitionerRoleSearchParams {
   telecom: TokenParam;
 }
 
-export interface ProcedureSearchParams {
+export interface ProcedureSearchParams extends DomainResourceSearchParams {
   "based-on": ReferenceParam;
   category: TokenParam;
   code: TokenParam;
@@ -1647,7 +1686,7 @@ export interface ProcedureSearchParams {
   subject: ReferenceParam;
 }
 
-export interface ProvenanceSearchParams {
+export interface ProvenanceSearchParams extends DomainResourceSearchParams {
   agent: ReferenceParam;
   "agent-role": TokenParam;
   "agent-type": TokenParam;
@@ -1660,13 +1699,13 @@ export interface ProvenanceSearchParams {
   when: DateParam;
 }
 
-export interface QuestionnaireSearchParams {
+export interface QuestionnaireSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   definition: UriParam;
   description: StringParam;
@@ -1682,7 +1721,7 @@ export interface QuestionnaireSearchParams {
   version: TokenParam;
 }
 
-export interface QuestionnaireResponseSearchParams {
+export interface QuestionnaireResponseSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   authored: DateParam;
   "based-on": ReferenceParam;
@@ -1696,7 +1735,7 @@ export interface QuestionnaireResponseSearchParams {
   subject: ReferenceParam;
 }
 
-export interface RelatedPersonSearchParams {
+export interface RelatedPersonSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   address: StringParam;
   "address-city": StringParam;
@@ -1716,7 +1755,7 @@ export interface RelatedPersonSearchParams {
   telecom: TokenParam;
 }
 
-export interface RequestGroupSearchParams {
+export interface RequestGroupSearchParams extends DomainResourceSearchParams {
   author: ReferenceParam;
   authored: DateParam;
   code: TokenParam;
@@ -1733,13 +1772,13 @@ export interface RequestGroupSearchParams {
   subject: ReferenceParam;
 }
 
-export interface ResearchDefinitionSearchParams {
+export interface ResearchDefinitionSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -1758,13 +1797,13 @@ export interface ResearchDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface ResearchElementDefinitionSearchParams {
+export interface ResearchElementDefinitionSearchParams extends DomainResourceSearchParams {
   "composed-of": ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "depends-on": ReferenceParam;
   "derived-from": ReferenceParam;
@@ -1783,7 +1822,7 @@ export interface ResearchElementDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface ResearchStudySearchParams {
+export interface ResearchStudySearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   date: DateParam;
   focus: TokenParam;
@@ -1799,7 +1838,7 @@ export interface ResearchStudySearchParams {
   title: StringParam;
 }
 
-export interface ResearchSubjectSearchParams {
+export interface ResearchSubjectSearchParams extends DomainResourceSearchParams {
   date: DateParam;
   identifier: TokenParam;
   individual: ReferenceParam;
@@ -1808,7 +1847,7 @@ export interface ResearchSubjectSearchParams {
   study: ReferenceParam;
 }
 
-export interface RiskAssessmentSearchParams {
+export interface RiskAssessmentSearchParams extends DomainResourceSearchParams {
   condition: ReferenceParam;
   date: DateParam;
   encounter: ReferenceParam;
@@ -1821,12 +1860,12 @@ export interface RiskAssessmentSearchParams {
   subject: ReferenceParam;
 }
 
-export interface RiskEvidenceSynthesisSearchParams {
+export interface RiskEvidenceSynthesisSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   effective: DateParam;
@@ -1840,7 +1879,7 @@ export interface RiskEvidenceSynthesisSearchParams {
   version: TokenParam;
 }
 
-export interface ScheduleSearchParams {
+export interface ScheduleSearchParams extends DomainResourceSearchParams {
   active: TokenParam;
   actor: ReferenceParam;
   date: DateParam;
@@ -1850,15 +1889,15 @@ export interface ScheduleSearchParams {
   specialty: TokenParam;
 }
 
-export interface SearchParameterSearchParams {
+export interface SearchParameterSearchParams extends DomainResourceSearchParams {
   base: TokenParam;
   code: TokenParam;
   component: ReferenceParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   "derived-from": ReferenceParam;
   description: StringParam;
@@ -1872,7 +1911,7 @@ export interface SearchParameterSearchParams {
   version: TokenParam;
 }
 
-export interface ServiceRequestSearchParams {
+export interface ServiceRequestSearchParams extends DomainResourceSearchParams {
   authored: DateParam;
   "based-on": ReferenceParam;
   "body-site": TokenParam;
@@ -1896,7 +1935,7 @@ export interface ServiceRequestSearchParams {
   subject: ReferenceParam;
 }
 
-export interface SlotSearchParams {
+export interface SlotSearchParams extends DomainResourceSearchParams {
   "appointment-type": TokenParam;
   identifier: TokenParam;
   schedule: ReferenceParam;
@@ -1907,7 +1946,7 @@ export interface SlotSearchParams {
   status: TokenParam;
 }
 
-export interface SpecimenSearchParams {
+export interface SpecimenSearchParams extends DomainResourceSearchParams {
   accession: TokenParam;
   bodysite: TokenParam;
   collected: DateParam;
@@ -1922,21 +1961,21 @@ export interface SpecimenSearchParams {
   type: TokenParam;
 }
 
-export interface SpecimenDefinitionSearchParams {
+export interface SpecimenDefinitionSearchParams extends DomainResourceSearchParams {
   container: TokenParam;
   identifier: TokenParam;
   type: TokenParam;
 }
 
-export interface StructureDefinitionSearchParams {
+export interface StructureDefinitionSearchParams extends DomainResourceSearchParams {
   abstract: TokenParam;
   base: ReferenceParam;
   "base-path": TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   derivation: TokenParam;
   description: StringParam;
@@ -1957,12 +1996,12 @@ export interface StructureDefinitionSearchParams {
   version: TokenParam;
 }
 
-export interface StructureMapSearchParams {
+export interface StructureMapSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   identifier: TokenParam;
@@ -1975,7 +2014,7 @@ export interface StructureMapSearchParams {
   version: TokenParam;
 }
 
-export interface SubscriptionSearchParams {
+export interface SubscriptionSearchParams extends DomainResourceSearchParams {
   contact: TokenParam;
   criteria: StringParam;
   payload: TokenParam;
@@ -1984,7 +2023,7 @@ export interface SubscriptionSearchParams {
   url: UriParam;
 }
 
-export interface SubstanceSearchParams {
+export interface SubstanceSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   code: TokenParam;
   "container-identifier": TokenParam;
@@ -1995,11 +2034,11 @@ export interface SubstanceSearchParams {
   "substance-reference": ReferenceParam;
 }
 
-export interface SubstanceSpecificationSearchParams {
+export interface SubstanceSpecificationSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
 }
 
-export interface SupplyDeliverySearchParams {
+export interface SupplyDeliverySearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   patient: ReferenceParam;
   receiver: ReferenceParam;
@@ -2007,7 +2046,7 @@ export interface SupplyDeliverySearchParams {
   supplier: ReferenceParam;
 }
 
-export interface SupplyRequestSearchParams {
+export interface SupplyRequestSearchParams extends DomainResourceSearchParams {
   category: TokenParam;
   date: DateParam;
   identifier: TokenParam;
@@ -2017,7 +2056,7 @@ export interface SupplyRequestSearchParams {
   supplier: ReferenceParam;
 }
 
-export interface TaskSearchParams {
+export interface TaskSearchParams extends DomainResourceSearchParams {
   "authored-on": DateParam;
   "based-on": ReferenceParam;
   "business-status": TokenParam;
@@ -2039,12 +2078,12 @@ export interface TaskSearchParams {
   subject: ReferenceParam;
 }
 
-export interface TerminologyCapabilitiesSearchParams {
+export interface TerminologyCapabilitiesSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   jurisdiction: TokenParam;
@@ -2056,7 +2095,7 @@ export interface TerminologyCapabilitiesSearchParams {
   version: TokenParam;
 }
 
-export interface TestReportSearchParams {
+export interface TestReportSearchParams extends DomainResourceSearchParams {
   identifier: TokenParam;
   issued: DateParam;
   participant: UriParam;
@@ -2065,12 +2104,12 @@ export interface TestReportSearchParams {
   testscript: ReferenceParam;
 }
 
-export interface TestScriptSearchParams {
+export interface TestScriptSearchParams extends DomainResourceSearchParams {
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   identifier: TokenParam;
@@ -2084,13 +2123,13 @@ export interface TestScriptSearchParams {
   version: TokenParam;
 }
 
-export interface ValueSetSearchParams {
+export interface ValueSetSearchParams extends DomainResourceSearchParams {
   code: TokenParam;
   context: TokenParam;
   "context-quantity": QuantityParam;
   "context-type": TokenParam;
-  "context-type-quantity": CompositeParam;
-  "context-type-value": CompositeParam;
+  "context-type-quantity": CompositeParam<{ "context-type": TokenParam; "context-quantity": QuantityParam }>;
+  "context-type-value": CompositeParam<{ "context-type": TokenParam; context: TokenParam }>;
   date: DateParam;
   description: StringParam;
   expansion: UriParam;
@@ -2105,11 +2144,11 @@ export interface ValueSetSearchParams {
   version: TokenParam;
 }
 
-export interface VerificationResultSearchParams {
+export interface VerificationResultSearchParams extends DomainResourceSearchParams {
   target: ReferenceParam;
 }
 
-export interface VisionPrescriptionSearchParams {
+export interface VisionPrescriptionSearchParams extends DomainResourceSearchParams {
   datewritten: DateParam;
   encounter: ReferenceParam;
   identifier: TokenParam;

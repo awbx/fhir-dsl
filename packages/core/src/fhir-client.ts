@@ -67,6 +67,15 @@ export interface FhirClientConfig {
    * returned as-is (their body, if any, is handed to the caller).
    */
   async?: AsyncPollingConfig;
+  /**
+   * Runtime counterpart of the schema's `includeExpressions` type. Maps
+   * `ResourceType → searchParam → dotted FHIRPath` so `.transform(...)` can
+   * dereference `.include()`d references through the bundle. Emitted by the
+   * CLI alongside the schema types; absent on hand-authored schemas (in which
+   * case auto-dereferencing is skipped and `.transform` still reads through
+   * the `Reference` shape).
+   */
+  includeExpressions?: Record<string, Record<string, string | readonly string[]>>;
 }
 
 // --- Default executor using fetch ---
@@ -256,18 +265,21 @@ export class FhirClient<S extends FhirSchema> {
   readonly #executor: Executor;
   readonly #urlExecutor: UrlExecutor;
   readonly #schemas: SchemaRegistry | undefined;
+  readonly #includeExpressions: Record<string, Record<string, string | readonly string[]>> | undefined;
 
   constructor(config: FhirClientConfig) {
     this.#executor = createFetchExecutor(config);
     this.#urlExecutor = createUrlExecutor(config);
     this.#schemas = config.schemas;
+    this.#includeExpressions = config.includeExpressions;
   }
 
   search<RT extends string & keyof S["resources"]>(resourceType: RT): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>>;
   search<RT extends string & keyof S["resources"], P extends ProfileNames<S, RT>>(
     resourceType: RT,
     profile: P,
-  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>, never, P>;
+    // biome-ignore lint/complexity/noBannedTypes: empty-map default for the Inc generic
+  ): SearchQueryBuilder<S, RT, SearchParamFor<S, RT>, {}, P>;
   search<RT extends string & keyof S["resources"]>(
     resourceType: RT,
     profile?: string,
@@ -280,6 +292,7 @@ export class FhirClient<S extends FhirSchema> {
         profile,
         this.#urlExecutor,
         this.#schemas,
+        this.#includeExpressions,
       );
     }
     return new SearchQueryBuilderImpl<S, RT, SearchParamFor<S, RT>>(
@@ -289,6 +302,7 @@ export class FhirClient<S extends FhirSchema> {
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -309,6 +323,7 @@ export class FhirClient<S extends FhirSchema> {
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 

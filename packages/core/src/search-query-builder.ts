@@ -9,6 +9,7 @@ import {
   type ContainedMode,
   type ContainedTypeMode,
   type ExecuteOptions,
+  type IncludedResourceNames,
   mergePreferIntoQuery,
   type ResolveIncluded,
   type SearchQueryBuilder,
@@ -17,6 +18,16 @@ import {
   type SummaryMode,
   type TotalMode,
 } from "./query-builder.js";
+import type { Scope } from "./scope.js";
+import {
+  buildIncludedMap,
+  type CompiledPath,
+  collectActivatedExpressions,
+  makeT,
+  type T,
+  type TransformedQuery,
+  type TransformedResult,
+} from "./transform.js";
 import type {
   CompositeKeys,
   CompositeValues,
@@ -88,7 +99,8 @@ export class SearchQueryBuilderImpl<
   S extends FhirSchema,
   RT extends string,
   SP,
-  Inc extends string = never,
+  // biome-ignore lint/complexity/noBannedTypes: empty-record default for "no includes yet"
+  Inc extends Record<string, string> = {},
   Prof extends string | undefined = undefined,
   Sel extends string = never,
 > implements SearchQueryBuilder<S, RT, SP, Inc, Prof, Sel>
@@ -97,6 +109,7 @@ export class SearchQueryBuilderImpl<
   readonly #executor: Executor;
   readonly #urlExecutor: UrlExecutor | undefined;
   readonly #schemas: SchemaRegistry | undefined;
+  readonly #includeExpressions: Record<string, Record<string, string | readonly string[]>> | undefined;
 
   constructor(
     resourceType: string,
@@ -105,10 +118,12 @@ export class SearchQueryBuilderImpl<
     profile?: string,
     urlExecutor?: UrlExecutor,
     schemas?: SchemaRegistry,
+    includeExpressions?: Record<string, Record<string, string | readonly string[]>>,
   ) {
     this.#executor = executor;
     this.#urlExecutor = urlExecutor;
     this.#schemas = schemas;
+    this.#includeExpressions = includeExpressions;
     this.#state = state ?? {
       resourceType,
       params: [],
@@ -141,6 +156,7 @@ export class SearchQueryBuilderImpl<
         undefined,
         this.#urlExecutor,
         this.#schemas,
+        this.#includeExpressions,
       );
     }
     const param = paramOrCallback as string;
@@ -162,6 +178,7 @@ export class SearchQueryBuilderImpl<
         undefined,
         this.#urlExecutor,
         this.#schemas,
+        this.#includeExpressions,
       );
     }
     return new SearchQueryBuilderImpl<S, RT, SP, Inc, Prof, Sel>(
@@ -181,6 +198,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -202,6 +220,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -213,6 +232,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -225,6 +245,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -236,6 +257,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -247,6 +269,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -258,6 +281,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -269,6 +293,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -280,6 +305,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -291,6 +317,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -302,6 +329,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -329,6 +357,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -339,7 +368,7 @@ export class SearchQueryBuilderImpl<
     S,
     RT,
     SP,
-    Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never),
+    Inc & { [P in K]: IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never },
     Prof,
     Sel
   > {
@@ -356,14 +385,22 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
-    );
+      this.#includeExpressions,
+    ) as unknown as SearchQueryBuilder<
+      S,
+      RT,
+      SP,
+      Inc & { [P in K]: IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never },
+      Prof,
+      Sel
+    >;
   }
 
   revinclude<SrcRT extends string & keyof RevIncludeFor<S, RT>, Param extends string & RevIncludeFor<S, RT>[SrcRT]>(
     sourceResource: SrcRT,
     param: Param,
     options?: { iterate?: boolean },
-  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel> {
+  ): SearchQueryBuilder<S, RT, SP, Inc & { [P in `_rev_${SrcRT}_${Param}`]: SrcRT }, Prof, Sel> {
     const value = `${sourceResource}:${param}`;
     const entry: { value: string; iterate?: boolean } = options?.iterate ? { value, iterate: true } : { value };
     return new SearchQueryBuilderImpl(
@@ -376,7 +413,8 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
-    );
+      this.#includeExpressions,
+    ) as unknown as SearchQueryBuilder<S, RT, SP, Inc & { [P in `_rev_${SrcRT}_${Param}`]: SrcRT }, Prof, Sel>;
   }
 
   whereChained<
@@ -408,6 +446,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -441,6 +480,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -473,6 +513,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -487,6 +528,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -501,6 +543,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -515,6 +558,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -531,6 +575,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -546,6 +591,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -557,6 +603,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -568,6 +615,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -590,6 +638,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -613,6 +662,7 @@ export class SearchQueryBuilderImpl<
       undefined,
       this.#urlExecutor,
       this.#schemas,
+      this.#includeExpressions,
     );
   }
 
@@ -622,6 +672,112 @@ export class SearchQueryBuilderImpl<
 
   $call<R>(callback: (qb: this) => R): R {
     return callback(this);
+  }
+
+  transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out> {
+    // Snapshot the parameters the transform needs so it stays bound to the
+    // builder's state at call-time, not to some later chained variant.
+    const executor = this.#executor;
+    const urlExecutor = this.#urlExecutor;
+    const state = this.#state;
+    const validateFlag = this.#state.validate;
+    const schemas = this.#schemas;
+    const resourceType = this.#state.resourceType;
+
+    const activeParams = state.includes.map((i) => i.value);
+
+    // `includeExpressions` is the runtime counterpart of the generator-emitted
+    // `IncludeExpressions` type. When it's missing (hand-authored schema,
+    // older generator), auto-dereferencing simply won't activate — paths
+    // through references will return the Reference object and callers can
+    // still read `subject.reference` etc.
+    const expressionsForResource = this.#includeExpressions?.[resourceType];
+    const activatedExpressions = collectActivatedExpressions(expressionsForResource, activeParams);
+
+    const compile = this.compile.bind(this);
+
+    const runOnce = async (options?: StreamOptions): Promise<TransformedResult<Out>> => {
+      const query = mergePreferIntoQuery(compile(), options?.prefer);
+      const bundle = (await executor(query, options?.signal)) as Bundle;
+
+      const entries = bundle.entry ?? [];
+      const primaries: Resource[] = [];
+      const included: Resource[] = [];
+      for (const entry of entries) {
+        if (!entry.resource) continue;
+        if (entry.search?.mode === "include") included.push(entry.resource);
+        else primaries.push(entry.resource);
+      }
+
+      if (validateFlag) {
+        if (!schemas) throw new ValidationUnavailableError();
+        const schema = resolveSchema(schemas, resourceType, state.profile);
+        for (let i = 0; i < primaries.length; i++) {
+          await validateOne(schema, resourceType, primaries[i], i);
+        }
+      }
+
+      const includedMap = buildIncludedMap(included);
+      const pathCache = new Map<string, CompiledPath>();
+      const data: Out[] = [];
+      for (const row of primaries) {
+        const t = makeT<Scope<S, RT, Inc>>(row, activatedExpressions, includedMap, pathCache);
+        data.push(fn(t));
+      }
+
+      return {
+        data,
+        total: bundle.total,
+        link: bundle.link,
+        raw: bundle,
+      };
+    };
+
+    async function* streamRows(options?: StreamOptions): AsyncIterable<Out> {
+      // v1 streams the first page's rows. Cross-page streaming follows the
+      // same pattern as `.stream()` but would need to weave included
+      // resources across bundles — out of scope here.
+      let bundle = (await executor(mergePreferIntoQuery(compile(), options?.prefer), options?.signal)) as Bundle;
+      let schema: ReturnType<typeof resolveSchema> | undefined;
+      if (validateFlag) {
+        if (!schemas) throw new ValidationUnavailableError();
+        schema = resolveSchema(schemas, resourceType, state.profile);
+      }
+
+      const pathCache = new Map<string, CompiledPath>();
+      let index = 0;
+      while (bundle) {
+        options?.signal?.throwIfAborted();
+        const entries = bundle.entry ?? [];
+        const primaries: Resource[] = [];
+        const included: Resource[] = [];
+        for (const entry of entries) {
+          if (!entry.resource) continue;
+          if (entry.search?.mode === "include") included.push(entry.resource);
+          else primaries.push(entry.resource);
+        }
+        const includedMap = buildIncludedMap(included);
+        for (const row of primaries) {
+          if (schema) {
+            await validateOne(schema, resourceType, row, index);
+          }
+          index++;
+          const t = makeT<Scope<S, RT, Inc>>(row, activatedExpressions, includedMap, pathCache);
+          yield fn(t);
+        }
+        const nextLink = bundle.link?.find((l) => l.relation === "next");
+        if (nextLink?.url && urlExecutor) {
+          bundle = (await urlExecutor(nextLink.url, options?.signal)) as Bundle;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return {
+      execute: runOnce,
+      stream: streamRows,
+    };
   }
 
   compile(): CompiledQuery {
@@ -759,7 +915,7 @@ export class SearchQueryBuilderImpl<
   ): Promise<
     SearchResult<
       ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
-      [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
+      [IncludedResourceNames<Inc>] extends [never] ? never : ResolveIncluded<S, IncludedResourceNames<Inc>> & Resource
     >
   > {
     const query = mergePreferIntoQuery(this.compile(), options?.prefer);
@@ -790,7 +946,10 @@ export class SearchQueryBuilderImpl<
 
     const links: BundleLink[] | undefined = bundle.link;
 
-    type ResultType = SearchResult<PrimaryType, [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource>;
+    type ResultType = SearchResult<
+      PrimaryType,
+      [IncludedResourceNames<Inc>] extends [never] ? never : ResolveIncluded<S, IncludedResourceNames<Inc>> & Resource
+    >;
 
     return {
       data,

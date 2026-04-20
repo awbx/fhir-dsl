@@ -38,7 +38,7 @@ export function emitClient(hasProfiles: boolean, hasValidator: boolean = false):
 
   lines.push('import { createFhirClient, type FhirClientConfig } from "@fhir-dsl/core";');
   lines.push(
-    'import type { FhirResourceMap, IncludeRegistry, RevIncludeRegistry, SearchParamRegistry } from "./registry.js";',
+    'import { includeExpressions, type FhirResourceMap, type IncludeExpressions, type IncludeRegistry, type RevIncludeRegistry, type SearchParamRegistry } from "./registry.js";',
   );
   if (hasProfiles) {
     lines.push('import type { ProfileRegistry } from "./profiles/profile-registry.js";');
@@ -53,15 +53,18 @@ export function emitClient(hasProfiles: boolean, hasValidator: boolean = false):
   lines.push("  searchParams: SearchParamRegistry;");
   lines.push("  includes: IncludeRegistry;");
   lines.push("  revIncludes: RevIncludeRegistry;");
+  lines.push("  includeExpressions: IncludeExpressions;");
   lines.push(`  profiles: ${hasProfiles ? "ProfileRegistry" : "Record<string, never>"};`);
   lines.push("};");
   lines.push("");
 
   lines.push("export function createClient(config: FhirClientConfig) {");
   if (hasValidator) {
-    lines.push("  return createFhirClient<GeneratedSchema>({ schemas: SchemaRegistry, ...config });");
+    lines.push(
+      "  return createFhirClient<GeneratedSchema>({ schemas: SchemaRegistry, includeExpressions, ...config });",
+    );
   } else {
-    lines.push("  return createFhirClient<GeneratedSchema>(config);");
+    lines.push("  return createFhirClient<GeneratedSchema>({ includeExpressions, ...config });");
   }
   lines.push("}");
   lines.push("");

@@ -42,6 +42,7 @@ const sidebars = {
       label: 'Guides',
       items: [
         'guides/streaming',
+        'guides/transform',
         'guides/terminology',
         'guides/validation',
         'guides/smart',
@@ -69,6 +70,7 @@ const sidebars = {
       label: 'Recipes',
       items: [
         'recipes/patient-timeline',
+        'recipes/flat-rows-export',
         'recipes/bulk-export-async',
         'recipes/us-core-compliance',
         'recipes/pagination-cursor',

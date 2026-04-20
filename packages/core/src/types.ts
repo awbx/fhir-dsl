@@ -14,6 +14,13 @@ export interface FhirSchema {
   searchParams: any;
   includes: any;
   revIncludes?: any;
+  /**
+   * Optional map from include param → dotted FHIRPath on the primary resource.
+   * Present when the generator is new enough; absent on older generated trees,
+   * in which case `.transform(...)` paths through `.include()`d references
+   * won't activate auto-dereferencing (they'll still typecheck as `Reference`).
+   */
+  includeExpressions?: any;
   profiles: any;
 }
 

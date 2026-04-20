@@ -99,12 +99,21 @@ describe("emitClient", () => {
     const output = emitClient(false, false);
     expect(output).not.toContain("schema-registry.js");
     expect(output).not.toContain("SchemaRegistry");
-    expect(output).toContain("return createFhirClient<GeneratedSchema>(config);");
+    expect(output).toContain("return createFhirClient<GeneratedSchema>({ includeExpressions, ...config });");
   });
 
   it("imports SchemaRegistry and wires it into config when hasValidator is true", () => {
     const output = emitClient(false, true);
     expect(output).toContain('import { SchemaRegistry } from "./schemas/schema-registry.js";');
-    expect(output).toContain("return createFhirClient<GeneratedSchema>({ schemas: SchemaRegistry, ...config });");
+    expect(output).toContain(
+      "return createFhirClient<GeneratedSchema>({ schemas: SchemaRegistry, includeExpressions, ...config });",
+    );
+  });
+
+  it("imports IncludeExpressions type and runtime const from registry", () => {
+    const output = emitClient(false);
+    expect(output).toContain("IncludeExpressions");
+    expect(output).toContain("includeExpressions");
+    expect(output).toContain("includeExpressions: IncludeExpressions");
   });
 });

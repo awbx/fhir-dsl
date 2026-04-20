@@ -1,6 +1,8 @@
 import type { Resource, SearchParam } from "@fhir-dsl/types";
 import type { Prettify } from "./_internal/type-utils.js";
 import type { CompiledQuery } from "./compiled-query.js";
+import type { Scope } from "./scope.js";
+import type { T, TransformedQuery } from "./transform.js";
 import type {
   CompositeKeys,
   CompositeValues,
@@ -111,13 +113,17 @@ export type ResolveIncluded<
   IncludedTypes extends string,
 > = IncludedTypes extends keyof S["resources"] ? S["resources"][IncludedTypes] : never;
 
+/** Extract the union of target resource types from an include-map generic. */
+export type IncludedResourceNames<Inc extends Record<string, string>> = Inc[keyof Inc] & string;
+
 // --- Search Query Builder Interface ---
 
 export interface SearchQueryBuilder<
   S extends FhirSchema,
   RT extends string,
   SP = Record<string, SearchParam>,
-  Inc extends string = never,
+  // biome-ignore lint/complexity/noBannedTypes: empty-record default for "no includes yet"
+  Inc extends Record<string, string> = {},
   Prof extends string | undefined = undefined,
   Sel extends string = never,
 > {
@@ -206,7 +212,7 @@ export interface SearchQueryBuilder<
     S,
     RT,
     SP,
-    Inc | (IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never),
+    Inc & { [P in K]: IncludeFor<S, RT>[K] extends string ? IncludeFor<S, RT>[K] : never },
     Prof,
     Sel
   >;
@@ -215,7 +221,7 @@ export interface SearchQueryBuilder<
     sourceResource: SrcRT,
     param: Param,
     options?: { iterate?: boolean },
-  ): SearchQueryBuilder<S, RT, SP, Inc | SrcRT, Prof, Sel>;
+  ): SearchQueryBuilder<S, RT, SP, Inc & { [P in `_rev_${SrcRT}_${Param}`]: SrcRT }, Prof, Sel>;
 
   whereChained<
     RefParam extends string & keyof IncludeFor<S, RT>,
@@ -382,11 +388,33 @@ export interface SearchQueryBuilder<
   ): Promise<
     SearchResult<
       ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource,
-      [Inc] extends [never] ? never : ResolveIncluded<S, Inc> & Resource
+      [IncludedResourceNames<Inc>] extends [never] ? never : ResolveIncluded<S, IncludedResourceNames<Inc>> & Resource
     >
   >;
 
   stream(options?: StreamOptions): AsyncIterable<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource>;
+
+  /**
+   * Project the primary resources (plus any `.include()`d references) into a
+   * flat row shape via typed, FHIR-native dotted paths. Paths that cross an
+   * activated reference auto-dereference into the target resource — without
+   * the include, the same path fails to compile.
+   *
+   * ```ts
+   * const { data } = await client.search("Encounter")
+   *   .include("patient")
+   *   .transform((t) => ({
+   *     id: t("id", ""),
+   *     patientId: t.ref("subject.reference"),
+   *     given: t("subject.name.0.given.0", null),
+   *   }))
+   *   .execute();
+   * ```
+   *
+   * Unresolved references (server dropped the include, permissions filter,
+   * etc.) fall through to the supplied fallback — the transform never throws.
+   */
+  transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out>;
 }
 
 // --- Read Query Builder Interface ---

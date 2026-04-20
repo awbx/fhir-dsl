@@ -61,6 +61,10 @@ npm install @fhir-dsl/core
 | `CompositeKeys` / `CompositeComponents` / `CompositeValues` / `ParamValue` / `SortDirection` | type | Schema-derived utility types. |
 | `SearchResult` / `BundleLink` / `ApplySelection` / `ResolveIncluded` | type | Typed result of `search().execute()`. |
 | `SummaryMode` / `TotalMode` / `ContainedMode` / `ContainedTypeMode` | type | Result-shaping enums. |
+| `T` / `TExtensions` / `TransformedQuery` / `TransformedResult` | interface | `.transform(fn)` projection surface. `TExtensions<Scope>` is the declaration-merging slot for user-land helpers. |
+| `registerTHelper` / `unregisterTHelper` | function | Mount / unmount a helper onto every `t` closure. |
+| `Path` / `PathValue` / `PathToCodingArray` / `PathToSystemValueArray` | type | Typed dotted paths used by `t(path, ...)`. Arrays require explicit numeric segments; depth capped at 6. |
+| `Scope` / `IncludeExpressionsFor` | type | Include-activated virtual resource shape passed to `t`. |
 
 ## API
 
@@ -130,7 +134,7 @@ interface SearchQueryBuilder<
   S extends FhirSchema,
   RT extends string,
   SP = Record<string, SearchParam>,
-  Inc extends string = never,
+  Inc extends Record<string, string> = {},
   Prof extends string | undefined = undefined,
   Sel extends string = never,
 > {
@@ -188,6 +192,9 @@ interface SearchQueryBuilder<
   compile(): CompiledQuery;
   execute(options?: ExecuteOptions): Promise<SearchResult<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource, ResolveIncluded<S, Inc> & Resource>>;
   stream(options?: StreamOptions): AsyncIterable<ApplySelection<ResolveProfile<S, RT, Prof>, Sel> & Resource>;
+
+  // Typed row projection — auto-dereferences .include()d references
+  transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out>;
 }
 ```
 **Parameters** — Six type parameters thread schema (`S`), resource type (`RT`), search-param map (`SP`), accumulated include types (`Inc`), active profile (`Prof`), and selected fields (`Sel`) through every chain step.
@@ -214,6 +221,60 @@ const result = await fhir
 - `.usePost()` forces POST `[type]/_search`; the builder also auto-upgrades GET to POST when the URL exceeds `1900` bytes (override via `.getUrlByteLimit(n)`).
 - `.where(callback)` routes condition trees three ways: all-AND → one query param per tuple (implicit FHIR AND); all-OR of `eq` tuples sharing a param name → single comma-joined param; anything else → `_filter=<FHIRPath>`.
 - `.has("Observation", "subject", "code", "eq", "1234")` emits `_has:Observation:subject:code=1234`.
+
+---
+
+### `.transform(fn)` — typed row projection
+**Signature**
+```ts
+transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out>;
+
+interface T<Scope> extends TExtensions<Scope> {
+  <P extends Path<Scope>, D, R = PathValue<Scope, P>>(
+    path: P, fallback: D, map?: (value: NonNullable<PathValue<Scope, P>>) => R,
+  ): R | D;
+  ref<P extends Path<Scope>>(path: P): string | null;
+  coding<P extends PathToCodingArray<Scope>>(path: P, system: string): string | null;
+  valueOf<P extends PathToSystemValueArray<Scope>>(path: P, system: string): string | null;
+  enum<P extends Path<Scope>, R>(path: P, table: ReadonlyMap<string, R> | Readonly<Record<string, R>>, fallback: R): R;
+}
+
+interface TransformedQuery<Out> {
+  execute(options?: StreamOptions): Promise<TransformedResult<Out>>; // { data, total?, link?, raw }
+  stream(options?: StreamOptions): AsyncIterable<Out>;
+}
+```
+**Parameters**
+- `fn: (t) => Out` — callback that builds one row from a single matched resource. The `t` closure reads typed dotted paths against `Scope<S, RT, Inc>` (the primary resource with each `.include()`d reference unioned in).
+
+**Returns** — A `TransformedQuery<Out>`. Deferred execution: nothing is dispatched until `.execute()` or `.stream()` is called.
+
+**Example**
+```ts
+const rows = await fhir
+  .search("Encounter")
+  .include("patient")
+  .include("practitioner")
+  .transform((t) => ({
+    id: t("id", null),
+    patientFamily: t("subject.name.0.family", null),              // auto-dereferences via .include("patient")
+    patientId: t.ref("subject.reference"),                         // reads the Reference side
+    practitioner: t("participant.0.actor.name.0.family", null),   // auto-dereferences through participant[].actor
+    loincCode: t.coding("code.coding", "http://loinc.org"),
+    gender: t.enum("subject.gender", { male: "M", female: "F" }, "U"),
+  }))
+  .execute();
+```
+
+**Notes**
+- **Include activation rule.** A `.include(param)` widens the scope so paths into the referenced resource typecheck. Without the include, `subject.name` doesn't compile — `subject` stays a `Reference`. With `.include("patient")`, `subject` becomes `Reference | Patient` and both sides are reachable.
+- **Explicit numeric indexing.** Arrays require numeric segments: `name.0.given.0`, not `name.given`. The runtime walks exactly the path the type describes.
+- **Null-safe.** Any missing segment (server dropped the include, reference points outside the bundle, field unpopulated) returns the fallback without calling `map`. The walker never throws.
+- **Structural Reference fields.** `subject.reference`, `subject.type`, `subject.identifier`, `subject.display` are read directly — they're not auto-dereferenced even when the include is active.
+- **Custom helpers.** Augment `TExtensions<Scope>` via `declare module "@fhir-dsl/core"` and register the impl with `registerTHelper(name, impl)`. The impl receives a walker context (`ctx.walk(path)`) that reuses the same dereferencing machinery.
+- **Schema wiring.** Auto-dereferencing is driven by the generator-emitted `includeExpressions` map. Hand-authored schemas that omit it still get `.transform()`, just without the auto-dereference step (references remain plain `Reference` values).
+
+See the [`.transform()` guide](../guides/transform.md) for the full walkthrough and the [Flat Rows for Export](../recipes/flat-rows-export.md) recipe for an end-to-end example.
 
 ---
 

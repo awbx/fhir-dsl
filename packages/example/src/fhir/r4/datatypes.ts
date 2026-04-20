@@ -46,3 +46,7 @@ export type {
   TriggerDefinition,
   UsageContext,
 } from "@fhir-dsl/types";
+
+import type { Element } from "@fhir-dsl/types";
+
+export interface MoneyQuantity extends Element {}

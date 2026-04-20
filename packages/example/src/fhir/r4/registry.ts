@@ -13123,180 +13123,7101 @@ export interface IncludeRegistry {
 }
 
 export interface RevIncludeRegistry {
+  Account: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "account";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    Encounter: "account";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "account";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
   ActivityDefinition: {
-    DeviceRequest: "instantiates-canonical";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "instantiates-canonical";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "instantiates-canonical" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "instantiates-canonical" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "instantiates-canonical";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageDefinition: "parent";
+    MessageHeader: "focus";
     NutritionOrder: "instantiates-canonical";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "definition" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "instantiates-canonical";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     ServiceRequest: "instantiates-canonical";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  AdverseEvent: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  AllergyIntolerance: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "problem" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Appointment: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AppointmentResponse: "appointment";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    Encounter: "appointment";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "basedon";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  AppointmentResponse: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "basedon";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  AuditEvent: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Basic: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Binary: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  BiologicallyDerivedProduct: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  BodyStructure: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Bundle: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CapabilityStatement: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   CarePlan: {
-    CarePlan: "based-on" | "part-of";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "based-on" | "part-of" | "replaces";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
     DiagnosticReport: "based-on";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "basedon";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     Media: "based-on";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "based-on";
-    QuestionnaireResponse: "based-on";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "based-on" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     ServiceRequest: "based-on";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   CareTeam: {
-    CarePlan: "care-team";
-    DiagnosticReport: "results-interpreter";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "care-team" | "performer";
+    CareTeam: "participant";
+    ChargeItem: "performer-actor";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient";
+    CommunicationRequest: "based-on" | "recipient";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "actor" | "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "performer" | "prior-request";
+    DiagnosticReport: "performer" | "results-interpreter";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "performer";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Media: "operator";
+    MedicationRequest: "intended-performer";
+    MessageHeader: "focus";
+    Observation: "focus" | "performer";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ServiceRequest: "performer";
+    Task: "based-on" | "focus" | "owner" | "subject";
+    VerificationResult: "target";
+  };
+  CatalogEntry: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ChargeItem: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ChargeItemDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Claim: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClaimResponse: "request";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "claim";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ClaimResponse: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "insurance" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ClinicalImpression: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "previous" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CodeSystem: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    CodeSystem: "supplements";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Communication: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CommunicationRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on" | "replaces";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CompartmentDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Composition: {
-    Composition: "related-ref";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    Bundle: "composition";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "related-ref" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ConceptMap: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    ConceptMap: "other";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Condition: {
-    Appointment: "reason-reference";
-    ClinicalImpression: "finding-ref";
-    Encounter: "reason-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "resultingcondition";
+    Appointment: "reason-reference" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "condition";
+    ClinicalImpression: "finding-ref" | "problem" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    Encounter: "diagnosis" | "reason-reference";
+    EpisodeOfCare: "condition";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Immunization: "reason-reference";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "reason-reference";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    RiskAssessment: "condition";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Consent: {
-    Consent: "source-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data" | "source-reference";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Contract: {
-    Consent: "source-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data" | "source-reference";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Coverage: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "insurance" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "coverage";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CoverageEligibilityRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    CoverageEligibilityResponse: "request";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  CoverageEligibilityResponse: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  DetectedIssue: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Device: {
+    Account: "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "actor" | "supporting-info";
+    AppointmentResponse: "actor";
+    AuditEvent: "agent" | "entity" | "source";
+    Basic: "subject";
+    CarePlan: "performer";
+    ChargeItem: "enterer" | "performer-actor";
     Claim: "detail-udi" | "item-udi" | "procedure-udi" | "subdetail-udi";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "requester" | "sender";
+    Composition: "author" | "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "actor" | "data";
+    Contract: "subject";
+    DetectedIssue: "author" | "implicated";
+    DeviceMetric: "parent" | "source";
+    DeviceRequest: "based-on" | "device" | "performer" | "prior-request" | "requester" | "subject";
+    DeviceUseStatement: "device";
+    DiagnosticReport: "subject";
+    DocumentManifest: "author" | "item" | "related-ref" | "subject";
+    DocumentReference: "author" | "related" | "subject";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     ExplanationOfBenefit: "detail-udi" | "item-udi" | "procedure-udi" | "subdetail-udi";
+    Flag: "author";
+    Group: "member";
+    ImagingStudy: "performer" | "subject";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "participant";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item" | "source" | "subject";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "subject";
+    Media: "device" | "operator" | "subject";
+    MedicationAdministration: "device" | "performer";
+    MedicationDispense: "performer";
+    MedicationRequest: "intended-performer" | "requester";
+    MessageHeader: "focus" | "target";
+    Observation: "device" | "focus" | "subject";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "performer";
+    Provenance: "agent" | "entity" | "target";
+    QuestionnaireResponse: "author" | "subject";
+    RequestGroup: "author" | "participant";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    RiskAssessment: "performer";
+    Schedule: "actor";
+    ServiceRequest: "performer" | "requester" | "subject";
+    Specimen: "subject";
+    SupplyRequest: "requester";
+    Task: "based-on" | "focus" | "owner" | "requester" | "subject";
+    VerificationResult: "target";
+  };
+  DeviceDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceDefinition: "parent";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  DeviceMetric: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Media: "device";
+    MessageHeader: "focus";
+    Observation: "device" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  DeviceRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  DeviceUseStatement: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   DiagnosticReport: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Immunization: "reason-reference";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "reason-reference";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  DocumentManifest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   DocumentReference: {
-    Consent: "source-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data" | "source-reference";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related" | "relatesto";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicationKnowledge: "monograph";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "reason-reference";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  EffectEvidenceSynthesis: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Encounter: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "encounter";
+    CareTeam: "encounter";
+    ChargeItem: "context";
+    Claim: "encounter";
+    ClinicalImpression: "encounter" | "supporting-info";
+    Communication: "based-on" | "encounter" | "part-of";
+    CommunicationRequest: "based-on" | "encounter";
+    Composition: "encounter" | "entry" | "subject";
+    Condition: "encounter" | "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "encounter" | "prior-request";
+    DiagnosticReport: "encounter";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "encounter" | "related";
     Encounter: "part-of";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "encounter";
+    Flag: "encounter";
+    ImagingStudy: "encounter";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "encounter" | "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Media: "encounter";
+    MedicationAdministration: "context";
+    MedicationDispense: "context";
+    MedicationRequest: "encounter";
+    MedicationStatement: "context";
+    MessageHeader: "focus";
+    NutritionOrder: "encounter";
+    Observation: "encounter" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "encounter";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "encounter" | "subject";
+    RequestGroup: "encounter";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    RiskAssessment: "encounter";
+    ServiceRequest: "encounter";
+    Task: "based-on" | "encounter" | "focus" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "encounter";
+  };
+  Endpoint: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    HealthcareService: "endpoint";
+    ImagingStudy: "endpoint";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    InsurancePlan: "endpoint";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Location: "endpoint";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    Organization: "endpoint";
+    OrganizationAffiliation: "endpoint";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    PractitionerRole: "endpoint";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  EnrollmentRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EnrollmentResponse: "request";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  EnrollmentResponse: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   EpisodeOfCare: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "context";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "encounter" | "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "encounter" | "prior-request";
+    DiagnosticReport: "encounter";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "encounter" | "related";
     Encounter: "episode-of-care";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Flag: "encounter";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "encounter" | "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicationAdministration: "context";
+    MedicationDispense: "context";
+    MedicationStatement: "context";
+    MessageHeader: "focus";
+    NutritionOrder: "encounter";
+    Observation: "encounter" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "encounter";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    RiskAssessment: "encounter";
+    ServiceRequest: "encounter";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "encounter";
+  };
+  EventDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Evidence: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  EvidenceVariable: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ExampleScenario: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ExplanationOfBenefit: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  FamilyMemberHistory: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Flag: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Goal: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "goal";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  GraphDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Group: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "subject";
+    AllergyIntolerance: "patient";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "patient" | "subject";
+    CareTeam: "patient" | "subject";
+    ChargeItem: "subject";
+    ClinicalImpression: "patient" | "subject" | "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "subject";
+    CommunicationRequest: "based-on" | "recipient" | "subject";
+    Composition: "entry" | "patient" | "subject";
+    Condition: "evidence-detail" | "patient" | "subject";
+    Consent: "actor" | "data" | "patient";
+    Contract: "subject";
+    DetectedIssue: "implicated" | "patient";
+    DeviceRequest: "based-on" | "patient" | "prior-request" | "subject";
+    DeviceUseStatement: "patient" | "subject";
+    DiagnosticReport: "patient" | "subject";
+    DocumentManifest: "item" | "patient" | "related-ref" | "subject";
+    DocumentReference: "patient" | "related" | "subject";
+    Encounter: "patient" | "subject";
+    EpisodeOfCare: "patient";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "patient";
+    Flag: "patient" | "subject";
+    Goal: "patient" | "subject";
+    Group: "member";
+    GuidanceResponse: "subject";
+    ImagingStudy: "patient" | "subject";
+    Immunization: "patient";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "subject";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item" | "patient" | "subject";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "subject";
+    Media: "subject";
+    MedicationAdministration: "patient" | "subject";
+    MedicationDispense: "patient" | "subject";
+    MedicationRequest: "patient" | "subject";
+    MedicationStatement: "patient" | "subject";
+    MessageHeader: "focus";
+    NutritionOrder: "patient";
+    Observation: "focus" | "patient" | "subject";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "patient" | "subject";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    RequestGroup: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    RiskAssessment: "patient" | "subject";
+    ServiceRequest: "patient" | "subject";
+    Specimen: "subject";
+    SupplyDelivery: "patient";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "patient";
+  };
+  GuidanceResponse: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  HealthcareService: {
+    Account: "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "actor" | "supporting-info";
+    AppointmentResponse: "actor";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "performer";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "sender";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "performer" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    OrganizationAffiliation: "service";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    PractitionerRole: "service";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Schedule: "actor";
+    ServiceRequest: "performer";
+    SupplyRequest: "supplier";
+    Task: "based-on" | "focus" | "owner" | "subject";
+    VerificationResult: "target";
+  };
+  ImagingStudy: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Immunization: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     ImmunizationEvaluation: "immunization-event";
+    ImmunizationRecommendation: "information" | "support";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ImmunizationEvaluation: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information" | "support";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   ImmunizationRecommendation: {
-    Appointment: "reason-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "reason-reference" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
     DiagnosticReport: "based-on";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
     Encounter: "reason-reference";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   ImplementationGuide: {
-    ImplementationGuide: "depends-on";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CapabilityStatement: "guide";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "depends-on" | "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  InsurancePlan: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Invoice: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Library: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Linkage: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  List: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Location: {
-    HealthcareService: "coverage-area";
+    Account: "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "location";
+    Appointment: "actor" | "location" | "supporting-info";
+    AppointmentResponse: "actor" | "location";
+    AuditEvent: "entity";
+    Basic: "subject";
+    Claim: "facility";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "domain" | "subject";
+    CoverageEligibilityRequest: "facility";
+    DetectedIssue: "implicated";
+    Device: "location";
+    DeviceRequest: "based-on" | "prior-request" | "subject";
+    DiagnosticReport: "subject";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    Encounter: "location";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "facility";
+    Flag: "subject";
+    HealthcareService: "coverage-area" | "location";
+    Immunization: "location";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item" | "subject";
+    Location: "partof";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "reporter" | "subject";
+    Media: "subject";
+    MedicationDispense: "destination";
+    MessageHeader: "focus";
+    Observation: "focus" | "subject";
+    OrganizationAffiliation: "location";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    PractitionerRole: "location";
+    Procedure: "location";
+    Provenance: "entity" | "location" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "site";
+    Schedule: "actor";
+    ServiceRequest: "subject";
+    Specimen: "subject";
+    SupplyRequest: "subject";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Measure: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "instantiates-canonical";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "instantiates-canonical" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "instantiates-canonical";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "measure";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "instantiates-canonical";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MeasureReport: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Media: {
-    ClinicalImpression: "finding-ref";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "finding-ref" | "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DiagnosticReport: "media";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicationKnowledge: "monograph";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Medication: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Flag: "subject";
+    Group: "member";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Medication: "ingredient";
+    MedicationAdministration: "medication";
+    MedicationDispense: "medication";
+    MedicationRequest: "medication";
+    MedicationStatement: "medication";
+    MedicinalProductContraindication: "subject";
+    MedicinalProductIndication: "subject";
+    MedicinalProductInteraction: "subject";
+    MedicinalProductUndesirableEffect: "subject";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   MedicationAdministration: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     MedicationStatement: "part-of";
+    MessageHeader: "focus";
+    Observation: "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "part-of";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   MedicationDispense: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     MedicationStatement: "part-of";
+    MessageHeader: "focus";
+    Observation: "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicationKnowledge: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   MedicationRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
     DiagnosticReport: "based-on";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicationAdministration: "request";
+    MedicationDispense: "prescription";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     ServiceRequest: "based-on";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   MedicationStatement: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     MedicationStatement: "part-of";
+    MessageHeader: "focus";
+    Observation: "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProduct: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicinalProductAuthorization: "subject";
+    MedicinalProductContraindication: "subject";
+    MedicinalProductIndication: "subject";
+    MedicinalProductInteraction: "subject";
+    MedicinalProductPackaged: "subject";
+    MedicinalProductUndesirableEffect: "subject";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductAuthorization: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductContraindication: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductIndication: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductIngredient: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductInteraction: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductManufactured: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductPackaged: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MedicinalProductAuthorization: "subject";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductPharmaceutical: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MedicinalProductUndesirableEffect: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MessageDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  MessageHeader: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    Bundle: "message";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   MolecularSequence: {
-    Observation: "has-member";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus" | "has-member";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  NamingSystem: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   NutritionOrder: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
     DiagnosticReport: "based-on";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Observation: {
-    Appointment: "reason-reference";
-    ClinicalImpression: "finding-ref";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "reason-reference" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "finding-ref" | "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DiagnosticReport: "result";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
     Encounter: "reason-reference";
-    Immunization: "reason-reference";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Immunization: "reaction" | "reason-reference";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     MedicationStatement: "part-of";
-    Observation: "has-member";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus" | "has-member";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "part-of" | "reason-reference";
-    QuestionnaireResponse: "part-of";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "part-of" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ObservationDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  OperationDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "instantiates-canonical";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "instantiates-canonical" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "instantiates-canonical";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    OperationDefinition: "base";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "instantiates-canonical";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  OperationOutcome: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Organization: {
-    ChargeItem: "performing-organization" | "requesting-organization";
-    Claim: "care-team";
-    Coverage: "policy-holder";
-    DiagnosticReport: "results-interpreter";
+    Account: "owner" | "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "agent" | "entity" | "source";
+    Basic: "author" | "subject";
+    CarePlan: "performer";
+    CareTeam: "participant";
+    ChargeItem: "enterer" | "performer-actor" | "performing-organization" | "requesting-organization";
+    Claim: "care-team" | "insurer" | "payee" | "provider";
+    ClaimResponse: "insurer" | "requestor";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "requester" | "sender";
+    Composition: "attester" | "author" | "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "actor" | "consentor" | "data" | "organization";
+    Contract: "authority" | "signer" | "subject";
+    Coverage: "payor" | "policy-holder";
+    CoverageEligibilityRequest: "provider";
+    CoverageEligibilityResponse: "insurer" | "requestor";
+    DetectedIssue: "implicated";
+    Device: "organization";
+    DeviceRequest: "based-on" | "performer" | "prior-request" | "requester";
+    DiagnosticReport: "performer" | "results-interpreter";
+    DocumentManifest: "author" | "item" | "recipient" | "related-ref";
+    DocumentReference: "authenticator" | "author" | "custodian" | "related";
     Encounter: "service-provider";
-    ExplanationOfBenefit: "care-team";
+    Endpoint: "organization";
+    EpisodeOfCare: "organization";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "care-team" | "payee" | "provider";
+    Flag: "author" | "subject";
+    Goal: "subject";
     Group: "managing-entity";
+    HealthcareService: "organization";
+    ImagingStudy: "performer";
+    Immunization: "manufacturer" | "performer";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
     InsurancePlan: "administered-by" | "owned-by";
-    MedicationRequest: "intended-dispenser";
-    OrganizationAffiliation: "participating-organization" | "primary-organization";
-    Patient: "general-practitioner";
-    PaymentReconciliation: "payment-issuer";
+    Invoice: "issuer" | "participant" | "recipient";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "author" | "item" | "source";
+    List: "item";
+    Location: "organization";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "reporter";
+    Media: "operator";
+    Medication: "manufacturer";
+    MedicationDispense: "performer";
+    MedicationKnowledge: "manufacturer";
+    MedicationRequest: "intended-dispenser" | "intended-performer" | "requester";
+    MedicationStatement: "source";
+    MedicinalProductAuthorization: "holder";
+    MessageHeader: "focus" | "receiver" | "responsible" | "sender";
+    Observation: "focus" | "performer";
+    Organization: "partof";
+    OrganizationAffiliation: "network" | "participating-organization" | "primary-organization";
+    Patient: "general-practitioner" | "organization";
+    PaymentNotice: "provider" | "request" | "response";
+    PaymentReconciliation: "payment-issuer" | "requestor";
+    Person: "organization";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    PractitionerRole: "organization";
+    Procedure: "performer";
+    Provenance: "agent" | "entity" | "target";
+    QuestionnaireResponse: "author" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "sponsor";
+    ServiceRequest: "performer" | "requester";
+    SupplyDelivery: "supplier";
+    SupplyRequest: "requester" | "subject" | "supplier";
+    Task: "based-on" | "focus" | "owner" | "requester" | "subject";
+    VerificationResult: "target";
+  };
+  OrganizationAffiliation: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Patient: {
-    Coverage: "policy-holder";
+    Account: "patient" | "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "recorder" | "subject";
+    AllergyIntolerance: "asserter" | "patient" | "recorder";
+    Appointment: "actor" | "patient" | "supporting-info";
+    AppointmentResponse: "actor" | "patient";
+    AuditEvent: "agent" | "entity" | "patient" | "source";
+    Basic: "author" | "patient" | "subject";
+    BodyStructure: "patient";
+    CarePlan: "patient" | "performer" | "subject";
+    CareTeam: "participant" | "patient" | "subject";
+    ChargeItem: "enterer" | "patient" | "performer-actor" | "subject";
+    Claim: "patient" | "payee";
+    ClaimResponse: "patient";
+    ClinicalImpression: "patient" | "subject" | "supporting-info";
+    Communication: "based-on" | "part-of" | "patient" | "recipient" | "sender" | "subject";
+    CommunicationRequest: "based-on" | "patient" | "recipient" | "requester" | "sender" | "subject";
+    Composition: "attester" | "author" | "entry" | "patient" | "subject";
+    Condition: "asserter" | "evidence-detail" | "patient" | "subject";
+    Consent: "actor" | "consentor" | "data" | "patient";
+    Contract: "patient" | "signer" | "subject";
+    Coverage: "beneficiary" | "patient" | "payor" | "policy-holder" | "subscriber";
+    CoverageEligibilityRequest: "patient";
+    CoverageEligibilityResponse: "patient";
+    DetectedIssue: "implicated" | "patient";
+    Device: "patient";
+    DeviceRequest: "based-on" | "patient" | "performer" | "prior-request" | "subject";
+    DeviceUseStatement: "patient" | "subject";
+    DiagnosticReport: "patient" | "subject";
+    DocumentManifest: "author" | "item" | "patient" | "recipient" | "related-ref" | "subject";
+    DocumentReference: "author" | "patient" | "related" | "subject";
+    Encounter: "patient" | "subject";
+    EnrollmentRequest: "patient" | "subject";
+    EpisodeOfCare: "patient";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "patient" | "payee";
+    FamilyMemberHistory: "patient";
+    Flag: "author" | "patient" | "subject";
+    Goal: "patient" | "subject";
+    Group: "member";
+    GuidanceResponse: "patient" | "subject";
+    ImagingStudy: "patient" | "performer" | "subject";
+    Immunization: "patient";
+    ImmunizationEvaluation: "patient";
+    ImmunizationRecommendation: "information" | "patient";
+    ImplementationGuide: "resource";
+    Invoice: "participant" | "patient" | "recipient" | "subject";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item" | "patient" | "source" | "subject";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "patient" | "subject";
+    Media: "operator" | "patient" | "subject";
+    MedicationAdministration: "patient" | "performer" | "subject";
+    MedicationDispense: "patient" | "performer" | "receiver" | "subject";
+    MedicationRequest: "intended-performer" | "patient" | "requester" | "subject";
+    MedicationStatement: "patient" | "source" | "subject";
+    MessageHeader: "focus";
+    MolecularSequence: "patient";
+    NutritionOrder: "patient";
+    Observation: "focus" | "patient" | "performer" | "subject";
+    Patient: "link";
+    PaymentNotice: "request" | "response";
+    Person: "link" | "patient";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "patient" | "performer" | "subject";
+    Provenance: "agent" | "entity" | "patient" | "target";
+    QuestionnaireResponse: "author" | "patient" | "source" | "subject";
+    RelatedPerson: "patient";
+    RequestGroup: "participant" | "patient" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchSubject: "individual" | "patient";
+    RiskAssessment: "patient" | "subject";
+    Schedule: "actor";
+    ServiceRequest: "patient" | "performer" | "requester" | "subject";
+    Specimen: "patient" | "subject";
+    SupplyDelivery: "patient";
+    SupplyRequest: "requester" | "subject";
+    Task: "based-on" | "focus" | "owner" | "patient" | "requester" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "patient";
+  };
+  PaymentNotice: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  PaymentReconciliation: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Person: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    Person: "link";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   PlanDefinition: {
-    DeviceRequest: "instantiates-canonical";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "instantiates-canonical";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "instantiates-canonical" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "instantiates-canonical" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "instantiates-canonical";
+    Flag: "subject";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageDefinition: "parent";
+    MessageHeader: "focus";
     NutritionOrder: "instantiates-canonical";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "definition" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "instantiates-canonical";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "protocol";
     ServiceRequest: "instantiates-canonical";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Practitioner: {
-    Claim: "care-team";
-    DiagnosticReport: "results-interpreter";
+    Account: "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "recorder" | "subject";
+    AllergyIntolerance: "asserter" | "recorder";
+    Appointment: "actor" | "practitioner" | "supporting-info";
+    AppointmentResponse: "actor" | "practitioner";
+    AuditEvent: "agent" | "entity" | "source";
+    Basic: "author" | "subject";
+    CarePlan: "performer";
+    CareTeam: "participant";
+    ChargeItem: "enterer" | "performer-actor";
+    Claim: "care-team" | "enterer" | "payee" | "provider";
+    ClaimResponse: "requestor";
+    ClinicalImpression: "assessor" | "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "requester" | "sender";
+    Composition: "attester" | "author" | "entry" | "subject";
+    Condition: "asserter" | "evidence-detail";
+    Consent: "actor" | "consentor" | "data";
+    Contract: "signer" | "subject";
+    CoverageEligibilityRequest: "enterer" | "provider";
+    CoverageEligibilityResponse: "requestor";
+    DetectedIssue: "author" | "implicated";
+    DeviceRequest: "based-on" | "performer" | "prior-request" | "requester";
+    DiagnosticReport: "performer" | "results-interpreter";
+    DocumentManifest: "author" | "item" | "recipient" | "related-ref" | "subject";
+    DocumentReference: "authenticator" | "author" | "related" | "subject";
+    Encounter: "participant" | "practitioner";
     EpisodeOfCare: "care-manager";
-    ExplanationOfBenefit: "care-team";
-    Group: "managing-entity";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "care-team" | "enterer" | "payee" | "provider";
+    Flag: "author" | "subject";
+    Group: "managing-entity" | "member";
+    ImagingStudy: "interpreter" | "performer" | "referrer";
+    Immunization: "performer";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "participant";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "author" | "item" | "source";
+    List: "item" | "source";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "reporter" | "subject";
+    Media: "operator" | "subject";
+    MedicationAdministration: "performer";
+    MedicationDispense: "performer" | "receiver" | "responsibleparty";
+    MedicationRequest: "intended-performer" | "requester";
+    MedicationStatement: "source";
+    MessageHeader: "author" | "enterer" | "focus" | "receiver" | "responsible" | "sender";
+    NutritionOrder: "provider";
+    Observation: "focus" | "performer";
     Patient: "general-practitioner";
+    PaymentNotice: "provider" | "request" | "response";
+    PaymentReconciliation: "requestor";
+    Person: "link" | "practitioner";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    PractitionerRole: "practitioner";
+    Procedure: "performer";
+    Provenance: "agent" | "entity" | "target";
+    QuestionnaireResponse: "author" | "source" | "subject";
+    RequestGroup: "author" | "participant";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "principalinvestigator";
+    RiskAssessment: "performer";
+    Schedule: "actor";
+    ServiceRequest: "performer" | "requester";
+    Specimen: "collector";
+    SupplyDelivery: "receiver" | "supplier";
+    SupplyRequest: "requester";
+    Task: "based-on" | "focus" | "owner" | "requester" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "prescriber";
   };
   PractitionerRole: {
-    Claim: "care-team";
-    DiagnosticReport: "results-interpreter";
-    ExplanationOfBenefit: "care-team";
-    Group: "managing-entity";
+    Account: "subject";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "recorder";
+    AllergyIntolerance: "asserter" | "recorder";
+    Appointment: "actor" | "supporting-info";
+    AppointmentResponse: "actor";
+    AuditEvent: "agent" | "entity" | "source";
+    Basic: "author" | "subject";
+    CarePlan: "performer";
+    CareTeam: "participant";
+    ChargeItem: "enterer" | "performer-actor";
+    Claim: "care-team" | "enterer" | "payee" | "provider";
+    ClaimResponse: "requestor";
+    ClinicalImpression: "assessor" | "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "requester" | "sender";
+    Composition: "attester" | "author" | "entry" | "subject";
+    Condition: "asserter" | "evidence-detail";
+    Consent: "actor" | "consentor" | "data";
+    Contract: "signer" | "subject";
+    CoverageEligibilityRequest: "enterer" | "provider";
+    CoverageEligibilityResponse: "requestor";
+    DetectedIssue: "author" | "implicated";
+    DeviceRequest: "based-on" | "performer" | "prior-request" | "requester";
+    DiagnosticReport: "performer" | "results-interpreter";
+    DocumentManifest: "author" | "item" | "recipient" | "related-ref";
+    DocumentReference: "authenticator" | "author" | "related";
+    Encounter: "participant";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "care-team" | "enterer" | "payee" | "provider";
+    Flag: "author";
+    Group: "managing-entity" | "member";
+    ImagingStudy: "interpreter" | "performer" | "referrer";
+    Immunization: "performer";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "participant";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "author" | "item" | "source";
+    List: "item" | "source";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "reporter" | "subject";
+    Media: "operator" | "subject";
+    MedicationAdministration: "performer";
+    MedicationDispense: "performer" | "responsibleparty";
+    MedicationRequest: "intended-performer" | "requester";
+    MedicationStatement: "source";
+    MessageHeader: "author" | "enterer" | "focus" | "receiver" | "responsible" | "sender";
+    NutritionOrder: "provider";
+    Observation: "focus" | "performer";
     Patient: "general-practitioner";
+    PaymentNotice: "provider" | "request" | "response";
+    PaymentReconciliation: "requestor";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "performer";
+    Provenance: "agent" | "entity" | "target";
+    QuestionnaireResponse: "author" | "source" | "subject";
+    RequestGroup: "author" | "participant";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "principalinvestigator";
+    RiskAssessment: "performer";
+    Schedule: "actor";
+    ServiceRequest: "performer" | "requester";
+    Specimen: "collector";
+    SupplyDelivery: "receiver" | "supplier";
+    SupplyRequest: "requester";
+    Task: "based-on" | "focus" | "owner" | "requester" | "subject";
+    VerificationResult: "target";
+    VisionPrescription: "prescriber";
   };
   Procedure: {
-    Appointment: "reason-reference";
-    Encounter: "reason-reference";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "reason-reference" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    Encounter: "diagnosis" | "reason-reference";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Flag: "subject";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     MedicationStatement: "part-of";
+    MessageHeader: "focus";
+    Observation: "focus" | "part-of";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "part-of" | "reason-reference";
-    QuestionnaireResponse: "part-of";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "part-of" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Provenance: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Questionnaire: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "instantiates-canonical";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "instantiates-canonical" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    FamilyMemberHistory: "instantiates-canonical";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "definition" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "instantiates-canonical";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "questionnaire" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   QuestionnaireResponse: {
-    Consent: "source-reference";
-    Observation: "has-member";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data" | "source-reference";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "derived-from" | "focus" | "has-member";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   RelatedPerson: {
-    Coverage: "policy-holder";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "recorder" | "subject";
+    AllergyIntolerance: "asserter" | "recorder";
+    Appointment: "actor" | "supporting-info";
+    AppointmentResponse: "actor";
+    AuditEvent: "agent" | "entity" | "source";
+    Basic: "author" | "subject";
+    CarePlan: "performer";
+    CareTeam: "participant";
+    ChargeItem: "enterer" | "performer-actor";
+    Claim: "payee";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of" | "recipient" | "sender";
+    CommunicationRequest: "based-on" | "recipient" | "requester" | "sender";
+    Composition: "attester" | "author" | "entry" | "subject";
+    Condition: "asserter" | "evidence-detail";
+    Consent: "actor" | "consentor" | "data";
+    Contract: "signer" | "subject";
+    Coverage: "payor" | "policy-holder" | "subscriber";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "performer" | "prior-request";
+    DocumentManifest: "author" | "item" | "recipient" | "related-ref";
+    DocumentReference: "author" | "related";
+    Encounter: "participant";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ExplanationOfBenefit: "payee";
     Group: "managing-entity";
+    ImagingStudy: "performer";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Invoice: "participant" | "recipient";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource" | "subject";
+    Media: "operator";
+    MedicationAdministration: "performer";
+    MedicationDispense: "performer";
+    MedicationRequest: "intended-performer" | "requester";
+    MedicationStatement: "source";
+    MessageHeader: "focus";
+    Observation: "focus" | "performer";
+    Patient: "link";
+    PaymentNotice: "request" | "response";
+    Person: "link" | "relatedperson";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Procedure: "performer";
+    Provenance: "agent" | "entity" | "target";
+    QuestionnaireResponse: "author" | "source" | "subject";
+    RequestGroup: "participant";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Schedule: "actor";
+    ServiceRequest: "performer" | "requester";
+    SupplyRequest: "requester";
+    Task: "based-on" | "focus" | "owner" | "requester" | "subject";
+    VerificationResult: "target";
+  };
+  RequestGroup: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ResearchDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ResearchElementDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ResearchStudy: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "study";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchStudy: "partof";
+    ResearchSubject: "study";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  ResearchSubject: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  RiskAssessment: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "investigation" | "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  RiskEvidenceSynthesis: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Schedule: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Slot: "schedule";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   SearchParameter: {
-    SearchParameter: "derived-from";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    SearchParameter: "component" | "derived-from";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   ServiceRequest: {
-    Appointment: "based-on";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "based-on" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
     DiagnosticReport: "based-on";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
     Encounter: "based-on";
     EpisodeOfCare: "incoming-referral";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "basedon";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
     Media: "based-on";
+    MessageHeader: "focus";
+    Observation: "based-on" | "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
     Procedure: "based-on";
-    QuestionnaireResponse: "based-on";
-    ServiceRequest: "based-on";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "based-on" | "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ServiceRequest: "based-on" | "replaces";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Slot: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "slot" | "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Specimen: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DiagnosticReport: "specimen";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Media: "subject";
+    MessageHeader: "focus";
+    Observation: "focus" | "specimen";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ServiceRequest: "specimen";
+    Specimen: "parent";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SpecimenDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   StructureDefinition: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
     CapabilityStatement: "resource-profile" | "supported-profile";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "global" | "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
     OperationDefinition: "input-profile" | "output-profile";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    StructureDefinition: "base";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  StructureMap: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  Subscription: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Substance: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    AdverseEvent: "substance";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Group: "member";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    Medication: "ingredient";
+    MedicationKnowledge: "ingredient";
+    MedicinalProductInteraction: "subject";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Specimen: "subject";
     Substance: "substance-reference";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstanceNucleicAcid: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstancePolymer: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstanceProtein: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstanceReferenceInformation: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstanceSourceMaterial: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SubstanceSpecification: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SupplyDelivery: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ChargeItem: "service";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  SupplyRequest: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
   Task: {
-    Task: "part-of";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImagingStudy: "basedon";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PaymentReconciliation: "request";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "part-of" | "subject";
+    VerificationResult: "target";
+  };
+  TerminologyCapabilities: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  TestReport: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  TestScript: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    TestReport: "testscript";
+    VerificationResult: "target";
   };
   ValueSet: {
-    ConceptMap: "source-uri" | "target-uri";
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    ConceptMap: "source" | "source-uri" | "target" | "target-uri";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    StructureDefinition: "valueset";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  VerificationResult: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
+  };
+  VisionPrescription: {
+    ActivityDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Appointment: "supporting-info";
+    AuditEvent: "entity";
+    Basic: "subject";
+    CarePlan: "activity-reference";
+    ClinicalImpression: "supporting-info";
+    Communication: "based-on" | "part-of";
+    CommunicationRequest: "based-on";
+    Composition: "entry" | "subject";
+    Condition: "evidence-detail";
+    Consent: "data";
+    Contract: "subject";
+    DetectedIssue: "implicated";
+    DeviceRequest: "based-on" | "prior-request";
+    DocumentManifest: "item" | "related-ref";
+    DocumentReference: "related";
+    EventDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Evidence: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    EvidenceVariable: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ImmunizationRecommendation: "information";
+    ImplementationGuide: "resource";
+    Library: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Linkage: "item" | "source";
+    List: "item";
+    Measure: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    MeasureReport: "evaluated-resource";
+    MessageHeader: "focus";
+    Observation: "focus";
+    PaymentNotice: "request" | "response";
+    PlanDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Provenance: "entity" | "target";
+    QuestionnaireResponse: "subject";
+    ResearchDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    ResearchElementDefinition: "composed-of" | "depends-on" | "derived-from" | "predecessor" | "successor";
+    Task: "based-on" | "focus" | "subject";
+    VerificationResult: "target";
   };
 }
+
+export interface IncludeExpressions {
+  Account: {
+    owner: "owner";
+    patient: "subject";
+    subject: "subject";
+  };
+  AdverseEvent: {
+    location: "location";
+    recorder: "recorder";
+    resultingcondition: "resultingCondition";
+    study: "study";
+    subject: "subject";
+    substance: "suspectEntity.instance";
+  };
+  AllergyIntolerance: {
+    asserter: "asserter";
+    recorder: "recorder";
+  };
+  Appointment: {
+    actor: "participant.actor";
+    "based-on": "basedOn";
+    location: "participant.actor";
+    patient: "participant.actor";
+    practitioner: "participant.actor";
+    "reason-reference": "reasonReference";
+    slot: "slot";
+    "supporting-info": "supportingInformation";
+  };
+  AppointmentResponse: {
+    actor: "actor";
+    appointment: "appointment";
+    location: "actor";
+    patient: "actor";
+    practitioner: "actor";
+  };
+  AuditEvent: {
+    agent: "agent.who";
+    entity: "entity.what";
+    patient: "agent.who" | "entity.what";
+    source: "source.observer";
+  };
+  Basic: {
+    author: "author";
+    patient: "subject";
+    subject: "subject";
+  };
+  BodyStructure: {
+    patient: "patient";
+  };
+  CapabilityStatement: {
+    guide: "implementationGuide";
+    "resource-profile": "rest.resource.profile";
+    "supported-profile": "rest.resource.supportedProfile";
+  };
+  CarePlan: {
+    "activity-reference": "activity";
+    "based-on": "basedOn";
+    "care-team": "careTeam";
+    condition: "addresses";
+    encounter: "encounter";
+    goal: "goal";
+    "instantiates-canonical": "instantiatesCanonical";
+    "part-of": "partOf";
+    performer: "activity.detail.performer";
+    replaces: "replaces";
+    subject: "subject";
+  };
+  CareTeam: {
+    encounter: "encounter";
+    participant: "participant.member";
+    subject: "subject";
+  };
+  ChargeItem: {
+    account: "account";
+    context: "context";
+    enterer: "enterer";
+    patient: "subject";
+    "performer-actor": "performer.actor";
+    "performing-organization": "performingOrganization";
+    "requesting-organization": "requestingOrganization";
+    service: "service";
+    subject: "subject";
+  };
+  Claim: {
+    "care-team": "careTeam.provider";
+    "detail-udi": "item.detail.udi";
+    encounter: "item.encounter";
+    enterer: "enterer";
+    facility: "facility";
+    insurer: "insurer";
+    "item-udi": "item.udi";
+    patient: "patient";
+    payee: "payee.party";
+    "procedure-udi": "procedure.udi";
+    provider: "provider";
+    "subdetail-udi": "item.detail.subDetail.udi";
+  };
+  ClaimResponse: {
+    insurer: "insurer";
+    patient: "patient";
+    request: "request";
+    requestor: "requestor";
+  };
+  ClinicalImpression: {
+    assessor: "assessor";
+    encounter: "encounter";
+    "finding-ref": "finding.itemReference";
+    investigation: "investigation.item";
+    previous: "previous";
+    problem: "problem";
+    subject: "subject";
+    "supporting-info": "supportingInfo";
+  };
+  CodeSystem: {
+    supplements: "supplements";
+  };
+  Communication: {
+    "based-on": "basedOn";
+    encounter: "encounter";
+    "instantiates-canonical": "instantiatesCanonical";
+    "part-of": "partOf";
+    patient: "subject";
+    recipient: "recipient";
+    sender: "sender";
+    subject: "subject";
+  };
+  CommunicationRequest: {
+    "based-on": "basedOn";
+    encounter: "encounter";
+    patient: "subject";
+    recipient: "recipient";
+    replaces: "replaces";
+    requester: "requester";
+    sender: "sender";
+    subject: "subject";
+  };
+  Composition: {
+    attester: "attester.party";
+    author: "author";
+    entry: "section.entry";
+    subject: "subject";
+  };
+  ConceptMap: {
+    other: "group.unmapped.url";
+  };
+  Condition: {
+    asserter: "asserter";
+    encounter: "encounter";
+    "evidence-detail": "evidence.detail";
+    subject: "subject";
+  };
+  Consent: {
+    actor: "provision.actor";
+    consentor: "performer";
+    data: "provision.data";
+    organization: "organization";
+    "source-reference": "source";
+  };
+  Contract: {
+    authority: "authority";
+    domain: "domain";
+    patient: "subject";
+    signer: "signer.party";
+    subject: "subject";
+  };
+  Coverage: {
+    beneficiary: "beneficiary";
+    patient: "beneficiary";
+    payor: "payor";
+    "policy-holder": "policyHolder";
+    subscriber: "subscriber";
+  };
+  CoverageEligibilityRequest: {
+    enterer: "enterer";
+    facility: "facility";
+    patient: "patient";
+    provider: "provider";
+  };
+  CoverageEligibilityResponse: {
+    insurer: "insurer";
+    patient: "patient";
+    request: "request";
+    requestor: "requestor";
+  };
+  DetectedIssue: {
+    author: "author";
+    implicated: "implicated";
+  };
+  Device: {
+    location: "location";
+    organization: "owner";
+    patient: "patient";
+  };
+  DeviceDefinition: {
+    parent: "parentDevice";
+  };
+  DeviceMetric: {
+    parent: "parent";
+    source: "source";
+  };
+  DeviceRequest: {
+    "based-on": "basedOn";
+    "instantiates-canonical": "instantiatesCanonical";
+    insurance: "insurance";
+    performer: "performer";
+    "prior-request": "priorRequest";
+    requester: "requester";
+    subject: "subject";
+  };
+  DeviceUseStatement: {
+    device: "device";
+    subject: "subject";
+  };
+  DiagnosticReport: {
+    "based-on": "basedOn";
+    media: "media.link";
+    performer: "performer";
+    result: "result";
+    "results-interpreter": "resultsInterpreter";
+    specimen: "specimen";
+    subject: "subject";
+  };
+  DocumentManifest: {
+    author: "author";
+    item: "content";
+    recipient: "recipient";
+    "related-ref": "related.ref";
+    subject: "subject";
+  };
+  DocumentReference: {
+    authenticator: "authenticator";
+    author: "author";
+    custodian: "custodian";
+    related: "context.related";
+    relatesto: "relatesTo.target";
+    subject: "subject";
+  };
+  Encounter: {
+    account: "account";
+    appointment: "appointment";
+    "based-on": "basedOn";
+    diagnosis: "diagnosis.condition";
+    "episode-of-care": "episodeOfCare";
+    location: "location.location";
+    "part-of": "partOf";
+    participant: "participant.individual";
+    practitioner: "participant.individual";
+    "reason-reference": "reasonReference";
+    "service-provider": "serviceProvider";
+    subject: "subject";
+  };
+  Endpoint: {
+    organization: "managingOrganization";
+  };
+  EnrollmentRequest: {
+    patient: "candidate";
+    subject: "candidate";
+  };
+  EnrollmentResponse: {
+    request: "request";
+  };
+  EpisodeOfCare: {
+    "care-manager": "careManager";
+    condition: "diagnosis.condition";
+    "incoming-referral": "referralRequest";
+    organization: "managingOrganization";
+  };
+  ExplanationOfBenefit: {
+    "care-team": "careTeam.provider";
+    claim: "claim";
+    coverage: "insurance.coverage";
+    "detail-udi": "item.detail.udi";
+    encounter: "item.encounter";
+    enterer: "enterer";
+    facility: "facility";
+    "item-udi": "item.udi";
+    patient: "patient";
+    payee: "payee.party";
+    "procedure-udi": "procedure.udi";
+    provider: "provider";
+    "subdetail-udi": "item.detail.subDetail.udi";
+  };
+  FamilyMemberHistory: {
+    "instantiates-canonical": "instantiatesCanonical";
+  };
+  Flag: {
+    author: "author";
+    subject: "subject";
+  };
+  Goal: {
+    subject: "subject";
+  };
+  Group: {
+    "managing-entity": "managingEntity";
+    member: "member.entity";
+  };
+  GuidanceResponse: {
+    patient: "subject";
+    subject: "subject";
+  };
+  HealthcareService: {
+    "coverage-area": "coverageArea";
+    endpoint: "endpoint";
+    location: "location";
+    organization: "providedBy";
+  };
+  ImagingStudy: {
+    basedon: "basedOn";
+    encounter: "encounter";
+    endpoint: "endpoint" | "series.endpoint";
+    interpreter: "interpreter";
+    performer: "series.performer.actor";
+    referrer: "referrer";
+    subject: "subject";
+  };
+  Immunization: {
+    location: "location";
+    manufacturer: "manufacturer";
+    performer: "performer.actor";
+    reaction: "reaction.detail";
+    "reason-reference": "reasonReference";
+  };
+  ImmunizationEvaluation: {
+    "immunization-event": "immunizationEvent";
+    patient: "patient";
+  };
+  ImmunizationRecommendation: {
+    information: "recommendation.supportingPatientInformation";
+    patient: "patient";
+    support: "recommendation.supportingImmunization";
+  };
+  ImplementationGuide: {
+    "depends-on": "dependsOn.uri";
+    global: "global.profile";
+    resource: "definition.resource";
+  };
+  InsurancePlan: {
+    "administered-by": "administeredBy";
+    endpoint: "endpoint";
+    "owned-by": "ownedBy";
+  };
+  Invoice: {
+    account: "account";
+    issuer: "issuer";
+    participant: "participant.actor";
+    patient: "subject";
+    recipient: "recipient";
+    subject: "subject";
+  };
+  Linkage: {
+    author: "author";
+    item: "item.resource";
+    source: "item.resource";
+  };
+  List: {
+    item: "entry.item";
+    source: "source";
+    subject: "subject";
+  };
+  Location: {
+    endpoint: "endpoint";
+    organization: "managingOrganization";
+    partof: "partOf";
+  };
+  MeasureReport: {
+    "evaluated-resource": "evaluatedResource";
+    measure: "measure";
+    patient: "subject";
+    reporter: "reporter";
+    subject: "subject";
+  };
+  Media: {
+    "based-on": "basedOn";
+    device: "device";
+    encounter: "encounter";
+    operator: "operator";
+    patient: "subject";
+    subject: "subject";
+  };
+  Medication: {
+    manufacturer: "manufacturer";
+  };
+  MedicationAdministration: {
+    context: "context";
+    device: "device";
+    performer: "performer.actor";
+    request: "request";
+    subject: "subject";
+  };
+  MedicationDispense: {
+    context: "context";
+    destination: "destination";
+    performer: "performer.actor";
+    prescription: "authorizingPrescription";
+    receiver: "receiver";
+    responsibleparty: "substitution.responsibleParty";
+    subject: "subject";
+  };
+  MedicationKnowledge: {
+    manufacturer: "manufacturer";
+    monograph: "monograph.source";
+  };
+  MedicationRequest: {
+    encounter: "encounter";
+    "intended-dispenser": "dispenseRequest.performer";
+    "intended-performer": "performer";
+    requester: "requester";
+    subject: "subject";
+  };
+  MedicationStatement: {
+    context: "context";
+    "part-of": "partOf";
+    source: "informationSource";
+    subject: "subject";
+  };
+  MedicinalProductAuthorization: {
+    holder: "holder";
+    subject: "subject";
+  };
+  MedicinalProductContraindication: {
+    subject: "subject";
+  };
+  MedicinalProductIndication: {
+    subject: "subject";
+  };
+  MedicinalProductInteraction: {
+    subject: "subject";
+  };
+  MedicinalProductPackaged: {
+    subject: "subject";
+  };
+  MedicinalProductUndesirableEffect: {
+    subject: "subject";
+  };
+  MessageDefinition: {
+    parent: "parent";
+  };
+  MessageHeader: {
+    author: "author";
+    enterer: "enterer";
+    focus: "focus";
+    receiver: "destination.receiver";
+    responsible: "responsible";
+    sender: "sender";
+    target: "destination.target";
+  };
+  MolecularSequence: {
+    patient: "patient";
+  };
+  NutritionOrder: {
+    "instantiates-canonical": "instantiatesCanonical";
+    provider: "orderer";
+  };
+  Observation: {
+    "based-on": "basedOn";
+    "derived-from": "derivedFrom";
+    device: "device";
+    focus: "focus";
+    "has-member": "hasMember";
+    "part-of": "partOf";
+    performer: "performer";
+    specimen: "specimen";
+    subject: "subject";
+  };
+  OperationDefinition: {
+    base: "base";
+    "input-profile": "inputProfile";
+    "output-profile": "outputProfile";
+  };
+  Organization: {
+    endpoint: "endpoint";
+    partof: "partOf";
+  };
+  OrganizationAffiliation: {
+    endpoint: "endpoint";
+    location: "location";
+    network: "network";
+    "participating-organization": "participatingOrganization";
+    "primary-organization": "organization";
+    service: "healthcareService";
+  };
+  Patient: {
+    "general-practitioner": "generalPractitioner";
+    link: "link.other";
+    organization: "managingOrganization";
+  };
+  PaymentNotice: {
+    provider: "provider";
+    request: "request";
+    response: "response";
+  };
+  PaymentReconciliation: {
+    "payment-issuer": "paymentIssuer";
+    request: "request";
+    requestor: "requestor";
+  };
+  Person: {
+    link: "link.target";
+    organization: "managingOrganization";
+    patient: "link.target";
+    practitioner: "link.target";
+    relatedperson: "link.target";
+  };
+  PlanDefinition: {
+    definition: "action.definition";
+  };
+  PractitionerRole: {
+    endpoint: "endpoint";
+    location: "location";
+    organization: "organization";
+    practitioner: "practitioner";
+    service: "healthcareService";
+  };
+  Procedure: {
+    "based-on": "basedOn";
+    "instantiates-canonical": "instantiatesCanonical";
+    location: "location";
+    "part-of": "partOf";
+    performer: "performer.actor";
+    "reason-reference": "reasonReference";
+    subject: "subject";
+  };
+  Provenance: {
+    agent: "agent.who";
+    entity: "entity.what";
+    location: "location";
+    patient: "target";
+    target: "target";
+  };
+  QuestionnaireResponse: {
+    author: "author";
+    "based-on": "basedOn";
+    encounter: "encounter";
+    "part-of": "partOf";
+    patient: "subject";
+    questionnaire: "questionnaire";
+    source: "source";
+    subject: "subject";
+  };
+  RelatedPerson: {
+    patient: "patient";
+  };
+  RequestGroup: {
+    author: "author";
+    encounter: "encounter";
+    participant: "action.participant";
+    patient: "subject";
+    subject: "subject";
+  };
+  ResearchStudy: {
+    partof: "partOf";
+    principalinvestigator: "principalInvestigator";
+    protocol: "protocol";
+    site: "site";
+    sponsor: "sponsor";
+  };
+  ResearchSubject: {
+    individual: "individual";
+    patient: "individual";
+    study: "study";
+  };
+  RiskAssessment: {
+    condition: "condition";
+    performer: "performer";
+    subject: "subject";
+  };
+  Schedule: {
+    actor: "actor";
+  };
+  SearchParameter: {
+    component: "component.definition";
+    "derived-from": "derivedFrom";
+  };
+  ServiceRequest: {
+    "based-on": "basedOn";
+    "instantiates-canonical": "instantiatesCanonical";
+    performer: "performer";
+    replaces: "replaces";
+    requester: "requester";
+    specimen: "specimen";
+    subject: "subject";
+  };
+  Slot: {
+    schedule: "schedule";
+  };
+  Specimen: {
+    collector: "collection.collector";
+    parent: "parent";
+    patient: "subject";
+    subject: "subject";
+  };
+  StructureDefinition: {
+    base: "baseDefinition";
+    valueset: "snapshot.element.binding.valueSet";
+  };
+  SupplyDelivery: {
+    receiver: "receiver";
+    supplier: "supplier";
+  };
+  SupplyRequest: {
+    requester: "requester";
+    subject: "deliverTo";
+    supplier: "supplier";
+  };
+  Task: {
+    "based-on": "basedOn";
+    encounter: "encounter";
+    focus: "focus";
+    owner: "owner";
+    "part-of": "partOf";
+    patient: "for";
+    requester: "requester";
+    subject: "for";
+  };
+  TestReport: {
+    testscript: "testScript";
+  };
+  VerificationResult: {
+    target: "target";
+  };
+  VisionPrescription: {
+    prescriber: "prescriber";
+  };
+}
+
+export const includeExpressions: Record<string, Record<string, string | string[]>> = {
+  Account: {
+    owner: "owner",
+    patient: "subject",
+    subject: "subject",
+  },
+  AdverseEvent: {
+    location: "location",
+    recorder: "recorder",
+    resultingcondition: "resultingCondition",
+    study: "study",
+    subject: "subject",
+    substance: "suspectEntity.instance",
+  },
+  AllergyIntolerance: {
+    asserter: "asserter",
+    recorder: "recorder",
+  },
+  Appointment: {
+    actor: "participant.actor",
+    "based-on": "basedOn",
+    location: "participant.actor",
+    patient: "participant.actor",
+    practitioner: "participant.actor",
+    "reason-reference": "reasonReference",
+    slot: "slot",
+    "supporting-info": "supportingInformation",
+  },
+  AppointmentResponse: {
+    actor: "actor",
+    appointment: "appointment",
+    location: "actor",
+    patient: "actor",
+    practitioner: "actor",
+  },
+  AuditEvent: {
+    agent: "agent.who",
+    entity: "entity.what",
+    patient: ["agent.who", "entity.what"],
+    source: "source.observer",
+  },
+  Basic: {
+    author: "author",
+    patient: "subject",
+    subject: "subject",
+  },
+  BodyStructure: {
+    patient: "patient",
+  },
+  CapabilityStatement: {
+    guide: "implementationGuide",
+    "resource-profile": "rest.resource.profile",
+    "supported-profile": "rest.resource.supportedProfile",
+  },
+  CarePlan: {
+    "activity-reference": "activity",
+    "based-on": "basedOn",
+    "care-team": "careTeam",
+    condition: "addresses",
+    encounter: "encounter",
+    goal: "goal",
+    "instantiates-canonical": "instantiatesCanonical",
+    "part-of": "partOf",
+    performer: "activity.detail.performer",
+    replaces: "replaces",
+    subject: "subject",
+  },
+  CareTeam: {
+    encounter: "encounter",
+    participant: "participant.member",
+    subject: "subject",
+  },
+  ChargeItem: {
+    account: "account",
+    context: "context",
+    enterer: "enterer",
+    patient: "subject",
+    "performer-actor": "performer.actor",
+    "performing-organization": "performingOrganization",
+    "requesting-organization": "requestingOrganization",
+    service: "service",
+    subject: "subject",
+  },
+  Claim: {
+    "care-team": "careTeam.provider",
+    "detail-udi": "item.detail.udi",
+    encounter: "item.encounter",
+    enterer: "enterer",
+    facility: "facility",
+    insurer: "insurer",
+    "item-udi": "item.udi",
+    patient: "patient",
+    payee: "payee.party",
+    "procedure-udi": "procedure.udi",
+    provider: "provider",
+    "subdetail-udi": "item.detail.subDetail.udi",
+  },
+  ClaimResponse: {
+    insurer: "insurer",
+    patient: "patient",
+    request: "request",
+    requestor: "requestor",
+  },
+  ClinicalImpression: {
+    assessor: "assessor",
+    encounter: "encounter",
+    "finding-ref": "finding.itemReference",
+    investigation: "investigation.item",
+    previous: "previous",
+    problem: "problem",
+    subject: "subject",
+    "supporting-info": "supportingInfo",
+  },
+  CodeSystem: {
+    supplements: "supplements",
+  },
+  Communication: {
+    "based-on": "basedOn",
+    encounter: "encounter",
+    "instantiates-canonical": "instantiatesCanonical",
+    "part-of": "partOf",
+    patient: "subject",
+    recipient: "recipient",
+    sender: "sender",
+    subject: "subject",
+  },
+  CommunicationRequest: {
+    "based-on": "basedOn",
+    encounter: "encounter",
+    patient: "subject",
+    recipient: "recipient",
+    replaces: "replaces",
+    requester: "requester",
+    sender: "sender",
+    subject: "subject",
+  },
+  Composition: {
+    attester: "attester.party",
+    author: "author",
+    entry: "section.entry",
+    subject: "subject",
+  },
+  ConceptMap: {
+    other: "group.unmapped.url",
+  },
+  Condition: {
+    asserter: "asserter",
+    encounter: "encounter",
+    "evidence-detail": "evidence.detail",
+    subject: "subject",
+  },
+  Consent: {
+    actor: "provision.actor",
+    consentor: "performer",
+    data: "provision.data",
+    organization: "organization",
+    "source-reference": "source",
+  },
+  Contract: {
+    authority: "authority",
+    domain: "domain",
+    patient: "subject",
+    signer: "signer.party",
+    subject: "subject",
+  },
+  Coverage: {
+    beneficiary: "beneficiary",
+    patient: "beneficiary",
+    payor: "payor",
+    "policy-holder": "policyHolder",
+    subscriber: "subscriber",
+  },
+  CoverageEligibilityRequest: {
+    enterer: "enterer",
+    facility: "facility",
+    patient: "patient",
+    provider: "provider",
+  },
+  CoverageEligibilityResponse: {
+    insurer: "insurer",
+    patient: "patient",
+    request: "request",
+    requestor: "requestor",
+  },
+  DetectedIssue: {
+    author: "author",
+    implicated: "implicated",
+  },
+  Device: {
+    location: "location",
+    organization: "owner",
+    patient: "patient",
+  },
+  DeviceDefinition: {
+    parent: "parentDevice",
+  },
+  DeviceMetric: {
+    parent: "parent",
+    source: "source",
+  },
+  DeviceRequest: {
+    "based-on": "basedOn",
+    "instantiates-canonical": "instantiatesCanonical",
+    insurance: "insurance",
+    performer: "performer",
+    "prior-request": "priorRequest",
+    requester: "requester",
+    subject: "subject",
+  },
+  DeviceUseStatement: {
+    device: "device",
+    subject: "subject",
+  },
+  DiagnosticReport: {
+    "based-on": "basedOn",
+    media: "media.link",
+    performer: "performer",
+    result: "result",
+    "results-interpreter": "resultsInterpreter",
+    specimen: "specimen",
+    subject: "subject",
+  },
+  DocumentManifest: {
+    author: "author",
+    item: "content",
+    recipient: "recipient",
+    "related-ref": "related.ref",
+    subject: "subject",
+  },
+  DocumentReference: {
+    authenticator: "authenticator",
+    author: "author",
+    custodian: "custodian",
+    related: "context.related",
+    relatesto: "relatesTo.target",
+    subject: "subject",
+  },
+  Encounter: {
+    account: "account",
+    appointment: "appointment",
+    "based-on": "basedOn",
+    diagnosis: "diagnosis.condition",
+    "episode-of-care": "episodeOfCare",
+    location: "location.location",
+    "part-of": "partOf",
+    participant: "participant.individual",
+    practitioner: "participant.individual",
+    "reason-reference": "reasonReference",
+    "service-provider": "serviceProvider",
+    subject: "subject",
+  },
+  Endpoint: {
+    organization: "managingOrganization",
+  },
+  EnrollmentRequest: {
+    patient: "candidate",
+    subject: "candidate",
+  },
+  EnrollmentResponse: {
+    request: "request",
+  },
+  EpisodeOfCare: {
+    "care-manager": "careManager",
+    condition: "diagnosis.condition",
+    "incoming-referral": "referralRequest",
+    organization: "managingOrganization",
+  },
+  ExplanationOfBenefit: {
+    "care-team": "careTeam.provider",
+    claim: "claim",
+    coverage: "insurance.coverage",
+    "detail-udi": "item.detail.udi",
+    encounter: "item.encounter",
+    enterer: "enterer",
+    facility: "facility",
+    "item-udi": "item.udi",
+    patient: "patient",
+    payee: "payee.party",
+    "procedure-udi": "procedure.udi",
+    provider: "provider",
+    "subdetail-udi": "item.detail.subDetail.udi",
+  },
+  FamilyMemberHistory: {
+    "instantiates-canonical": "instantiatesCanonical",
+  },
+  Flag: {
+    author: "author",
+    subject: "subject",
+  },
+  Goal: {
+    subject: "subject",
+  },
+  Group: {
+    "managing-entity": "managingEntity",
+    member: "member.entity",
+  },
+  GuidanceResponse: {
+    patient: "subject",
+    subject: "subject",
+  },
+  HealthcareService: {
+    "coverage-area": "coverageArea",
+    endpoint: "endpoint",
+    location: "location",
+    organization: "providedBy",
+  },
+  ImagingStudy: {
+    basedon: "basedOn",
+    encounter: "encounter",
+    endpoint: ["endpoint", "series.endpoint"],
+    interpreter: "interpreter",
+    performer: "series.performer.actor",
+    referrer: "referrer",
+    subject: "subject",
+  },
+  Immunization: {
+    location: "location",
+    manufacturer: "manufacturer",
+    performer: "performer.actor",
+    reaction: "reaction.detail",
+    "reason-reference": "reasonReference",
+  },
+  ImmunizationEvaluation: {
+    "immunization-event": "immunizationEvent",
+    patient: "patient",
+  },
+  ImmunizationRecommendation: {
+    information: "recommendation.supportingPatientInformation",
+    patient: "patient",
+    support: "recommendation.supportingImmunization",
+  },
+  ImplementationGuide: {
+    "depends-on": "dependsOn.uri",
+    global: "global.profile",
+    resource: "definition.resource",
+  },
+  InsurancePlan: {
+    "administered-by": "administeredBy",
+    endpoint: "endpoint",
+    "owned-by": "ownedBy",
+  },
+  Invoice: {
+    account: "account",
+    issuer: "issuer",
+    participant: "participant.actor",
+    patient: "subject",
+    recipient: "recipient",
+    subject: "subject",
+  },
+  Linkage: {
+    author: "author",
+    item: "item.resource",
+    source: "item.resource",
+  },
+  List: {
+    item: "entry.item",
+    source: "source",
+    subject: "subject",
+  },
+  Location: {
+    endpoint: "endpoint",
+    organization: "managingOrganization",
+    partof: "partOf",
+  },
+  MeasureReport: {
+    "evaluated-resource": "evaluatedResource",
+    measure: "measure",
+    patient: "subject",
+    reporter: "reporter",
+    subject: "subject",
+  },
+  Media: {
+    "based-on": "basedOn",
+    device: "device",
+    encounter: "encounter",
+    operator: "operator",
+    patient: "subject",
+    subject: "subject",
+  },
+  Medication: {
+    manufacturer: "manufacturer",
+  },
+  MedicationAdministration: {
+    context: "context",
+    device: "device",
+    performer: "performer.actor",
+    request: "request",
+    subject: "subject",
+  },
+  MedicationDispense: {
+    context: "context",
+    destination: "destination",
+    performer: "performer.actor",
+    prescription: "authorizingPrescription",
+    receiver: "receiver",
+    responsibleparty: "substitution.responsibleParty",
+    subject: "subject",
+  },
+  MedicationKnowledge: {
+    manufacturer: "manufacturer",
+    monograph: "monograph.source",
+  },
+  MedicationRequest: {
+    encounter: "encounter",
+    "intended-dispenser": "dispenseRequest.performer",
+    "intended-performer": "performer",
+    requester: "requester",
+    subject: "subject",
+  },
+  MedicationStatement: {
+    context: "context",
+    "part-of": "partOf",
+    source: "informationSource",
+    subject: "subject",
+  },
+  MedicinalProductAuthorization: {
+    holder: "holder",
+    subject: "subject",
+  },
+  MedicinalProductContraindication: {
+    subject: "subject",
+  },
+  MedicinalProductIndication: {
+    subject: "subject",
+  },
+  MedicinalProductInteraction: {
+    subject: "subject",
+  },
+  MedicinalProductPackaged: {
+    subject: "subject",
+  },
+  MedicinalProductUndesirableEffect: {
+    subject: "subject",
+  },
+  MessageDefinition: {
+    parent: "parent",
+  },
+  MessageHeader: {
+    author: "author",
+    enterer: "enterer",
+    focus: "focus",
+    receiver: "destination.receiver",
+    responsible: "responsible",
+    sender: "sender",
+    target: "destination.target",
+  },
+  MolecularSequence: {
+    patient: "patient",
+  },
+  NutritionOrder: {
+    "instantiates-canonical": "instantiatesCanonical",
+    provider: "orderer",
+  },
+  Observation: {
+    "based-on": "basedOn",
+    "derived-from": "derivedFrom",
+    device: "device",
+    focus: "focus",
+    "has-member": "hasMember",
+    "part-of": "partOf",
+    performer: "performer",
+    specimen: "specimen",
+    subject: "subject",
+  },
+  OperationDefinition: {
+    base: "base",
+    "input-profile": "inputProfile",
+    "output-profile": "outputProfile",
+  },
+  Organization: {
+    endpoint: "endpoint",
+    partof: "partOf",
+  },
+  OrganizationAffiliation: {
+    endpoint: "endpoint",
+    location: "location",
+    network: "network",
+    "participating-organization": "participatingOrganization",
+    "primary-organization": "organization",
+    service: "healthcareService",
+  },
+  Patient: {
+    "general-practitioner": "generalPractitioner",
+    link: "link.other",
+    organization: "managingOrganization",
+  },
+  PaymentNotice: {
+    provider: "provider",
+    request: "request",
+    response: "response",
+  },
+  PaymentReconciliation: {
+    "payment-issuer": "paymentIssuer",
+    request: "request",
+    requestor: "requestor",
+  },
+  Person: {
+    link: "link.target",
+    organization: "managingOrganization",
+    patient: "link.target",
+    practitioner: "link.target",
+    relatedperson: "link.target",
+  },
+  PlanDefinition: {
+    definition: "action.definition",
+  },
+  PractitionerRole: {
+    endpoint: "endpoint",
+    location: "location",
+    organization: "organization",
+    practitioner: "practitioner",
+    service: "healthcareService",
+  },
+  Procedure: {
+    "based-on": "basedOn",
+    "instantiates-canonical": "instantiatesCanonical",
+    location: "location",
+    "part-of": "partOf",
+    performer: "performer.actor",
+    "reason-reference": "reasonReference",
+    subject: "subject",
+  },
+  Provenance: {
+    agent: "agent.who",
+    entity: "entity.what",
+    location: "location",
+    patient: "target",
+    target: "target",
+  },
+  QuestionnaireResponse: {
+    author: "author",
+    "based-on": "basedOn",
+    encounter: "encounter",
+    "part-of": "partOf",
+    patient: "subject",
+    questionnaire: "questionnaire",
+    source: "source",
+    subject: "subject",
+  },
+  RelatedPerson: {
+    patient: "patient",
+  },
+  RequestGroup: {
+    author: "author",
+    encounter: "encounter",
+    participant: "action.participant",
+    patient: "subject",
+    subject: "subject",
+  },
+  ResearchStudy: {
+    partof: "partOf",
+    principalinvestigator: "principalInvestigator",
+    protocol: "protocol",
+    site: "site",
+    sponsor: "sponsor",
+  },
+  ResearchSubject: {
+    individual: "individual",
+    patient: "individual",
+    study: "study",
+  },
+  RiskAssessment: {
+    condition: "condition",
+    performer: "performer",
+    subject: "subject",
+  },
+  Schedule: {
+    actor: "actor",
+  },
+  SearchParameter: {
+    component: "component.definition",
+    "derived-from": "derivedFrom",
+  },
+  ServiceRequest: {
+    "based-on": "basedOn",
+    "instantiates-canonical": "instantiatesCanonical",
+    performer: "performer",
+    replaces: "replaces",
+    requester: "requester",
+    specimen: "specimen",
+    subject: "subject",
+  },
+  Slot: {
+    schedule: "schedule",
+  },
+  Specimen: {
+    collector: "collection.collector",
+    parent: "parent",
+    patient: "subject",
+    subject: "subject",
+  },
+  StructureDefinition: {
+    base: "baseDefinition",
+    valueset: "snapshot.element.binding.valueSet",
+  },
+  SupplyDelivery: {
+    receiver: "receiver",
+    supplier: "supplier",
+  },
+  SupplyRequest: {
+    requester: "requester",
+    subject: "deliverTo",
+    supplier: "supplier",
+  },
+  Task: {
+    "based-on": "basedOn",
+    encounter: "encounter",
+    focus: "focus",
+    owner: "owner",
+    "part-of": "partOf",
+    patient: "for",
+    requester: "requester",
+    subject: "for",
+  },
+  TestReport: {
+    testscript: "testScript",
+  },
+  VerificationResult: {
+    target: "target",
+  },
+  VisionPrescription: {
+    prescriber: "prescriber",
+  },
+};

@@ -3,9 +3,9 @@ export interface StringParam {
   value: string;
 }
 
-export interface TokenParam {
+export interface TokenParam<T extends string = string> {
   type: "token";
-  value: string;
+  value: T;
 }
 
 export interface DateParam {
@@ -33,9 +33,15 @@ export interface UriParam {
   value: string;
 }
 
-export interface CompositeParam {
+export interface CompositeParam<
+  C extends Record<string, { type: string; value: string | number }> = Record<
+    string,
+    { type: string; value: string | number }
+  >,
+> {
   type: "composite";
   value: string;
+  components: C;
 }
 
 export interface SpecialParam {
