@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.22.1] - 2026-04-20
+## [0.22.2] - 2026-04-20
+
+### Other
+
+- perf(core): speed up Path filter types + add t.raw escape hatch (`b857e0a`)
+
+## [0.22.1] - 2026-04-21
 
 ### Features
 
