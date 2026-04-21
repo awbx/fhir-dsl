@@ -2,6 +2,7 @@ import { describe, it } from "vitest";
 import type { Assert, Equals } from "./_internal/test-helpers.js";
 import type { Path, PathValue } from "./path.js";
 import type { Scope } from "./scope.js";
+import type { T } from "./transform.js";
 
 // Minimal test schema mirroring the acceptance scenario: Encounter with a
 // subject reference whose canonical FHIRPath expression is `subject`.
@@ -165,6 +166,25 @@ describe("Scope — include-activated substitution", () => {
     type _1 = Assert<Equals<Extract<P, "subject.reference">, "subject.reference">>;
     type _2 = Assert<Equals<Extract<P, "subject.type">, "subject.type">>;
     type _3 = Assert<Equals<Extract<P, `subject.name.${number}.family`>, `subject.name.${number}.family`>>;
+  });
+
+  it("t(path, fallback) does not leak undefined into the return type", () => {
+    // Optional field — PathValue is `string | undefined`, but `t` guarantees
+    // the walked value is non-nullish before returning it (nullish → fallback),
+    // so the return type should be `string | D`, not `string | undefined | D`.
+    type S = Scope<TestSchema, "Encounter", { patient: "Patient" }>;
+    const t = undefined as unknown as T<S>;
+
+    const r = t("subject.name.0.family", null);
+    type _1 = Assert<Equals<typeof r, string | null>>;
+
+    // With a map callback, the map's return type wins (still non-undefined).
+    const r2 = t("subject.name.0.family", "unknown", (v) => v.toUpperCase());
+    type _2 = Assert<Equals<typeof r2, string>>;
+
+    // Required scalar — no widening either way.
+    const r3 = t("resourceType", "unknown");
+    type _3 = Assert<Equals<typeof r3, "Encounter" | "unknown">>;
   });
 
   it("PathValue resolves to Patient's gender enum after include", () => {

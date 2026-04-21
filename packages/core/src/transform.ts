@@ -34,7 +34,7 @@ export interface TExtensions<Scope> {}
  * resource.
  */
 export interface T<Scope> extends TExtensions<Scope> {
-  <P extends Path<Scope>, D, R = PathValue<Scope, P>>(
+  <P extends Path<Scope>, D, R = NonNullable<PathValue<Scope, P>>>(
     path: P,
     fallback: D,
     map?: (value: NonNullable<PathValue<Scope, P>>) => R,
