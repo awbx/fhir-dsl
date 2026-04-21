@@ -8,7 +8,17 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
-## [0.22.2] - 2026-04-20
+## [0.22.3] - 2026-04-21
+
+### Bug Fixes
+
+- fix(core): strip undefined from t(path, fallback) return type (`a092dbb`)
+
+### Other
+
+- test(core): regression tests for array-hop include expressions (`7877940`)
+
+## [0.22.2] - 2026-04-21
 
 ### Other
 
