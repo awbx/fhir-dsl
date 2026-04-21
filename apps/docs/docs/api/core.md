@@ -230,13 +230,14 @@ const result = await fhir
 transform<Out>(fn: (t: T<Scope<S, RT, Inc>>) => Out): TransformedQuery<Out>;
 
 interface T<Scope> extends TExtensions<Scope> {
-  <P extends Path<Scope>, D, R = PathValue<Scope, P>>(
-    path: P, fallback: D, map?: (value: NonNullable<PathValue<Scope, P>>) => R,
+  <P extends string, D, R = PathValue<Scope, P>>(
+    path: P & ValidatePath<Scope, P>, fallback: D, map?: (value: NonNullable<PathValue<Scope, P>>) => R,
   ): R | D;
-  ref<P extends Path<Scope>>(path: P): string | null;
+  ref<P extends string>(path: P & ValidatePath<Scope, P>): string | null;
   coding<P extends PathToCodingArray<Scope>>(path: P, system: string): string | null;
   valueOf<P extends PathToSystemValueArray<Scope>>(path: P, system: string): string | null;
-  enum<P extends Path<Scope>, R>(path: P, table: ReadonlyMap<string, R> | Readonly<Record<string, R>>, fallback: R): R;
+  enum<P extends string, R>(path: P & ValidatePath<Scope, P>, table: ReadonlyMap<string, R> | Readonly<Record<string, R>>, fallback: NoInfer<R>): R;
+  raw<R = unknown, D = null>(path: string, fallback: D, map?: (value: unknown) => R): R | D;
 }
 
 interface TransformedQuery<Out> {

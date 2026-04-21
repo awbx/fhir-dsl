@@ -191,14 +191,33 @@ through your helper.
 
 Use `unregisterTHelper(name)` to remove a helper — useful for scoped tests.
 
+## Path validation & autocomplete tradeoff
+
+`t`, `t.ref`, and `t.enum` validate paths with a **segment-by-segment
+walker** rather than enumerating the full `Path<Scope>` union. This keeps
+typecheck time flat on wide scopes (Encounter + 3 includes compiles in
+~0.5s instead of ~4s), but means the editor has no enumerable list to
+complete against:
+
+- **Typos are still caught** — the walker rejects `subject.naem.0.famiy`
+  at compile time.
+- **Autocomplete is not offered** — typing `t("sub` won't suggest
+  `subject`, `subject.name`, etc. You type the path from memory or from
+  the FHIR spec.
+- **Return type still inferred** — `t("status", "")` infers `string | ""`
+  from `Scope`, same as before.
+
+If your editor stalls even so, see `t.raw` below.
+
 ## `t.raw(path, fallback, map?)` — the escape hatch
 
 Same runtime behavior as `t(...)` (auto-dereferencing, nullish fallback,
-optional `map`), but the `path` is typed as `string` instead of
-`Path<Scope>`. Use it when IntelliSense is noticeably slow on a
-projection with many `t(...)` calls against a wide type — `t.raw`
-skips the per-call-site path union, so TS spends ~no time on typed
-path completion for these calls.
+optional `map`), but `path` is typed as bare `string` with **no path
+validation at all** and return type defaults to `unknown`. Use it when:
+
+- You need a path the walker can't express (e.g. dynamic path strings).
+- You want to squeeze out the last bit of typecheck cost on very hot
+  projections — `t.raw` skips even the walker.
 
 ```ts
 t.raw("subject.name.0.family", null),                   // unknown | null
@@ -206,23 +225,8 @@ t.raw<string>("subject.name.0.family", null),           // string | null
 t.raw("count", 0, (n) => (n as number) * 10),           // number
 ```
 
-**Tradeoff:** you lose path autocomplete and typo detection. Reach for
-it only on the handful of calls that are dragging IntelliSense — keep
-the typed `t(...)` form for the rest.
-
-### IntelliSense tips for wide projections
-
-For schemas like Encounter + 3 includes, each typed `t(...)` call site
-instantiates `Path<Scope>` once. A dozen calls is fine; several dozen
-on a single builder can stall completion. If you hit that:
-
-- **Split into smaller builders.** One `.transform()` per logical
-  projection is cheaper than one giant one.
-- **Narrow `Scope` with a local alias.** Assigning the built query to
-  a variable with an explicit type lets TS cache the scope.
-- **Drop to `t.raw` for the hot spots** — usually the deepest paths
-  (`participant.0.actor.name.0.given.0`) are the slowest, and those
-  are also the ones you're least likely to typo.
+**Tradeoff:** you lose typo detection entirely — misspelled paths
+silently return the fallback at runtime.
 
 ## `.transform()` on `.read()`
 

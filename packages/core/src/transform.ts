@@ -1,4 +1,4 @@
-import type { Path, PathToCodingArray, PathToSystemValueArray, PathValue } from "./path.js";
+import type { PathToCodingArray, PathToSystemValueArray, PathValue, ValidatePath } from "./path.js";
 import type { BundleLink, ExecuteOptions, StreamOptions } from "./query-builder.js";
 
 // The `t` projection namespace. Callers pass `t => ({ ... })` to
@@ -34,8 +34,8 @@ export interface TExtensions<Scope> {}
  * resource.
  */
 export interface T<Scope> extends TExtensions<Scope> {
-  <P extends Path<Scope>, D, R = NonNullable<PathValue<Scope, P>>>(
-    path: P,
+  <P extends string, D, R = NonNullable<PathValue<Scope, P>>>(
+    path: P & ValidatePath<Scope, P>,
     fallback: D,
     map?: (value: NonNullable<PathValue<Scope, P>>) => R,
   ): R | D;
@@ -46,7 +46,7 @@ export interface T<Scope> extends TExtensions<Scope> {
    * Paths pointing at the structural Reference fields (`.reference`, `.type`,
    * `.identifier`, `.display`) are read directly and are NOT dereferenced.
    */
-  ref: <P extends Path<Scope>>(path: P) => string | null;
+  ref: <P extends string>(path: P & ValidatePath<Scope, P>) => string | null;
 
   /**
    * Scan an array of `{ system?, code? }` and return the first code whose
@@ -65,10 +65,10 @@ export interface T<Scope> extends TExtensions<Scope> {
    * Map a string value through a lookup table. Returns the mapped value if the
    * key is present, otherwise the fallback. Accepts a plain record or a `Map`.
    */
-  enum: <P extends Path<Scope>, R>(
-    path: P,
+  enum: <P extends string, R>(
+    path: P & ValidatePath<Scope, P>,
     table: ReadonlyMap<string, R> | Readonly<Record<string, R>>,
-    fallback: R,
+    fallback: NoInfer<R>,
   ) => R;
 
   /**
