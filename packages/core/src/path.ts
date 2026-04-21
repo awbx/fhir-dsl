@@ -6,12 +6,15 @@
 // (walking the same structure the type describes) and rules out a whole class
 // of subtle bugs where a path compiled but pointed at a missing index.
 //
-// Depth is capped at 6. FHIR resources are shallow in practice; deeper
-// recursion explodes the union and makes hovers / autocomplete unresponsive.
+// Depth is capped at 6 *named-field hops*. Numeric array segments are "free":
+// they don't consume a depth slot because they don't add a navigational hop
+// (they just say *which* element of a collection you've already reached). A
+// path like `participant.0.actor.name.0.given.0` is 5 named hops (participant,
+// actor, name, given, leaf) plus 2 array indices — well within budget.
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6];
 
-/** Max depth for Path/PathValue recursion. Product decision — do not raise without measuring IntelliSense. */
+/** Max depth for Path/PathValue recursion, counted in named-field hops only. */
 export type PathMaxDepth = 6;
 
 type NumericSeg = `${number}`;
@@ -28,7 +31,7 @@ type NonNullableStrict<T> = T extends null | undefined ? never : T;
 export type Path<T, D extends number = PathMaxDepth> = [D] extends [0]
   ? never
   : T extends readonly (infer U)[]
-    ? NumericSeg | `${NumericSeg}.${Path<NonNullableStrict<U>, Prev[D] & number>}`
+    ? NumericSeg | `${NumericSeg}.${Path<NonNullableStrict<U>, D>}`
     : T extends object
       ? {
           [K in keyof T & string]: K | `${K}.${Path<NonNullableStrict<T[K]>, Prev[D] & number>}`;
@@ -81,7 +84,7 @@ type IsSystemValueArray<T> =
 export type PathToCodingArray<T, D extends number = PathMaxDepth> = [D] extends [0]
   ? never
   : T extends readonly (infer U)[]
-    ? `${NumericSeg}.${PathToCodingArray<NonNullableStrict<U>, Prev[D] & number>}`
+    ? `${NumericSeg}.${PathToCodingArray<NonNullableStrict<U>, D>}`
     : T extends object
       ? {
           [K in keyof T & string]: IsCodingArray<T[K]> extends true
@@ -97,7 +100,7 @@ export type PathToCodingArray<T, D extends number = PathMaxDepth> = [D] extends 
 export type PathToSystemValueArray<T, D extends number = PathMaxDepth> = [D] extends [0]
   ? never
   : T extends readonly (infer U)[]
-    ? `${NumericSeg}.${PathToSystemValueArray<NonNullableStrict<U>, Prev[D] & number>}`
+    ? `${NumericSeg}.${PathToSystemValueArray<NonNullableStrict<U>, D>}`
     : T extends object
       ? {
           [K in keyof T & string]: IsSystemValueArray<T[K]> extends true

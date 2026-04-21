@@ -141,6 +141,21 @@ describe("Scope — include-activated substitution", () => {
     >;
   });
 
+  it("reaches array leaves through multi-hop activated paths (7+ segments)", () => {
+    // participant.0.actor.name.0.given.0 is 7 dotted segments — 5 named-field
+    // hops (participant → actor → name → given → leaf) plus 2 array indices.
+    // Numeric segments are free in the depth budget, so this resolves cleanly
+    // under PathMaxDepth=6.
+    type S = Scope<TestSchema, "Encounter", { practitioner: "Practitioner" }>;
+    type P = Path<S>;
+    type _ = Assert<
+      Equals<
+        Extract<P, `participant.${number}.actor.name.${number}.given.${number}`>,
+        `participant.${number}.actor.name.${number}.given.${number}`
+      >
+    >;
+  });
+
   it("handles multiple simultaneous includes", () => {
     type S = Scope<
       TestSchema,
