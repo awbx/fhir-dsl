@@ -1,8 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReadQueryBuilderImpl } from "./read-query-builder.js";
 
+interface HumanName {
+  family?: string;
+  given?: string[];
+}
 type TestSchema = {
-  resources: { Patient: { resourceType: "Patient"; id?: string } };
+  resources: {
+    Patient: {
+      resourceType: "Patient";
+      id?: string;
+      name?: HumanName[];
+      gender?: "male" | "female" | "other";
+    };
+    Observation: { resourceType: "Observation"; id?: string };
+  };
   searchParams: Record<string, never>;
   includes: Record<string, never>;
   profiles: Record<string, never>;
@@ -80,6 +92,75 @@ describe("ReadQueryBuilder", () => {
       const compiled = builder.$call((b) => b.compile());
 
       expect(compiled.path).toBe("Patient/123");
+    });
+  });
+
+  describe("transform", () => {
+    it("projects the read resource into a typed row", async () => {
+      const patient = {
+        resourceType: "Patient",
+        id: "123",
+        name: [{ family: "Smith", given: ["Alice"] }],
+        gender: "female",
+      };
+      const executor = vi.fn(async () => patient);
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+
+      const row = await builder
+        .transform((t) => ({
+          id: t("id", ""),
+          family: t("name.0.family", null),
+          given: t("name.0.given.0", null),
+          gender: t("gender", null),
+        }))
+        .execute();
+
+      expect(row).toEqual({ id: "123", family: "Smith", given: "Alice", gender: "female" });
+    });
+
+    it("falls back to the supplied default when a path is missing", async () => {
+      const patient = { resourceType: "Patient", id: "123" }; // no name
+      const executor = vi.fn(async () => patient);
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+
+      const row = await builder
+        .transform((t) => ({
+          family: t("name.0.family", null),
+          given: t("name.0.given.0", "unknown"),
+        }))
+        .execute();
+
+      expect(row).toEqual({ family: null, given: "unknown" });
+    });
+
+    it("passes signal + prefer through to the executor", async () => {
+      const patient = { resourceType: "Patient", id: "123" };
+      const executor = vi.fn(async () => patient);
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+      const ac = new AbortController();
+
+      await builder
+        .transform((t) => ({ id: t("id", "") }))
+        .execute({ signal: ac.signal, prefer: { return: "representation" } });
+
+      expect(executor).toHaveBeenCalledOnce();
+      const call = executor.mock.calls[0] as unknown as [{ headers?: Record<string, string> }, AbortSignal | undefined];
+      expect(call[1]).toBe(ac.signal);
+      expect(call[0].headers).toMatchObject({ Prefer: "return=representation" });
+    });
+
+    it("applies the map callback when the value is present", async () => {
+      const patient = { resourceType: "Patient", id: "123", name: [{ family: "smith" }] };
+      const executor = vi.fn(async () => patient);
+      const builder = new ReadQueryBuilderImpl<TestSchema, "Patient">("Patient", "123", executor);
+
+      const row = await builder
+        .transform((t) => ({
+          family: t("name.0.family", null, (v) => v.toUpperCase()),
+        }))
+        .execute();
+
+      expect(row).toEqual({ family: "SMITH" });
     });
   });
 });

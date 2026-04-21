@@ -2,6 +2,7 @@ import type { Resource } from "@fhir-dsl/types";
 import type { CompiledQuery } from "./compiled-query.js";
 import { type ExecuteOptions, mergePreferIntoQuery, type ReadQueryBuilder } from "./query-builder.js";
 import type { Executor } from "./search-query-builder.js";
+import { type CompiledPath, makeT, type ReadTransformedQuery, type T } from "./transform.js";
 import type { FhirSchema } from "./types.js";
 import { resolveSchema, type SchemaRegistry, ValidationUnavailableError, validateOne } from "./validation.js";
 
@@ -99,5 +100,28 @@ export class ReadQueryBuilderImpl<S extends FhirSchema, RT extends string> imple
       await validateOne(schema, this.#resourceType, resource);
     }
     return resource;
+  }
+
+  transform<Out>(fn: (t: T<S["resources"][RT] & Resource>) => Out): ReadTransformedQuery<Out> {
+    const executor = this.#executor;
+    const schemas = this.#schemas;
+    const validateFlag = this.#validate;
+    const resourceType = this.#resourceType;
+    const compile = this.compile.bind(this);
+
+    return {
+      async execute(options?: ExecuteOptions): Promise<Out> {
+        const query = mergePreferIntoQuery(compile(), options?.prefer);
+        const resource = (await executor(query, options?.signal)) as S["resources"][RT] & Resource;
+        if (validateFlag) {
+          if (!schemas) throw new ValidationUnavailableError();
+          const schema = resolveSchema(schemas, resourceType);
+          await validateOne(schema, resourceType, resource);
+        }
+        const pathCache = new Map<string, CompiledPath>();
+        const t = makeT<S["resources"][RT] & Resource>(resource, new Set(), new Map(), pathCache);
+        return fn(t);
+      },
+    };
   }
 }

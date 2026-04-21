@@ -2,7 +2,7 @@ import type { Resource, SearchParam } from "@fhir-dsl/types";
 import type { Prettify } from "./_internal/type-utils.js";
 import type { CompiledQuery } from "./compiled-query.js";
 import type { Scope } from "./scope.js";
-import type { T, TransformedQuery } from "./transform.js";
+import type { ReadTransformedQuery, T, TransformedQuery } from "./transform.js";
 import type {
   CompositeKeys,
   CompositeValues,
@@ -562,4 +562,22 @@ export interface ReadQueryBuilder<S extends FhirSchema, RT extends string> {
   compile(): CompiledQuery;
 
   execute(options?: ExecuteOptions): Promise<S["resources"][RT] & Resource>;
+
+  /**
+   * Project the fetched resource into a typed flat row with `t(path, fallback, map?)`.
+   * Single-resource variant — no includes, no bundle, no auto-dereferencing.
+   * Paths walk the resource directly with the same nullish-fallback semantics
+   * as `SearchQueryBuilder.transform`.
+   *
+   * ```ts
+   * const row = await client.read("Patient", "123")
+   *   .transform((t) => ({
+   *     id: t("id", ""),
+   *     family: t("name.0.family", null),
+   *     given: t("name.0.given.0", null),
+   *   }))
+   *   .execute();
+   * ```
+   */
+  transform<Out>(fn: (t: T<S["resources"][RT] & Resource>) => Out): ReadTransformedQuery<Out>;
 }

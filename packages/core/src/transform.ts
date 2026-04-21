@@ -1,5 +1,5 @@
 import type { Path, PathToCodingArray, PathToSystemValueArray, PathValue } from "./path.js";
-import type { BundleLink, StreamOptions } from "./query-builder.js";
+import type { BundleLink, ExecuteOptions, StreamOptions } from "./query-builder.js";
 
 // The `t` projection namespace. Callers pass `t => ({ ... })` to
 // `.transform()` and get back typed rows. Every helper returns a concrete
@@ -100,6 +100,16 @@ export interface TransformedResult<Out> {
   total?: number | undefined;
   link?: BundleLink[] | undefined;
   raw: unknown;
+}
+
+/**
+ * The result of `.transform(fn)` on a `.read(...)` builder. Single-resource —
+ * no bundle, no pagination, no auto-dereferencing. `t(path, fallback)` walks
+ * the resource directly with the same nullish-fallback semantics as the search
+ * variant.
+ */
+export interface ReadTransformedQuery<Out> {
+  execute(options?: ExecuteOptions): Promise<Out>;
 }
 
 // Reference structural fields: when the user's path steps into one of these

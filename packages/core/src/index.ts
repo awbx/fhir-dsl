@@ -12,6 +12,7 @@ export type { IncludeExpressionsFor, Scope } from "./scope.js";
 export * from "./transaction-builder.js";
 export {
   type CompiledPath,
+  type ReadTransformedQuery,
   registerTHelper,
   type T,
   type TExtensions,

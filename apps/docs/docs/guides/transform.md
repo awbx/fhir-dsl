@@ -224,6 +224,28 @@ on a single builder can stall completion. If you hit that:
   (`participant.0.actor.name.0.given.0`) are the slowest, and those
   are also the ones you're least likely to typo.
 
+## `.transform()` on `.read()`
+
+`.transform()` also lives on `.read(resourceType, id)`. Single-resource
+variant — no includes, no bundle, no auto-dereferencing. Paths walk the
+resource directly with the same nullish-fallback semantics.
+
+```ts
+const row = await client
+  .read("Patient", "123")
+  .transform((t) => ({
+    id: t("id", ""),
+    family: t("name.0.family", null),
+    given: t("name.0.given.0", null),
+    gender: t("gender", null),
+  }))
+  .execute();
+```
+
+`.execute()` returns `Promise<Out>` — a single row, not `{ data: Out[] }`.
+There's no `.stream()` (nothing to stream). If you want typed paths
+across a bundle of includes, use `.search(...)` with `.include(...)`.
+
 ## `execute()` vs `stream()`
 
 `.transform()` returns a `TransformedQuery<Out>` with two terminals:
