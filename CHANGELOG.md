@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.5] - 2026-04-21
+
+### Bug Fixes
+
+- fix(core): count Path depth in named-field hops only (`87aac91`)
+
 ## [0.22.4] - 2026-04-21
 
 ### Other
