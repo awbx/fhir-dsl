@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.6] - 2026-04-21
+
+### Other
+
+- perf(core): walker-style path validator drops transform typecheck ~8x (`4b488f7`)
+
 ## [0.22.5] - 2026-04-21
 
 ### Bug Fixes

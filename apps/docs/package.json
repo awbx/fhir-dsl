@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/docs",
-  "version": "0.22.5",
+  "version": "0.22.6",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
