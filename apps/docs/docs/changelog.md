@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.4] - 2026-04-21
+
+### Other
+
+- feat(core): .transform() on ReadQueryBuilder (`f43d47c`)
+
 ## [0.22.3] - 2026-04-21
 
 ### Bug Fixes
