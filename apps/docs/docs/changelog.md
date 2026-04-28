@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.40.0] - 2026-04-28
+
+### Features
+
+- add Phase 6 FHIRPath invariant evaluator (`4693c69`)
+
 ## [0.39.0] - 2026-04-28
 
 ### Features
