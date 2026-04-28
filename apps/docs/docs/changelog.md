@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.0] - 2026-04-28
+
+### Features
+
+- add Phase 0 hygiene baseline (`236e11c`)
+
 ## [0.22.6] - 2026-04-21
 
 ### Other
