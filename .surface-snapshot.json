@@ -1640,6 +1640,10 @@
         "kind": "other"
       },
       {
+        "name": "parseFhirUri",
+        "kind": "other"
+      },
+      {
         "name": "PatientLaunchAuth",
         "kind": "other"
       },

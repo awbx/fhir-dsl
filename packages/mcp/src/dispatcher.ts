@@ -50,6 +50,9 @@ export function createDispatcher(config: DispatcherConfig): Dispatcher {
         case "resources/list":
           return ok(request, { resources: listResources(config.resourceTypes) });
 
+        case "resources/read":
+          return await handleResourceRead(request, config);
+
         case "ping":
           return ok(request, {});
 
@@ -163,6 +166,91 @@ function listResources(
     description: `Fetch a ${rt} resource by id from the bound FHIR server.`,
     mimeType: "application/fhir+json",
   }));
+}
+
+interface ParsedFhirUri {
+  resourceType: string;
+  id: string;
+  versionId?: string;
+}
+
+export function parseFhirUri(uri: string): ParsedFhirUri | null {
+  // Accepts:
+  //   fhir://Patient/123
+  //   fhir://Patient/123/_history/4
+  if (!uri.startsWith("fhir://")) return null;
+  const path = uri.slice("fhir://".length);
+  const segments = path.split("/").filter(Boolean);
+  if (segments.length === 2) {
+    const [resourceType, id] = segments;
+    if (!resourceType || !id) return null;
+    return { resourceType, id };
+  }
+  if (segments.length === 4) {
+    const [resourceType, id, history, versionId] = segments;
+    if (!resourceType || !id || history !== "_history" || !versionId) return null;
+    return { resourceType, id, versionId };
+  }
+  return null;
+}
+
+async function handleResourceRead(request: McpRequest, config: DispatcherConfig): Promise<McpResponse> {
+  const params = request.params ?? {};
+  const uri = typeof params.uri === "string" ? params.uri : "";
+  const parsed = parseFhirUri(uri);
+  if (!parsed) return error(request, -32602, `Invalid resource URI: ${uri}`);
+
+  if (!config.resourceTypes.includes(parsed.resourceType)) {
+    return error(
+      request,
+      -32602,
+      `Resource type ${parsed.resourceType} is not in the bound IG (${config.resourceTypes.join(", ")})`,
+    );
+  }
+
+  const call: VerbCall = parsed.versionId
+    ? { verb: "vread", resourceType: parsed.resourceType, id: parsed.id, params: { versionId: parsed.versionId } }
+    : { verb: "read", resourceType: parsed.resourceType, id: parsed.id };
+
+  const result = config.upstream
+    ? await config.upstream.run(call)
+    : {
+        ok: false,
+        outcome: {
+          resourceType: "OperationOutcome",
+          issue: [{ severity: "error", code: "not-supported", diagnostics: "Server is not bound to an upstream" }],
+        },
+      };
+
+  await config.audit.record({
+    id: cryptoRandomId(),
+    ts: new Date().toISOString(),
+    call,
+    result,
+  });
+
+  if (!result.ok) {
+    return error(request, -32000, `Failed to read ${uri}: ${describeOutcome(result.outcome)}`);
+  }
+
+  return ok(request, {
+    contents: [
+      {
+        uri,
+        mimeType: "application/fhir+json",
+        text: JSON.stringify(result.body ?? {}),
+      },
+    ],
+  });
+}
+
+function describeOutcome(outcome: unknown): string {
+  if (outcome && typeof outcome === "object" && "issue" in outcome) {
+    const issues = (outcome as { issue?: Array<{ diagnostics?: string }> }).issue ?? [];
+    const first = issues[0]?.diagnostics;
+    if (first) return first;
+  }
+  return "upstream error";
 }
 
 async function handleToolCall(request: McpRequest, config: DispatcherConfig): Promise<McpResponse> {

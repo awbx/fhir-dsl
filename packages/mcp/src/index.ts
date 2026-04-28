@@ -1,6 +1,6 @@
 export { JsonLogAuditSink, MemoryAuditSink, NullAuditSink } from "./audit.js";
 export { type AuthHeaders, type AuthResolver, createAuthResolver } from "./auth.js";
-export { createDispatcher, type DispatcherConfig } from "./dispatcher.js";
+export { createDispatcher, type DispatcherConfig, parseFhirUri } from "./dispatcher.js";
 export { createServer, type ServerConfig } from "./server.js";
 export { type StdioTransportOptions, stdioTransport } from "./transports/stdio.js";
 export type {
