@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.25.0] - 2026-04-28
+
+### Features
+
+- add Phase 1.4 full Extension.value[x] union (`c80a729`)
+
 ## [0.24.0] - 2026-04-28
 
 ### Features
