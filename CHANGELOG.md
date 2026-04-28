@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.0] - 2026-04-28
+
+### Features
+
+- add Phase 7.3 fhir-gen scaffold-ig command (`fa6229f`)
+
 ## [0.35.0] - 2026-04-28
 
 ### Features

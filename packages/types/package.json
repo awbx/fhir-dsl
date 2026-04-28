@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/types",
-  "version": "0.35.0",
+  "version": "0.36.0",
   "description": "TypeScript type definitions for FHIR R4/R5 resources, datatypes, and search parameters",
   "type": "module",
   "main": "./dist/index.cjs",
