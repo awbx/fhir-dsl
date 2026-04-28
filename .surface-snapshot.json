@@ -533,6 +533,10 @@
         "kind": "interface"
       },
       {
+        "name": "ExpandParams",
+        "kind": "interface"
+      },
+      {
         "name": "FhirClient",
         "kind": "class"
       },
@@ -614,6 +618,10 @@
       },
       {
         "name": "JsonPatchOperation",
+        "kind": "interface"
+      },
+      {
+        "name": "LookupParams",
         "kind": "interface"
       },
       {
@@ -805,12 +813,20 @@
         "kind": "type"
       },
       {
+        "name": "SubsumesParams",
+        "kind": "interface"
+      },
+      {
         "name": "SummaryMode",
         "kind": "type"
       },
       {
         "name": "T",
         "kind": "other"
+      },
+      {
+        "name": "TerminologyClient",
+        "kind": "class"
       },
       {
         "name": "TExtensions",
@@ -841,6 +857,10 @@
         "kind": "other"
       },
       {
+        "name": "TranslateParams",
+        "kind": "interface"
+      },
+      {
         "name": "unregisterTHelper",
         "kind": "other"
       },
@@ -855,6 +875,10 @@
       {
         "name": "UriModifier",
         "kind": "type"
+      },
+      {
+        "name": "ValidateCodeParams",
+        "kind": "interface"
       },
       {
         "name": "validateOne",

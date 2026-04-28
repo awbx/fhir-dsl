@@ -16,6 +16,7 @@ export * from "./query-builder.js";
 export * from "./rest-builders.js";
 export * from "./retry.js";
 export type { IncludeExpressionsFor, Scope } from "./scope.js";
+export * from "./terminology-operations.js";
 export * from "./transaction-builder.js";
 export {
   type CompiledPath,

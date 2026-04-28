@@ -28,6 +28,7 @@ import {
 } from "./rest-builders.js";
 import type { RetryConfig } from "./retry.js";
 import { type Executor, SearchQueryBuilderImpl, type UrlExecutor } from "./search-query-builder.js";
+import { TerminologyClient } from "./terminology-operations.js";
 import {
   type BatchBuilder,
   BatchBuilderImpl,
@@ -359,6 +360,20 @@ export class FhirClient<S extends FhirSchema> {
   operation(name: string, options?: OperationOptions): OperationBuilder {
     return new OperationBuilderImpl(this.#executor, name, options);
   }
+
+  /**
+   * Phase 3.1 — typed terminology-service operations
+   * (`$expand`, `$validate-code`, `$lookup`, `$translate`, `$subsumes`).
+   * Each method returns an `OperationBuilder` you can `compile()` or
+   * `execute()` like any other operation.
+   */
+  get terminology(): TerminologyClient {
+    if (!this.#terminology) {
+      this.#terminology = new TerminologyClient(this.#executor);
+    }
+    return this.#terminology;
+  }
+  #terminology: TerminologyClient | undefined;
 
   create<RT extends string & keyof S["resources"]>(resource: S["resources"][RT] & Resource): CreateBuilder<S, RT> {
     return new CreateBuilderImpl<S, RT>(this.#executor, resource);
