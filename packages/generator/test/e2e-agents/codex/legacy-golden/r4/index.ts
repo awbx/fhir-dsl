@@ -4,6 +4,7 @@ export * from "./search-param-types.js";
 export * from "./search-params.js";
 export * from "./registry.js";
 export * from "./client.js";
+export * from "./layers.js";
 
 export * from "./resources/condition.js";
 export * from "./resources/encounter.js";

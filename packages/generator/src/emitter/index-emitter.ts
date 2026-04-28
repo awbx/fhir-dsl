@@ -11,6 +11,7 @@ export function emitResourceIndex(resources: ResourceModel[], extraExports?: str
   lines.push('export * from "./search-params.js";');
   lines.push('export * from "./registry.js";');
   lines.push('export * from "./client.js";');
+  lines.push('export * from "./layers.js";');
 
   if (extraExports?.length) {
     for (const exp of extraExports) {

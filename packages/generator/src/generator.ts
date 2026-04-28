@@ -4,6 +4,7 @@ import { type ResolvedValueSet, TerminologyRegistry } from "@fhir-dsl/terminolog
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
 import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
+import { emitLayers } from "./emitter/layer-emitter.js";
 import { emitDatatypes, emitPrimitives } from "./emitter/primitives-emitter.js";
 import { emitProfile, emitProfileIndex, emitProfileRegistry } from "./emitter/profile-emitter.js";
 import { emitRegistry } from "./emitter/registry-emitter.js";
@@ -206,6 +207,9 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     const content = emitResource(model, mapper, bindingTypeMap);
     await writeFile(join(resourcesDir, fileName), content, "utf-8");
   }
+
+  // Phase 5 — emit FHIR architectural-layer map.
+  await writeFile(join(versionDir, "layers.ts"), emitLayers(resourceModels), "utf-8");
 
   // --- Schema (Standard Schema) generation ---
   if (options.validator) {
