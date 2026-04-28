@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.38.0] - 2026-04-28
+
+### Features
+
+- add Phase 2.1 StructureDefinition slicing (`cb2c34b`)
+
 ## [0.37.0] - 2026-04-28
 
 ### Features
