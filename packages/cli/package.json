@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@fhir-dsl/generator": "workspace:*",
+    "@fhir-dsl/mcp": "workspace:*",
     "commander": "^14.0.3"
   },
   "files": [

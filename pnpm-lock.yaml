@@ -76,6 +76,9 @@ importers:
       '@fhir-dsl/generator':
         specifier: workspace:*
         version: link:../generator
+      '@fhir-dsl/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       commander:
         specifier: ^14.0.3
         version: 14.0.3

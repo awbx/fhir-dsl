@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { capabilityCommand } from "./commands/capability.js";
 import { diffCommand } from "./commands/diff.js";
 import { generateCommand } from "./commands/generate.js";
+import { mcpCommand } from "./commands/mcp.js";
 import { scaffoldIgCommand } from "./commands/scaffold-ig.js";
 import { validateCommand } from "./commands/validate.js";
 
@@ -23,5 +24,6 @@ program.addCommand(capabilityCommand);
 program.addCommand(validateCommand);
 program.addCommand(scaffoldIgCommand);
 program.addCommand(diffCommand);
+program.addCommand(mcpCommand);
 
 program.parse();
