@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.0] - 2026-04-28
+
+### Features
+
+- add Phase 2.2 typed extensions from IGs (`9351be6`)
+
 ## [0.38.0] - 2026-04-28
 
 ### Features
