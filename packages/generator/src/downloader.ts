@@ -108,6 +108,30 @@ export interface DownloadedIG {
   profiles: unknown[];
   valueSets: unknown[];
   codeSystems: unknown[];
+  /** Phase 2.3: parsed `ImplementationGuide` manifest (when present in the package). */
+  manifest?: ImplementationGuideManifest | undefined;
+}
+
+/**
+ * Phase 2.3: a flattened view of an IG's `ImplementationGuide` resource.
+ *
+ * `global` lets the generator default-narrow base FHIR types to their
+ * IG-specific profile (e.g., `Patient` → us-core-patient when
+ * `--ig hl7.fhir.us.core` is passed).
+ *
+ * `dependsOn` lists transitive IG references — surfaced for downstream
+ * tooling but not auto-loaded. Callers that want transitive support
+ * inspect `dependsOn` and call `downloadIG` per entry.
+ */
+export interface ImplementationGuideManifest {
+  url?: string | undefined;
+  version?: string | undefined;
+  packageId?: string | undefined;
+  fhirVersion?: string[] | undefined;
+  /** Default profile binding per resource type — `Patient` → profile URL. */
+  global: Record<string, string>;
+  /** Transitive IG dependencies (`packageId@version`). */
+  dependsOn: Array<{ packageId: string; version?: string; uri?: string }>;
 }
 
 export async function downloadIG(packageRef: string, cacheDir: string): Promise<DownloadedIG> {
@@ -138,6 +162,7 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
   const profiles: unknown[] = [];
   const valueSets: unknown[] = [];
   const codeSystems: unknown[] = [];
+  let manifest: ImplementationGuideManifest | undefined;
   for (const file of files) {
     if (!file.endsWith(".json") || file === ".index.json" || file === "package.json") continue;
     try {
@@ -153,17 +178,47 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
         valueSets.push(content);
       } else if (content.resourceType === "CodeSystem") {
         codeSystems.push(content);
+      } else if (content.resourceType === "ImplementationGuide") {
+        manifest = parseImplementationGuide(content);
       }
     } catch {
       // Skip invalid files
     }
   }
 
+  const manifestSummary = manifest
+    ? ` (${Object.keys(manifest.global).length} globals, ${manifest.dependsOn.length} deps)`
+    : "";
   console.info(
-    `Loaded ${profiles.length} profiles, ${valueSets.length} ValueSets, ${codeSystems.length} CodeSystems from ${name}@${version}`,
+    `Loaded ${profiles.length} profiles, ${valueSets.length} ValueSets, ${codeSystems.length} CodeSystems from ${name}@${version}${manifestSummary}`,
   );
 
-  return { name, version, profiles, valueSets, codeSystems };
+  return { name, version, profiles, valueSets, codeSystems, manifest };
+}
+
+/** Phase 2.3: extract `global[*]` and `dependsOn[*]` from an ImplementationGuide resource. */
+function parseImplementationGuide(ig: Record<string, unknown>): ImplementationGuideManifest {
+  const global: Record<string, string> = {};
+  const globals = (ig.global ?? []) as Array<{ type?: string; profile?: string }>;
+  for (const g of globals) {
+    if (g.type && g.profile) global[g.type] = g.profile;
+  }
+  const dependsOn: ImplementationGuideManifest["dependsOn"] = [];
+  const deps = (ig.dependsOn ?? []) as Array<{ packageId?: string; version?: string; uri?: string }>;
+  for (const d of deps) {
+    if (d.packageId) {
+      const entry: { packageId: string; version?: string; uri?: string } = { packageId: d.packageId };
+      if (d.version !== undefined) entry.version = d.version;
+      if (d.uri !== undefined) entry.uri = d.uri;
+      dependsOn.push(entry);
+    }
+  }
+  const manifest: ImplementationGuideManifest = { global, dependsOn };
+  if (typeof ig.url === "string") manifest.url = ig.url;
+  if (typeof ig.version === "string") manifest.version = ig.version;
+  if (typeof ig.packageId === "string") manifest.packageId = ig.packageId;
+  if (Array.isArray(ig.fhirVersion)) manifest.fhirVersion = ig.fhirVersion as string[];
+  return manifest;
 }
 
 function parsePackageRef(ref: string): { name: string; version: string } {
