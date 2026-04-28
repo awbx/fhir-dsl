@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.1] - 2026-04-28
+
+### Improvements
+
+- update README and plan: Phase 8 complete (all 6 sub-phases shipped) (`c7d4a19`)
+
 ## [0.48.0] - 2026-04-28
 
 ### Features
