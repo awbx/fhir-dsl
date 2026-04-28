@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.37.0] - 2026-04-28
+
+### Features
+
+- add Phase 7.4 fhir-gen diff command (`ee54d47`)
+
 ## [0.36.0] - 2026-04-28
 
 ### Features

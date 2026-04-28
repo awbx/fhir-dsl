@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/smart",
-  "version": "0.36.0",
+  "version": "0.37.0",
   "description": "SMART on FHIR v2 authentication for @fhir-dsl — Backend Services, App Launch (PKCE), scopes, and discovery",
   "type": "module",
   "main": "./dist/index.cjs",
