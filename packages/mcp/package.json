@@ -29,6 +29,22 @@
     "@fhir-dsl/runtime": "workspace:*",
     "@fhir-dsl/types": "workspace:*"
   },
+  "peerDependencies": {
+    "@fhir-dsl/smart": "workspace:*",
+    "jose": "^5.9.6"
+  },
+  "peerDependenciesMeta": {
+    "@fhir-dsl/smart": {
+      "optional": true
+    },
+    "jose": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@fhir-dsl/smart": "workspace:*",
+    "jose": "^5.9.6"
+  },
   "files": [
     "dist"
   ],

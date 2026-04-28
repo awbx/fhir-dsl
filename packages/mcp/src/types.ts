@@ -62,30 +62,51 @@ export type AuthStrategy = BackendServicesAuth | PatientLaunchAuth | BearerAuth;
 
 export interface BackendServicesAuth {
   kind: "backend-services";
-  /** Issuer URL of the FHIR server's token endpoint. */
-  tokenUrl: string;
+  /**
+   * FHIR base URL — used for `.well-known/smart-configuration` discovery
+   * and as the audience for the signed client assertion. Pass
+   * `tokenEndpoint` to bypass discovery.
+   */
+  issuer: string;
   /** Client id registered for backend-services. */
   clientId: string;
-  /** PEM-encoded private key for JWT assertions (RS256/ES256). */
+  /**
+   * PEM-encoded PKCS#8 private key for JWT assertions. Imported lazily
+   * via `jose` when the resolver runs — bearer-only users never load
+   * jose.
+   */
   privateKey: string;
+  /** Signing algorithm — SMART v2 mandates RS384 or ES384. Default RS384. */
+  alg?: "RS384" | "ES384";
+  /** Optional `kid` for the client assertion header. */
+  kid?: string;
   /** OAuth2 scopes; `system/*.read` is the safe default. */
   scope?: string;
+  /** Skip discovery — pass the token endpoint directly. */
+  tokenEndpoint?: string;
 }
 
 export interface PatientLaunchAuth {
   kind: "patient-launch";
-  /** Authorisation server token endpoint. */
-  tokenUrl: string;
+  /**
+   * FHIR base URL — used for `.well-known/smart-configuration` discovery.
+   * Pass `tokenEndpoint` to bypass discovery.
+   */
+  issuer: string;
   /** Public client id from the SMART app registration. */
   clientId: string;
   /** Scopes requested for the patient session (e.g. `patient/*.read`). */
   scope?: string;
   /**
-   * The current refresh token. Issuers that require PKCE-S256 are handled
-   * inside `@fhir-dsl/smart`; this strategy is purely for the *runtime*
+   * The current refresh token. PKCE-S256 + the auth-code flow are handled
+   * by `@fhir-dsl/smart`; this strategy is purely for the runtime
    * token-exchange step driven by an MCP request.
    */
   refreshToken: string;
+  /** Optional confidential-client secret (most patient-launch clients are public). */
+  clientSecret?: string;
+  /** Skip discovery — pass the token endpoint directly. */
+  tokenEndpoint?: string;
 }
 
 export interface BearerAuth {

@@ -124,13 +124,28 @@ export function generateChangelog(newVersion) {
  * Write changelog to disk. Called from bump-version.mjs or standalone.
  */
 /**
- * MDX parses bare `<Word>` as JSX. Commit messages like `Reference<T>` or
- * `Map<K,V>` would fail the Docusaurus build. Escape `<` to `&lt;` everywhere
- * except inside code spans/blocks (which MDX already treats as literal).
+ * MDX parses bare `<Word>` as JSX and `${...}` as a JS expression. Commit
+ * messages like `Reference<T>` or `${opts.version}` would fail the
+ * Docusaurus build. Escape both outside code spans/blocks (which MDX
+ * already treats as literal).
  */
 function sanitizeForMdx(content) {
   const parts = content.split(/(`[^`]*`)/g);
-  return parts.map((p, i) => (i % 2 === 1 ? p : p.replace(/</g, "&lt;"))).join("");
+  return parts
+    .map((p, i) => {
+      if (i % 2 === 1) return p; // inside a code span — leave alone
+      // Escape `<` (JSX) and `${...}` (which MDX otherwise treats as a JS
+      // expression). For `${`, we wrap the `$` in a code span so MDX sees
+      // it as inline literal — `&#36;` HTML entity isn't enough because
+      // MDX parses JSX before decoding entities.
+      // MDX treats `{` as the start of a JS expression. Backslash-escape
+      // every literal `{` we emit; commit messages don't (legitimately)
+      // use balanced `{...}` for content, so this is safe.
+      return p
+        .replace(/</g, "&lt;")
+        .replace(/\{/g, "\\{");
+    })
+    .join("");
 }
 
 export function writeChangelog(newVersion) {

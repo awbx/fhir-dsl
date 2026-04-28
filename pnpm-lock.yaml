@@ -124,6 +124,13 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@fhir-dsl/smart':
+        specifier: workspace:*
+        version: link:../smart
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
 
   packages/runtime:
     dependencies:
