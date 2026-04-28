@@ -3,18 +3,21 @@ import type {
   FhirBoolean,
   FhirCanonical,
   FhirCode,
+  FhirDate,
   FhirDateTime,
   FhirDecimal,
   FhirId,
   FhirInstant,
   FhirInteger,
   FhirMarkdown,
+  FhirOid,
   FhirPositiveInt,
   FhirString,
   FhirTime,
   FhirUnsignedInt,
   FhirUri,
   FhirUrl,
+  FhirUuid,
   FhirXhtml,
 } from "./primitives.js";
 
@@ -27,18 +30,58 @@ export interface Element {
 
 export interface Extension extends Element {
   url: FhirUri;
-  valueString?: FhirString;
+  // --- Primitive value[x] variants ---
+  valueBase64Binary?: FhirBase64Binary;
   valueBoolean?: FhirBoolean;
-  valueInteger?: FhirInteger;
-  valueDecimal?: FhirDecimal;
-  valueDateTime?: FhirDateTime;
+  valueCanonical?: FhirCanonical;
   valueCode?: FhirCode;
-  valueCoding?: Coding;
+  valueDate?: FhirDate;
+  valueDateTime?: FhirDateTime;
+  valueDecimal?: FhirDecimal;
+  valueId?: FhirId;
+  valueInstant?: FhirInstant;
+  valueInteger?: FhirInteger;
+  valueMarkdown?: FhirMarkdown;
+  valueOid?: FhirOid;
+  valuePositiveInt?: FhirPositiveInt;
+  valueString?: FhirString;
+  valueTime?: FhirTime;
+  valueUnsignedInt?: FhirUnsignedInt;
+  valueUri?: FhirUri;
+  valueUrl?: FhirUrl;
+  valueUuid?: FhirUuid;
+  // --- Complex value[x] variants ---
+  valueAddress?: Address;
+  valueAge?: Age;
+  valueAnnotation?: Annotation;
+  valueAttachment?: Attachment;
   valueCodeableConcept?: CodeableConcept;
-  valueReference?: Reference;
-  valueQuantity?: Quantity;
-  valuePeriod?: Period;
+  valueCoding?: Coding;
+  valueContactDetail?: ContactDetail;
+  valueContactPoint?: ContactPoint;
+  valueContributor?: Contributor;
+  valueCount?: Count;
+  valueDataRequirement?: DataRequirement;
+  valueDistance?: Distance;
+  valueDosage?: Dosage;
+  valueDuration?: Duration;
+  valueExpression?: Expression;
+  valueHumanName?: HumanName;
   valueIdentifier?: Identifier;
+  valueMoney?: Money;
+  valueParameterDefinition?: ParameterDefinition;
+  valuePeriod?: Period;
+  valueQuantity?: Quantity;
+  valueRange?: Range;
+  valueRatio?: Ratio;
+  valueReference?: Reference;
+  valueRelatedArtifact?: RelatedArtifact;
+  valueSampledData?: SampledData;
+  valueSignature?: Signature;
+  valueTiming?: Timing;
+  valueTriggerDefinition?: TriggerDefinition;
+  valueUsageContext?: UsageContext;
+  valueMeta?: Meta;
 }
 
 // --- Complex Datatypes ---
