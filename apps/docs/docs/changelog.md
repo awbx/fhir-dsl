@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.35.0] - 2026-04-28
+
+### Features
+
+- add Phase 7.1 fhir-gen validate command (`fd86f0d`)
+
 ## [0.34.0] - 2026-04-28
 
 ### Features
