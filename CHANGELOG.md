@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.0] - 2026-04-28
+
+### Features
+
+- add Phase 3.1 first-class terminology operations (`580e054`)
+
 ## [0.29.0] - 2026-04-28
 
 ### Features
