@@ -37,3 +37,15 @@ export interface RevIncludeRegistry {
 
 export interface ProfileRegistry {}
 
+export interface IncludeExpressions {
+  Observation: {
+    "subject": "subject";
+  };
+}
+
+export const includeExpressions: Record<string, Record<string, string | string[]>> = {
+  Observation: {
+    "subject": "subject",
+  },
+};
+

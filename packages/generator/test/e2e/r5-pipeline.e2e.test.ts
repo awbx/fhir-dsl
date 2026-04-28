@@ -57,9 +57,9 @@ describe("r5 pipeline e2e", () => {
       expect(src).toContain("export type FhirBoolean = boolean;");
     });
 
-    it("emits FhirPositiveInt as a number alias", () => {
+    it("emits FhirPositiveInt as a branded number alias", () => {
       const src = read("primitives.ts");
-      expect(src).toContain("export type FhirPositiveInt = number;");
+      expect(src).toContain('export type FhirPositiveInt = number & Marker<"positiveInt">;');
     });
 
     it("parameterizes FhirCode<T> for narrowed bindings", () => {

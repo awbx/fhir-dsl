@@ -7,15 +7,47 @@ const PRIMITIVE_TS_TYPE: Record<string, string> = {
   string: "string",
 };
 
-/** Emit per-primitive TS aliases from the catalog. `FhirCode` is parameterized to support narrowed code bindings. */
-export function emitPrimitives(catalog: SpecCatalog): string {
-  const lines: string[] = [];
-  const primitives = [...catalog.primitives.values()].sort((a, b) => a.name.localeCompare(b.name));
+// Primitives that carry a FHIR-specific shape worth marking. The marker
+// is an optional unique-symbol property — string/number literals still
+// assign without a cast, but tooling sees the FHIR intent. Use the
+// `parseX` smart constructors in `@fhir-dsl/types` for runtime checks.
+const BRANDED: ReadonlySet<string> = new Set([
+  "date",
+  "dateTime",
+  "instant",
+  "time",
+  "uri",
+  "url",
+  "canonical",
+  "id",
+  "oid",
+  "uuid",
+  "markdown",
+  "base64Binary",
+  "xhtml",
+  "positiveInt",
+  "unsignedInt",
+]);
 
+/**
+ * Emit per-primitive TS aliases from the catalog.
+ *
+ * - `FhirCode` is parameterized to support narrowed code bindings.
+ * - Branded primitives (date, uri, id, …) intersect their JS base with
+ *   an optional `__fhirBrand` marker so consumers can distinguish them
+ *   without losing literal-assignment ergonomics.
+ */
+export function emitPrimitives(catalog: SpecCatalog): string {
+  const primitives = [...catalog.primitives.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const lines: string[] = [];
+  if (primitives.some((p) => BRANDED.has(p.name))) {
+    lines.push("declare const __fhirBrand: unique symbol;");
+    lines.push("interface Marker<K extends string> { readonly [__fhirBrand]?: K; }");
+    lines.push("");
+  }
   for (const p of primitives) {
     lines.push(aliasFor(p));
   }
-
   return `${lines.join("\n")}\n`;
 }
 
@@ -23,6 +55,9 @@ function aliasFor(p: PrimitiveEntry): string {
   const jsType = PRIMITIVE_TS_TYPE[p.rule.kind] ?? "string";
   if (p.name === "code") {
     return `export type ${p.tsType}<T extends string = string> = T;`;
+  }
+  if (BRANDED.has(p.name)) {
+    return `export type ${p.tsType} = ${jsType} & Marker<"${p.name}">;`;
   }
   return `export type ${p.tsType} = ${jsType};`;
 }

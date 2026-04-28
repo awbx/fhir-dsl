@@ -227,6 +227,58 @@
         "kind": "interface"
       },
       {
+        "name": "parseBase64Binary",
+        "kind": "function"
+      },
+      {
+        "name": "parseCanonical",
+        "kind": "function"
+      },
+      {
+        "name": "parseDate",
+        "kind": "function"
+      },
+      {
+        "name": "parseDateTime",
+        "kind": "function"
+      },
+      {
+        "name": "parseId",
+        "kind": "function"
+      },
+      {
+        "name": "parseInstant",
+        "kind": "function"
+      },
+      {
+        "name": "parseOid",
+        "kind": "function"
+      },
+      {
+        "name": "parsePositiveInt",
+        "kind": "function"
+      },
+      {
+        "name": "parseTime",
+        "kind": "function"
+      },
+      {
+        "name": "parseUnsignedInt",
+        "kind": "function"
+      },
+      {
+        "name": "parseUri",
+        "kind": "function"
+      },
+      {
+        "name": "parseUrl",
+        "kind": "function"
+      },
+      {
+        "name": "parseUuid",
+        "kind": "function"
+      },
+      {
         "name": "Period",
         "kind": "interface"
       },

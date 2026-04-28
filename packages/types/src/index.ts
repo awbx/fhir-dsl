@@ -3,5 +3,6 @@
 // Users generate those via the CLI into their own project.
 
 export * from "./datatypes.js";
+export * from "./parse.js";
 export * from "./primitives.js";
 export * from "./search-param-types.js";
