@@ -23,6 +23,15 @@ export function emitResource(model: ResourceModel, mapper: TypeMapper, bindingTy
     datatypeImports.add("BackboneElement");
   }
 
+  // Phase 1.3: any primitive-only property triggers an underscore
+  // sibling typed as `Element` (or sparse `(Element | null)[]`).
+  if (
+    hasPrimitiveSibling(model.properties, mapper) ||
+    model.backboneElements.some((bb) => hasPrimitiveSibling(bb.properties, mapper))
+  ) {
+    datatypeImports.add("Element");
+  }
+
   if (primitiveImports.size > 0) {
     const sorted = [...primitiveImports].sort();
     lines.push(`import type { ${sorted.join(", ")} } from "../primitives.js";`);
@@ -61,7 +70,9 @@ function emitResourceInterface(model: ResourceModel, mapper: TypeMapper, binding
   lines.push(`  resourceType: "${model.name}";`);
 
   for (const prop of model.properties) {
-    lines.push(`  ${formatProperty(prop, mapper, bindingTypeMap)}`);
+    for (const line of formatPropertyLines(prop, mapper, bindingTypeMap)) {
+      lines.push(`  ${line}`);
+    }
   }
 
   lines.push("}");
@@ -77,18 +88,46 @@ function emitBackboneInterface(
   lines.push(`export interface ${bb.name} extends BackboneElement {`);
 
   for (const prop of bb.properties) {
-    lines.push(`  ${formatProperty(prop, mapper, bindingTypeMap)}`);
+    for (const line of formatPropertyLines(prop, mapper, bindingTypeMap)) {
+      lines.push(`  ${line}`);
+    }
   }
 
   lines.push("}");
   return lines;
 }
 
-function formatProperty(prop: PropertyModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string {
+/**
+ * Emits the property line plus, for primitive-typed properties, the
+ * underscore-prefixed sibling that carries `id` and extensions per the
+ * FHIR JSON representation rules.
+ *
+ *   birthDate?: FhirDate;
+ *   _birthDate?: Element;
+ *
+ * Repeating primitives use a sparse array (`(Element | null)[]`) so
+ * indices stay aligned with the value array, with `null` for entries
+ * that have no extensions.
+ */
+function formatPropertyLines(prop: PropertyModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string[] {
   const optional = prop.isRequired ? "" : "?";
   const tsType = formatPropertyType(prop, mapper, bindingTypeMap);
   const arraySuffix = prop.isArray ? "[]" : "";
-  return `${prop.name}${optional}: ${tsType}${arraySuffix};`;
+  const lines = [`${prop.name}${optional}: ${tsType}${arraySuffix};`];
+  if (isPrimitiveOnly(prop, mapper)) {
+    const sibling = prop.isArray ? "(Element | null)[]" : "Element";
+    lines.push(`_${prop.name}?: ${sibling};`);
+  }
+  return lines;
+}
+
+function isPrimitiveOnly(prop: PropertyModel, mapper: TypeMapper): boolean {
+  if (prop.types.length === 0) return false;
+  return prop.types.every((t) => mapper.isPrimitive(t.code));
+}
+
+function hasPrimitiveSibling(properties: PropertyModel[], mapper: TypeMapper): boolean {
+  return properties.some((p) => isPrimitiveOnly(p, mapper));
 }
 
 function formatPropertyType(prop: PropertyModel, mapper: TypeMapper, bindingTypeMap?: BindingTypeMap): string {

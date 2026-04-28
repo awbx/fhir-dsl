@@ -276,12 +276,19 @@ export interface Meta extends Element {
 
 // --- Base Resource ---
 
+// Each primitive-typed field on Resource carries an underscore-prefixed
+// sibling for round-trip safety per the FHIR JSON representation rules
+// — the sibling holds `id` and `extension` for the primitive value.
+// (See Phase 1.3 of FHIR_COMPLIANCE_PLAN.md.)
 export interface Resource {
   resourceType: string;
   id?: FhirId;
+  _id?: Element;
   meta?: Meta;
   implicitRules?: FhirUri;
+  _implicitRules?: Element;
   language?: FhirCode;
+  _language?: Element;
 }
 
 export interface DomainResource extends Resource {
