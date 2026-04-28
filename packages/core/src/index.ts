@@ -1,4 +1,5 @@
 export * from "./auth.js";
+export * from "./capability-guard.js";
 export * from "./compiled-query.js";
 export * from "./direct-crud-builder.js";
 export * from "./fhir-client.js";

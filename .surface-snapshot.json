@@ -433,6 +433,22 @@
         "kind": "class"
       },
       {
+        "name": "CapabilityGuard",
+        "kind": "interface"
+      },
+      {
+        "name": "capabilityGuardFromUrl",
+        "kind": "function"
+      },
+      {
+        "name": "CapabilityGuardOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "CapabilityStatementShape",
+        "kind": "interface"
+      },
+      {
         "name": "CompiledPath",
         "kind": "other"
       },
@@ -493,6 +509,10 @@
         "kind": "class"
       },
       {
+        "name": "createCapabilityGuard",
+        "kind": "function"
+      },
+      {
         "name": "createFhirClient",
         "kind": "function"
       },
@@ -543,6 +563,10 @@
       {
         "name": "FhirClientConfig",
         "kind": "interface"
+      },
+      {
+        "name": "FhirInteraction",
+        "kind": "type"
       },
       {
         "name": "FhirRequestError",
@@ -863,6 +887,10 @@
       {
         "name": "unregisterTHelper",
         "kind": "other"
+      },
+      {
+        "name": "UnsupportedAction",
+        "kind": "type"
       },
       {
         "name": "UpdateBuilder",
