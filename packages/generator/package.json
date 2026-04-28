@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/generator",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "description": "FHIR TypeScript code generator from HL7 StructureDefinitions and SearchParameters",
   "type": "module",
   "main": "./dist/index.cjs",

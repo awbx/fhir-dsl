@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.29.0] - 2026-04-28
+
+### Features
+
+- add Phase 4.2 bundle reference resolution (`49ac216`)
+
 ## [0.28.0] - 2026-04-28
 
 ### Features
