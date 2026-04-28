@@ -545,6 +545,40 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 - After a phase ships: bump `pnpm version:bump` (minor for new pillars,
   patch for fidelity-only fixes), regenerate the spec coverage table.
 
+### Shipped phases
+
+| Version | Phase | Notes |
+|---|---|---|
+| v0.23.0 | 1.1 | Branded primitives via `unique symbol` markers |
+| v0.24.0 | 1.2 | `ChoiceOf<T, Prefix>` + `choiceOf()` runtime helper |
+| v0.25.0 | 1.3 + 1.4 | `_field` siblings, full `Extension.value[x]` union (49 variants) |
+| v0.26.0 | 3.1 | Typed terminology operations on `client.terminology.*` |
+| v0.27.0 | 4.1 | `createCapabilityGuard` for capability-narrowed clients |
+| v0.28.0 | 3.2 | Concept hierarchy + `is-a` / `descendent-of` / `regex` ValueSet filters |
+| v0.29.0 | 4.2 | `Bundle.resolveReference` / `resolveReferences` runtime helpers |
+| v0.30.0 | 5 | Layered framework: `LAYER_OF`, `referencesUpward` |
+| v0.32.0 | 7.2 | `fhir-gen capability <baseUrl>` |
+| v0.33.0 | (audit) | Export-surface snapshot in CI |
+| v0.34.0 | 2.3 | IG manifest (`global`, `dependsOn`) parsing |
+| v0.35.0 | 7.1 | `fhir-gen validate` |
+| v0.36.0 | 7.3 | `fhir-gen scaffold-ig` |
+| v0.37.0 | 7.4 | `fhir-gen diff` (exits 2 on breaking changes) |
+| v0.38.0 | 2.1 | StructureDefinition slicing parse + emit + runtime helpers |
+| v0.39.0 | 2.2 | Branded `Extension<URL>` + IG extension SD parsing |
+| v0.40.0 | 6 | FHIRPath invariant evaluator (subset) |
+| v0.41.0 | 8.1 | `@fhir-dsl/mcp` package skeleton |
+| v0.42.0 | 8.2 | MCP generic verb runners (read/search/etc. against upstream) |
+
+### Remaining
+
+- Phase 8.3 — MCP `resources/read` (URI-addressable get-by-id)
+- Phase 8.4 — Backend-services + patient-launch auth wiring
+- Phase 8.5 — Write gating + safety
+- Phase 8.7 — Token economy defaults (response truncation, `_summary`)
+- Phase 8.8 — Generator integration: `fhir-gen generate --mcp <out>`
+- Phase 8.9 — CLI ergonomics (`fhir-gen mcp` to launch a configured server)
+- Phase 6 follow-up — wire compiled invariants into emitted Standard Schema validators
+
 ## Out of scope (intentionally)
 
 - A full FHIR server. fhir-dsl is a typed client + generator; server

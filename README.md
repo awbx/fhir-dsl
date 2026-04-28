@@ -34,12 +34,15 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 
 | Package | Description | When to Install |
 |---|---|---|
-| [`@fhir-dsl/core`](./packages/core) | Query builder DSL (search, read, batch, transactions) | Always — this is the query builder |
-| [`@fhir-dsl/runtime`](./packages/runtime) | HTTP executor with pagination and error handling | Always — provides the HTTP executor |
-| [`@fhir-dsl/cli`](./packages/cli) | CLI for generating types from FHIR specs | Dev dependency — generates types for your project |
-| [`@fhir-dsl/types`](./packages/types) | Base FHIR R4/R5 type definitions | Automatically installed as a dependency of `@fhir-dsl/core` |
-| [`@fhir-dsl/generator`](./packages/generator) | Code generation engine | Only if building custom tooling on top of the generator |
-| [`@fhir-dsl/fhirpath`](./packages/fhirpath) | Type-safe FHIRPath expression builder | When working with FHIRPath expressions |
+| [`@fhir-dsl/core`](./packages/core) | Query builder DSL (search, read, batch, transactions, terminology ops, capability guard) | Always — this is the query builder |
+| [`@fhir-dsl/runtime`](./packages/runtime) | HTTP executor with pagination, error handling, bundle resolution, slice helpers | Always — provides the HTTP executor |
+| [`@fhir-dsl/cli`](./packages/cli) | `fhir-gen` CLI: `generate`, `capability`, `validate`, `scaffold-ig`, `diff` | Dev dependency — generates types for your project |
+| [`@fhir-dsl/types`](./packages/types) | Branded FHIR R4/R5 primitives + base datatypes + parsers | Automatically installed as a dependency of `@fhir-dsl/core` |
+| [`@fhir-dsl/generator`](./packages/generator) | Code generation engine (resources, profiles, slices, typed extensions, layers, IG manifests) | Only if building custom tooling on top of the generator |
+| [`@fhir-dsl/fhirpath`](./packages/fhirpath) | Type-safe FHIRPath expression builder + invariant evaluator | When working with FHIRPath expressions or compiling invariants |
+| [`@fhir-dsl/terminology`](./packages/terminology) | CodeSystem hierarchy + ValueSet filter engine (`is-a`, `descendent-of`, `regex`) | Used internally by the generator; also usable standalone |
+| [`@fhir-dsl/smart`](./packages/smart) | SMART on FHIR v2 — PKCE-S256, backend services, scope DSL | Only when integrating with SMART-secured FHIR servers |
+| [`@fhir-dsl/mcp`](./packages/mcp) | MCP server: ~10 generic FHIR verbs as tools, pluggable auth/audit | When exposing a FHIR endpoint to an LLM agent |
 | [`@fhir-dsl/utils`](./packages/utils) | Shared utilities | Only if building custom tooling |
 
 For detailed installation instructions, see the [Installation Guide](https://awbx.github.io/fhir-dsl/docs/getting-started/installation).
@@ -196,24 +199,28 @@ fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.
 | Pillar | Status | Notes |
 |---|---|---|
 | Information Model — base classes & datatypes | ✅ | `Element`, `Resource`, `DomainResource`, `BackboneElement`, all complex datatypes typed. |
-| Information Model — primitives | 🟡 | All 19 FHIR primitives present; branded types ship in Phase 1.1. |
-| Information Model — choice types `value[x]` | 🟡 | Flattened to optional siblings today; discriminated unions in Phase 1.2. |
-| Information Model — primitive `_field` siblings | ❌ | Round-trip-safe in Phase 1.3. |
+| Information Model — primitives | ✅ | All 19 FHIR primitives, branded with `unique symbol` markers (Phase 1.1, v0.23.0). |
+| Information Model — choice types `value[x]` | ✅ | Discriminated `ChoiceOf<T, Prefix>` + `choiceOf()` runtime helper (Phase 1.2, v0.24.0). |
+| Information Model — primitive `_field` siblings | ✅ | `_id`, `_extension`, etc. round-trip via `Element` siblings (Phase 1.3, v0.25.0). |
+| Information Model — full `Extension.value[x]` union | ✅ | All 49 value variants (Phase 1.4, v0.25.0). |
 | Conformance — profiles | ✅ | Type-narrowing on `.search("RT", profileUrl)`. |
-| Conformance — slicing | ❌ | Generator skips slices today; Phase 2.1. |
-| Conformance — CapabilityStatement-driven client | 🟡 | `metadata` GET only; `fromCapabilities()` in Phase 4.1. |
-| Conformance — extensions | 🟡 | Structural only; typed extensions from IGs in Phase 2.2. |
+| Conformance — StructureDefinition slicing | ✅ | Slice-named optional fields (`extension_usCoreRace?`, `component_systolic?`) + runtime `extensionByUrl` / `findSliceByPath` helpers (Phase 2.1, v0.38.0). |
+| Conformance — typed extensions from IGs | ✅ | Branded `Extension<URL>` interfaces emitted per IG-defined extension SD (Phase 2.2, v0.39.0). |
+| Conformance — IG manifest as first-class | ✅ | `ImplementationGuide.global` + `dependsOn` parsed by the downloader (Phase 2.3, v0.34.0). |
+| Conformance — CapabilityStatement-driven client | ✅ | `createCapabilityGuard` narrows the client surface to advertised capabilities (Phase 4.1, v0.27.0). |
 | Terminology — typed bindings (generate-time) | ✅ | Required/extensible/preferred resolved offline. |
-| Terminology — `$expand` / `$validate-code` / `$lookup` / etc. | ❌ | First-class typed builders in Phase 3.1. |
+| Terminology — `$expand` / `$validate-code` / `$lookup` / `$translate` / `$subsumes` | ✅ | Typed `client.terminology.*` operations (Phase 3.1, v0.26.0). |
+| Terminology — concept hierarchy + ValueSet filters | ✅ | `is-a`, `descendent-of`, `regex` filters with transitive subsumption (Phase 3.2, v0.28.0). |
 | REST — read/vread/search/history/transaction/batch/operation | ✅ | Full surface in `packages/core`. |
 | REST — PATCH + conditional headers + retry + AbortSignal | ✅ | json-patch / xml-patch / fhirpath-patch all wired. |
-| REST — `_include` / `_revinclude` runtime resolution | 🟡 | Typed; `bundle.resolve()` lands in Phase 4.2. |
+| REST — `_include` / `_revinclude` runtime resolution | ✅ | `Bundle.resolveReference` walks fragment → fullUrl → `Type/id` (Phase 4.2, v0.29.0). |
 | References — `Reference<T>` target narrowing | ✅ | Generated from `targetProfile`. |
 | FHIRPath — N1 core | ✅ | Arithmetic, env vars, `$index`/`$total`, aggregates, `resolve`/`hasValue`, `extension(url)`. |
-| FHIRPath — invariants compiled to validators | ❌ | Phase 6. |
+| FHIRPath — invariants compiled to runtime predicates | ✅ | `compileInvariant` + `validateInvariants` returning OperationOutcome (Phase 6, v0.40.0). Subset: identifiers/member access, `exists`/`empty`/`matches`/`count`/`where`/`hasValue`, `and`/`or`/`xor`/`implies`/`not`, comparisons, parentheses, indexers, three-valued logic. |
 | SMART on FHIR v2 | ✅ | PKCE-S256, backend services, scope DSL. |
-| Layered framework (Foundation/Base/Clinical/…) | ❌ | Phase 5. |
-| MCP server generation | ❌ | Phase 8. |
+| Layered framework (Foundation/Base/Clinical/Financial/Specialized) | ✅ | `LAYER_OF`, `referencesUpward` emitted under `<version>/layers.ts` (Phase 5, v0.30.0). |
+| MCP server generation — package + dispatcher | ✅ | `@fhir-dsl/mcp` ships generic verb tools, three pluggable auth strategies, audit sinks, stdio transport (Phase 8.1+8.2, v0.41.0+v0.42.0). |
+| MCP server generation — generator `--mcp` integration | ❌ | Phase 8.8. |
 
 Drift between this table and the code is caught by `pnpm audit:export-surface` — every PR that changes the public surface must refresh `.surface-snapshot.json`.
 
@@ -255,22 +262,104 @@ Mapping of [FHIR R5 search features](https://fhir.hl7.org/fhir/search.html) to t
 | POST `_search` (long URLs / sensitive params) | `.usePost()` (auto-switch over ~1900 chars) |
 | `_count`, `_sort` | `.count(n)`, `.sort(param, dir)` |
 
+## Invariants (FHIRPath → Predicates)
+
+`@fhir-dsl/fhirpath` exposes a runtime invariant evaluator that compiles `ElementDefinition.constraint[*].expression` strings into predicates and surfaces results as `OperationOutcome` issues. The supported subset covers the patterns FHIR core invariants actually use:
+
+- Identifiers and member access (`name.given`, `extension.url`)
+- Function calls: `exists()`, `empty()`, `count()`, `where()`, `select()`, `matches('regex')`, `hasValue()`, `first()`/`last()`/`tail()`/`single()`, `iif()`, `distinct()`, `startsWith`/`endsWith`/`contains`/`length`/`toString`
+- Boolean operators: `and`, `or`, `xor`, `implies`, `not` (with FHIRPath three-valued logic)
+- Comparison/equivalence: `=`, `!=`, `<`, `>`, `<=`, `>=`, `~`, `!~`, `in`
+- Arithmetic, parentheses, indexers, `$this`, scalar literals
+
+```ts
+import { compileInvariant, validateInvariants } from "@fhir-dsl/fhirpath";
+
+const inv = compileInvariant({
+  key: "pat-1",
+  expression: "name.exists() or telecom.exists() or address.exists()",
+  severity: "error",
+  human: "Patient must have a contact mechanism",
+});
+
+const result = inv.check(patient);            // { passed: true | false | "indeterminate", ... }
+const oo = validateInvariants(patient, [inv]); // { resourceType: "OperationOutcome", issue: [...] }
+```
+
+Generator wiring (so the emitted Standard Schema validators run invariants automatically) is a follow-up phase.
+
+## MCP Server (Model Context Protocol)
+
+`@fhir-dsl/mcp` exposes any FHIR endpoint as an MCP tool surface for LLM agents — one server === one upstream + one IG.
+
+```ts
+import { createServer, stdioTransport } from "@fhir-dsl/mcp";
+
+const server = createServer({
+  name: "us-core-mcp",
+  version: "1.0.0",
+  baseUrl: "https://hapi.fhir.org/baseR4",
+  resourceTypes: ["Patient", "Observation", "Encounter"],
+  auth: { kind: "bearer", token: process.env.FHIR_TOKEN! },
+  // writes default to none — opt in explicitly:
+  // writes: ["create", "update"],
+});
+
+await server.listen(stdioTransport());
+```
+
+Locked design (see `FHIR_COMPLIANCE_PLAN.md`):
+
+- ~10 generic verbs typed by `resourceType` discriminated union: `read`, `vread`, `search`, `history`, `create`, `update`, `patch`, `delete`, `operation`, `capabilities`
+- Read-only by default; writes opt in via `writes`
+- Three pluggable auth strategies — `bearer` works today, `backend-services` and `patient-launch` are wired in a later phase
+- Pluggable `AuditSink` (`JsonLogAuditSink`, `MemoryAuditSink`, `NullAuditSink` ship by default)
+- Both `stdio` and Streamable HTTP transports planned (stdio only today)
+- `fhir://<ResourceType>/{id}` URI templates exposed via MCP `resources/list`
+
 ## CLI Reference
 
+The `fhir-gen` binary ships five commands:
+
 ```bash
-fhir-gen generate [options]
+fhir-gen generate     # generate TypeScript from a FHIR version (+ optional IG)
+fhir-gen capability   # snapshot a server's CapabilityStatement
+fhir-gen validate     # structurally check a FHIR JSON resource
+fhir-gen scaffold-ig  # initialise a project with an IG pre-wired
+fhir-gen diff         # report breaking changes between two generated outputs
 ```
+
+### `fhir-gen generate`
 
 | Option | Description | Required |
 |---|---|---|
 | `--version <version>` | FHIR version: `r4`, `r4b`, `r5`, `r6` | Yes |
 | `--out <dir>` | Output directory for generated files | Yes |
-| `--ig <packages...>` | Implementation Guide packages to include | No |
+| `--ig <packages...>` | Implementation Guide packages (`hl7.fhir.us.core@6.1.0`) | No |
 | `--resources <list>` | Comma-separated list of resource names to generate | No |
 | `--src <path>` | Local FHIR definitions directory (skips download) | No |
 | `--cache <dir>` | Cache directory for downloaded specs | No |
 | `--validator <target>` | Emit Standard Schema validators: `native` or `zod` | No |
 | `--strict-extensible` | Treat extensible bindings as closed enums (validator only) | No |
+| `--expand-valuesets` | Generate typed unions from FHIR ValueSet bindings | No |
+| `--resolve-codesystems` | Generate CodeSystem namespace objects for IntelliSense | No |
+| `--include-spec` | Emit markdown spec files alongside types for AI/LLM context | No |
+
+### `fhir-gen capability <baseUrl>`
+
+Fetches `<baseUrl>/metadata` and prints a table of supported interactions, formats, search params, and conditional-* flags. `--out <file>` dumps the raw JSON, `--json` prints it to stdout. (Phase 7.2, v0.32.0.)
+
+### `fhir-gen validate <file>`
+
+Structural sanity-check on a FHIR JSON resource: parses, validates the `resourceType` is known, checks basic invariants (string `id`, `Bundle.entry` is an array, no NaN/Infinity in numbers). Designed for CI gates around LLM-generated payloads. `--quiet` suppresses warnings on success. (Phase 7.1, v0.35.0.)
+
+### `fhir-gen scaffold-ig <pkg>`
+
+Initialises a starter project with the IG pre-wired. Writes `package.json`, `tsconfig.json`, `fhir-dsl.config.json`, and `src/client.ts` calling the generator's emitted `createClient`. `--out <dir>` (default cwd), `--version <ver>` (default `r4`), `--name <project>`, `--force` to overwrite. (Phase 7.3, v0.36.0.)
+
+### `fhir-gen diff <oldDir> <newDir>`
+
+Compares two generated outputs and reports added/removed resources, removed fields, optional→required changes, and type narrowing. Exits 2 when breaking changes are detected — wire it into CI to gate FHIR version bumps. `--json` for a machine-readable report. (Phase 7.4, v0.37.0.)
 
 For full CLI details and examples, see the [CLI Usage Guide](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 
