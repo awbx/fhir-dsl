@@ -26,6 +26,7 @@ const packages = [
 	"utils",
 	"generator",
 	"cli",
+	"mcp",
 ];
 
 function symbolKind(sym) {

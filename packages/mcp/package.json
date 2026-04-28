@@ -1,0 +1,53 @@
+{
+  "name": "@fhir-dsl/mcp",
+  "version": "0.40.0",
+  "description": "Model Context Protocol server for FHIR — generated tool surface for any LLM upstream",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@fhir-dsl/core": "workspace:*",
+    "@fhir-dsl/runtime": "workspace:*",
+    "@fhir-dsl/types": "workspace:*"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awbx/fhir-dsl.git",
+    "directory": "packages/mcp"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "fhir",
+    "mcp",
+    "model-context-protocol",
+    "llm",
+    "agents",
+    "healthcare"
+  ]
+}

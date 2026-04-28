@@ -110,6 +110,18 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
+  packages/mcp:
+    dependencies:
+      '@fhir-dsl/core':
+        specifier: workspace:*
+        version: link:../core
+      '@fhir-dsl/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@fhir-dsl/types':
+        specifier: workspace:*
+        version: link:../types
+
   packages/runtime:
     dependencies:
       '@fhir-dsl/core':

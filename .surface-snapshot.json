@@ -1557,6 +1557,116 @@
         "kind": "other"
       }
     ],
-    "@fhir-dsl/cli": []
+    "@fhir-dsl/cli": [],
+    "@fhir-dsl/mcp": [
+      {
+        "name": "AuditEvent",
+        "kind": "other"
+      },
+      {
+        "name": "AuditSink",
+        "kind": "other"
+      },
+      {
+        "name": "AuthHeaders",
+        "kind": "other"
+      },
+      {
+        "name": "AuthResolver",
+        "kind": "other"
+      },
+      {
+        "name": "AuthStrategy",
+        "kind": "other"
+      },
+      {
+        "name": "BackendServicesAuth",
+        "kind": "other"
+      },
+      {
+        "name": "BearerAuth",
+        "kind": "other"
+      },
+      {
+        "name": "createAuthResolver",
+        "kind": "other"
+      },
+      {
+        "name": "createDispatcher",
+        "kind": "other"
+      },
+      {
+        "name": "createServer",
+        "kind": "other"
+      },
+      {
+        "name": "Dispatcher",
+        "kind": "other"
+      },
+      {
+        "name": "DispatcherConfig",
+        "kind": "other"
+      },
+      {
+        "name": "GenericVerb",
+        "kind": "other"
+      },
+      {
+        "name": "JsonLogAuditSink",
+        "kind": "other"
+      },
+      {
+        "name": "McpRequest",
+        "kind": "other"
+      },
+      {
+        "name": "McpResponse",
+        "kind": "other"
+      },
+      {
+        "name": "McpServer",
+        "kind": "other"
+      },
+      {
+        "name": "MemoryAuditSink",
+        "kind": "other"
+      },
+      {
+        "name": "NullAuditSink",
+        "kind": "other"
+      },
+      {
+        "name": "PatientLaunchAuth",
+        "kind": "other"
+      },
+      {
+        "name": "ResourceType",
+        "kind": "other"
+      },
+      {
+        "name": "ServerConfig",
+        "kind": "other"
+      },
+      {
+        "name": "stdioTransport",
+        "kind": "other"
+      },
+      {
+        "name": "StdioTransportOptions",
+        "kind": "other"
+      },
+      {
+        "name": "Transport",
+        "kind": "other"
+      },
+      {
+        "name": "VerbCall",
+        "kind": "other"
+      },
+      {
+        "name": "VerbResult",
+        "kind": "other"
+      }
+    ]
   }
 }
