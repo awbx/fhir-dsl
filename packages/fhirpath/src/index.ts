@@ -11,6 +11,18 @@ export {
 export { FhirPathEvaluationError } from "./eval/types.js";
 export { type EvalOptions, evaluate } from "./evaluator.js";
 export { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
+export {
+  type CompiledInvariant,
+  compileInvariant,
+  type Expr as InvariantExpr,
+  FhirPathInvariantCompileError,
+  type InvariantDefinition,
+  type InvariantIssue,
+  type InvariantResult,
+  type OperationOutcome,
+  parseExpression as parseInvariantExpression,
+  validateInvariants,
+} from "./invariant/index.js";
 export type {
   AggregateOp,
   ArithmeticOp,

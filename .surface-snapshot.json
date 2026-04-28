@@ -1057,7 +1057,15 @@
         "kind": "other"
       },
       {
+        "name": "CompiledInvariant",
+        "kind": "other"
+      },
+      {
         "name": "CompiledPredicate",
+        "kind": "other"
+      },
+      {
+        "name": "compileInvariant",
         "kind": "other"
       },
       {
@@ -1101,6 +1109,10 @@
         "kind": "other"
       },
       {
+        "name": "FhirPathInvariantCompileError",
+        "kind": "other"
+      },
+      {
         "name": "FhirPathOps",
         "kind": "other"
       },
@@ -1118,6 +1130,22 @@
       },
       {
         "name": "FilterOp",
+        "kind": "other"
+      },
+      {
+        "name": "InvariantDefinition",
+        "kind": "other"
+      },
+      {
+        "name": "InvariantExpr",
+        "kind": "other"
+      },
+      {
+        "name": "InvariantIssue",
+        "kind": "other"
+      },
+      {
+        "name": "InvariantResult",
         "kind": "other"
       },
       {
@@ -1141,7 +1169,15 @@
         "kind": "other"
       },
       {
+        "name": "OperationOutcome",
+        "kind": "other"
+      },
+      {
         "name": "OperatorOp",
+        "kind": "other"
+      },
+      {
+        "name": "parseInvariantExpression",
         "kind": "other"
       },
       {
@@ -1170,6 +1206,10 @@
       },
       {
         "name": "UtilityOp",
+        "kind": "other"
+      },
+      {
+        "name": "validateInvariants",
         "kind": "other"
       },
       {
