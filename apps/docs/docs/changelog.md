@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.45.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.7 MCP token economy defaults (`265e5ca`)
+
 ## [0.44.0] - 2026-04-28
 
 ### Features
