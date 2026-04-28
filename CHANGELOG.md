@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.47.1] - 2026-04-28
+
+### Bug Fixes
+
+- fix unescaped ${opts.version} in MCP scaffold README template (`c6fbf7a`)
+
 ## [0.47.0] - 2026-04-28
 
 ### Features
