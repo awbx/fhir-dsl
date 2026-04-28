@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.1 MCP server package skeleton (`2aced32`)
+
 ## [0.40.0] - 2026-04-28
 
 ### Features
