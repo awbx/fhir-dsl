@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
+import { capabilityCommand } from "./commands/capability.js";
 import { generateCommand } from "./commands/generate.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,5 +16,6 @@ program
   .version(pkg.version, "-V, --cli-version");
 
 program.addCommand(generateCommand);
+program.addCommand(capabilityCommand);
 
 program.parse();

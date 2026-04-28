@@ -143,14 +143,14 @@ export class TerminologyClient {
   translate(params: TranslateParams): OperationBuilder {
     return new OperationBuilderImpl(this.#executor, "$translate", {
       scope: { kind: "type", resourceType: "ConceptMap" },
-      parameters: paramsWithResource(params),
+      parameters: paramsWithResource({ ...params }),
     });
   }
 
   subsumes(params: SubsumesParams): OperationBuilder {
     return new OperationBuilderImpl(this.#executor, "$subsumes", {
       scope: { kind: "type", resourceType: "CodeSystem" },
-      parameters: paramsWithResource(params),
+      parameters: paramsWithResource({ ...params }),
     });
   }
 }

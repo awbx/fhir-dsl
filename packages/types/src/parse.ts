@@ -95,7 +95,7 @@ export function parseUrl(value: string): FhirUrl | undefined {
 
 export function parseCanonical(value: string): FhirCanonical | undefined {
   // Canonical is a URI plus optional `|version` suffix.
-  const [head] = value.split("|");
+  const head = value.split("|")[0] ?? value;
   return URI_RE.test(head) ? (value as FhirCanonical) : undefined;
 }
 
