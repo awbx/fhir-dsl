@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.33.0] - 2026-04-28
+
+### Features
+
+- add Phase 3.2 terminology hierarchy + filter ops (`cd9f240`)
+
 ## [0.32.0] - 2026-04-28
 
 ### Features
