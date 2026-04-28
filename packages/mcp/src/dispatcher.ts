@@ -1,10 +1,10 @@
 import type { AuditSink, Dispatcher, McpRequest, McpResponse, ResourceType, VerbCall } from "./types.js";
+import type { FhirUpstream } from "./upstream.js";
 
-// Phase 8.1 — dispatcher shell. The real verb runners (read/search/etc.)
-// land in 8.2 with the upstream HTTP client wired in. Right now the
-// dispatcher answers `initialize`, `tools/list`, `tools/call` (with a
-// stub that audits and returns an "implementation pending" payload),
-// and `resources/list`. Enough for the MCP handshake plus a smoke test.
+// Phase 8.2 — dispatcher with the upstream HTTP client wired in.
+// `tools/call` resolves auth, hits the FHIR server, and audits the
+// outcome. Read verbs are exposed by default; write verbs require the
+// caller to opt in via `writes`.
 
 export interface DispatcherConfig {
   /** Resource types the bound IG advertises — narrows the verb surface. */
@@ -15,6 +15,12 @@ export interface DispatcherConfig {
   identity: { name: string; version: string };
   /** Audit hook invoked on every verb attempt. */
   audit: AuditSink;
+  /**
+   * Upstream client. Optional only so the Phase 8.1 smoke tests still
+   * pass — when omitted, every tools/call short-circuits with a
+   * deferred-implementation OperationOutcome.
+   */
+  upstream?: FhirUpstream;
 }
 
 const READ_VERBS = ["read", "vread", "search", "history", "operation", "capabilities"] as const;
@@ -177,22 +183,21 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
   if (args.patch !== undefined) call.patch = args.patch;
   if (typeof args.operation === "string") call.operation = args.operation;
 
-  // Phase 8.1 placeholder — Phase 8.2 replaces this with the real
-  // upstream HTTP call. We still audit the attempt so the wiring is
-  // observable from day one.
-  const result = {
-    ok: false,
-    outcome: {
-      resourceType: "OperationOutcome",
-      issue: [
-        {
-          severity: "error",
-          code: "not-supported",
-          diagnostics: `Verb ${verb} not yet wired (phase 8.2 work)`,
+  const result = config.upstream
+    ? await config.upstream.run(call)
+    : {
+        ok: false,
+        outcome: {
+          resourceType: "OperationOutcome",
+          issue: [
+            {
+              severity: "error",
+              code: "not-supported",
+              diagnostics: "Server is not bound to an upstream — pass `baseUrl` to createServer()",
+            },
+          ],
         },
-      ],
-    },
-  };
+      };
 
   await config.audit.record({
     id: cryptoRandomId(),
@@ -201,9 +206,10 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
     result,
   });
 
+  const payload = result.ok ? result.body : result.outcome;
   return ok(request, {
-    content: [{ type: "text", text: JSON.stringify(result.outcome) }],
-    isError: true,
+    content: [{ type: "text", text: JSON.stringify(payload ?? {}) }],
+    isError: !result.ok,
   });
 }
 

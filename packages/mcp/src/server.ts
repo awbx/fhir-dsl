@@ -1,6 +1,8 @@
 import { JsonLogAuditSink } from "./audit.js";
+import { createAuthResolver } from "./auth.js";
 import { createDispatcher, type DispatcherConfig } from "./dispatcher.js";
 import type { AuditSink, AuthStrategy, McpServer, ResourceType, Transport, VerbCall } from "./types.js";
+import { FhirUpstream } from "./upstream.js";
 
 // Phase 8.1 — `createServer(config)` is the user-facing entry point.
 // One server === one upstream FHIR endpoint, scoped to one IG (the IG
@@ -22,9 +24,18 @@ export interface ServerConfig {
   audit?: AuditSink;
   /** Whitelist of write verbs to expose. Empty (default) = read-only. */
   writes?: readonly Exclude<VerbCall["verb"], "read" | "vread" | "search" | "history" | "operation" | "capabilities">[];
+  /** Override the global `fetch` — handy for tests and custom transports. */
+  fetch?: typeof globalThis.fetch;
 }
 
 export function createServer(config: ServerConfig): McpServer {
+  const auth = createAuthResolver(config.auth);
+  const upstream = new FhirUpstream({
+    baseUrl: config.baseUrl,
+    auth,
+    ...(config.fetch ? { fetch: config.fetch } : {}),
+  });
+
   const dispatcherConfig: DispatcherConfig = {
     resourceTypes: config.resourceTypes,
     identity: {
@@ -32,6 +43,7 @@ export function createServer(config: ServerConfig): McpServer {
       version: config.version ?? "0.0.0",
     },
     audit: config.audit ?? new JsonLogAuditSink(),
+    upstream,
   };
   if (config.writes) dispatcherConfig.writes = config.writes;
   const dispatcher = createDispatcher(dispatcherConfig);

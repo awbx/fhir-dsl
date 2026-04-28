@@ -1608,6 +1608,10 @@
         "kind": "other"
       },
       {
+        "name": "FhirUpstream",
+        "kind": "other"
+      },
+      {
         "name": "GenericVerb",
         "kind": "other"
       },
@@ -1657,6 +1661,10 @@
       },
       {
         "name": "Transport",
+        "kind": "other"
+      },
+      {
+        "name": "UpstreamConfig",
         "kind": "other"
       },
       {

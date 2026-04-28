@@ -20,3 +20,4 @@ export type {
   VerbCall,
   VerbResult,
 } from "./types.js";
+export { FhirUpstream, type UpstreamConfig } from "./upstream.js";
