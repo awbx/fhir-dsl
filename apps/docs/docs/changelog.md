@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.47.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.8 generator --mcp scaffold emission (`e5e850a`)
+
 ## [0.46.0] - 2026-04-28
 
 ### Features
