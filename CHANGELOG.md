@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.42.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.2 MCP generic verb runners (`adca3fb`)
+
 ## [0.41.0] - 2026-04-28
 
 ### Features
