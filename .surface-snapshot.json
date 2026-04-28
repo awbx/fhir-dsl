@@ -919,6 +919,22 @@
         "kind": "function"
       },
       {
+        "name": "ReferenceLike",
+        "kind": "type"
+      },
+      {
+        "name": "ResolveOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "resolveReference",
+        "kind": "function"
+      },
+      {
+        "name": "resolveReferences",
+        "kind": "function"
+      },
+      {
         "name": "SearchResult",
         "kind": "interface"
       },
