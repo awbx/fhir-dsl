@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { capabilityCommand } from "./commands/capability.js";
 import { generateCommand } from "./commands/generate.js";
+import { scaffoldIgCommand } from "./commands/scaffold-ig.js";
 import { validateCommand } from "./commands/validate.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,5 +20,6 @@ program
 program.addCommand(generateCommand);
 program.addCommand(capabilityCommand);
 program.addCommand(validateCommand);
+program.addCommand(scaffoldIgCommand);
 
 program.parse();
