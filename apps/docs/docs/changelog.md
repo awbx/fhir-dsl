@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.5 MCP write gating + safety controls (`7c7f736`)
+
 ## [0.43.0] - 2026-04-28
 
 ### Features
