@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/runtime",
-  "version": "0.47.1",
+  "version": "0.48.0",
   "description": "Runtime execution layer for FHIR DSL queries with pagination and error handling",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.4 MCP backend-services + patient-launch auth (`551fc7f`)
+
 ## [0.47.1] - 2026-04-28
 
 ### Bug Fixes
