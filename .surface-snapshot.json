@@ -1,0 +1,1346 @@
+{
+  "generatedAt": "2026-04-28",
+  "packages": {
+    "@fhir-dsl/types": [
+      {
+        "name": "Address",
+        "kind": "interface"
+      },
+      {
+        "name": "Age",
+        "kind": "interface"
+      },
+      {
+        "name": "Annotation",
+        "kind": "interface"
+      },
+      {
+        "name": "Attachment",
+        "kind": "interface"
+      },
+      {
+        "name": "BackboneElement",
+        "kind": "interface"
+      },
+      {
+        "name": "Bundle",
+        "kind": "interface"
+      },
+      {
+        "name": "BundleEntry",
+        "kind": "interface"
+      },
+      {
+        "name": "BundleLink",
+        "kind": "interface"
+      },
+      {
+        "name": "CodeableConcept",
+        "kind": "interface"
+      },
+      {
+        "name": "Coding",
+        "kind": "interface"
+      },
+      {
+        "name": "CompositeParam",
+        "kind": "interface"
+      },
+      {
+        "name": "ContactDetail",
+        "kind": "interface"
+      },
+      {
+        "name": "ContactPoint",
+        "kind": "interface"
+      },
+      {
+        "name": "Contributor",
+        "kind": "interface"
+      },
+      {
+        "name": "Count",
+        "kind": "interface"
+      },
+      {
+        "name": "DataRequirement",
+        "kind": "interface"
+      },
+      {
+        "name": "DateParam",
+        "kind": "interface"
+      },
+      {
+        "name": "Distance",
+        "kind": "interface"
+      },
+      {
+        "name": "DomainResource",
+        "kind": "interface"
+      },
+      {
+        "name": "Dosage",
+        "kind": "interface"
+      },
+      {
+        "name": "DosageDoseAndRate",
+        "kind": "interface"
+      },
+      {
+        "name": "Duration",
+        "kind": "interface"
+      },
+      {
+        "name": "Element",
+        "kind": "interface"
+      },
+      {
+        "name": "ElementDefinition",
+        "kind": "interface"
+      },
+      {
+        "name": "Expression",
+        "kind": "interface"
+      },
+      {
+        "name": "Extension",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirBase64Binary",
+        "kind": "type"
+      },
+      {
+        "name": "FhirBoolean",
+        "kind": "type"
+      },
+      {
+        "name": "FhirCanonical",
+        "kind": "type"
+      },
+      {
+        "name": "FhirCode",
+        "kind": "type"
+      },
+      {
+        "name": "FhirDate",
+        "kind": "type"
+      },
+      {
+        "name": "FhirDateTime",
+        "kind": "type"
+      },
+      {
+        "name": "FhirDecimal",
+        "kind": "type"
+      },
+      {
+        "name": "FhirId",
+        "kind": "type"
+      },
+      {
+        "name": "FhirInstant",
+        "kind": "type"
+      },
+      {
+        "name": "FhirInteger",
+        "kind": "type"
+      },
+      {
+        "name": "FhirMarkdown",
+        "kind": "type"
+      },
+      {
+        "name": "FhirOid",
+        "kind": "type"
+      },
+      {
+        "name": "FhirPositiveInt",
+        "kind": "type"
+      },
+      {
+        "name": "FhirString",
+        "kind": "type"
+      },
+      {
+        "name": "FhirTime",
+        "kind": "type"
+      },
+      {
+        "name": "FhirUnsignedInt",
+        "kind": "type"
+      },
+      {
+        "name": "FhirUri",
+        "kind": "type"
+      },
+      {
+        "name": "FhirUrl",
+        "kind": "type"
+      },
+      {
+        "name": "FhirUuid",
+        "kind": "type"
+      },
+      {
+        "name": "FhirXhtml",
+        "kind": "type"
+      },
+      {
+        "name": "HumanName",
+        "kind": "interface"
+      },
+      {
+        "name": "Identifier",
+        "kind": "interface"
+      },
+      {
+        "name": "MarketingStatus",
+        "kind": "interface"
+      },
+      {
+        "name": "Meta",
+        "kind": "interface"
+      },
+      {
+        "name": "Money",
+        "kind": "interface"
+      },
+      {
+        "name": "Narrative",
+        "kind": "interface"
+      },
+      {
+        "name": "NumberParam",
+        "kind": "interface"
+      },
+      {
+        "name": "ParameterDefinition",
+        "kind": "interface"
+      },
+      {
+        "name": "Parameters",
+        "kind": "interface"
+      },
+      {
+        "name": "ParametersParameter",
+        "kind": "interface"
+      },
+      {
+        "name": "Period",
+        "kind": "interface"
+      },
+      {
+        "name": "Population",
+        "kind": "interface"
+      },
+      {
+        "name": "ProdCharacteristic",
+        "kind": "interface"
+      },
+      {
+        "name": "ProductShelfLife",
+        "kind": "interface"
+      },
+      {
+        "name": "Quantity",
+        "kind": "interface"
+      },
+      {
+        "name": "QuantityParam",
+        "kind": "interface"
+      },
+      {
+        "name": "Range",
+        "kind": "interface"
+      },
+      {
+        "name": "Ratio",
+        "kind": "interface"
+      },
+      {
+        "name": "Reference",
+        "kind": "interface"
+      },
+      {
+        "name": "ReferenceParam",
+        "kind": "interface"
+      },
+      {
+        "name": "RelatedArtifact",
+        "kind": "interface"
+      },
+      {
+        "name": "Resource",
+        "kind": "interface"
+      },
+      {
+        "name": "SampledData",
+        "kind": "interface"
+      },
+      {
+        "name": "SearchParam",
+        "kind": "type"
+      },
+      {
+        "name": "Signature",
+        "kind": "interface"
+      },
+      {
+        "name": "SimpleQuantity",
+        "kind": "interface"
+      },
+      {
+        "name": "SpecialParam",
+        "kind": "interface"
+      },
+      {
+        "name": "StringParam",
+        "kind": "interface"
+      },
+      {
+        "name": "SubstanceAmount",
+        "kind": "interface"
+      },
+      {
+        "name": "Timing",
+        "kind": "interface"
+      },
+      {
+        "name": "TimingRepeat",
+        "kind": "interface"
+      },
+      {
+        "name": "TokenParam",
+        "kind": "interface"
+      },
+      {
+        "name": "TriggerDefinition",
+        "kind": "interface"
+      },
+      {
+        "name": "UriParam",
+        "kind": "interface"
+      },
+      {
+        "name": "UsageContext",
+        "kind": "interface"
+      }
+    ],
+    "@fhir-dsl/core": [
+      {
+        "name": "AnySearchBuilder",
+        "kind": "type"
+      },
+      {
+        "name": "ApplySelection",
+        "kind": "type"
+      },
+      {
+        "name": "AsyncPollingConfig",
+        "kind": "interface"
+      },
+      {
+        "name": "AsyncPollingTimeoutError",
+        "kind": "class"
+      },
+      {
+        "name": "AuthConfig",
+        "kind": "type"
+      },
+      {
+        "name": "AuthProvider",
+        "kind": "interface"
+      },
+      {
+        "name": "BatchBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "BatchBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "BundleLink",
+        "kind": "interface"
+      },
+      {
+        "name": "CapabilitiesBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "CapabilitiesBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "CompiledPath",
+        "kind": "other"
+      },
+      {
+        "name": "CompiledQuery",
+        "kind": "interface"
+      },
+      {
+        "name": "CompiledSearchParam",
+        "kind": "interface"
+      },
+      {
+        "name": "compilePreferHeader",
+        "kind": "function"
+      },
+      {
+        "name": "CompositeComponents",
+        "kind": "type"
+      },
+      {
+        "name": "CompositeKeys",
+        "kind": "type"
+      },
+      {
+        "name": "CompositeValues",
+        "kind": "type"
+      },
+      {
+        "name": "computeBackoffMs",
+        "kind": "function"
+      },
+      {
+        "name": "Condition",
+        "kind": "type"
+      },
+      {
+        "name": "ConditionGroup",
+        "kind": "interface"
+      },
+      {
+        "name": "ConditionTuple",
+        "kind": "type"
+      },
+      {
+        "name": "ContainedMode",
+        "kind": "type"
+      },
+      {
+        "name": "ContainedTypeMode",
+        "kind": "type"
+      },
+      {
+        "name": "CreateBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "CreateBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "createFhirClient",
+        "kind": "function"
+      },
+      {
+        "name": "createWhereBuilder",
+        "kind": "function"
+      },
+      {
+        "name": "DatePrefix",
+        "kind": "type"
+      },
+      {
+        "name": "DEFAULT_BASE_BACKOFF_MS",
+        "kind": "const"
+      },
+      {
+        "name": "DEFAULT_MAX_ATTEMPTS",
+        "kind": "const"
+      },
+      {
+        "name": "DEFAULT_MAX_BACKOFF_MS",
+        "kind": "const"
+      },
+      {
+        "name": "DEFAULT_RETRY_STATUSES",
+        "kind": "const"
+      },
+      {
+        "name": "DeleteBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "DeleteBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "ExecuteOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirClient",
+        "kind": "class"
+      },
+      {
+        "name": "FhirClientConfig",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirRequestError",
+        "kind": "class"
+      },
+      {
+        "name": "FhirSchema",
+        "kind": "interface"
+      },
+      {
+        "name": "FilterableBuilder",
+        "kind": "type"
+      },
+      {
+        "name": "HistoryBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "HistoryBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "HistoryParams",
+        "kind": "interface"
+      },
+      {
+        "name": "HistoryScope",
+        "kind": "type"
+      },
+      {
+        "name": "HttpConfig",
+        "kind": "interface"
+      },
+      {
+        "name": "HttpMethod",
+        "kind": "type"
+      },
+      {
+        "name": "HttpRequest",
+        "kind": "interface"
+      },
+      {
+        "name": "HttpResponse",
+        "kind": "interface"
+      },
+      {
+        "name": "IncludedResourceNames",
+        "kind": "type"
+      },
+      {
+        "name": "IncludeExpressionsFor",
+        "kind": "other"
+      },
+      {
+        "name": "IncludeFor",
+        "kind": "type"
+      },
+      {
+        "name": "IncludesOf",
+        "kind": "type"
+      },
+      {
+        "name": "isConditionGroup",
+        "kind": "function"
+      },
+      {
+        "name": "isStaticAuth",
+        "kind": "function"
+      },
+      {
+        "name": "JsonPatchBody",
+        "kind": "type"
+      },
+      {
+        "name": "JsonPatchOperation",
+        "kind": "interface"
+      },
+      {
+        "name": "mergePreferIntoQuery",
+        "kind": "function"
+      },
+      {
+        "name": "NumberPrefix",
+        "kind": "type"
+      },
+      {
+        "name": "OperationBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "OperationBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "OperationOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "OperationScope",
+        "kind": "type"
+      },
+      {
+        "name": "ParamValue",
+        "kind": "type"
+      },
+      {
+        "name": "parseRetryAfter",
+        "kind": "function"
+      },
+      {
+        "name": "PatchBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "PatchBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "PatchFormat",
+        "kind": "type"
+      },
+      {
+        "name": "Path",
+        "kind": "other"
+      },
+      {
+        "name": "PathMaxDepth",
+        "kind": "other"
+      },
+      {
+        "name": "PathToCodingArray",
+        "kind": "other"
+      },
+      {
+        "name": "PathToSystemValueArray",
+        "kind": "other"
+      },
+      {
+        "name": "PathValue",
+        "kind": "other"
+      },
+      {
+        "name": "performRequest",
+        "kind": "function"
+      },
+      {
+        "name": "PreferOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "ProfileFor",
+        "kind": "type"
+      },
+      {
+        "name": "ProfileNames",
+        "kind": "type"
+      },
+      {
+        "name": "QuantityPrefix",
+        "kind": "type"
+      },
+      {
+        "name": "ReadQueryBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "ReadTransformedQuery",
+        "kind": "other"
+      },
+      {
+        "name": "ReferenceModifier",
+        "kind": "type"
+      },
+      {
+        "name": "registerTHelper",
+        "kind": "other"
+      },
+      {
+        "name": "resolveAuthProvider",
+        "kind": "function"
+      },
+      {
+        "name": "ResolveIncluded",
+        "kind": "type"
+      },
+      {
+        "name": "ResolveProfile",
+        "kind": "type"
+      },
+      {
+        "name": "resolveRetryPolicy",
+        "kind": "function"
+      },
+      {
+        "name": "resolveSchema",
+        "kind": "function"
+      },
+      {
+        "name": "ResourceOf",
+        "kind": "type"
+      },
+      {
+        "name": "RetryConfig",
+        "kind": "type"
+      },
+      {
+        "name": "RetryPolicy",
+        "kind": "interface"
+      },
+      {
+        "name": "RevIncludeFor",
+        "kind": "type"
+      },
+      {
+        "name": "SchemaRegistry",
+        "kind": "interface"
+      },
+      {
+        "name": "Scope",
+        "kind": "other"
+      },
+      {
+        "name": "SearchBuilderOf",
+        "kind": "interface"
+      },
+      {
+        "name": "SearchParamFor",
+        "kind": "type"
+      },
+      {
+        "name": "SearchPrefixFor",
+        "kind": "type"
+      },
+      {
+        "name": "SearchQueryBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "SearchResult",
+        "kind": "interface"
+      },
+      {
+        "name": "SortDirection",
+        "kind": "type"
+      },
+      {
+        "name": "StandardSchemaLike",
+        "kind": "interface"
+      },
+      {
+        "name": "StandardValidateResult",
+        "kind": "type"
+      },
+      {
+        "name": "StaticAuth",
+        "kind": "interface"
+      },
+      {
+        "name": "StreamOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "StringModifier",
+        "kind": "type"
+      },
+      {
+        "name": "SummaryMode",
+        "kind": "type"
+      },
+      {
+        "name": "T",
+        "kind": "other"
+      },
+      {
+        "name": "TExtensions",
+        "kind": "other"
+      },
+      {
+        "name": "TokenModifier",
+        "kind": "type"
+      },
+      {
+        "name": "TotalMode",
+        "kind": "type"
+      },
+      {
+        "name": "TransactionBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "TransactionBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "TransformedQuery",
+        "kind": "other"
+      },
+      {
+        "name": "TransformedResult",
+        "kind": "other"
+      },
+      {
+        "name": "unregisterTHelper",
+        "kind": "other"
+      },
+      {
+        "name": "UpdateBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "UpdateBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "UriModifier",
+        "kind": "type"
+      },
+      {
+        "name": "validateOne",
+        "kind": "function"
+      },
+      {
+        "name": "ValidatePath",
+        "kind": "other"
+      },
+      {
+        "name": "ValidationError",
+        "kind": "class"
+      },
+      {
+        "name": "ValidationUnavailableError",
+        "kind": "class"
+      },
+      {
+        "name": "VreadBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "VreadBuilderImpl",
+        "kind": "class"
+      },
+      {
+        "name": "WhereBuilder",
+        "kind": "interface"
+      }
+    ],
+    "@fhir-dsl/runtime": [
+      {
+        "name": "ExecuteRequestOptions",
+        "kind": "interface"
+      },
+      {
+        "name": "fetchAllPages",
+        "kind": "function"
+      },
+      {
+        "name": "FhirClientConfig",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirError",
+        "kind": "class"
+      },
+      {
+        "name": "FhirExecutor",
+        "kind": "class"
+      },
+      {
+        "name": "OperationOutcome",
+        "kind": "interface"
+      },
+      {
+        "name": "OperationOutcomeIssue",
+        "kind": "interface"
+      },
+      {
+        "name": "paginate",
+        "kind": "function"
+      },
+      {
+        "name": "SearchResult",
+        "kind": "interface"
+      },
+      {
+        "name": "unwrapBundle",
+        "kind": "function"
+      }
+    ],
+    "@fhir-dsl/fhirpath": [
+      {
+        "name": "$context",
+        "kind": "other"
+      },
+      {
+        "name": "$index",
+        "kind": "other"
+      },
+      {
+        "name": "$resource",
+        "kind": "other"
+      },
+      {
+        "name": "$rootResource",
+        "kind": "other"
+      },
+      {
+        "name": "$total",
+        "kind": "other"
+      },
+      {
+        "name": "$ucum",
+        "kind": "other"
+      },
+      {
+        "name": "AggregateOp",
+        "kind": "other"
+      },
+      {
+        "name": "ArithmeticOp",
+        "kind": "other"
+      },
+      {
+        "name": "CombineOp",
+        "kind": "other"
+      },
+      {
+        "name": "CompiledPredicate",
+        "kind": "other"
+      },
+      {
+        "name": "ConversionOp",
+        "kind": "other"
+      },
+      {
+        "name": "createPredicateProxy",
+        "kind": "other"
+      },
+      {
+        "name": "envVar",
+        "kind": "other"
+      },
+      {
+        "name": "EvalOptions",
+        "kind": "other"
+      },
+      {
+        "name": "evaluate",
+        "kind": "other"
+      },
+      {
+        "name": "extractPredicate",
+        "kind": "other"
+      },
+      {
+        "name": "FhirFnOp",
+        "kind": "other"
+      },
+      {
+        "name": "fhirpath",
+        "kind": "other"
+      },
+      {
+        "name": "FhirPathEvaluationError",
+        "kind": "other"
+      },
+      {
+        "name": "FhirPathExpr",
+        "kind": "other"
+      },
+      {
+        "name": "FhirPathOps",
+        "kind": "other"
+      },
+      {
+        "name": "FhirPathPredicate",
+        "kind": "other"
+      },
+      {
+        "name": "FhirPathResource",
+        "kind": "other"
+      },
+      {
+        "name": "FhirTypeMap",
+        "kind": "other"
+      },
+      {
+        "name": "FilterOp",
+        "kind": "other"
+      },
+      {
+        "name": "IsPrimitive",
+        "kind": "other"
+      },
+      {
+        "name": "LiteralOp",
+        "kind": "other"
+      },
+      {
+        "name": "MathOp",
+        "kind": "other"
+      },
+      {
+        "name": "NavKeys",
+        "kind": "other"
+      },
+      {
+        "name": "NavOp",
+        "kind": "other"
+      },
+      {
+        "name": "OperatorOp",
+        "kind": "other"
+      },
+      {
+        "name": "PathOp",
+        "kind": "other"
+      },
+      {
+        "name": "PREDICATE_SYMBOL",
+        "kind": "other"
+      },
+      {
+        "name": "PredicateOps",
+        "kind": "other"
+      },
+      {
+        "name": "StringOp",
+        "kind": "other"
+      },
+      {
+        "name": "SubsetOp",
+        "kind": "other"
+      },
+      {
+        "name": "Unwrap",
+        "kind": "other"
+      },
+      {
+        "name": "UtilityOp",
+        "kind": "other"
+      },
+      {
+        "name": "VarOp",
+        "kind": "other"
+      }
+    ],
+    "@fhir-dsl/smart": [
+      {
+        "name": "AuthorizeParams",
+        "kind": "interface"
+      },
+      {
+        "name": "BackendServicesAuth",
+        "kind": "class"
+      },
+      {
+        "name": "BackendServicesConfig",
+        "kind": "interface"
+      },
+      {
+        "name": "base64UrlEncode",
+        "kind": "function"
+      },
+      {
+        "name": "buildAuthorizeUrl",
+        "kind": "function"
+      },
+      {
+        "name": "buildScopes",
+        "kind": "function"
+      },
+      {
+        "name": "codeChallengeS256",
+        "kind": "function"
+      },
+      {
+        "name": "discoverSmartConfiguration",
+        "kind": "function"
+      },
+      {
+        "name": "DiscoveryError",
+        "kind": "class"
+      },
+      {
+        "name": "exchangeCode",
+        "kind": "function"
+      },
+      {
+        "name": "ExchangeCodeParams",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirContextEntry",
+        "kind": "interface"
+      },
+      {
+        "name": "fhirUser",
+        "kind": "const"
+      },
+      {
+        "name": "generateCodeVerifier",
+        "kind": "function"
+      },
+      {
+        "name": "generateState",
+        "kind": "function"
+      },
+      {
+        "name": "InMemoryTokenStore",
+        "kind": "class"
+      },
+      {
+        "name": "launchScope",
+        "kind": "function"
+      },
+      {
+        "name": "OAuth2ErrorBody",
+        "kind": "interface"
+      },
+      {
+        "name": "offlineAccess",
+        "kind": "const"
+      },
+      {
+        "name": "onlineAccess",
+        "kind": "const"
+      },
+      {
+        "name": "openid",
+        "kind": "const"
+      },
+      {
+        "name": "ParsedLaunchScope",
+        "kind": "interface"
+      },
+      {
+        "name": "ParsedResourceScope",
+        "kind": "interface"
+      },
+      {
+        "name": "ParsedScope",
+        "kind": "type"
+      },
+      {
+        "name": "ParsedSimpleScope",
+        "kind": "interface"
+      },
+      {
+        "name": "parseScope",
+        "kind": "function"
+      },
+      {
+        "name": "postToken",
+        "kind": "function"
+      },
+      {
+        "name": "refreshToken",
+        "kind": "function"
+      },
+      {
+        "name": "RefreshTokenParams",
+        "kind": "interface"
+      },
+      {
+        "name": "resourceScope",
+        "kind": "function"
+      },
+      {
+        "name": "ResourceScopeOpts",
+        "kind": "interface"
+      },
+      {
+        "name": "ScopeContext",
+        "kind": "type"
+      },
+      {
+        "name": "ScopePermission",
+        "kind": "type"
+      },
+      {
+        "name": "signClientAssertion",
+        "kind": "function"
+      },
+      {
+        "name": "SignClientAssertionParams",
+        "kind": "interface"
+      },
+      {
+        "name": "SmartAuthError",
+        "kind": "class"
+      },
+      {
+        "name": "SmartClient",
+        "kind": "class"
+      },
+      {
+        "name": "SmartClientInit",
+        "kind": "interface"
+      },
+      {
+        "name": "SmartConfiguration",
+        "kind": "interface"
+      },
+      {
+        "name": "StoredToken",
+        "kind": "interface"
+      },
+      {
+        "name": "SupportedAlg",
+        "kind": "type"
+      },
+      {
+        "name": "TokenResponse",
+        "kind": "interface"
+      },
+      {
+        "name": "TokenStore",
+        "kind": "interface"
+      },
+      {
+        "name": "withAbsoluteExpiry",
+        "kind": "function"
+      }
+    ],
+    "@fhir-dsl/terminology": [
+      {
+        "name": "CodeSystemModel",
+        "kind": "other"
+      },
+      {
+        "name": "parseCodeSystem",
+        "kind": "other"
+      },
+      {
+        "name": "parseExpansion",
+        "kind": "other"
+      },
+      {
+        "name": "parseExpansionsBundle",
+        "kind": "other"
+      },
+      {
+        "name": "resolveCompose",
+        "kind": "other"
+      },
+      {
+        "name": "ResolvedCode",
+        "kind": "other"
+      },
+      {
+        "name": "ResolvedValueSet",
+        "kind": "other"
+      },
+      {
+        "name": "resolveValueSet",
+        "kind": "other"
+      },
+      {
+        "name": "TerminologyRegistry",
+        "kind": "other"
+      }
+    ],
+    "@fhir-dsl/utils": [
+      {
+        "name": "capitalizeFirst",
+        "kind": "function"
+      },
+      {
+        "name": "fhirPathToPropertyName",
+        "kind": "function"
+      },
+      {
+        "name": "fhirTypeToFileName",
+        "kind": "function"
+      },
+      {
+        "name": "logger",
+        "kind": "const"
+      },
+      {
+        "name": "Logger",
+        "kind": "class"
+      },
+      {
+        "name": "LogLevel",
+        "kind": "type"
+      },
+      {
+        "name": "searchParamTypeToTs",
+        "kind": "function"
+      },
+      {
+        "name": "toCamelCase",
+        "kind": "function"
+      },
+      {
+        "name": "toKebabCase",
+        "kind": "function"
+      },
+      {
+        "name": "toPascalCase",
+        "kind": "function"
+      }
+    ],
+    "@fhir-dsl/generator": [
+      {
+        "name": "BackboneElementModel",
+        "kind": "other"
+      },
+      {
+        "name": "downloadIG",
+        "kind": "other"
+      },
+      {
+        "name": "downloadSpec",
+        "kind": "other"
+      },
+      {
+        "name": "generate",
+        "kind": "other"
+      },
+      {
+        "name": "GeneratorOptions",
+        "kind": "other"
+      },
+      {
+        "name": "loadLocalSpec",
+        "kind": "other"
+      },
+      {
+        "name": "parseProfile",
+        "kind": "other"
+      },
+      {
+        "name": "parseSearchParameters",
+        "kind": "other"
+      },
+      {
+        "name": "parseStructureDefinition",
+        "kind": "other"
+      },
+      {
+        "name": "ProfileModel",
+        "kind": "other"
+      },
+      {
+        "name": "PropertyModel",
+        "kind": "other"
+      },
+      {
+        "name": "ResourceModel",
+        "kind": "other"
+      },
+      {
+        "name": "ResourceSearchParams",
+        "kind": "other"
+      },
+      {
+        "name": "SearchParamModel",
+        "kind": "other"
+      }
+    ],
+    "@fhir-dsl/cli": []
+  }
+}

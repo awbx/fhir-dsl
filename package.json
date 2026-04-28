@@ -13,6 +13,9 @@
     "lint:unsafefix": "biome check --write --unsafe .",
     "format": "biome format --write .",
     "changelog": "node scripts/generate-changelog.mjs --write",
+    "audit:export-surface": "node scripts/export-surface.mjs",
+    "audit:export-surface:check": "node scripts/export-surface.mjs --check",
+    "test:fhir-conformance": "vitest run conformance",
     "version:bump": "node scripts/bump-version.mjs",
     "prepare": "husky"
   },

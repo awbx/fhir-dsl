@@ -15,7 +15,7 @@ Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, 
 ## Features
 
 - **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, composite parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
-- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers the core of the FHIRPath N1 spec (60+ functions across navigation, filtering, subsetting, combining, conversions, strings, math, existence, boolean logic, type operators, tree navigation, and utility). See [AUDIT.md](./AUDIT.md) for the current spec-coverage breakdown and known gaps (arithmetic operators, environment variables, `extension()` / `resolve()`).
+- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers the core of the FHIRPath N1 spec (70+ functions across navigation, filtering, subsetting, combining, conversions, strings, math, arithmetic, existence, boolean logic, type operators, tree navigation, aggregates, environment variables, and FHIR-specific functions like `extension()` and `resolve()`). See [Spec Coverage](#spec-coverage) below.
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 - **Runtime validation (optional)** — Opt in with `--validator native|zod` to emit [Standard Schema V1](https://standardschema.dev/) validators for every resource, datatype, binding, and profile. Chain `.validate()` on any read/search for client-side schema checks; server-side FHIR `$validate` is a separate operation invoked via `client.operation("$validate", ...)`. See [Validation](https://awbx.github.io/fhir-dsl/docs/guides/validation).
@@ -189,25 +189,33 @@ const bundle = await fhir
 
 See the full [DSL Syntax Reference](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax) for all query methods, operators, and patterns.
 
-## Spec Compliance
+## Spec Coverage
 
-fhir-dsl went through a spec-driven audit pass against FHIRPath N1, FHIR R5 search, and FHIR R5 REST. Results live under [`audit/output/`](./audit/output/) — bug reports, spec-coverage matrix, missing-features ranking, and the full test-suite index.
+fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.org/overview-arch.html) and the FHIRPath N1 spec. The plan and gap analysis live in [`FHIR_COMPLIANCE_PLAN.md`](./FHIR_COMPLIANCE_PLAN.md).
 
-**v0.20.0 status (current release):**
+| Pillar | Status | Notes |
+|---|---|---|
+| Information Model — base classes & datatypes | ✅ | `Element`, `Resource`, `DomainResource`, `BackboneElement`, all complex datatypes typed. |
+| Information Model — primitives | 🟡 | All 19 FHIR primitives present; branded types ship in Phase 1.1. |
+| Information Model — choice types `value[x]` | 🟡 | Flattened to optional siblings today; discriminated unions in Phase 1.2. |
+| Information Model — primitive `_field` siblings | ❌ | Round-trip-safe in Phase 1.3. |
+| Conformance — profiles | ✅ | Type-narrowing on `.search("RT", profileUrl)`. |
+| Conformance — slicing | ❌ | Generator skips slices today; Phase 2.1. |
+| Conformance — CapabilityStatement-driven client | 🟡 | `metadata` GET only; `fromCapabilities()` in Phase 4.1. |
+| Conformance — extensions | 🟡 | Structural only; typed extensions from IGs in Phase 2.2. |
+| Terminology — typed bindings (generate-time) | ✅ | Required/extensible/preferred resolved offline. |
+| Terminology — `$expand` / `$validate-code` / `$lookup` / etc. | ❌ | First-class typed builders in Phase 3.1. |
+| REST — read/vread/search/history/transaction/batch/operation | ✅ | Full surface in `packages/core`. |
+| REST — PATCH + conditional headers + retry + AbortSignal | ✅ | json-patch / xml-patch / fhirpath-patch all wired. |
+| REST — `_include` / `_revinclude` runtime resolution | 🟡 | Typed; `bundle.resolve()` lands in Phase 4.2. |
+| References — `Reference<T>` target narrowing | ✅ | Generated from `targetProfile`. |
+| FHIRPath — N1 core | ✅ | Arithmetic, env vars, `$index`/`$total`, aggregates, `resolve`/`hasValue`, `extension(url)`. |
+| FHIRPath — invariants compiled to validators | ❌ | Phase 6. |
+| SMART on FHIR v2 | ✅ | PKCE-S256, backend services, scope DSL. |
+| Layered framework (Foundation/Base/Clinical/…) | ❌ | Phase 5. |
+| MCP server generation | ❌ | Phase 8. |
 
-- **4 of 5 blocker-tier bugs fixed.** `BUG-001` (FHIRPath comparison dead-ternary — lenient §4.5 default now returns `[]` instead of silently comparing the first element), `BUG-003` (search-value escape family for `,`, `$`, `\` at the 3 join sites — `|` in single-value still ambiguous), `BUG-004` (204 No Content / `Content-Length: 0` → `undefined` instead of `SyntaxError`), and `BUG-005` (cross-origin `Authorization` leak when following an off-origin `Bundle.link[rel=next]`) all landed in v0.20.0. See [`AUDIT.md`](./AUDIT.md) "Fixes landed".
-- **1 blocker-tier bug still open.** `BUG-002` (`Observation.value` and other `value[x]` choice-type navigation returns `[]` — needs builder-layer polymorphic expansion). Workaround: use `.valueQuantity`, `.valueString`, etc. directly.
-- **~55 medium / high bugs pinned by failing tests.** Every known defect has an on-disk `test.fails(...)` in [`packages/fhirpath/test/spec-compliance.test.ts`](./packages/fhirpath/test/spec-compliance.test.ts), [`packages/core/test/search-spec-compliance.test.ts`](./packages/core/test/search-spec-compliance.test.ts), [`packages/runtime/test/rest-spec-compliance.test.ts`](./packages/runtime/test/rest-spec-compliance.test.ts), and [`packages/core/test/rest-operations.test.ts`](./packages/core/test/rest-operations.test.ts). When a bug is fixed, flip `test.fails` → `it`.
-- **HTTP resilience capability gaps (not spec violations):** no `AbortSignal` plumbing into `fetch()`; no 429 / 503 retry with `Retry-After` / exponential backoff. Tracked in [`audit/output/missing-features.md`](./audit/output/missing-features.md) Priority 1.
-- **Roadmap gaps** (not-yet-built, SPEC-GAP-BY-DESIGN): FHIRPath arithmetic (`+ - * / div mod &`), environment variables (`%context`, `%resource`, `%rootResource`, …), `extension()` / `resolve()`, strict-mode evaluator flag, FHIR operations framework (`$validate`, `$everything`, `$expand`, `$lookup`, `$translate`), PATCH verb, direct `client.create/update/delete`, conditional headers (`If-Match`, `If-None-Exist`, `If-None-Match`, `If-Modified-Since`), `Prefer` header plumbing, async pattern. See [`audit/output/missing-features.md`](./audit/output/missing-features.md) for the prioritized list.
-
-For the full audit, read:
-
-- [`audit/output/bugs.md`](./audit/output/bugs.md) — every bug with spec citation, impl file:line, failing test file:line, suggested fix location.
-- [`audit/output/spec-coverage-matrix.md`](./audit/output/spec-coverage-matrix.md) — per-section FHIRPath / search / REST coverage.
-- [`audit/output/missing-features.md`](./audit/output/missing-features.md) — prioritized roadmap items with impact class, cost estimate, acceptance tests.
-- [`audit/output/test-suite-index.md`](./audit/output/test-suite-index.md) — index of every spec-compliance test file.
-- [`audit/debate/decisions.md`](./audit/debate/decisions.md) — verdict trace (BUG / SPEC-GAP-BY-DESIGN / AMBIGUITY-DOCUMENTED / FALSE-ALARM) per contested finding.
+Drift between this table and the code is caught by `pnpm audit:export-surface` — every PR that changes the public surface must refresh `.surface-snapshot.json`.
 
 ## Search Parameter Operators
 
