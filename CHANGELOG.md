@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.9 fhir-gen mcp CLI command (`7b2f70c`)
+
 ## [0.45.0] - 2026-04-28
 
 ### Features
