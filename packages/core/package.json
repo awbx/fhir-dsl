@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/core",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Type-safe FHIR query builder inspired by Kysely",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.0] - 2026-04-28
+
+### Features
+
+- add Phase 1.1 branded primitives + smart constructors (`1681b99`)
+
 ## [0.23.0] - 2026-04-28
 
 ### Features
