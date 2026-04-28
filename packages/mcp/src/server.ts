@@ -24,6 +24,12 @@ export interface ServerConfig {
   audit?: AuditSink;
   /** Whitelist of write verbs to expose. Empty (default) = read-only. */
   writes?: readonly Exclude<VerbCall["verb"], "read" | "vread" | "search" | "history" | "operation" | "capabilities">[];
+  /** Phase 8.5 — narrow which resource types accept writes (subset of `resourceTypes`). */
+  writeResourceTypes?: readonly ResourceType[];
+  /** Phase 8.5 — when true, write verbs short-circuit and return a synthetic OperationOutcome. */
+  dryRun?: boolean;
+  /** Phase 8.5 — when true, write verbs require `confirm: true` in their args. */
+  confirmWrites?: boolean;
   /** Override the global `fetch` — handy for tests and custom transports. */
   fetch?: typeof globalThis.fetch;
 }
@@ -46,6 +52,9 @@ export function createServer(config: ServerConfig): McpServer {
     upstream,
   };
   if (config.writes) dispatcherConfig.writes = config.writes;
+  if (config.writeResourceTypes) dispatcherConfig.writeResourceTypes = config.writeResourceTypes;
+  if (config.dryRun !== undefined) dispatcherConfig.dryRun = config.dryRun;
+  if (config.confirmWrites !== undefined) dispatcherConfig.confirmWrites = config.confirmWrites;
   const dispatcher = createDispatcher(dispatcherConfig);
 
   return {

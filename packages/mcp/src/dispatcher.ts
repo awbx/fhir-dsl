@@ -1,4 +1,4 @@
-import type { AuditSink, Dispatcher, McpRequest, McpResponse, ResourceType, VerbCall } from "./types.js";
+import type { AuditSink, Dispatcher, McpRequest, McpResponse, ResourceType, VerbCall, VerbResult } from "./types.js";
 import type { FhirUpstream } from "./upstream.js";
 
 // Phase 8.2 — dispatcher with the upstream HTTP client wired in.
@@ -11,6 +11,28 @@ export interface DispatcherConfig {
   resourceTypes: readonly ResourceType[];
   /** Whether write verbs (`create`, `update`, `patch`, `delete`) are exposed. */
   writes?: readonly Exclude<VerbCall["verb"], "read" | "vread" | "search" | "history" | "operation" | "capabilities">[];
+  /**
+   * Phase 8.5 — narrow which resource types are writable. When undefined,
+   * any resource in `resourceTypes` is fair game; when set, write verbs
+   * are rejected for any other type. Lets you expose Patient-create to an
+   * agent while keeping Observation read-only.
+   */
+  writeResourceTypes?: readonly ResourceType[];
+  /**
+   * Phase 8.5 — when true, write verbs short-circuit before hitting the
+   * upstream, audit-tagged as `dryRun`, and return a synthetic
+   * OperationOutcome describing what would have happened. Useful for
+   * agents under evaluation, regulator review, or staging environments.
+   */
+  dryRun?: boolean;
+  /**
+   * Phase 8.5 — when true, every write call must include `confirm: true`
+   * in its arguments. Missing confirmations short-circuit with a
+   * required-element error, matching FHIR `OperationOutcome.code:
+   * "required"`. The flag flips the burden of avoiding accidental writes
+   * onto the calling LLM, which is the safe default for production.
+   */
+  confirmWrites?: boolean;
   /** Server identity broadcast through MCP `initialize`. */
   identity: { name: string; version: string };
   /** Audit hook invoked on every verb attempt. */
@@ -22,6 +44,8 @@ export interface DispatcherConfig {
    */
   upstream?: FhirUpstream;
 }
+
+const WRITE_VERBS = new Set<VerbCall["verb"]>(["create", "update", "patch", "delete"]);
 
 const READ_VERBS = ["read", "vread", "search", "history", "operation", "capabilities"] as const;
 
@@ -271,27 +295,36 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
   if (args.patch !== undefined) call.patch = args.patch;
   if (typeof args.operation === "string") call.operation = args.operation;
 
-  const result = config.upstream
-    ? await config.upstream.run(call)
-    : {
-        ok: false,
-        outcome: {
-          resourceType: "OperationOutcome",
-          issue: [
-            {
-              severity: "error",
-              code: "not-supported",
-              diagnostics: "Server is not bound to an upstream — pass `baseUrl` to createServer()",
-            },
-          ],
-        },
-      };
+  const gateOutcome = checkWriteGates(call, args, config);
+  let result: VerbResult;
+  if (gateOutcome) {
+    result = { ok: false, outcome: gateOutcome };
+  } else if (config.dryRun && WRITE_VERBS.has(call.verb)) {
+    result = { ok: true, body: dryRunResponse(call) };
+  } else if (config.upstream) {
+    result = await config.upstream.run(call);
+  } else {
+    result = {
+      ok: false,
+      outcome: {
+        resourceType: "OperationOutcome",
+        issue: [
+          {
+            severity: "error",
+            code: "not-supported",
+            diagnostics: "Server is not bound to an upstream — pass `baseUrl` to createServer()",
+          },
+        ],
+      },
+    };
+  }
 
   await config.audit.record({
     id: cryptoRandomId(),
     ts: new Date().toISOString(),
     call,
     result,
+    ...(config.dryRun && WRITE_VERBS.has(call.verb) ? { actor: "dry-run" } : {}),
   });
 
   const payload = result.ok ? result.body : result.outcome;
@@ -299,6 +332,51 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
     content: [{ type: "text", text: JSON.stringify(payload ?? {}) }],
     isError: !result.ok,
   });
+}
+
+function checkWriteGates(call: VerbCall, args: Record<string, unknown>, config: DispatcherConfig): unknown | null {
+  if (!WRITE_VERBS.has(call.verb)) return null;
+
+  if (config.writeResourceTypes && !config.writeResourceTypes.includes(call.resourceType)) {
+    return {
+      resourceType: "OperationOutcome",
+      issue: [
+        {
+          severity: "error",
+          code: "forbidden",
+          diagnostics: `Writes to ${call.resourceType} are not permitted by this server (allowed: ${config.writeResourceTypes.join(", ") || "none"})`,
+        },
+      ],
+    };
+  }
+
+  if (config.confirmWrites && args.confirm !== true) {
+    return {
+      resourceType: "OperationOutcome",
+      issue: [
+        {
+          severity: "error",
+          code: "required",
+          diagnostics: `Writes require an explicit \`confirm: true\` argument (this server has confirmWrites=true)`,
+        },
+      ],
+    };
+  }
+
+  return null;
+}
+
+function dryRunResponse(call: VerbCall): unknown {
+  return {
+    resourceType: "OperationOutcome",
+    issue: [
+      {
+        severity: "information",
+        code: "informational",
+        diagnostics: `dry-run: would have ${call.verb}d ${call.resourceType}${call.id ? `/${call.id}` : ""} (no upstream call made)`,
+      },
+    ],
+  };
 }
 
 function ok(req: McpRequest, result: unknown): McpResponse {
