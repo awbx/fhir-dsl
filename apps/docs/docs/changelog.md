@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.34.0] - 2026-04-28
+
+### Features
+
+- add Phase 2.3 IG manifest parsing (`780c490`)
+
 ## [0.33.0] - 2026-04-28
 
 ### Features
