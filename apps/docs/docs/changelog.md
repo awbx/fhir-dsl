@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.42.1] - 2026-04-28
+
+### Improvements
+
+- update README and plan to reflect v0.23.0–v0.42.0 phases shipped (`316566f`)
+
 ## [0.42.0] - 2026-04-28
 
 ### Features
