@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.0] - 2026-04-28
+
+### Features
+
+- add Phase 5 layered framework metadata (`3b495e0`)
+
 ## [0.27.0] - 2026-04-28
 
 ### Features
