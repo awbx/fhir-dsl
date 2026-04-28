@@ -219,8 +219,11 @@ fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.
 | FHIRPath — invariants compiled to runtime predicates | ✅ | `compileInvariant` + `validateInvariants` returning OperationOutcome (Phase 6, v0.40.0). Subset: identifiers/member access, `exists`/`empty`/`matches`/`count`/`where`/`hasValue`, `and`/`or`/`xor`/`implies`/`not`, comparisons, parentheses, indexers, three-valued logic. |
 | SMART on FHIR v2 | ✅ | PKCE-S256, backend services, scope DSL. |
 | Layered framework (Foundation/Base/Clinical/Financial/Specialized) | ✅ | `LAYER_OF`, `referencesUpward` emitted under `<version>/layers.ts` (Phase 5, v0.30.0). |
-| MCP server generation — package + dispatcher | ✅ | `@fhir-dsl/mcp` ships generic verb tools, three pluggable auth strategies, audit sinks, stdio transport (Phase 8.1+8.2, v0.41.0+v0.42.0). |
-| MCP server generation — generator `--mcp` integration | ❌ | Phase 8.8. |
+| MCP server generation — package + dispatcher | ✅ | `@fhir-dsl/mcp` ships generic verb tools, audit sinks, stdio transport, FHIR URI templates with `resources/read` (Phases 8.1–8.3, v0.41.0+). |
+| MCP server generation — auth strategies | ✅ | Bearer / backend-services (signed JWT via SMART v2) / patient-launch (refresh-token flow), all lazy-loaded (Phase 8.4, v0.48.0). |
+| MCP server generation — write gating + token economy | ✅ | Per-resource-type allowlists, dryRun, confirmWrites, default `_count`/`_summary`, response-byte cap (Phases 8.5+8.7, v0.44.0+v0.45.0). |
+| MCP server generation — generator + CLI integration | ✅ | `fhir-gen generate --mcp <out>` emits a server scaffold; `fhir-gen mcp <baseUrl>` launches one inline (Phases 8.8+8.9, v0.46.0+v0.47.0). |
+| Phase 6 follow-up — invariants in emitted validators | ❌ | Compile generator-time invariants into the emitted Standard Schema validators. |
 
 Drift between this table and the code is caught by `pnpm audit:export-surface` — every PR that changes the public surface must refresh `.surface-snapshot.json`.
 
@@ -308,14 +311,32 @@ const server = createServer({
 await server.listen(stdioTransport());
 ```
 
-Locked design (see `FHIR_COMPLIANCE_PLAN.md`):
+Capabilities:
 
-- ~10 generic verbs typed by `resourceType` discriminated union: `read`, `vread`, `search`, `history`, `create`, `update`, `patch`, `delete`, `operation`, `capabilities`
-- Read-only by default; writes opt in via `writes`
-- Three pluggable auth strategies — `bearer` works today, `backend-services` and `patient-launch` are wired in a later phase
-- Pluggable `AuditSink` (`JsonLogAuditSink`, `MemoryAuditSink`, `NullAuditSink` ship by default)
-- Both `stdio` and Streamable HTTP transports planned (stdio only today)
-- `fhir://<ResourceType>/{id}` URI templates exposed via MCP `resources/list`
+- **~10 generic verbs** typed by `resourceType` discriminated union: `read`, `vread`, `search`, `history`, `create`, `update`, `patch`, `delete`, `operation`, `capabilities`
+- **Read-only by default**; writes opt in via `writes`, with optional per-resource-type allowlist (`writeResourceTypes`), `confirmWrites` (require `{confirm: true}` per call), and `dryRun` (short-circuit to a synthetic OperationOutcome)
+- **Three auth strategies, all wired**: `bearer`, `backend-services` (SMART v2 signed JWT — RS384 / ES384, lazy-loaded via `@fhir-dsl/smart` + `jose`), `patient-launch` (refresh-token flow with auto-rotation)
+- **Pluggable `AuditSink`** — `JsonLogAuditSink`, `MemoryAuditSink`, `NullAuditSink` ship by default
+- **Token economy guards** — `defaultSearchCount` (default 20), `defaultReadSummary`, and a `maxResponseBytes` cap (default 64KB) that swaps oversize bodies for a `too-costly` OperationOutcome (the audit retains the original)
+- **MCP resources** — `fhir://<ResourceType>/{id}` URIs read via `resources/read` (and `_history/<versionId>` for vread)
+- **Stdio transport today**; Streamable HTTP is planned
+
+### Generate a server alongside the typed client
+
+```bash
+fhir-gen generate --version r4 --ig hl7.fhir.us.core@6.1.0 \
+  --out ./src/fhir --mcp ./mcp-server
+```
+
+`./mcp-server/` gets a `server.ts` shim, `mcp.config.json` seeded with the IG's resource types, and a README. Launch it with `FHIR_BASE_URL=… node server.ts`.
+
+### Or run inline (no generated types):
+
+```bash
+fhir-gen mcp https://hapi.fhir.org/baseR4 \
+  --resources Patient,Observation \
+  --writes create --confirm-writes --auth-bearer-env FHIR_TOKEN
+```
 
 ## CLI Reference
 

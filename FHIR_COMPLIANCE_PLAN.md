@@ -568,16 +568,17 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 | v0.40.0 | 6 | FHIRPath invariant evaluator (subset) |
 | v0.41.0 | 8.1 | `@fhir-dsl/mcp` package skeleton |
 | v0.42.0 | 8.2 | MCP generic verb runners (read/search/etc. against upstream) |
+| v0.43.0 | 8.3 | MCP `resources/read` (URI-addressable get-by-id) |
+| v0.44.0 | 8.5 | Write gating + safety (dryRun, confirmWrites, write-resource-types) |
+| v0.45.0 | 8.7 | Token economy defaults (`_count`, `_summary`, byte cap) |
+| v0.46.0 | 8.9 | `fhir-gen mcp` CLI command |
+| v0.47.0 | 8.8 | Generator `--mcp <out>` scaffold emission |
+| v0.48.0 | 8.4 | Backend-services + patient-launch auth via `@fhir-dsl/smart` |
 
 ### Remaining
 
-- Phase 8.3 — MCP `resources/read` (URI-addressable get-by-id)
-- Phase 8.4 — Backend-services + patient-launch auth wiring
-- Phase 8.5 — Write gating + safety
-- Phase 8.7 — Token economy defaults (response truncation, `_summary`)
-- Phase 8.8 — Generator integration: `fhir-gen generate --mcp <out>`
-- Phase 8.9 — CLI ergonomics (`fhir-gen mcp` to launch a configured server)
-- Phase 6 follow-up — wire compiled invariants into emitted Standard Schema validators
+- Phase 6 follow-up — wire compiled invariants into emitted Standard Schema validators (extract `ElementDefinition.constraint[*]` at generate time, run `compileInvariant`, thread into the zod/native validator output)
+- Phase 8 — Streamable HTTP transport (the package ships only stdio today; the spec also defines an HTTP transport, useful for hosted deployments)
 
 ## Out of scope (intentionally)
 
