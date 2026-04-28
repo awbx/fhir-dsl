@@ -80,6 +80,14 @@ export interface GeneratorOptions {
   validator?: ValidatorTarget | undefined;
   /** Treat extensible bindings as closed enums in validators (default: open). */
   strictExtensible?: boolean | undefined;
+  /**
+   * Phase 8.8 — when set, emit an MCP server scaffold under this directory
+   * containing `mcp.config.json` (resource list, IG reference) and a
+   * `server.ts` shim that calls `@fhir-dsl/mcp`'s `createServer`. The
+   * scaffold reads the upstream base URL from the FHIR_BASE_URL env var
+   * at runtime so the generated artefacts stay portable.
+   */
+  mcpOutDir?: string | undefined;
 }
 
 export async function generate(options: GeneratorOptions): Promise<void> {
@@ -427,6 +435,16 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     }
   }
 
+  // --- Phase 8.8: MCP server scaffold ---
+  if (options.mcpOutDir) {
+    await emitMcpScaffold({
+      outDir: options.mcpOutDir,
+      version,
+      igRefs: igPackages,
+      resourceTypes: resourceModels.map((r) => r.name),
+    });
+  }
+
   // --- Spec index ---
   if (options.includeSpec) {
     const specDir = join(versionDir, "spec");
@@ -482,4 +500,97 @@ async function fileExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+interface McpScaffoldOptions {
+  outDir: string;
+  version: string;
+  igRefs: readonly string[];
+  resourceTypes: readonly string[];
+}
+
+async function emitMcpScaffold(opts: McpScaffoldOptions): Promise<void> {
+  await mkdir(opts.outDir, { recursive: true });
+
+  const config = {
+    version: opts.version,
+    igRefs: [...opts.igRefs],
+    resourceTypes: [...opts.resourceTypes].sort(),
+    writes: [] as string[],
+    confirmWrites: true,
+    dryRun: false,
+    defaultSearchCount: 20,
+    maxResponseBytes: 65536,
+  };
+  await writeFile(join(opts.outDir, "mcp.config.json"), `${JSON.stringify(config, null, 2)}\n`, "utf-8");
+
+  const serverContents = `import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import { createServer, JsonLogAuditSink, stdioTransport } from "@fhir-dsl/mcp";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const config = JSON.parse(readFileSync(resolve(__dirname, "mcp.config.json"), "utf-8"));
+
+const baseUrl = process.env.FHIR_BASE_URL;
+if (!baseUrl) {
+  console.error("Set FHIR_BASE_URL to the upstream FHIR endpoint before launching the MCP server.");
+  process.exit(1);
+}
+
+const token = process.env.FHIR_TOKEN;
+
+const server = createServer({
+  name: "${opts.igRefs[0]?.replace(/[@/]/g, "-") ?? `fhir-${opts.version}`}-mcp",
+  version: "0.1.0",
+  baseUrl,
+  resourceTypes: config.resourceTypes,
+  audit: new JsonLogAuditSink(),
+  ...(config.writes && config.writes.length > 0 ? { writes: config.writes } : {}),
+  ...(config.confirmWrites ? { confirmWrites: true } : {}),
+  ...(config.dryRun ? { dryRun: true } : {}),
+  ...(config.defaultSearchCount !== undefined ? { defaultSearchCount: config.defaultSearchCount } : {}),
+  ...(config.maxResponseBytes !== undefined ? { maxResponseBytes: config.maxResponseBytes } : {}),
+  ...(token ? { auth: { kind: "bearer" as const, token } } : {}),
+});
+
+console.error(\`[fhir-dsl-mcp] starting stdio server for \${baseUrl} (\${config.resourceTypes.length} resource type(s))\`);
+await server.listen(stdioTransport());
+`;
+  await writeFile(join(opts.outDir, "server.ts"), serverContents, "utf-8");
+
+  const readme = `# Generated FHIR MCP server
+
+This directory was emitted by \`fhir-gen generate --mcp <out>\` and is
+ready to launch as an MCP stdio server.
+
+## Run
+
+\`\`\`sh
+FHIR_BASE_URL=https://your-fhir-server/baseR${opts.version.replace(/^r/i, "").toUpperCase()} \\
+FHIR_TOKEN=optional-bearer-token \\
+node --experimental-strip-types server.ts
+\`\`\`
+
+(or compile \`server.ts\` to JS first if your runtime doesn't support
+type stripping).
+
+## Configuration
+
+\`mcp.config.json\` controls the resource surface, write gating, and
+token-economy defaults. Edit it to:
+
+- Add a \`writes\` whitelist (e.g. \`["create", "update"]\`) to expose
+  write tools.
+- Tighten or relax \`maxResponseBytes\` and \`defaultSearchCount\`.
+- Disable \`confirmWrites\` if your agent doesn't need explicit
+  confirmation on every write.
+
+## IGs bound
+
+${opts.igRefs.length > 0 ? opts.igRefs.map((r) => `- \`${r}\``).join("\n") : "_(no IGs — base FHIR ${opts.version})_"}
+`;
+  await writeFile(join(opts.outDir, "README.md"), readme, "utf-8");
+
+  console.info(`Generated MCP scaffold in ${opts.outDir}`);
 }
