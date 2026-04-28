@@ -97,13 +97,21 @@ describe("parseProfile", () => {
     expect(result.constrainedProperties).toHaveLength(0);
   });
 
-  it("skips sliced elements (colon in path)", () => {
+  it("extracts sliced elements as separate slice models", () => {
     const sd = makeSD({
       differential: {
         element: [
           makeElement("Observation"),
+          makeElement("Observation.component", { slicing: { discriminator: [{ type: "value", path: "code" }] } }),
           makeElement("Observation.component:systolic", {
             min: 1,
+            max: "1",
+            type: [{ code: "BackboneElement" }],
+            short: "Systolic blood pressure",
+          }),
+          makeElement("Observation.component:diastolic", {
+            min: 1,
+            max: "1",
             type: [{ code: "BackboneElement" }],
           }),
         ],
@@ -112,6 +120,106 @@ describe("parseProfile", () => {
 
     const result = parseProfile(sd as any, "test.ig", CATALOG);
     expect(result.constrainedProperties).toHaveLength(0);
+    expect(result.slices).toHaveLength(2);
+
+    const systolic = result.slices.find((s) => s.sliceName === "systolic");
+    expect(systolic).toBeDefined();
+    expect(systolic?.basePropName).toBe("component");
+    expect(systolic?.sanitizedName).toBe("systolic");
+    expect(systolic?.min).toBe(1);
+    expect(systolic?.max).toBe("1");
+    expect(systolic?.discriminator).toEqual([{ type: "value", path: "code" }]);
+    expect(systolic?.description).toBe("Systolic blood pressure");
+  });
+
+  it("extracts an extension slice with its profile URL", () => {
+    const sd = makeSD({
+      type: "Patient",
+      baseDefinition: "http://hl7.org/fhir/StructureDefinition/Patient",
+      differential: {
+        element: [
+          makeElement("Patient"),
+          makeElement("Patient.extension", { slicing: { discriminator: [{ type: "value", path: "url" }] } }),
+          makeElement("Patient.extension:race", {
+            sliceName: "race",
+            min: 0,
+            max: "1",
+            type: [
+              {
+                code: "Extension",
+                profile: ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"],
+              },
+            ],
+          }),
+        ],
+      },
+    });
+
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
+    expect(result.slices).toHaveLength(1);
+    const race = result.slices[0]!;
+    expect(race.basePropName).toBe("extension");
+    expect(race.sliceName).toBe("race");
+    expect(race.extensionUrl).toBe("http://hl7.org/fhir/us/core/StructureDefinition/us-core-race");
+    expect(race.discriminator).toEqual([{ type: "value", path: "url" }]);
+  });
+
+  it("normalises kebab-case slice names to camelCase in sanitizedName", () => {
+    const sd = makeSD({
+      type: "Patient",
+      differential: {
+        element: [
+          makeElement("Patient"),
+          makeElement("Patient.extension", { slicing: { discriminator: [{ type: "value", path: "url" }] } }),
+          makeElement("Patient.extension:us-core-race", {
+            sliceName: "us-core-race",
+            min: 0,
+            max: "1",
+            type: [{ code: "Extension" }],
+          }),
+        ],
+      },
+    });
+
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
+    expect(result.slices[0]!.sanitizedName).toBe("usCoreRace");
+  });
+
+  it("ignores nested slice elements (e.g., extension:race.url)", () => {
+    const sd = makeSD({
+      type: "Patient",
+      differential: {
+        element: [
+          makeElement("Patient"),
+          makeElement("Patient.extension", { slicing: { discriminator: [{ type: "value", path: "url" }] } }),
+          makeElement("Patient.extension:race", {
+            sliceName: "race",
+            min: 0,
+            type: [{ code: "Extension" }],
+          }),
+          makeElement("Patient.extension:race.url", {
+            min: 1,
+            type: [{ code: "uri" }],
+          }),
+        ],
+      },
+    });
+
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
+    // Only the top-level race slice — the .url child is part of the
+    // extension's internal shape, not a separate slice.
+    expect(result.slices).toHaveLength(1);
+    expect(result.slices[0]!.sliceName).toBe("race");
+  });
+
+  it("returns an empty slices array when the profile defines no slicing", () => {
+    const sd = makeSD({
+      differential: {
+        element: [makeElement("Observation"), makeElement("Observation.status", { min: 1, type: [{ code: "code" }] })],
+      },
+    });
+    const result = parseProfile(sd as any, "test.ig", CATALOG);
+    expect(result.slices).toEqual([]);
   });
 
   it("skips base inherited properties unless constrained with min > 0", () => {

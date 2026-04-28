@@ -1,5 +1,5 @@
 import { capitalizeFirst, fhirPathToPropertyName } from "@fhir-dsl/utils";
-import type { ProfileModel } from "../model/profile-model.js";
+import type { DiscriminatorRule, DiscriminatorType, ProfileModel, SliceModel } from "../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../model/resource-model.js";
 import type { SpecCatalog } from "../spec/catalog.js";
 
@@ -9,9 +9,22 @@ interface FhirTypeRef {
   profile?: string[] | undefined;
 }
 
+interface FhirSlicingDiscriminator {
+  type: DiscriminatorType;
+  path: string;
+}
+
+interface FhirSlicing {
+  discriminator?: FhirSlicingDiscriminator[] | undefined;
+  rules?: "open" | "closed" | "openAtEnd" | undefined;
+  ordered?: boolean | undefined;
+}
+
 interface FhirElementDefinition {
   id?: string | undefined;
   path: string;
+  sliceName?: string | undefined;
+  slicing?: FhirSlicing | undefined;
   min?: number | undefined;
   max?: string | undefined;
   type?: FhirTypeRef[] | undefined;
@@ -48,9 +61,25 @@ export function parseProfile(sd: FhirProfileSD, igName: string, catalog: SpecCat
   const elements = sd.differential?.element ?? sd.snapshot?.element ?? [];
   const rootPath = sd.type;
 
+  // First pass: build a map of `path → discriminator[]` from slicing parents,
+  // so slice instances declared later (or in any order) can pick up their
+  // discriminator rules without a second sort. Slicing parents look like:
+  //   { path: "Patient.extension", slicing: { discriminator: [...] } }
+  const discriminatorByPath = new Map<string, DiscriminatorRule[]>();
+  for (const element of elements) {
+    if (!element.slicing?.discriminator) continue;
+    const rules: DiscriminatorRule[] = element.slicing.discriminator.map((d) => ({
+      type: d.type,
+      path: d.path,
+    }));
+    discriminatorByPath.set(element.path, rules);
+  }
+
   // Only look at direct children constraints (not nested backbone elements for now)
   const constrainedProperties: PropertyModel[] = [];
+  const slices: SliceModel[] = [];
   const seenNames = new Set<string>();
+  const seenSliceKeys = new Set<string>();
 
   for (const element of elements) {
     // Skip the root element
@@ -60,8 +89,42 @@ export function parseProfile(sd: FhirProfileSD, igName: string, catalog: SpecCat
     const suffix = element.path.slice(rootPath.length + 1);
     if (suffix.includes(".")) continue;
 
-    // Skip sliced elements (e.g., "component:systolic") — they share the same property name
-    if (suffix.includes(":")) continue;
+    // Detect slice instances. The id form is `Resource.prop:sliceName`,
+    // but FHIR also allows the slice name to live on `element.sliceName`
+    // alone, and a few profiles encode it directly in `path`. Any of the
+    // three signals counts.
+    const sliceFromId = parseSliceFromId(element.id, rootPath);
+    const sliceFromPath = parseSliceFromId(element.path, rootPath);
+    const sliceName = element.sliceName ?? sliceFromId?.sliceName ?? sliceFromPath?.sliceName;
+    if (sliceName) {
+      const basePropPath = sliceFromId?.basePath ?? sliceFromPath?.basePath ?? element.path;
+      const basePropName = fhirPathToPropertyName(basePropPath);
+      const sanitized = sanitizeSliceName(sliceName);
+      const key = `${basePropName}:${sanitized}`;
+      if (seenSliceKeys.has(key)) continue;
+      seenSliceKeys.add(key);
+
+      const types: TypeRef[] = (element.type ?? []).map((t) => fhirTypeRefToTypeRef(t, catalog));
+      const extensionUrl = extensionUrlFromTypes(element.type ?? []);
+      const discriminator = discriminatorByPath.get(basePropPath) ?? [];
+
+      slices.push({
+        basePropName,
+        sliceName,
+        sanitizedName: sanitized,
+        min: element.min ?? 0,
+        max: element.max ?? "1",
+        types,
+        discriminator,
+        extensionUrl,
+        description: element.short,
+      });
+      continue;
+    }
+
+    // Pure slicing-parent declarations carry no constrained properties of
+    // their own — they exist solely to host `.slicing.discriminator`.
+    if (element.slicing && !sliceName) continue;
 
     const propName = fhirPathToPropertyName(element.path);
 
@@ -126,8 +189,47 @@ export function parseProfile(sd: FhirProfileSD, igName: string, catalog: SpecCat
     slug,
     igName,
     constrainedProperties,
+    slices,
     description: sd.title ?? sd.name,
   };
+}
+
+function parseSliceFromId(id: string | undefined, rootPath: string): { basePath: string; sliceName: string } | null {
+  if (!id) return null;
+  // Slice ids look like `Patient.extension:race` or
+  // `Observation.component:systolic`. Reject ids without a colon, and ids
+  // whose colon falls inside a deeper path (we only do top-level slices).
+  const prefix = `${rootPath}.`;
+  if (!id.startsWith(prefix)) return null;
+  const tail = id.slice(prefix.length);
+  const colonIdx = tail.indexOf(":");
+  if (colonIdx === -1) return null;
+  // Reject nested slices: `extension:race.value`
+  const after = tail.slice(colonIdx + 1);
+  if (after.includes(".")) return null;
+  const baseProp = tail.slice(0, colonIdx);
+  if (baseProp.includes(".")) return null;
+  return { basePath: `${rootPath}.${baseProp}`, sliceName: after };
+}
+
+function sanitizeSliceName(name: string): string {
+  // Normalise to camelCase so `us-core-race` and `usCoreRace` both emit
+  // `extension_usCoreRace`. The leading character is lowercased — slice
+  // names are conceptually identifiers, not type names.
+  const parts = name.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  if (parts.length === 0) return "slice";
+  const [head, ...rest] = parts;
+  return [head!.toLowerCase(), ...rest.map(capitalizeFirst)].join("");
+}
+
+function extensionUrlFromTypes(types: FhirTypeRef[]): string | undefined {
+  for (const t of types) {
+    if (t.code === "Extension" && t.profile?.length) {
+      const url = t.profile[0];
+      if (url) return url;
+    }
+  }
+  return undefined;
 }
 
 function fhirTypeRefToTypeRef(fhirType: FhirTypeRef, catalog: SpecCatalog): TypeRef {

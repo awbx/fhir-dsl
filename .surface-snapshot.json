@@ -943,6 +943,14 @@
         "kind": "interface"
       },
       {
+        "name": "extensionByUrl",
+        "kind": "function"
+      },
+      {
+        "name": "extensionsByUrl",
+        "kind": "function"
+      },
+      {
         "name": "fetchAllPages",
         "kind": "function"
       },
@@ -959,6 +967,14 @@
         "kind": "class"
       },
       {
+        "name": "findSlice",
+        "kind": "function"
+      },
+      {
+        "name": "findSliceByPath",
+        "kind": "function"
+      },
+      {
         "name": "OperationOutcome",
         "kind": "interface"
       },
@@ -968,6 +984,10 @@
       },
       {
         "name": "paginate",
+        "kind": "function"
+      },
+      {
+        "name": "readPath",
         "kind": "function"
       },
       {
@@ -993,6 +1013,10 @@
       {
         "name": "unwrapBundle",
         "kind": "function"
+      },
+      {
+        "name": "UrlBearing",
+        "kind": "interface"
       }
     ],
     "@fhir-dsl/fhirpath": [

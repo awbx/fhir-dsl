@@ -4,3 +4,4 @@ export * from "./errors.js";
 export * from "./executor.js";
 export * from "./pagination.js";
 export * from "./result.js";
+export * from "./slice.js";

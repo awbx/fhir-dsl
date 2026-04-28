@@ -1,5 +1,5 @@
 import { toKebabCase } from "@fhir-dsl/utils";
-import type { ProfileModel } from "../model/profile-model.js";
+import type { ProfileModel, SliceModel } from "../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../model/resource-model.js";
 import type { TypeMapper } from "../spec/type-mapping.js";
 
@@ -9,6 +9,7 @@ export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
   const datatypeImports = new Set<string>();
 
   collectImports(model.constrainedProperties, mapper, primitiveImports, datatypeImports);
+  collectSliceImports(model.slices, mapper, primitiveImports, datatypeImports);
 
   // Import the base resource type
   const baseFileName = toKebabCase(model.baseResourceType);
@@ -39,6 +40,15 @@ export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
 
   for (const prop of model.constrainedProperties) {
     lines.push(`  ${formatProperty(prop, mapper)}`);
+  }
+
+  // Emit slice-named optional fields after the regular constrained
+  // properties. They sit alongside the underlying array (e.g.,
+  // `extension`) in the type — runtime code keeps using the array, while
+  // user code reaches for `.extension_usCoreRace` to get the type-narrowed
+  // hint of which element is intended.
+  for (const slice of model.slices) {
+    lines.push(`  ${formatSliceProperty(slice, mapper)}`);
   }
 
   lines.push("}");
@@ -136,6 +146,60 @@ function collectImports(
       if (mapper.isPrimitive(typeRef.code)) {
         primitives.add(tsType);
       } else if (mapper.isComplexType(typeRef.code)) {
+        datatypes.add(tsType);
+      }
+    }
+  }
+}
+
+function formatSliceProperty(slice: SliceModel, mapper: TypeMapper): string {
+  // All slices are emitted as optional — the slice-named field is a
+  // type-level convenience pointing at one (or several) elements of the
+  // underlying array, and absence of the field never means absence of the
+  // array. Cardinality is preserved via single-vs-array-of regardless.
+  const tsType = formatSliceType(slice, mapper);
+  const arraySuffix = isMultiCardinality(slice.max) ? "[]" : "";
+  return `${slice.basePropName}_${slice.sanitizedName}?: ${tsType}${arraySuffix};`;
+}
+
+function formatSliceType(slice: SliceModel, mapper: TypeMapper): string {
+  if (slice.types.length === 0) return "Extension";
+  if (slice.types.length === 1) {
+    return formatTypeRef(slice.types[0]!, mapper);
+  }
+  return slice.types.map((t) => formatTypeRef(t, mapper)).join(" | ");
+}
+
+function isMultiCardinality(max: string): boolean {
+  if (max === "*") return true;
+  const n = Number.parseInt(max, 10);
+  return Number.isFinite(n) && n > 1;
+}
+
+function collectSliceImports(
+  slices: SliceModel[],
+  mapper: TypeMapper,
+  primitives: Set<string>,
+  datatypes: Set<string>,
+): void {
+  for (const slice of slices) {
+    if (slice.types.length === 0) {
+      // Default Extension fallback.
+      datatypes.add("Extension");
+      continue;
+    }
+    for (const typeRef of slice.types) {
+      if (typeRef.code === "Reference") {
+        datatypes.add("Reference");
+        continue;
+      }
+      const tsType = mapper.fhirTypeToTs(typeRef.code);
+      if (mapper.isPrimitive(typeRef.code)) {
+        primitives.add(tsType);
+      } else if (mapper.isComplexType(typeRef.code)) {
+        datatypes.add(tsType);
+      } else {
+        // Backbone or named type — best-effort import from datatypes.
         datatypes.add(tsType);
       }
     }

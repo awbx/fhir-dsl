@@ -30,6 +30,7 @@ function usCorePatient(): ProfileModel {
         isChoiceType: false,
       },
     ],
+    slices: [],
   };
 }
 
@@ -71,6 +72,7 @@ describe("emitProfileSchema", () => {
           binding: { strength: "required", valueSet: "http://example.org/vs/statuses" },
         },
       ],
+      slices: [],
     };
     const map: BindingTypeMap = new Map([["http://example.org/vs/statuses", "Statuses"]]);
     const out = emitProfileSchema(profile, nativeAdapter, {

@@ -13,6 +13,7 @@ function makeProfile(overrides: Partial<ProfileModel> = {}): ProfileModel {
     slug: "us-core-patient",
     igName: "hl7.fhir.us.core",
     constrainedProperties: [],
+    slices: [],
     description: "US Core Patient Profile",
     ...overrides,
   };
@@ -170,6 +171,68 @@ describe("emitProfile", () => {
     );
     expect(output).toContain("Reference");
     expect(output).toContain('from "../datatypes.js"');
+  });
+
+  it("emits slice-named optional fields with cardinality 0..1", () => {
+    const output = emitProfile(
+      makeProfile({
+        slices: [
+          {
+            basePropName: "extension",
+            sliceName: "race",
+            sanitizedName: "race",
+            min: 0,
+            max: "1",
+            types: [{ code: "Extension" }],
+            discriminator: [{ type: "value", path: "url" }],
+            extensionUrl: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          },
+        ],
+      }),
+      MAPPER,
+    );
+    expect(output).toContain("extension_race?: Extension;");
+    expect(output).not.toContain("extension_race?: Extension[]");
+  });
+
+  it("emits slice-named optional array fields when max > 1", () => {
+    const output = emitProfile(
+      makeProfile({
+        slices: [
+          {
+            basePropName: "component",
+            sliceName: "systolic",
+            sanitizedName: "systolic",
+            min: 1,
+            max: "*",
+            types: [{ code: "BackboneElement" }],
+            discriminator: [{ type: "value", path: "code" }],
+          },
+        ],
+      }),
+      MAPPER,
+    );
+    expect(output).toContain("component_systolic?: BackboneElement[];");
+  });
+
+  it("imports Extension from datatypes when slices use it", () => {
+    const output = emitProfile(
+      makeProfile({
+        slices: [
+          {
+            basePropName: "extension",
+            sliceName: "race",
+            sanitizedName: "race",
+            min: 0,
+            max: "1",
+            types: [{ code: "Extension" }],
+            discriminator: [{ type: "value", path: "url" }],
+          },
+        ],
+      }),
+      MAPPER,
+    );
+    expect(output).toContain('import type { Extension } from "../datatypes.js"');
   });
 });
 

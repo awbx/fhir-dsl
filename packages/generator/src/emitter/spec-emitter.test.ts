@@ -25,6 +25,7 @@ function makeProfile(overrides: Partial<ProfileModel> = {}): ProfileModel {
     slug: "us-core-patient",
     igName: "hl7.fhir.us.core",
     constrainedProperties: [],
+    slices: [],
     description: "US Core Patient Profile",
     ...overrides,
   };
