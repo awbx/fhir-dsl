@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.0] - 2026-04-28
+
+### Features
+
+- add Phase 1.2 choice-type accessor (choiceOf) (`c16cdca`)
+
 ## [0.26.0] - 2026-04-28
 
 ### Features
