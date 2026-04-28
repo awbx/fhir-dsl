@@ -33,6 +33,26 @@ export interface DispatcherConfig {
    * onto the calling LLM, which is the safe default for production.
    */
   confirmWrites?: boolean;
+  /**
+   * Phase 8.7 — default `_count` applied to search verbs when the caller
+   * doesn't specify one. Keeps response sizes bounded; agents can still
+   * pass an explicit `_count` to override. Set to 0 to disable. Default: 20.
+   */
+  defaultSearchCount?: number;
+  /**
+   * Phase 8.7 — default `_summary` applied to read verbs when the caller
+   * doesn't specify one. Useful values are `text`, `data`, `count`, or
+   * `false`. When undefined, no summary is added — the full resource is
+   * returned.
+   */
+  defaultReadSummary?: "text" | "data" | "count" | "false" | "true";
+  /**
+   * Phase 8.7 — hard cap on the JSON-encoded response body returned via
+   * MCP `tools/call` content. Above this, the response body is replaced
+   * with an OperationOutcome citing the cap; the original is still
+   * recorded in the audit event. Set to 0 to disable. Default: 64KB.
+   */
+  maxResponseBytes?: number;
   /** Server identity broadcast through MCP `initialize`. */
   identity: { name: string; version: string };
   /** Audit hook invoked on every verb attempt. */
@@ -295,6 +315,8 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
   if (args.patch !== undefined) call.patch = args.patch;
   if (typeof args.operation === "string") call.operation = args.operation;
 
+  applyTokenEconomyDefaults(call, config);
+
   const gateOutcome = checkWriteGates(call, args, config);
   let result: VerbResult;
   if (gateOutcome) {
@@ -328,10 +350,45 @@ async function handleToolCall(request: McpRequest, config: DispatcherConfig): Pr
   });
 
   const payload = result.ok ? result.body : result.outcome;
+  const text = clampResponse(JSON.stringify(payload ?? {}), call, config);
   return ok(request, {
-    content: [{ type: "text", text: JSON.stringify(payload ?? {}) }],
+    content: [{ type: "text", text }],
     isError: !result.ok,
   });
+}
+
+const DEFAULT_SEARCH_COUNT = 20;
+const DEFAULT_MAX_RESPONSE_BYTES = 64 * 1024;
+
+function applyTokenEconomyDefaults(call: VerbCall, config: DispatcherConfig): void {
+  if (call.verb === "search") {
+    const count = config.defaultSearchCount ?? DEFAULT_SEARCH_COUNT;
+    if (count > 0) {
+      call.params = call.params ?? {};
+      if (call.params._count === undefined) call.params._count = count;
+    }
+  }
+  if ((call.verb === "read" || call.verb === "vread") && config.defaultReadSummary) {
+    call.params = call.params ?? {};
+    if (call.params._summary === undefined) call.params._summary = config.defaultReadSummary;
+  }
+}
+
+function clampResponse(text: string, call: VerbCall, config: DispatcherConfig): string {
+  const max = config.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
+  if (max <= 0) return text;
+  if (text.length <= max) return text;
+  const summary = {
+    resourceType: "OperationOutcome",
+    issue: [
+      {
+        severity: "warning",
+        code: "too-costly",
+        diagnostics: `Response from ${call.verb} ${call.resourceType}${call.id ? `/${call.id}` : ""} exceeded ${max} bytes (${text.length} bytes); body truncated. Re-run with explicit search params or _summary to narrow.`,
+      },
+    ],
+  };
+  return JSON.stringify(summary);
 }
 
 function checkWriteGates(call: VerbCall, args: Record<string, unknown>, config: DispatcherConfig): unknown | null {

@@ -30,6 +30,12 @@ export interface ServerConfig {
   dryRun?: boolean;
   /** Phase 8.5 — when true, write verbs require `confirm: true` in their args. */
   confirmWrites?: boolean;
+  /** Phase 8.7 — default `_count` for search verbs. Default 20; 0 disables. */
+  defaultSearchCount?: number;
+  /** Phase 8.7 — default `_summary` for read verbs. */
+  defaultReadSummary?: "text" | "data" | "count" | "false" | "true";
+  /** Phase 8.7 — hard cap on JSON response bytes. Default 64KB; 0 disables. */
+  maxResponseBytes?: number;
   /** Override the global `fetch` — handy for tests and custom transports. */
   fetch?: typeof globalThis.fetch;
 }
@@ -55,6 +61,9 @@ export function createServer(config: ServerConfig): McpServer {
   if (config.writeResourceTypes) dispatcherConfig.writeResourceTypes = config.writeResourceTypes;
   if (config.dryRun !== undefined) dispatcherConfig.dryRun = config.dryRun;
   if (config.confirmWrites !== undefined) dispatcherConfig.confirmWrites = config.confirmWrites;
+  if (config.defaultSearchCount !== undefined) dispatcherConfig.defaultSearchCount = config.defaultSearchCount;
+  if (config.defaultReadSummary !== undefined) dispatcherConfig.defaultReadSummary = config.defaultReadSummary;
+  if (config.maxResponseBytes !== undefined) dispatcherConfig.maxResponseBytes = config.maxResponseBytes;
   const dispatcher = createDispatcher(dispatcherConfig);
 
   return {
