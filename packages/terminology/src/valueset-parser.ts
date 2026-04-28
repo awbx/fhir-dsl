@@ -61,7 +61,8 @@ export function resolveCompose(
       // Filter-based include — try to resolve from local CodeSystem
       const cs = include.system ? codeSystemLookup.get(include.system) : undefined;
       if (cs && cs.content === "complete" && cs.concepts.length > 0) {
-        const filtered = applyFilters(cs.concepts, include.filter);
+        const { codes: filtered, complete } = applyFilters(cs, include.filter);
+        if (!complete) isComplete = false;
         includedCodes.push(...filtered.map((c) => ({ ...c, system: include.system })));
       } else {
         isComplete = false;
@@ -120,15 +121,70 @@ export function resolveCompose(
   };
 }
 
-function applyFilters(concepts: ResolvedCode[], filters: FhirIncludeFilter[]): ResolvedCode[] {
-  let result = concepts;
+/**
+ * Phase 3.2 — applies ValueSet `compose.include.filter[*]` rules to a
+ * resolved CodeSystem's concept list.
+ *
+ * Supported ops:
+ * - `=`              on `concept` — exact code match.
+ * - `is-a` / `=`     on `concept` (when CS hierarchy is loaded) — code +
+ *                    descendants.
+ * - `descendent-of`  on `concept` — strict descendants only (no self).
+ * - `regex`          on `code` — regex match against the code value.
+ *
+ * Returns `{ codes, complete }`. `complete=false` signals that one or
+ * more filters couldn't be applied offline (e.g., is-a without
+ * hierarchy data) so the caller can mark the ValueSet incomplete.
+ */
+function applyFilters(cs: CodeSystemModel, filters: FhirIncludeFilter[]): { codes: ResolvedCode[]; complete: boolean } {
+  let result = cs.concepts;
+  let complete = true;
+
   for (const filter of filters) {
-    if (filter.op === "=" && filter.property === "concept" && filter.value) {
-      result = result.filter((c) => c.code === filter.value);
+    const op = filter.op;
+    const value = filter.value;
+    const prop = filter.property;
+    if (!op || !value || !prop) {
+      complete = false;
+      continue;
     }
-    // For complex filters (is-a, descendent-of, regex, etc.) on external code systems,
-    // we cannot resolve offline — return all concepts as a best-effort approximation
-    // for FHIR-defined code systems (which are small and complete)
+
+    if (op === "=" && prop === "concept") {
+      result = result.filter((c) => c.code === value);
+      continue;
+    }
+
+    if ((op === "is-a" || op === "isa") && prop === "concept") {
+      if (!cs.isA) {
+        complete = false;
+        continue;
+      }
+      result = result.filter((c) => cs.isA!(value, c.code));
+      continue;
+    }
+
+    if (op === "descendent-of" && prop === "concept") {
+      if (!cs.isA) {
+        complete = false;
+        continue;
+      }
+      result = result.filter((c) => c.code !== value && cs.isA!(value, c.code));
+      continue;
+    }
+
+    if (op === "regex") {
+      try {
+        const re = new RegExp(value);
+        result = result.filter((c) => re.test(prop === "display" ? (c.display ?? "") : c.code));
+      } catch {
+        complete = false;
+      }
+      continue;
+    }
+
+    // Unknown op — best-effort skip, mark incomplete.
+    complete = false;
   }
-  return result;
+
+  return { codes: result, complete };
 }
