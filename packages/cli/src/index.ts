@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { capabilityCommand } from "./commands/capability.js";
 import { generateCommand } from "./commands/generate.js";
+import { validateCommand } from "./commands/validate.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
@@ -17,5 +18,6 @@ program
 
 program.addCommand(generateCommand);
 program.addCommand(capabilityCommand);
+program.addCommand(validateCommand);
 
 program.parse();
