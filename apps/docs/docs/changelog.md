@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.0] - 2026-04-28
+
+### Features
+
+- add Phase 8.3 MCP resources/read (`4af8f38`)
+
 ## [0.42.1] - 2026-04-28
 
 ### Improvements
