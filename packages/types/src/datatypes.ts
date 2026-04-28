@@ -28,8 +28,8 @@ export interface Element {
   extension?: Extension[];
 }
 
-export interface Extension extends Element {
-  url: FhirUri;
+export interface Extension<TUrl extends string = string> extends Element {
+  url: FhirUri & TUrl;
   // --- Primitive value[x] variants ---
   valueBase64Binary?: FhirBase64Binary;
   valueBoolean?: FhirBoolean;

@@ -106,6 +106,8 @@ export interface DownloadedIG {
   name: string;
   version: string;
   profiles: unknown[];
+  /** Phase 2.2: extension StructureDefinitions defined in the IG. */
+  extensions: unknown[];
   valueSets: unknown[];
   codeSystems: unknown[];
   /** Phase 2.3: parsed `ImplementationGuide` manifest (when present in the package). */
@@ -160,6 +162,7 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
 
   // Load resources from IG package
   const profiles: unknown[] = [];
+  const extensions: unknown[] = [];
   const valueSets: unknown[] = [];
   const codeSystems: unknown[] = [];
   let manifest: ImplementationGuideManifest | undefined;
@@ -174,6 +177,14 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
         !content.abstract
       ) {
         profiles.push(content);
+      } else if (
+        content.resourceType === "StructureDefinition" &&
+        content.derivation === "constraint" &&
+        content.type === "Extension" &&
+        content.kind === "complex-type" &&
+        !content.abstract
+      ) {
+        extensions.push(content);
       } else if (content.resourceType === "ValueSet") {
         valueSets.push(content);
       } else if (content.resourceType === "CodeSystem") {
@@ -190,10 +201,10 @@ export async function downloadIG(packageRef: string, cacheDir: string): Promise<
     ? ` (${Object.keys(manifest.global).length} globals, ${manifest.dependsOn.length} deps)`
     : "";
   console.info(
-    `Loaded ${profiles.length} profiles, ${valueSets.length} ValueSets, ${codeSystems.length} CodeSystems from ${name}@${version}${manifestSummary}`,
+    `Loaded ${profiles.length} profiles, ${extensions.length} extensions, ${valueSets.length} ValueSets, ${codeSystems.length} CodeSystems from ${name}@${version}${manifestSummary}`,
   );
 
-  return { name, version, profiles, valueSets, codeSystems, manifest };
+  return { name, version, profiles, extensions, valueSets, codeSystems, manifest };
 }
 
 /** Phase 2.3: extract `global[*]` and `dependsOn[*]` from an ImplementationGuide resource. */

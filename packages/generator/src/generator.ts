@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { type ResolvedValueSet, TerminologyRegistry } from "@fhir-dsl/terminology";
 import { toKebabCase } from "@fhir-dsl/utils";
 import { type DownloadedSpec, downloadIG, downloadSpec, loadLocalSpec } from "./downloader.js";
+import { emitExtension, emitExtensionIndex, emitExtensionRegistry } from "./emitter/extension-emitter.js";
 import { emitClient, emitResourceIndex, emitRootIndex } from "./emitter/index-emitter.js";
 import { emitLayers } from "./emitter/layer-emitter.js";
 import { emitDatatypes, emitPrimitives } from "./emitter/primitives-emitter.js";
@@ -28,8 +29,10 @@ import type { SearchParamBindingMap } from "./emitter/search-param-emitter.js";
 import { emitSearchParams, emitSearchParamTypes } from "./emitter/search-param-emitter.js";
 import { emitProfileSpec, emitResourceSpec, emitSpecIndex } from "./emitter/spec-emitter.js";
 import { type BindingTypeMap, emitTerminology } from "./emitter/terminology-emitter.js";
+import type { ExtensionModel } from "./model/extension-model.js";
 import type { ProfileModel } from "./model/profile-model.js";
 import type { ResourceModel, ResourceSearchParams } from "./model/resource-model.js";
+import { isExtensionSD, parseExtension } from "./parser/extension.js";
 import { parseProfile } from "./parser/profile.js";
 import { parseSearchParameters } from "./parser/search-parameter.js";
 import { parseStructureDefinition } from "./parser/structure-definition.js";
@@ -314,9 +317,10 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     }
   }
 
-  // --- IG Profile Generation ---
+  // --- IG Profile + Extension Generation ---
   const igPackages = options.ig ?? [];
   const allProfiles: ProfileModel[] = [];
+  const allExtensions: ExtensionModel[] = [];
 
   if (igPackages.length > 0) {
     const cache = cacheDir ?? join(outDir, ".cache");
@@ -331,6 +335,16 @@ export async function generate(options: GeneratorOptions): Promise<void> {
           allProfiles.push(profile);
         } catch (err) {
           console.warn(`Failed to parse profile ${sd.name}: ${err}`);
+        }
+      }
+
+      for (const sd of ig.extensions) {
+        if (!isExtensionSD(sd)) continue;
+        try {
+          const ext = parseExtension(sd, ig.name, catalog);
+          allExtensions.push(ext);
+        } catch (err) {
+          console.warn(`Failed to parse extension ${(sd as { name?: string }).name ?? "?"}: ${err}`);
         }
       }
     }
@@ -395,6 +409,21 @@ export async function generate(options: GeneratorOptions): Promise<void> {
           await writeFile(join(specProfilesDir, fileName), emitProfileSpec(profile), "utf-8");
         }
       }
+    }
+
+    if (allExtensions.length > 0) {
+      const extensionsDir = join(versionDir, "extensions");
+      await mkdir(extensionsDir, { recursive: true });
+
+      for (const ext of allExtensions) {
+        const fileName = `${toKebabCase(ext.name)}.ts`;
+        await writeFile(join(extensionsDir, fileName), emitExtension(ext, mapper), "utf-8");
+      }
+
+      await writeFile(join(extensionsDir, "index.ts"), emitExtensionIndex(allExtensions), "utf-8");
+      await writeFile(join(extensionsDir, "extension-registry.ts"), emitExtensionRegistry(allExtensions), "utf-8");
+
+      console.info(`Generated ${allExtensions.length} typed extensions`);
     }
   }
 

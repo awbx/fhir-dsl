@@ -1441,11 +1441,23 @@
         "kind": "other"
       },
       {
+        "name": "DiscriminatorRule",
+        "kind": "other"
+      },
+      {
+        "name": "DiscriminatorType",
+        "kind": "other"
+      },
+      {
         "name": "downloadIG",
         "kind": "other"
       },
       {
         "name": "downloadSpec",
+        "kind": "other"
+      },
+      {
+        "name": "ExtensionModel",
         "kind": "other"
       },
       {
@@ -1457,7 +1469,15 @@
         "kind": "other"
       },
       {
+        "name": "isExtensionSD",
+        "kind": "other"
+      },
+      {
         "name": "loadLocalSpec",
+        "kind": "other"
+      },
+      {
+        "name": "parseExtension",
         "kind": "other"
       },
       {
@@ -1490,6 +1510,10 @@
       },
       {
         "name": "SearchParamModel",
+        "kind": "other"
+      },
+      {
+        "name": "SliceModel",
         "kind": "other"
       }
     ],
