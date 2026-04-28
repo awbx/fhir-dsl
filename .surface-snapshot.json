@@ -35,6 +35,14 @@
         "kind": "interface"
       },
       {
+        "name": "choiceOf",
+        "kind": "function"
+      },
+      {
+        "name": "ChoiceOf",
+        "kind": "type"
+      },
+      {
         "name": "CodeableConcept",
         "kind": "interface"
       },

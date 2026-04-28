@@ -2,6 +2,7 @@
 // This package does NOT contain generated resource types.
 // Users generate those via the CLI into their own project.
 
+export * from "./choice.js";
 export * from "./datatypes.js";
 export * from "./parse.js";
 export * from "./primitives.js";
