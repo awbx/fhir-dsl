@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.31.0] - 2026-04-28
+
+### Features
+
+- add Phase 7.2 fhir-gen capability command (`6bcf943`)
+
 ## [0.30.0] - 2026-04-28
 
 ### Features
