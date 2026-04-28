@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.32.0] - 2026-04-28
+
+### Features
+
+- add Phase 4.1 capability-driven runtime guard (`6af17a8`)
+
 ## [0.31.0] - 2026-04-28
 
 ### Features
