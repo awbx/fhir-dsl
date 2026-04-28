@@ -588,7 +588,7 @@ token-economy defaults. Edit it to:
 
 ## IGs bound
 
-${opts.igRefs.length > 0 ? opts.igRefs.map((r) => `- \`${r}\``).join("\n") : "_(no IGs — base FHIR ${opts.version})_"}
+${opts.igRefs.length > 0 ? opts.igRefs.map((r) => `- \`${r}\``).join("\n") : `_(no IGs — base FHIR ${opts.version})_`}
 `;
   await writeFile(join(opts.outDir, "README.md"), readme, "utf-8");
 
