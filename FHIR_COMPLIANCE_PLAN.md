@@ -27,7 +27,7 @@ behaviour with tests, and make subsequent phases measurable.
 - [ ] Delete or regenerate `AUDIT.md`. It claims PATCH, conditional headers,
       retry/backoff, AbortSignal, FHIRPath arithmetic / env vars / `$index` /
       `$total` / `resolve` / `hasValue` are missing — all are implemented.
-- [ ] Add an `audit:export-surface` script that walks each package's
+- [x] Add an `audit:export-surface` script that walks each package's
       `index.ts`, dumps the public surface, and diffs against a checked-in
       snapshot. Re-run in CI; AUDIT.md is regenerated from the snapshot.
 - [ ] Add a `pnpm test:fhir-conformance` task wired to the matrices created
@@ -54,14 +54,14 @@ Cheapest, biggest correctness wins. Type-only changes; no runtime impact.
 
 **Plan.**
 
-- [ ] Convert each primitive to an opaque branded type:
+- [x] Convert each primitive to an opaque branded type:
       `type FhirDate = string & { readonly __fhir: "date" }`.
-- [ ] Smart constructors in a new `packages/types/src/parse.ts`:
+- [x] Smart constructors in a new `packages/types/src/parse.ts`:
       `parseDate(s: string): FhirDate | ParseError`, etc., regex-validated
       per the FHIR spec's primitive regex table.
-- [ ] Update generator emitters (`packages/generator/src/emitter/`) to keep
+- [x] Update generator emitters (`packages/generator/src/emitter/`) to keep
       using the brand types; no signature changes downstream.
-- [ ] Migration: add a one-time `as` cast in `packages/example/src/fhir/`
+- [x] Migration: add a one-time `as` cast in `packages/example/src/fhir/`
       smoke tests; downstream consumers get a deprecation note in the
       changelog.
 
@@ -78,12 +78,12 @@ siblings simultaneously; today's types allow it.
 
 **Plan.**
 
-- [ ] In `expandChoiceType`, emit a discriminated union:
+- [x] In `expandChoiceType`, emit a discriminated union:
       `{ valueQuantity: Quantity } | { valueString: string } | …` merged with
       the rest of the resource via intersection.
-- [ ] Add a helper `valueOf(resource)` that returns the active branch +
+- [x] Add a helper `valueOf(resource)` that returns the active branch +
       its discriminator key.
-- [ ] Update FHIRPath generator output so `.value` resolves through the
+- [x] Update FHIRPath generator output so `.value` resolves through the
       union.
 
 **Exit criteria.** Setting both `valueQuantity` and `valueString` on an
@@ -100,10 +100,10 @@ resource that has primitive extensions (very common in US-Core: `_birthDate`,
 
 **Plan.**
 
-- [ ] In `resource-emitter.ts`, for every primitive-typed property `foo`,
+- [x] In `resource-emitter.ts`, for every primitive-typed property `foo`,
       also emit `_foo?: Element` (or `Element[]` for repeating fields).
-- [ ] Same for the hand-written datatypes in `packages/types/src/datatypes.ts`.
-- [ ] Add a serializer helper `withPrimitiveExtensions()` that the runtime
+- [x] Same for the hand-written datatypes in `packages/types/src/datatypes.ts`.
+- [x] Add a serializer helper `withPrimitiveExtensions()` that the runtime
       uses for round-trip safety.
 
 **Exit criteria.** A US-Core Patient with `_birthDate.extension` parses,
@@ -118,9 +118,9 @@ type-checks, and re-serialises byte-identically.
 
 **Plan.**
 
-- [ ] Generate `Extension` from the spec catalog the generator already builds
+- [x] Generate `Extension` from the spec catalog the generator already builds
       (`packages/generator/src/spec/catalog.ts`).
-- [ ] Move `Extension` from `packages/types` (hand-written) into the
+- [x] Move `Extension` from `packages/types` (hand-written) into the
       generated layer; keep a thin re-export in `packages/types` for
       backwards compatibility.
 
@@ -144,13 +144,13 @@ sliced elements. Typed extensions and typed slices don't exist.
 
 **Plan.**
 
-- [ ] Parse `slicing.discriminator` (path/type/value).
-- [ ] Emit slice-named optional fields:
+- [x] Parse `slicing.discriminator` (path/type/value).
+- [x] Emit slice-named optional fields:
       `Observation.component_systolicBP?: Component`,
       `Patient.extension_usCoreRace?: Extension<UsCoreRace>`.
-- [ ] Generate a typed `slice()` accessor that walks the array by
+- [x] Generate a typed `slice()` accessor that walks the array by
       discriminator at runtime and returns the typed slice.
-- [ ] Cover all three discriminator types: `value`, `pattern`, `type`,
+- [x] Cover all three discriminator types: `value`, `pattern`, `type`,
       `profile`, `exists`. (Most US-Core uses `value` and `pattern`.)
 
 **Exit criteria.** A US-Core Observation Blood Pressure profile generates a
@@ -163,10 +163,10 @@ runtime accessor returns the right entry.
 
 **Plan.**
 
-- [ ] For every extension StructureDefinition in a loaded IG, emit a
+- [x] For every extension StructureDefinition in a loaded IG, emit a
       branded `Extension<"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race">`
       with the typed `value[x]` narrowed.
-- [ ] `extension(url)` in FHIRPath builder
+- [x] `extension(url)` in FHIRPath builder
       (`packages/fhirpath/src/builder.ts:234`) returns the branded type when
       the URL is a known constant.
 
@@ -182,13 +182,13 @@ profile bag.
 
 **Plan.**
 
-- [ ] Parse `ImplementationGuide.global[*]` → a map
+- [x] Parse `ImplementationGuide.global[*]` → a map
       `{ Patient: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" }`.
-- [ ] When `--ig us-core` is passed, default-narrow `Patient` etc. to that
+- [x] When `--ig us-core` is passed, default-narrow `Patient` etc. to that
       profile in the generated client.
-- [ ] Parse `ImplementationGuide.dependsOn[*]` and load transitive IGs
+- [x] Parse `ImplementationGuide.dependsOn[*]` and load transitive IGs
       (us-core depends on uv-sdc, etc.).
-- [ ] Surface IG metadata via `client.ig.us_core.version`.
+- [x] Surface IG metadata via `client.ig.us_core.version`.
 
 **Exit criteria.** `pnpm fhir-gen generate --version r4 --ig hl7.fhir.us.core@6.1.0`
 narrows `Patient` to `us-core-patient` by default, and pulls in dependencies
@@ -206,12 +206,12 @@ without an explicit list.
 
 **Plan.** Add a typed `client.terminology` namespace in `packages/core`:
 
-- [ ] `expand(valueSet, params)` → typed `ResolvedValueSet`.
-- [ ] `validateCode({ valueSet | codeSystem, code, system, display })`
+- [x] `expand(valueSet, params)` → typed `ResolvedValueSet`.
+- [x] `validateCode({ valueSet | codeSystem, code, system, display })`
       → typed result.
-- [ ] `lookup({ system, code, properties? })` → typed `Parameters` view.
-- [ ] `translate({ source, target, code })` → typed result.
-- [ ] `subsumes({ system, codeA, codeB })` → typed result.
+- [x] `lookup({ system, code, properties? })` → typed `Parameters` view.
+- [x] `translate({ source, target, code })` → typed result.
+- [x] `subsumes({ system, codeA, codeB })` → typed result.
 
 **Exit criteria.** Each operation has a typed builder + a typed result
 shape; integration tests against a public terminology server (e.g.,
@@ -226,11 +226,11 @@ shape; integration tests against a public terminology server (e.g.,
 
 **Plan.**
 
-- [ ] Extend `CodeSystemModel` to carry `parent`, `child`, `properties`,
+- [x] Extend `CodeSystemModel` to carry `parent`, `child`, `properties`,
       `designations`.
-- [ ] Add `is-a`, `descendent-of`, `regex` filter operators in
+- [x] Add `is-a`, `descendent-of`, `regex` filter operators in
       `packages/terminology/src/valueset-parser.ts`.
-- [ ] Implement `subsumes(systemUrl, a, b)` locally for resolved code
+- [x] Implement `subsumes(systemUrl, a, b)` locally for resolved code
       systems.
 
 **Exit criteria.** US-Core ValueSets that use `is-a` filters resolve
@@ -250,16 +250,16 @@ the CodeSystem is loaded.
 
 **Plan.**
 
-- [ ] `FhirClient.fromCapabilities(stmt | url)` returns a narrowed client:
+- [x] `FhirClient.fromCapabilities(stmt | url)` returns a narrowed client:
   - disable interactions the server doesn't advertise (e.g., no PATCH on
     `Observation`).
   - narrow per-resource search-param maps to advertised params.
   - prefer profiles listed in `rest.resource[*].supportedProfile`.
   - honor `rest.resource[*].versioning`, `readHistory`, `updateCreate`,
     `conditionalRead`, `conditionalUpdate`, `conditionalDelete` flags.
-- [ ] Emit a developer-time warning when calling a disabled interaction
+- [x] Emit a developer-time warning when calling a disabled interaction
       from a generated client.
-- [ ] CLI: `fhir-gen capability <baseUrl> --out <dir>` snapshots the
+- [x] CLI: `fhir-gen capability <baseUrl> --out <dir>` snapshots the
       server's CapabilityStatement and emits a typed client config.
 
 **Exit criteria.** Pointing the client at a server that doesn't support
@@ -275,15 +275,15 @@ exists at `packages/fhirpath/src/builder.ts:51`.
 
 **Plan.**
 
-- [ ] Add `resolveReference(bundle, ref)` in
+- [x] Add `resolveReference(bundle, ref)` in
       `packages/runtime/src/bundle.ts`. Walks `entry.fullUrl` first, then
       `entry.resource.id` + `resourceType` to match relative refs.
-- [ ] `searchAll()` returns a `ResolvedBundle<T>` with a `.deref(ref)`
+- [x] `searchAll()` returns a `ResolvedBundle<T>` with a `.deref(ref)`
       method that returns a typed resource.
-- [ ] FHIRPath `resolve()` op (`fhirpath/src/builder.ts:51`) routes
+- [x] FHIRPath `resolve()` op (`fhirpath/src/builder.ts:51`) routes
       through the same resolver when an evaluation context Bundle is
       provided.
-- [ ] Detect contained resources (`DomainResource.contained`) for `#id`
+- [x] Detect contained resources (`DomainResource.contained`) for `#id`
       refs.
 
 **Exit criteria.** `client.search("Observation").include("subject").resolve()`
@@ -302,15 +302,15 @@ zero representation. The "reference upward only" rule is unenforceable.
 
 **Plan.**
 
-- [ ] Extend `ResourceModel` with a `layer` field
+- [x] Extend `ResourceModel` with a `layer` field
       (`Foundation | Base | Clinical | Financial | Specialized`),
       populated from the FHIR spec's resource categorisation table.
-- [ ] Emit a `LAYER_OF: Record<ResourceType, Layer>` map and a typed
+- [x] Emit a `LAYER_OF: Record<ResourceType, Layer>` map and a typed
       `referencesUpwardOf(rt)` helper.
-- [ ] Optional ESLint rule (or a `tsc`-time check) that flags a
+- [x] Optional ESLint rule (or a `tsc`-time check) that flags a
       generated `Reference<TARGET>` whose `TARGET` is in a strictly lower
       layer than the source. Off by default; users opt in.
-- [ ] Emit `compartment` membership too (a Patient / Encounter /
+- [x] Emit `compartment` membership too (a Patient / Encounter /
       RelatedPerson / Practitioner / Device compartment map). Useful for
       authorization scoping.
 
@@ -353,12 +353,12 @@ plumbing.
 
 **Plan.**
 
-- [ ] `fhir-gen validate <file> [--profile <url>] [--ig <pkg>]`
+- [x] `fhir-gen validate <file> [--profile <url>] [--ig <pkg>]`
       validates a JSON resource against generated types + invariants.
-- [ ] `fhir-gen capability <baseUrl>` (see 4.1).
-- [ ] `fhir-gen scaffold-ig <pkg>` initialises a project with the IG
+- [x] `fhir-gen capability <baseUrl>` (see 4.1).
+- [x] `fhir-gen scaffold-ig <pkg>` initialises a project with the IG
       pre-wired and a working `client.ts`.
-- [ ] `fhir-gen diff <oldVersion> <newVersion>` highlights breaking
+- [x] `fhir-gen diff <oldVersion> <newVersion>` highlights breaking
       changes between two FHIR versions or two IG versions (uses the
       generator's intermediate model).
 
@@ -398,67 +398,67 @@ isn't ready.
 
 ### 8.1 Package skeleton
 
-- [ ] New `packages/mcp/` workspace, depends on `core`, `runtime`,
+- [x] New `packages/mcp/` workspace, depends on `core`, `runtime`,
       `smart`, and `@modelcontextprotocol/sdk`.
-- [ ] Exports: `createMcpServer({ client, auth, audit, writes,
+- [x] Exports: `createMcpServer({ client, auth, audit, writes,
       transport })`, `AuthStrategy`, `AuditSink`, `Transport`.
-- [ ] Server boot supports `transport: "stdio" | "http"` (Streamable
+- [x] Server boot supports `transport: "stdio" | "http"` (Streamable
       HTTP per the SDK), with `http` accepting host/port/cors options.
-- [ ] No FHIR types live in this package — they're imported from the
+- [x] No FHIR types live in this package — they're imported from the
       generator output the consumer wires in.
 
 ### 8.2 Generic verb tools
 
 Tool catalog (all schemas are discriminated unions over `resourceType`):
 
-- [ ] `fhir_search` — typed search params per resource.
-- [ ] `fhir_read` — `{ resourceType, id }`.
-- [ ] `fhir_vread` — `{ resourceType, id, vid }`.
-- [ ] `fhir_history` — system / type / instance variants.
-- [ ] `fhir_capability` — server CapabilityStatement (typed).
-- [ ] `fhir_operation` — typed operations (`$everything`, etc.) by
+- [x] `fhir_search` — typed search params per resource.
+- [x] `fhir_read` — `{ resourceType, id }`.
+- [x] `fhir_vread` — `{ resourceType, id, vid }`.
+- [x] `fhir_history` — system / type / instance variants.
+- [x] `fhir_capability` — server CapabilityStatement (typed).
+- [x] `fhir_operation` — typed operations (`$everything`, etc.) by
       `(resourceType?, opName)`.
-- [ ] `fhir_terminology_expand`, `fhir_terminology_validate_code`,
+- [x] `fhir_terminology_expand`, `fhir_terminology_validate_code`,
       `fhir_terminology_lookup`, `fhir_terminology_translate`,
       `fhir_terminology_subsumes` — first-class tools (Phase 3).
-- [ ] **Write tools, gated by `--writes`:** `fhir_create`,
+- [x] **Write tools, gated by `--writes`:** `fhir_create`,
       `fhir_update` (requires `If-Match`), `fhir_patch`,
       `fhir_delete` (requires `If-Match`).
-- [ ] Generator emits the discriminated-union schemas into
+- [x] Generator emits the discriminated-union schemas into
       `<out>/mcp/schemas.ts`; runtime imports them.
 
 ### 8.3 MCP resources
 
-- [ ] URI template `fhir://{resourceType}/{id}` → `client.read(...)`.
-- [ ] URI template `fhir://{resourceType}/{id}/_history/{vid}` →
+- [x] URI template `fhir://{resourceType}/{id}` → `client.read(...)`.
+- [x] URI template `fhir://{resourceType}/{id}/_history/{vid}` →
       `vread`.
-- [ ] Fixed `fhir://capability` → CapabilityStatement.
-- [ ] Fixed `fhir://terminology/ValueSet/{id}/expand` → expansion.
-- [ ] Resource list endpoint advertises only the fixed URIs; templates
+- [x] Fixed `fhir://capability` → CapabilityStatement.
+- [x] Fixed `fhir://terminology/ValueSet/{id}/expand` → expansion.
+- [x] Resource list endpoint advertises only the fixed URIs; templates
       are discoverable via the SDK's templated-URI mechanism.
 
 ### 8.4 Pluggable auth
 
-- [ ] `AuthStrategy` interface: `getToken(req): Promise<string |
+- [x] `AuthStrategy` interface: `getToken(req): Promise<string |
       undefined>`, `onUnauthorized(res): Promise<void>`.
-- [ ] `BackendServicesStrategy` — wraps `packages/smart`'s JWT
+- [x] `BackendServicesStrategy` — wraps `packages/smart`'s JWT
       flow + token cache.
-- [ ] `PatientLaunchStrategy` — accepts a SMART launch context;
+- [x] `PatientLaunchStrategy` — accepts a SMART launch context;
       injects launch patient as compartment scope (depends on Phase 5
       compartment metadata for the auto-scoping).
-- [ ] `BearerStrategy` — static token from env/config; for dev/CTF.
-- [ ] `compose(...strategies)` helper that tries each in order.
+- [x] `BearerStrategy` — static token from env/config; for dev/CTF.
+- [x] `compose(...strategies)` helper that tries each in order.
 
 ### 8.5 Write gating + safety
 
-- [ ] CLI flag `--writes none|create|create,update|all` (default
+- [x] CLI flag `--writes none|create|create,update|all` (default
       `none`).
-- [ ] When `update`/`delete`/`patch` is enabled, the tool schema
+- [x] When `update`/`delete`/`patch` is enabled, the tool schema
       *requires* an `ifMatch` field; runtime rejects calls without it.
-- [ ] When `PatientLaunchStrategy` is active, every tool input is
+- [x] When `PatientLaunchStrategy` is active, every tool input is
       validated against the launch patient's compartment; cross-patient
       writes are rejected at the MCP layer before hitting the upstream.
-- [ ] Per-tool deny-list flag `--deny <tool,tool>` for surgical
+- [x] Per-tool deny-list flag `--deny <tool,tool>` for surgical
       lockdown.
 
 ### 8.6 Audit sink
@@ -475,34 +475,34 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 
 ### 8.7 Token economy defaults
 
-- [ ] `fhir_search` defaults: `_summary=true`, `_count=20`,
+- [x] `fhir_search` defaults: `_summary=true`, `_count=20`,
       hard cap `_count <= 100`.
-- [ ] Per-resource `_elements` whitelist generated from common-fields
+- [x] Per-resource `_elements` whitelist generated from common-fields
       heuristics (configurable per server).
-- [ ] Pagination is transparent to the LLM: tool walks up to N pages
+- [x] Pagination is transparent to the LLM: tool walks up to N pages
       (default 5) and returns a single concatenated bundle plus a
       `truncated` flag — no opaque cursor handed to the model.
-- [ ] Strip `Resource.text.div` from responses by default; `--keep-text`
+- [x] Strip `Resource.text.div` from responses by default; `--keep-text`
       flag re-enables.
 
 ### 8.8 Generator integration
 
-- [ ] `fhir-gen generate --mcp <out>` emits, alongside the typed
+- [x] `fhir-gen generate --mcp <out>` emits, alongside the typed
       client: `<out>/mcp/schemas.ts`, `<out>/mcp/tools.ts`,
       `<out>/mcp/resources.ts`, `<out>/mcp/server.ts`.
-- [ ] `<out>/mcp/server.ts` is a runnable entrypoint: imports the
+- [x] `<out>/mcp/server.ts` is a runnable entrypoint: imports the
       generated client, default auth/audit, reads env for upstream URL +
       bearer.
-- [ ] When invoked with `--ig hl7.fhir.us.core@6.1.0`, the emitted
+- [x] When invoked with `--ig hl7.fhir.us.core@6.1.0`, the emitted
       schemas reflect us-core profiles (Patient body type =
       us-core-patient).
 
 ### 8.9 CLI ergonomics
 
-- [ ] `fhir-gen mcp serve --base <url> [--ig <pkg>] [--writes <list>]
+- [x] `fhir-gen mcp serve --base <url> [--ig <pkg>] [--writes <list>]
       [--transport stdio|http] [--port N]` — boots a server using a
       cached generated tree, no separate generate step needed.
-- [ ] `fhir-gen mcp inspect --base <url>` — connects to an upstream's
+- [x] `fhir-gen mcp inspect --base <url>` — connects to an upstream's
       `/metadata` and prints the tool surface that *would* be generated
       (CapabilityStatement-driven preview).
 
