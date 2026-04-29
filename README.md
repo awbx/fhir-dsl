@@ -226,7 +226,8 @@ fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.
 | MCP server generation — auth strategies | ✅ | Bearer / backend-services (signed JWT via SMART v2) / patient-launch (refresh-token flow), all lazy-loaded (Phase 8.4, v0.48.0). |
 | MCP server generation — write gating + token economy | ✅ | Per-resource-type allowlists, dryRun, confirmWrites, default `_count`/`_summary`, response-byte cap (Phases 8.5+8.7, v0.44.0+v0.45.0). |
 | MCP server generation — generator + CLI integration | ✅ | `fhir-gen generate --mcp <out>` emits a server scaffold; `fhir-gen mcp <baseUrl>` launches one inline (Phases 8.8+8.9, v0.46.0+v0.47.0). |
-| Phase 6 follow-up — invariants in emitted validators | ❌ | Compile generator-time invariants into the emitted Standard Schema validators. |
+| MCP server generation — streamable HTTP transport | ✅ | `httpTransport()` accepts JSON-RPC over POST with optional CORS, auth hook, body cap, and external-server mounting (Phase 8 streamable HTTP, v0.50.0). |
+| Phase 6 follow-up — invariants in emitted validators | ✅ | `--validator` automatically wires `validateInvariants` via `s.refine` (native) / `.superRefine` (zod); opt out with `--no-invariants` (v0.49.0). |
 
 Drift between this table and the code is caught by `pnpm audit:export-surface` — every PR that changes the public surface must refresh `.surface-snapshot.json`.
 
@@ -292,7 +293,7 @@ const result = inv.check(patient);            // { passed: true | false | "indet
 const oo = validateInvariants(patient, [inv]); // { resourceType: "OperationOutcome", issue: [...] }
 ```
 
-Generator wiring (so the emitted Standard Schema validators run invariants automatically) is a follow-up phase.
+Generator wiring is automatic when `--validator` is used: every emitted resource and backbone schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds. Opt out with `fhir-gen generate --validator native --no-invariants`. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency. (Phase 6 follow-up, v0.49.0.)
 
 ## MCP Server (Model Context Protocol)
 
@@ -314,6 +315,20 @@ const server = createServer({
 await server.listen(stdioTransport());
 ```
 
+Or expose the same server over HTTP for hosted deployments:
+
+```ts
+import { createServer, httpTransport } from "@fhir-dsl/mcp";
+
+const transport = httpTransport({
+  port: 8080,
+  cors: true,
+  authenticate: (req) => req.headers.authorization === `Bearer ${process.env.MCP_TOKEN}`,
+});
+await server.listen(transport);
+console.log(`MCP listening on ${transport.url()}`);
+```
+
 Capabilities:
 
 - **~10 generic verbs** typed by `resourceType` discriminated union: `read`, `vread`, `search`, `history`, `create`, `update`, `patch`, `delete`, `operation`, `capabilities`
@@ -322,7 +337,7 @@ Capabilities:
 - **Pluggable `AuditSink`** — `JsonLogAuditSink`, `MemoryAuditSink`, `NullAuditSink` ship by default
 - **Token economy guards** — `defaultSearchCount` (default 20), `defaultReadSummary`, and a `maxResponseBytes` cap (default 64KB) that swaps oversize bodies for a `too-costly` OperationOutcome (the audit retains the original)
 - **MCP resources** — `fhir://<ResourceType>/{id}` URIs read via `resources/read` (and `_history/<versionId>` for vread)
-- **Stdio transport today**; Streamable HTTP is planned
+- **Two transports** — `stdioTransport()` for CLI MCP clients, `httpTransport()` for hosted deployments (POST JSON-RPC; optional CORS, auth hook, body cap; mounts onto a caller-owned `http.Server` if you already have one)
 
 ### Generate a server alongside the typed client
 

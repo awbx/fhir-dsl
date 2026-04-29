@@ -76,6 +76,21 @@ Bindings on `Coding` and `CodeableConcept` emit inline objects that narrow the `
 
 `minItems: 1` is enforced for required arrays. Required scalar fields fail validation when missing.
 
+### FHIRPath invariants
+
+Every `ElementDefinition.constraint[*]` from the spec or your IG -- root-level (`dom-3`, `dom-6`, etc.) and backbone-level (`pat-1` on `Patient.contact`, `obs-7` on `Observation`, ...) -- is wired into the emitted schema automatically. Each schema with constraints is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` from `@fhir-dsl/fhirpath` after structural validation succeeds. Errors surface as Standard Schema issues; `severity: "warning"` constraints are filtered out so they don't fail validation but remain reported by `validateInvariants` directly.
+
+```ts
+// A Patient.contact with no name/telecom/address/organization fails pat-1.
+const result = await PatientSchema["~standard"].validate({
+  resourceType: "Patient",
+  contact: [{}], // <-- violates pat-1
+});
+// result.issues[0].message → "pat-1: SHALL at least contain a contact's details ..."
+```
+
+Generated projects need `@fhir-dsl/fhirpath` as a runtime dep. Opt out with `fhir-gen generate --validator native --no-invariants` if you don't want the dependency.
+
 ### Profiles
 
 When you pass `--ig hl7.fhir.us.core@6.1.0` alongside `--validator`, the generator also emits `schemas/profiles/<slug>.schema.ts`, one per profile, each extending the base resource schema with the profile's tighter cardinality and bindings.

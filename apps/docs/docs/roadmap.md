@@ -6,33 +6,42 @@ sidebar_label: Roadmap
 
 # Roadmap
 
-Upcoming features on the fhir-dsl roadmap. Items land in approximate priority
-order; nothing here is guaranteed until it ships.
+The 0.x line is feature-complete against the original FHIR-compliance plan — every Phase 0–8 row is shipped as of v0.50.0. The next milestone is **v1.0.0**, which is framed as a stability commitment (API freeze + semver discipline) rather than a feature ship.
 
-## FHIR Operations
+The full plan lives in [`V1_PLAN.md`](https://github.com/awbx/fhir-dsl/blob/main/V1_PLAN.md). Highlights below.
 
-- **`$everything`** — Patient/Encounter everything operations
-- **`$validate`** — Resource validation against profiles
-- **Custom operations** — Type-safe builder for arbitrary FHIR operations
+## Towards v1.0.0
 
-## Developer Experience
+### Cleanups landing before the freeze
 
-- **Middleware/interceptors** — Hook into request/response pipeline for logging, retries, metrics
-- **History** — Resource and type-level history queries
-- **Capabilities** — Typed access to CapabilityStatement for feature detection
+- **Streamable HTTP — finish the spec.** Today's `httpTransport()` only handles POST → single JSON response. SSE on GET (for server-initiated notifications), `text/event-stream` responses, and batched JSON-RPC arrays land before v1 so the framing isn't observable later.
+- **Per-property invariants.** Phase 6 follow-up (v0.49.0) wires invariants on root + backbone elements; deeper-level constraints flow into the same `s.refine()` machinery.
 
-## Code Generation
+### Borrowing from the atomic-ehr ecosystem
 
-- **Watch mode** — Re-generate types when StructureDefinitions change
-- **Custom profiles** — Generate types from your own StructureDefinitions
-- **Incremental generation** — Only regenerate changed resources
-- **Extension support** — First-class typed extensions
+- **UCUM integration** — `@atomic-ehr/ucum` plugged into FHIRPath quantity arithmetic and the `code-value-quantity` composite-search normalizer. Closes a real correctness gap (`5 'kg'` vs `5000 'g'` are silently unequal today).
+- **`@atomic-ehr/fhir-canonical-manager`** — replaces the generator's roll-your-own tgz/registry handling.
 
-## Ecosystem
+### One open feature ask
 
-- **React hooks** — `useFhirSearch`, `useFhirRead` for React applications
-- **Adapter packages** — Pre-built adapters for popular FHIR servers (HAPI, Azure Health Data Services, Google Cloud Healthcare API)
+- **FHIRPath `setValue()` / `createPatch()`** ([#50](https://github.com/awbx/fhir-dsl/issues/50)) — write through a typed FHIRPath builder back to a resource (or emit a JSON Patch), creating intermediate nodes per `where()` predicates.
+
+### Stability scaffolding
+
+- Deprecation pass with `@deprecated` tags + console warnings.
+- Performance baseline (generator <30s on R4 + US Core; 1k-resource Bundle <100ms parse+validate; FHIRPath 10k iters <500ms).
+- Documentation parity between README, generated TSDoc, and this docs site.
+- Hand-written v1.0.0 changelog entry.
+
+## Out of scope for v1, in scope for v2
+
+Documented up front so they don't bleed scope:
+
+- **React adapter** (`@fhir-dsl/react`). Useful, but the query builder API must freeze first.
+- **Server adapter packages** for HAPI, Azure Health Data Services, Google Cloud Healthcare API. Same reason.
+- **Generator watch / incremental modes**. Convenient, not a stability blocker.
+- **Middleware/interceptor pipeline** on the runtime executor. Real feature, but adding it changes the request flow — better as a v2 design pass than a pre-freeze rush.
 
 ## Community
 
-Suggestions, feature requests, and contributions are welcome. Open an issue on GitHub to propose new features or discuss architectural changes.
+Suggestions, feature requests, and bug reports are welcome. Open an issue on GitHub to propose new features or discuss architectural changes.

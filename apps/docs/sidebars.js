@@ -47,6 +47,7 @@ const sidebars = {
         'guides/terminology',
         'guides/validation',
         'guides/smart',
+        'guides/mcp',
         'guides/fhirpath-and-queries',
       ],
     },
