@@ -264,6 +264,93 @@ describe("emitResourceSchema (native adapter)", () => {
   });
 });
 
+describe("emitResourceSchema invariants", () => {
+  function patientWithInvariants(): ResourceModel {
+    return {
+      name: "Patient",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [],
+      backboneElements: [
+        {
+          name: "PatientContact",
+          path: "Patient.contact",
+          properties: [
+            {
+              name: "name",
+              types: [{ code: "HumanName" }],
+              isRequired: false,
+              isArray: false,
+              isChoiceType: false,
+            },
+          ],
+          invariants: [
+            {
+              key: "pat-1",
+              severity: "error",
+              human: "SHALL at least contain a contact's details or a reference to an organization",
+              expression: "name.exists() or telecom.exists() or address.exists() or organization.exists()",
+            },
+          ],
+        },
+      ],
+      invariants: [
+        {
+          key: "test-root",
+          severity: "warning",
+          human: "root warning",
+          expression: "true",
+        },
+      ],
+    };
+  }
+
+  it("emits s.refine wrapping objects that have invariants", () => {
+    const out = emitResourceSchema(patientWithInvariants(), nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(["HumanName"]),
+    });
+    expect(out).toContain('import { validateInvariants } from "@fhir-dsl/fhirpath";');
+    expect(out).toContain("s.refine(");
+    expect(out).toContain('key: "pat-1"');
+    expect(out).toContain('severity: "error"');
+    expect(out).toContain(
+      'expression: "name.exists() or telecom.exists() or address.exists() or organization.exists()"',
+    );
+    // Root-level warning invariant is emitted alongside the main schema.
+    expect(out).toContain('key: "test-root"');
+  });
+
+  it("does NOT add invariant import when no invariants present", () => {
+    const plain: ResourceModel = {
+      name: "Plain",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [],
+      backboneElements: [],
+    };
+    const out = emitResourceSchema(plain, nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(),
+    });
+    expect(out).not.toContain("validateInvariants");
+    expect(out).not.toContain("s.refine");
+  });
+
+  it("invariants: false opt-out strips constraints from emitted output", () => {
+    const out = emitResourceSchema(patientWithInvariants(), nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(["HumanName"]),
+      invariants: false,
+    });
+    expect(out).not.toContain("validateInvariants");
+    expect(out).not.toContain("s.refine");
+    expect(out).not.toContain("pat-1");
+  });
+});
+
 describe("emitDatatypeSchemas", () => {
   it("wraps cross-type references in s.lazy to tolerate declaration order", () => {
     const humanName: ResourceModel = {

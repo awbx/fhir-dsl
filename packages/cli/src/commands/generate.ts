@@ -15,6 +15,10 @@ export const generateCommand = new Command("generate")
   .option("--include-spec", "Emit markdown spec files alongside types for AI/LLM context")
   .option("--validator <target>", "Emit Standard Schema validators using: zod | native")
   .option("--strict-extensible", "Treat extensible bindings as closed enums in validators")
+  .option(
+    "--no-invariants",
+    "Skip FHIRPath invariants (ElementDefinition.constraint[*]) in emitted validators (default: included)",
+  )
   .option("--mcp <dir>", "Emit an MCP server scaffold (server.ts + mcp.config.json) into this directory")
   .action(async (opts) => {
     const resources = opts.resources ? opts.resources.split(",").map((r: string) => r.trim()) : undefined;
@@ -36,6 +40,7 @@ export const generateCommand = new Command("generate")
       includeSpec: opts.includeSpec,
       validator,
       strictExtensible: opts.strictExtensible,
+      invariants: opts.invariants,
       mcpOutDir: opts.mcp ? resolve(opts.mcp) : undefined,
     });
   });

@@ -1,4 +1,4 @@
-import type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
+import type { InvariantNode, ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
 import { FHIR_PRIMITIVE_RULES, type PrimitiveRules, regexLiteral } from "./primitive-rules.js";
 
 const INDENT = "  ";
@@ -55,9 +55,38 @@ function renderNode(node: SchemaNode, indent: number, rules: PrimitiveRules): st
       const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1, rules)}`).join(",\n");
       return `z.union([\n${parts},\n${close}])`;
     }
-    case "object":
-      return renderObject(node.fields, indent, rules);
+    case "object": {
+      const obj = renderObject(node.fields, indent, rules);
+      return node.invariants?.length ? wrapWithInvariants(obj, node.invariants, indent) : obj;
+    }
   }
+}
+
+function wrapWithInvariants(objectExpr: string, invariants: readonly InvariantNode[], indent: number): string {
+  const pad = INDENT.repeat(indent + 1);
+  const close = INDENT.repeat(indent);
+  const innerPad = INDENT.repeat(indent + 2);
+  const literal = renderInvariantsLiteral(invariants, indent + 1);
+  return [
+    `${objectExpr}.superRefine((value, ctx) => {`,
+    `${pad}const oo = validateInvariants(value, ${literal});`,
+    `${pad}for (const issue of oo.issue) {`,
+    `${innerPad}if (issue.severity === "error") {`,
+    `${innerPad}${INDENT}ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue.diagnostics });`,
+    `${innerPad}}`,
+    `${pad}}`,
+    `${close}})`,
+  ].join("\n");
+}
+
+function renderInvariantsLiteral(invariants: readonly InvariantNode[], indent: number): string {
+  const pad = INDENT.repeat(indent + 1);
+  const close = INDENT.repeat(indent);
+  const lines = invariants.map(
+    (i) =>
+      `${pad}{ key: ${JSON.stringify(i.key)}, severity: ${JSON.stringify(i.severity)}, expression: ${JSON.stringify(i.expression)}, human: ${JSON.stringify(i.human)} }`,
+  );
+  return `[\n${lines.join(",\n")},\n${close}]`;
 }
 
 function renderObject(fields: ObjectField[], indent: number, rules: PrimitiveRules): string {

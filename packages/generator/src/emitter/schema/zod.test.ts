@@ -87,6 +87,25 @@ describe("zodAdapter", () => {
     expect(out).toMatch(/^export const PatientSchema = z\.object/);
   });
 
+  it("emits .superRefine wrapper for objects with invariants", () => {
+    const out = zodAdapter.render({
+      kind: "object",
+      fields: [{ name: "name", schema: { kind: "primitive", fhirType: "string" }, optional: true }],
+      invariants: [
+        {
+          key: "pat-1",
+          severity: "error",
+          human: "SHALL at least contain a contact's details",
+          expression: "name.exists() or telecom.exists()",
+        },
+      ],
+    });
+    expect(out).toContain(".superRefine((value, ctx) =>");
+    expect(out).toContain("validateInvariants(value,");
+    expect(out).toContain('key: "pat-1"');
+    expect(out).toContain("z.ZodIssueCode.custom");
+  });
+
   it("declareExtend uses .extend({shape})", () => {
     const out = zodAdapter.declareExtend("USCorePatientSchema", "PatientSchema", [
       {

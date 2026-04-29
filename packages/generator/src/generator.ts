@@ -81,6 +81,14 @@ export interface GeneratorOptions {
   /** Treat extensible bindings as closed enums in validators (default: open). */
   strictExtensible?: boolean | undefined;
   /**
+   * Phase 6 follow-up — when emitting validators, also wire compiled FHIRPath
+   * invariants from `ElementDefinition.constraint[*]` into the schemas via a
+   * `.refine()` / `.superRefine()` pass. Adds `@fhir-dsl/fhirpath` as a
+   * runtime dependency of the generated project. Default: `true` whenever
+   * `validator` is set; pass `invariants: false` to skip.
+   */
+  invariants?: boolean | undefined;
+  /**
    * Phase 8.8 — when set, emit an MCP server scaffold under this directory
    * containing `mcp.config.json` (resource list, IG reference) and a
    * `server.ts` shim that calls `@fhir-dsl/mcp`'s `createServer`. The
@@ -247,6 +255,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       mapper,
       bindingTypeMap,
       strictExtensible: options.strictExtensible,
+      invariants: options.invariants,
     });
     await writeFile(join(schemasDir, "datatypes.ts"), datatypeSource, "utf-8");
     const datatypeNames = new Set(complexTypeModels.map((m) => m.name));
@@ -259,6 +268,7 @@ export async function generate(options: GeneratorOptions): Promise<void> {
         bindingTypeMap,
         importedDatatypes: datatypeNames,
         strictExtensible: options.strictExtensible,
+        invariants: options.invariants,
       });
       await writeFile(join(schemaResourcesDir, fileName), content, "utf-8");
     }
@@ -272,6 +282,11 @@ export async function generate(options: GeneratorOptions): Promise<void> {
     await writeFile(join(schemasDir, "index.ts"), emitSchemaRootIndex(hasTerminology, false), "utf-8");
 
     console.info(`Generated validator schemas (${adapter.name}) for ${resourceModels.length} resources`);
+    if (options.invariants !== false) {
+      console.info(
+        "Validators include FHIRPath invariants — generated project must depend on @fhir-dsl/fhirpath. Pass --no-invariants to skip.",
+      );
+    }
   }
 
   // Build search param binding map from resource properties with bindings

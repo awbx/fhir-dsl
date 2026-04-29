@@ -22,12 +22,26 @@ export interface ResourceModel {
   properties: PropertyModel[];
   backboneElements: BackboneElementModel[];
   description?: string | undefined;
+  /** ElementDefinition.constraint[*] from the root element. */
+  invariants?: InvariantModel[] | undefined;
 }
 
 export interface BackboneElementModel {
   name: string;
   path: string;
   properties: PropertyModel[];
+  /** ElementDefinition.constraint[*] from the backbone's root element. */
+  invariants?: InvariantModel[] | undefined;
+}
+
+export interface InvariantModel {
+  /** ElementDefinition.constraint.key (e.g. `pat-1`). */
+  key: string;
+  severity: "error" | "warning";
+  /** Human-readable description used as OperationOutcome diagnostics. */
+  human: string;
+  /** FHIRPath expression — must yield boolean. */
+  expression: string;
 }
 
 export interface CompositeComponent {

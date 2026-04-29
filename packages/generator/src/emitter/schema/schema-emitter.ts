@@ -1,8 +1,8 @@
 import { toKebabCase } from "@fhir-dsl/utils";
-import type { PropertyModel, ResourceModel, TypeRef } from "../../model/resource-model.js";
+import type { InvariantModel, PropertyModel, ResourceModel, TypeRef } from "../../model/resource-model.js";
 import type { TypeMapper } from "../../spec/type-mapping.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
-import type { ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
+import type { InvariantNode, ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
 
 const BINDABLE_TYPES = new Set(["code", "Coding", "CodeableConcept"]);
 
@@ -17,10 +17,14 @@ interface EmitContext {
   /** Names of backbone schemas declared earlier in the same file. No lazy needed. */
   localBackbones: ReadonlySet<string>;
   strictExtensible?: boolean | undefined;
+  /** When false, drop ElementDefinition.constraint[*] invariants from emitted schemas. */
+  emitInvariants: boolean;
   /** Mutated: names this file imports from ../datatypes.js. */
   datatypeImports: Set<string>;
   /** Mutated: names this file imports from ../terminology.js (no Schema suffix). */
   terminologyImports: Set<string>;
+  /** Mutated: set when any schema in this file uses invariants and needs the FHIRPath import. */
+  needsInvariantImport: { value: boolean };
 }
 
 function resolveBindingName(valueSet: string, map: BindingTypeMap): string | undefined {
@@ -136,6 +140,17 @@ function propertiesToFields(properties: PropertyModel[], ctx: EmitContext): Obje
   }));
 }
 
+function toInvariantNodes(invariants: InvariantModel[] | undefined, ctx: EmitContext): InvariantNode[] | undefined {
+  if (!ctx.emitInvariants || !invariants?.length) return undefined;
+  ctx.needsInvariantImport.value = true;
+  return invariants.map((i) => ({
+    key: i.key,
+    severity: i.severity,
+    human: i.human,
+    expression: i.expression,
+  }));
+}
+
 export interface EmitOptions {
   bindingTypeMap?: BindingTypeMap | undefined;
   /** Names of datatypes available in ../datatypes.js (imported). */
@@ -144,6 +159,8 @@ export interface EmitOptions {
   /** Relative path from the emitted file to the native runtime helper. */
   runtimePath?: string | undefined;
   mapper: TypeMapper;
+  /** When false, drop ElementDefinition.constraint[*] invariants from schemas. Default: true. */
+  invariants?: boolean | undefined;
 }
 
 export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapter, options: EmitOptions): string {
@@ -155,14 +172,22 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
     importedDatatypes: options.importedDatatypes,
     localBackbones: new Set(model.backboneElements.map((bb) => bb.name)),
     strictExtensible: options.strictExtensible,
+    emitInvariants: options.invariants !== false,
     datatypeImports: new Set(),
     terminologyImports: new Set(),
+    needsInvariantImport: { value: false },
   };
 
   const body: string[] = [];
   for (const bb of model.backboneElements) {
     const fields = propertiesToFields(bb.properties, ctx);
-    body.push(adapter.declareConst(`${bb.name}Schema`, { kind: "object", fields }));
+    body.push(
+      adapter.declareConst(`${bb.name}Schema`, {
+        kind: "object",
+        fields,
+        invariants: toInvariantNodes(bb.invariants, ctx),
+      }),
+    );
     body.push("");
   }
 
@@ -171,9 +196,18 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
     mainFields.push({ name: "resourceType", schema: { kind: "literal", value: model.name }, optional: false });
   }
   mainFields.push(...propertiesToFields(model.properties, ctx));
-  body.push(adapter.declareConst(`${model.name}Schema`, { kind: "object", fields: mainFields }));
+  body.push(
+    adapter.declareConst(`${model.name}Schema`, {
+      kind: "object",
+      fields: mainFields,
+      invariants: toInvariantNodes(model.invariants, ctx),
+    }),
+  );
 
   const header: string[] = [adapter.libImport({ runtimePath: options.runtimePath ?? "../__runtime.js" })];
+  if (ctx.needsInvariantImport.value) {
+    header.push('import { validateInvariants } from "@fhir-dsl/fhirpath";');
+  }
   if (ctx.datatypeImports.size > 0) {
     const names = [...ctx.datatypeImports].sort().map((n) => `${n}Schema`);
     header.push(`import { ${names.join(", ")} } from "../datatypes.js";`);
@@ -206,8 +240,10 @@ export function emitDatatypeSchemas(
     importedDatatypes: new Set(),
     localBackbones: new Set(),
     strictExtensible: options.strictExtensible,
+    emitInvariants: options.invariants !== false,
     datatypeImports: new Set(),
     terminologyImports: new Set(),
+    needsInvariantImport: { value: false },
   };
 
   const runtimePath = options.runtimePath ?? "./__runtime.js";
@@ -220,19 +256,22 @@ export function emitDatatypeSchemas(
     ctx.localBackbones = new Set(model.backboneElements.map((bb) => bb.name));
     for (const bb of model.backboneElements) {
       const fields = propertiesToFields(bb.properties, ctx);
-      const bbNode: SchemaNode = { kind: "object", fields };
+      const bbNode: SchemaNode = { kind: "object", fields, invariants: toInvariantNodes(bb.invariants, ctx) };
       body.push(renderDatatypeConst(adapter, `${bb.name}Schema`, bbNode, annotation?.annotation));
       body.push("");
     }
     // Datatype main schema — fields use lazy() for cross-datatype refs (handled by makeRef).
     const fields = propertiesToFields(model.properties, ctx);
-    const mainNode: SchemaNode = { kind: "object", fields };
+    const mainNode: SchemaNode = { kind: "object", fields, invariants: toInvariantNodes(model.invariants, ctx) };
     body.push(renderDatatypeConst(adapter, `${model.name}Schema`, mainNode, annotation?.annotation));
     body.push("");
   }
   ctx.localBackbones = new Set();
 
   const header: string[] = [adapter.libImport({ runtimePath })];
+  if (ctx.needsInvariantImport.value) {
+    header.push('import { validateInvariants } from "@fhir-dsl/fhirpath";');
+  }
   if (annotation?.importStatement) {
     header.push(annotation.importStatement);
   }

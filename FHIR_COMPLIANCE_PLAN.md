@@ -328,14 +328,14 @@ ignored.
 
 **Plan.**
 
-- [ ] During generation, parse `constraint[*]` (`key`, `severity`,
+- [x] During generation, parse `constraint[*]` (`key`, `severity`,
       `expression`, `human`).
-- [ ] Compile each FHIRPath expression with the existing builder
+- [x] Compile each FHIRPath expression with the existing builder
       (`packages/fhirpath`) into a runtime predicate.
-- [ ] Wire predicates into the optional Standard Schema validators
+- [x] Wire predicates into the optional Standard Schema validators
       (`packages/generator/src/emitter/schema/`) — both `zod` and
       `native` paths.
-- [ ] Surface invariant violations as `OperationOutcome` shapes with
+- [x] Surface invariant violations as `OperationOutcome` shapes with
       `severity` mapped from constraint severity.
 
 **Exit criteria.** A Patient with `birthDate` after `deceasedDateTime`
@@ -574,10 +574,10 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 | v0.46.0 | 8.9 | `fhir-gen mcp` CLI command |
 | v0.47.0 | 8.8 | Generator `--mcp <out>` scaffold emission |
 | v0.48.0 | 8.4 | Backend-services + patient-launch auth via `@fhir-dsl/smart` |
+| v0.49.0 | 6 follow-up | FHIRPath invariants wired into emitted Standard Schema validators (`s.refine` / `z.superRefine`); opt-out via `--no-invariants` |
 
 ### Remaining
 
-- Phase 6 follow-up — wire compiled invariants into emitted Standard Schema validators (extract `ElementDefinition.constraint[*]` at generate time, run `compileInvariant`, thread into the zod/native validator output)
 - Phase 8 — Streamable HTTP transport (the package ships only stdio today; the spec also defines an HTTP transport, useful for hosted deployments)
 
 ## Out of scope (intentionally)

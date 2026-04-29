@@ -112,6 +112,10 @@ importers:
       '@fhir-dsl/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@fhir-dsl/fhirpath':
+        specifier: workspace:*
+        version: link:../fhirpath
 
   packages/mcp:
     dependencies:

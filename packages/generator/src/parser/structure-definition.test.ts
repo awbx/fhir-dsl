@@ -269,6 +269,84 @@ describe("parseStructureDefinition", () => {
     expect(name.binding).toBeUndefined();
   });
 
+  it("extracts root-level invariants from constraint[]", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          {
+            path: "TestResource",
+            constraint: [
+              {
+                key: "test-1",
+                severity: "error",
+                human: "Subject must be present",
+                expression: "subject.exists()",
+              },
+              { key: "test-warn", severity: "warning", human: "warn", expression: "true" },
+              { key: "no-expr", severity: "error", human: "missing expression" },
+            ],
+          },
+          { path: "TestResource.subject", type: [{ code: "string" }], min: 0, max: "1" },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+
+    const model = parseStructureDefinition(sd, CATALOG);
+    expect(model.invariants).toBeDefined();
+    expect(model.invariants).toHaveLength(2);
+    expect(model.invariants?.[0]).toMatchObject({
+      key: "test-1",
+      severity: "error",
+      expression: "subject.exists()",
+    });
+    expect(model.invariants?.[1]?.severity).toBe("warning");
+  });
+
+  it("extracts backbone-level invariants (e.g. Patient.contact.pat-1)", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          { path: "TestResource" },
+          {
+            path: "TestResource.contact",
+            type: [{ code: "BackboneElement" }],
+            min: 0,
+            max: "*",
+            constraint: [
+              {
+                key: "pat-1",
+                severity: "error",
+                human: "SHALL at least contain a contact's details",
+                expression: "name.exists() or telecom.exists()",
+              },
+            ],
+          },
+          { path: "TestResource.contact.name", type: [{ code: "HumanName" }], min: 0, max: "1" },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+
+    const model = parseStructureDefinition(sd, CATALOG);
+    expect(model.backboneElements).toHaveLength(1);
+    const bb = model.backboneElements[0]!;
+    expect(bb.invariants).toBeDefined();
+    expect(bb.invariants?.[0]?.key).toBe("pat-1");
+    expect(bb.invariants?.[0]?.expression).toBe("name.exists() or telecom.exists()");
+  });
+
+  it("returns undefined invariants when constraint[] is missing or empty", () => {
+    const noConstraints = parseStructureDefinition(makeSD(), CATALOG);
+    expect(noConstraints.invariants).toBeUndefined();
+
+    const emptyConstraints = parseStructureDefinition(
+      makeSD({ snapshot: { element: [{ path: "TestResource", constraint: [] }] } }),
+      CATALOG,
+    );
+    expect(emptyConstraints.invariants).toBeUndefined();
+  });
+
   it("falls back to differential when snapshot is missing", () => {
     const sd = {
       resourceType: "StructureDefinition" as const,

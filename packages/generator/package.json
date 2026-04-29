@@ -28,6 +28,9 @@
     "@fhir-dsl/terminology": "workspace:*",
     "@fhir-dsl/utils": "workspace:*"
   },
+  "devDependencies": {
+    "@fhir-dsl/fhirpath": "workspace:*"
+  },
   "files": [
     "dist"
   ],

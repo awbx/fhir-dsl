@@ -11,7 +11,7 @@ export type SchemaNode =
   | { kind: "primitive"; fhirType: string }
   | { kind: "literal"; value: string }
   | { kind: "enum"; values: string[]; extensible: boolean }
-  | { kind: "object"; fields: ObjectField[] }
+  | { kind: "object"; fields: ObjectField[]; invariants?: InvariantNode[] | undefined }
   | { kind: "array"; inner: SchemaNode; minItems?: number }
   | { kind: "union"; options: SchemaNode[] }
   | { kind: "ref"; name: string }
@@ -22,6 +22,14 @@ export interface ObjectField {
   name: string;
   schema: SchemaNode;
   optional: boolean;
+}
+
+/** Invariant attached to an object schema, runs after structural validation. */
+export interface InvariantNode {
+  key: string;
+  severity: "error" | "warning";
+  human: string;
+  expression: string;
 }
 
 export interface ExtraRuntimeFile {

@@ -168,3 +168,28 @@ export function extend<B, F extends ShapeFields>(
   const merged: ShapeFields = { ...baseShape, ...additional };
   return object(merged) as unknown as StandardSchema<B & InferObject<F>>;
 }
+
+/**
+ * Wrap a schema with a post-validation refinement. The refiner runs only
+ * if the structural validation succeeds and may append additional issues
+ * (typically used for FHIRPath invariants — `pat-1`, `dom-3`, etc.).
+ *
+ * The refiner receives the parsed value and returns an array of issues —
+ * empty array means the refinement passed.
+ */
+export function refine<T>(
+  inner: StandardSchema<T>,
+  refiner: (value: T) => readonly Issue[] | Issue[],
+): StandardSchema<T> {
+  const refined = make<T>((value) => {
+    const r = inner["~standard"].validate(value);
+    if ("issues" in r && r.issues) return r;
+    const extra = refiner(r.value);
+    if (extra.length === 0) return r;
+    return { issues: [...extra] };
+  });
+  // Preserve `_shape` so downstream `extend()` keeps working through refinements.
+  const shape = (inner as StandardSchema<T> & { _shape?: ShapeFields })._shape;
+  if (shape) (refined as StandardSchema<T> & { _shape?: ShapeFields })._shape = shape;
+  return refined;
+}

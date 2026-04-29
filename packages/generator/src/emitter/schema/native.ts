@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ExtraRuntimeFile, LibImportOptions, ObjectField, SchemaNode, ValidatorAdapter } from "./adapter.js";
+import type {
+  ExtraRuntimeFile,
+  InvariantNode,
+  LibImportOptions,
+  ObjectField,
+  SchemaNode,
+  ValidatorAdapter,
+} from "./adapter.js";
 import { FHIR_PRIMITIVE_RULES, type PrimitiveRules, regexLiteral } from "./primitive-rules.js";
 
 const INDENT = "  ";
@@ -59,8 +66,10 @@ function renderNode(node: SchemaNode, indent: number, rules: PrimitiveRules): st
       const parts = node.options.map((o) => `${pad}${renderNode(o, indent + 1, rules)}`).join(",\n");
       return `s.union([\n${parts},\n${close}])`;
     }
-    case "object":
-      return renderObject(node.fields, indent, rules);
+    case "object": {
+      const obj = renderObject(node.fields, indent, rules);
+      return node.invariants?.length ? wrapWithInvariants(obj, node.invariants, indent) : obj;
+    }
   }
 }
 
@@ -75,6 +84,33 @@ function renderObject(fields: ObjectField[], indent: number, rules: PrimitiveRul
     return `${pad}${key}: { schema: ${value}, optional: ${f.optional} },`;
   });
   return `s.object({\n${lines.join("\n")}\n${close}})`;
+}
+
+export function renderInvariantsLiteral(invariants: readonly InvariantNode[], indent: number): string {
+  const pad = INDENT.repeat(indent + 1);
+  const close = INDENT.repeat(indent);
+  const lines = invariants.map(
+    (i) =>
+      `${pad}{ key: ${JSON.stringify(i.key)}, severity: ${JSON.stringify(i.severity)}, expression: ${JSON.stringify(i.expression)}, human: ${JSON.stringify(i.human)} }`,
+  );
+  return `[\n${lines.join(",\n")},\n${close}]`;
+}
+
+function wrapWithInvariants(objectExpr: string, invariants: readonly InvariantNode[], indent: number): string {
+  const pad = INDENT.repeat(indent + 1);
+  const close = INDENT.repeat(indent);
+  const literal = renderInvariantsLiteral(invariants, indent + 1);
+  return [
+    "s.refine(",
+    `${pad}${objectExpr},`,
+    `${pad}(value) => {`,
+    `${pad}${INDENT}const oo = validateInvariants(value, ${literal});`,
+    `${pad}${INDENT}return oo.issue`,
+    `${pad}${INDENT}${INDENT}.filter((i) => i.severity === "error")`,
+    `${pad}${INDENT}${INDENT}.map((i) => ({ message: i.diagnostics }));`,
+    `${pad}}`,
+    `${close})`,
+  ].join("\n");
 }
 
 export function createNativeAdapter(rules: PrimitiveRules): ValidatorAdapter {

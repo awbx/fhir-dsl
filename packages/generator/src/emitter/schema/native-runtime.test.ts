@@ -1,3 +1,4 @@
+import { validateInvariants } from "@fhir-dsl/fhirpath";
 import { describe, expect, it } from "vitest";
 import * as s from "./native-runtime.js";
 
@@ -116,5 +117,48 @@ describe("native-runtime", () => {
     const schema = s.string();
     expect(schema["~standard"].version).toBe(1);
     expect(schema["~standard"].vendor).toBe("fhir-dsl");
+  });
+
+  it("refine runs only after structural validation succeeds", () => {
+    const base = s.object({ a: { schema: s.string(), optional: false } });
+    const refined = s.refine(base, (v) =>
+      typeof (v as { a: string }).a === "string" && (v as { a: string }).a.length === 0
+        ? [{ message: "a must be non-empty" }]
+        : [],
+    );
+
+    // Structural failure short-circuits; refiner not invoked.
+    const structural = refined["~standard"].validate({});
+    expect("issues" in structural && structural.issues?.[0]?.message).toBe("missing required field");
+
+    // Structural pass + refiner failure surfaces refiner issue.
+    const refinerFail = refined["~standard"].validate({ a: "" });
+    expect("issues" in refinerFail && refinerFail.issues?.[0]?.message).toBe("a must be non-empty");
+
+    // Both pass.
+    const ok = refined["~standard"].validate({ a: "hello" });
+    expect("value" in ok).toBe(true);
+  });
+
+  it("refine integrates with FHIRPath invariant evaluator (pat-1 exit criterion)", () => {
+    const PatientContactInvariants = [
+      {
+        key: "pat-1",
+        severity: "error" as const,
+        human: "SHALL at least contain a contact's details or a reference to an organization",
+        expression: "name.exists() or telecom.exists() or address.exists() or organization.exists()",
+      },
+    ];
+
+    const PatientContactSchema = s.refine(s.object({}), (value) => {
+      const oo = validateInvariants(value, PatientContactInvariants);
+      return oo.issue.filter((issue) => issue.severity === "error").map((issue) => ({ message: issue.diagnostics }));
+    });
+
+    const violating = PatientContactSchema["~standard"].validate({});
+    expect("issues" in violating && violating.issues?.[0]?.message).toContain("contact's details");
+
+    const passing = PatientContactSchema["~standard"].validate({ name: { family: "Smith" } });
+    expect("value" in passing).toBe(true);
   });
 });

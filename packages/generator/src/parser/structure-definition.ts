@@ -2,6 +2,7 @@ import { capitalizeFirst, fhirPathToPropertyName } from "@fhir-dsl/utils";
 import type {
   BackboneElementModel,
   BindingModel,
+  InvariantModel,
   PropertyModel,
   ResourceModel,
   TypeRef,
@@ -14,6 +15,13 @@ interface FhirTypeRef {
   profile?: string[] | undefined;
 }
 
+interface FhirElementDefinitionConstraint {
+  key?: string | undefined;
+  severity?: string | undefined;
+  human?: string | undefined;
+  expression?: string | undefined;
+}
+
 interface FhirElementDefinition {
   id?: string | undefined;
   path: string;
@@ -24,6 +32,7 @@ interface FhirElementDefinition {
   definition?: string | undefined;
   contentReference?: string | undefined;
   binding?: { strength?: string | undefined; valueSet?: string | undefined } | undefined;
+  constraint?: FhirElementDefinitionConstraint[] | undefined;
 }
 
 interface FhirStructureDefinition {
@@ -42,6 +51,9 @@ interface FhirStructureDefinition {
 export function parseStructureDefinition(sd: FhirStructureDefinition, catalog: SpecCatalog): ResourceModel {
   const elements = sd.snapshot?.element ?? sd.differential?.element ?? [];
   const rootPath = sd.type;
+
+  const rootElement = elements.find((el) => el.path === rootPath);
+  const rootInvariants = extractInvariants(rootElement?.constraint);
 
   const directChildren = elements.filter((el) => {
     const path = el.path;
@@ -98,6 +110,7 @@ export function parseStructureDefinition(sd: FhirStructureDefinition, catalog: S
     properties,
     backboneElements,
     description: elements[0]?.definition,
+    invariants: rootInvariants,
   };
 }
 
@@ -180,6 +193,7 @@ function parseBackboneElement(
   const pathSuffix = bbPath.slice(resourceName.length + 1);
   const name = resourceName + pathSuffix.split(".").map(capitalizeFirst).join("");
 
+  const invariants = extractInvariants(element.constraint);
   const backboneBaseProps = catalog.baseProperties.get("BackboneElement") ?? new Set<string>();
   const properties: PropertyModel[] = [];
   for (const child of children) {
@@ -211,7 +225,18 @@ function parseBackboneElement(
     properties.push(elementToProperty(child, resourceName, catalog));
   }
 
-  return { name, path: bbPath, properties };
+  return { name, path: bbPath, properties, invariants };
+}
+
+function extractInvariants(constraints: FhirElementDefinitionConstraint[] | undefined): InvariantModel[] | undefined {
+  if (!constraints?.length) return undefined;
+  const out: InvariantModel[] = [];
+  for (const c of constraints) {
+    if (!c.key || !c.expression || !c.human) continue;
+    if (c.severity !== "error" && c.severity !== "warning") continue;
+    out.push({ key: c.key, severity: c.severity, human: c.human, expression: c.expression });
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 function fhirTypeRefToTypeRef(fhirType: FhirTypeRef, catalog: SpecCatalog): TypeRef {
