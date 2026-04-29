@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/d5f0916a-1a3a-42f7-8ebe-acadf8d8c129
 # fhir-dsl
 
 A fully type-safe FHIR query builder and code generator for TypeScript, inspired by [Kysely](https://github.com/kysely-org/kysely).
@@ -6,7 +8,8 @@ Build FHIR REST queries with compile-time type safety for resources, search para
 
 **[Documentation](https://awbx.github.io/fhir-dsl/)** | **[Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start)** | **[CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage)** | **[Roadmap](https://awbx.github.io/fhir-dsl/docs/roadmap)**
 
-<video src="./assets/fhir-dsl-walkthrough.mp4" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/64947e51-cdd0-41fc-b7e0-01d68009ffc8" controls width="100%"></video>
+
 
 ## Why fhir-dsl?
 
