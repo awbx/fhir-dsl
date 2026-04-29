@@ -21,8 +21,10 @@ of cleanups that should land before the freeze takes effect.
 
 1. **Cleanups before freeze** — gaps the audit caught that should not
    ship in v1 untouched.
-2. **Borrow what's better elsewhere** — bounded swaps from the
-   atomic-ehr ecosystem; net code reduction or pure additions.
+2. **Self-built coverage gaps** — capabilities other libraries solve
+   (UCUM, canonical resolution) that we'd previously considered
+   borrowing; **dropping third-party deps as a hard rule**, so each
+   either gets a bounded in-house implementation or ships post-v1.
 3. **Open issues triage** — the 3 issues that survived the close-out
    sweep get a decision per item.
 4. **Pre-v1 polish** — stability scaffolding (deprecations, perf
@@ -69,55 +71,53 @@ top two levels today.
 
 ---
 
-## Theme 2 — Borrow from atomic-ehr
+## Theme 2 — Self-built coverage gaps
 
-Three takeaways surfaced by the cross-org compare. Two are clear wins;
-the third is a deliberate non-adoption.
+**Decision (2026-04-29):** we will not adopt third-party packages
+from atomic-ehr (or any other org) as runtime deps. Their projects
+are pre-1.0, scope overlap is partial, and the typed-FHIR-client niche
+is small enough that pinning to an upstream's release cadence costs
+more than it saves. Every gap below ships in-house or is deferred.
 
-### 2.1 UCUM integration — `@atomic-ehr/ucum`
+### 2.1 UCUM-aware FHIRPath quantity ops
 
-**Gap.** FHIR `Quantity` arithmetic and the `code-value-quantity`
-composite-search-param normalizer treat `5 'kg'` and `5000 'g'` as
-unequal. Silent correctness bug.
+**Gap.** FHIR `Quantity` equality, ordering, and arithmetic are
+spec-defined to be UCUM-aware. Today `5 'kg' = 5000 'g'` returns
+`false` (property equality), `<`/`>` cast to `NaN`, and `+`/`-`
+return empty. Silent correctness bug in invariants and FHIRPath
+evaluation.
 
-- [ ] Add `@atomic-ehr/ucum` as an optional peer dep on
-      `@fhir-dsl/fhirpath`.
-- [ ] Wire into FHIRPath quantity comparison (`=`, `~`, `<`, `>`).
-- [ ] Wire into FHIRPath quantity arithmetic (`+`, `-`).
-- [ ] Wire into core's composite-search normalizer.
-- [ ] Test fixture: `5 kg = 5000 g`, `1 'L' = 1000 'mL'`.
+**Decision: deferred to post-v1.** A correct UCUM implementation —
+parser for `mol/(L.s).cm-1` style expressions, dimension algebra,
+prefix normalization, special-unit (Celsius, decibel, pH) handling —
+is ~2-3KLoC of careful code. Out of scope for the v1 freeze. Track
+as a known limitation:
 
-**Cost.** S — half a day. Highest value/lowest risk swap in this plan.
+- [ ] Document the gap in `packages/fhirpath/README.md` so callers
+      know not to rely on UCUM-aware quantity semantics.
+- [ ] Add an explicit `it.skip` test pinning current behaviour so a
+      future implementation breaks loudly.
+- [ ] Open a v2 issue: "Native UCUM expression evaluator".
 
-### 2.2 `@atomic-ehr/fhir-canonical-manager` — replace downloader
+### 2.2 Canonical / package resolution
 
-**Gap.** `packages/generator/src/downloader.ts` rolls its own tgz
-fetch, registry resolution, and canonical lookup. ~200 LoC of code we
-don't need to maintain when their `fcm` package handles the same
-problem with disk caching and registry redirects already.
+**Gap.** `packages/generator/src/downloader.ts` does its own tgz
+fetch and registry resolution. It works, but registry edge cases
+(redirects, mirror failover, signed packages) are not covered.
 
-- [ ] Add `@atomic-ehr/fhir-canonical-manager` as runtime dep on
-      `@fhir-dsl/generator`.
-- [ ] Verify license compatibility (likely MIT — confirm before
-      adopting).
-- [ ] Adapt `DownloadedSpec` shape from `fcm`'s output via a thin
-      shim.
-- [ ] Delete `downloader.ts` (modulo the `--src` local-dir path,
-      which stays).
-- [ ] Smoke test: `pnpm --filter @fhir-dsl/example generate` still
-      produces an identical tree.
+**Decision: keep our own.** It's working today. Hardening goes in v2
+once we have specific user-reported failures to drive the design.
 
-**Cost.** S/M — half a day plus the shape-mismatch surprise tax.
+### 2.3 FHIRPath evaluator scope
 
-### 2.3 FHIRPath evaluator — DON'T swap (decision)
+We own a sync, type-safe FHIRPath evaluator that covers the subset
+FHIR invariants and the common navigation patterns actually use.
+Broadening to the full FHIRPath N1 spec is post-v1 work, driven by
+real user expressions that fail.
 
-Their `@atomic-ehr/fhirpath` is async and broader-spec; ours is sync
-and narrower. Adopting their evaluator would force a public API break
-across `@fhir-dsl/fhirpath` (every `evaluate()` becomes async). Our
-differentiator is the typed builder, not the evaluator internals.
-
-- [ ] Document the decision in the package README so it's not
-      revisited every quarter.
+- [ ] Document the supported subset and the boundary in
+      `packages/fhirpath/README.md` so users know when to file a
+      "missing feature" vs. when to choose a different evaluator.
 
 ---
 
@@ -216,12 +216,12 @@ Documented here so they don't bleed scope:
 
 ## Risks
 
-- **The atomic-ehr swaps add upstream risk.** Their packages are still
-  pre-1.0; we'd be pinning to versions whose APIs may shift. Mitigate
-  by exact-version pinning in `package.json` until they cut their own
-  1.0.
 - **#50 setValue is the largest scope in this plan.** If it slips,
   ship v1 without it (move to v1.1) rather than holding the freeze.
+- **Documenting the UCUM gap is not the same as closing it.** Users
+  with quantity-heavy invariants (vital signs, lab ranges, dose
+  arithmetic) will hit it. Document loudly; revisit in v2 driven by
+  actual user reports rather than a speculative implementation.
 
 ## Exit criteria
 
@@ -236,13 +236,12 @@ Documented here so they don't bleed scope:
 
 | Version | Theme | Notes |
 |---|---|---|
-| v0.51.0 | 2.1 | UCUM integration |
-| v0.52.0 | 2.2 | `fhir-canonical-manager` swap |
-| v0.53.0 | 1.1 | Streamable HTTP — SSE + batched JSON-RPC |
-| v0.54.0 | 3.1 | FHIRPath setValue / patch (#50) |
-| v0.55.0 | 1.2 | Per-property invariants |
-| v0.56.0 | 4.1 + 4.3 | Deprecation pass + docs parity |
-| v0.57.0 | 4.2 + 4.4 | Perf baseline + hand-written changelog |
+| v0.51.0 | 1.1 | Streamable HTTP — SSE + batched JSON-RPC |
+| v0.52.0 | 1.2 | Per-property invariants |
+| v0.53.0 | 3.1 | FHIRPath setValue / patch (#50) |
+| v0.54.0 | 2.1 + 2.3 | Document UCUM + FHIRPath-subset gaps |
+| v0.55.0 | 4.1 + 4.3 | Deprecation pass + docs parity |
+| v0.56.0 | 4.2 + 4.4 | Perf baseline + hand-written changelog |
 | v1.0.0  |  | API freeze. Tag `surface-v1.0.0` from the locked snapshot. |
 
 Each version is independently mergeable. Order is suggested, not

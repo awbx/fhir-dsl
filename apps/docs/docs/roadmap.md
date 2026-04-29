@@ -17,10 +17,10 @@ The full plan lives in [`V1_PLAN.md`](https://github.com/awbx/fhir-dsl/blob/main
 - **Streamable HTTP — finish the spec.** Today's `httpTransport()` only handles POST → single JSON response. SSE on GET (for server-initiated notifications), `text/event-stream` responses, and batched JSON-RPC arrays land before v1 so the framing isn't observable later.
 - **Per-property invariants.** Phase 6 follow-up (v0.49.0) wires invariants on root + backbone elements; deeper-level constraints flow into the same `s.refine()` machinery.
 
-### Borrowing from the atomic-ehr ecosystem
+### Known limitations to document loudly before the freeze
 
-- **UCUM integration** — `@atomic-ehr/ucum` plugged into FHIRPath quantity arithmetic and the `code-value-quantity` composite-search normalizer. Closes a real correctness gap (`5 'kg'` vs `5000 'g'` are silently unequal today).
-- **`@atomic-ehr/fhir-canonical-manager`** — replaces the generator's roll-your-own tgz/registry handling.
+- **UCUM-aware quantity ops are deferred to post-v1.** `5 'kg' = 5000 'g'` returns `false` today, FHIRPath quantity arithmetic returns empty, and `<`/`>` cast through `NaN`. A correct in-house UCUM implementation is ~2-3KLoC and out of scope for the v1 freeze; we'll document the gap and ship a v2 that addresses it driven by real user-reported failures rather than speculation.
+- **The FHIRPath evaluator covers a subset of N1.** The supported surface is the patterns FHIR invariants and common navigation actually use. The boundary will be documented in `packages/fhirpath/README.md` before the freeze so users know when to file a missing-feature ticket vs. choose a different evaluator.
 
 ### One open feature ask
 
