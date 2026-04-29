@@ -24,15 +24,15 @@ behaviour with tests, and make subsequent phases measurable.
 
 **Tasks.**
 
-- [ ] Delete or regenerate `AUDIT.md`. It claims PATCH, conditional headers,
+- [x] Delete or regenerate `AUDIT.md`. It claims PATCH, conditional headers,
       retry/backoff, AbortSignal, FHIRPath arithmetic / env vars / `$index` /
       `$total` / `resolve` / `hasValue` are missing — all are implemented.
 - [x] Add an `audit:export-surface` script that walks each package's
       `index.ts`, dumps the public surface, and diffs against a checked-in
       snapshot. Re-run in CI; AUDIT.md is regenerated from the snapshot.
-- [ ] Add a `pnpm test:fhir-conformance` task wired to the matrices created
+- [x] Add a `pnpm test:fhir-conformance` task wired to the matrices created
       in later phases (it stays empty here, just the plumbing).
-- [ ] In `README.md`, add a "Spec coverage" table that the export-surface
+- [x] In `README.md`, add a "Spec coverage" table that the export-surface
       script populates so we never drift again.
 
 **Exit criteria.** AUDIT.md is either gone or re-derived from code; CI fails
@@ -463,15 +463,15 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 
 ### 8.6 Audit sink
 
-- [ ] `AuditSink` interface: `record(event: AuditRecord): void |
+- [x] `AuditSink` interface: `record(event: AuditRecord): void |
       Promise<void>`.
-- [ ] `AuditRecord` shape: timestamp, principal, transport, tool,
+- [x] `AuditRecord` shape: timestamp, principal, transport, tool,
       resourceType, id, action (`R`/`C`/`U`/`D`/`E`), outcome,
       latencyMs, requestId.
-- [ ] Built-in sinks: `JsonLogSink` (default), `OtlpSink` (OTel
+- [x] Built-in sinks: `JsonLogSink` (default), `OtlpSink` (OTel
       span+attribute mapping), `FhirAuditEventSink` (writes
       `AuditEvent` resources to the upstream when writes are enabled).
-- [ ] Every tool call goes through the sink, success or failure.
+- [x] Every tool call goes through the sink, success or failure.
 
 ### 8.7 Token economy defaults
 
