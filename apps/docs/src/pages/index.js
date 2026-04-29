@@ -5,6 +5,9 @@ import { Highlight, themes } from 'prism-react-renderer';
 import { useState } from 'react';
 import styles from './index.module.css';
 
+const WALKTHROUGH_VIDEO_URL =
+  'https://github.com/user-attachments/assets/64947e51-cdd0-41fc-b7e0-01d68009ffc8';
+
 const EXAMPLES = [
   {
     id: 'search',
@@ -399,6 +402,32 @@ function Hero({ title, tagline, version }) {
   );
 }
 
+function Walkthrough() {
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <span className={styles.eyebrow}>Walkthrough</span>
+        <h2 className={styles.sectionTitle}>See it in action</h2>
+        <p className={styles.sectionLead}>
+          A short narrated tour of the query builder, generator, and CLI.
+        </p>
+      </div>
+
+      <div className={styles.videoFrame}>
+        <video
+          className={styles.video}
+          src={WALKTHROUGH_VIDEO_URL}
+          controls
+          preload="metadata"
+          playsInline
+        >
+          <track kind="captions" />
+        </video>
+      </div>
+    </section>
+  );
+}
+
 function Playground() {
   const [activeId, setActiveId] = useState(EXAMPLES[0].id);
   const active = EXAMPLES.find((e) => e.id === activeId) ?? EXAMPLES[0];
@@ -509,6 +538,7 @@ export default function Home() {
           tagline={siteConfig.tagline}
           version={siteConfig.customFields?.version}
         />
+        <Walkthrough />
         <Playground />
         <Features />
         <CTA />

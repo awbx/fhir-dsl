@@ -6,7 +6,7 @@ Build FHIR REST queries with compile-time type safety for resources, search para
 
 **[Documentation](https://awbx.github.io/fhir-dsl/)** | **[Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start)** | **[CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage)** | **[Roadmap](https://awbx.github.io/fhir-dsl/docs/roadmap)**
 
-<video src="https://github.com/user-attachments/assets/64947e51-cdd0-41fc-b7e0-01d68009ffc8" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/64947e51-cdd0-41fc-b7e0-01d68009ffc8" autoplay muted loop playsinline controls width="100%"></video>
 
 
 ## Why fhir-dsl?
