@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/fhirpath",
-  "version": "0.48.1",
+  "version": "0.49.0",
   "description": "Type-safe FHIRPath expression builder with autocomplete",
   "type": "module",
   "main": "./dist/index.cjs",

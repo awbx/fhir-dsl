@@ -8,6 +8,25 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.49.0] - 2026-04-29
+
+### Features
+
+- add walkthrough video to README (`105a772`)
+
+### Improvements
+
+- Update README.md (`d8612f1`)
+
+### Removals
+
+- Remove outdated link from README (`2ef8d71`)
+
+### Other
+
+- Phase 6 follow-up — wire FHIRPath invariants into emitted validators (`64f78b2`)
+- autoplay walkthrough in README, embed in docs landing (`c8d42f7`)
+
 ## [0.48.1] - 2026-04-28
 
 ### Improvements
