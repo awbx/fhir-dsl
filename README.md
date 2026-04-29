@@ -1,5 +1,3 @@
-
-https://github.com/user-attachments/assets/d5f0916a-1a3a-42f7-8ebe-acadf8d8c129
 # fhir-dsl
 
 A fully type-safe FHIR query builder and code generator for TypeScript, inspired by [Kysely](https://github.com/kysely-org/kysely).
