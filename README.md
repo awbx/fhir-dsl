@@ -6,6 +6,8 @@ Build FHIR REST queries with compile-time type safety for resources, search para
 
 **[Documentation](https://awbx.github.io/fhir-dsl/)** | **[Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start)** | **[CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage)** | **[Roadmap](https://awbx.github.io/fhir-dsl/docs/roadmap)**
 
+<video src="./assets/fhir-dsl-walkthrough.mp4" controls width="100%"></video>
+
 ## Why fhir-dsl?
 
 Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, memorizing search parameter names, and hoping your query strings are correct. Bugs surface at runtime, not at build time.
