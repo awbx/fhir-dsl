@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.50.0] - 2026-04-29
+
+### Other
+
+- Phase 8 — streamable HTTP transport for @fhir-dsl/mcp (`0612f25`)
+
 ## [0.49.0] - 2026-04-29
 
 ### Features
