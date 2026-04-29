@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28",
+  "generatedAt": "2026-04-29",
   "packages": {
     "@fhir-dsl/types": [
       {
@@ -1613,6 +1613,18 @@
       },
       {
         "name": "GenericVerb",
+        "kind": "other"
+      },
+      {
+        "name": "httpTransport",
+        "kind": "other"
+      },
+      {
+        "name": "HttpTransport",
+        "kind": "other"
+      },
+      {
+        "name": "HttpTransportOptions",
         "kind": "other"
       },
       {

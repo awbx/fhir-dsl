@@ -575,10 +575,11 @@ Tool catalog (all schemas are discriminated unions over `resourceType`):
 | v0.47.0 | 8.8 | Generator `--mcp <out>` scaffold emission |
 | v0.48.0 | 8.4 | Backend-services + patient-launch auth via `@fhir-dsl/smart` |
 | v0.49.0 | 6 follow-up | FHIRPath invariants wired into emitted Standard Schema validators (`s.refine` / `z.superRefine`); opt-out via `--no-invariants` |
+| v0.50.0 | 8 streamable HTTP | `httpTransport()` for `@fhir-dsl/mcp` — POST JSON-RPC endpoint with optional CORS, auth hook, body cap, and external-server mounting |
 
 ### Remaining
 
-- Phase 8 — Streamable HTTP transport (the package ships only stdio today; the spec also defines an HTTP transport, useful for hosted deployments)
+(All phases shipped. Future work: GET-side SSE on the HTTP transport for server-to-client notifications and batched JSON-RPC; both deferred since the dispatcher today only does single synchronous responses.)
 
 ## Out of scope (intentionally)
 
