@@ -29,7 +29,7 @@ The full plan lives in [`V1_PLAN.md`](https://github.com/awbx/fhir-dsl/blob/main
 ### Stability scaffolding
 
 - Deprecation pass with `@deprecated` tags + console warnings.
-- Performance baseline (generator <30s on R4 + US Core; 1k-resource Bundle <100ms parse+validate; FHIRPath 10k iters <500ms).
+- Performance baseline (generator under 30s on R4 + US Core; 1k-resource Bundle under 100ms parse+validate; FHIRPath 10k iters under 500ms).
 - Documentation parity between README, generated TSDoc, and this docs site.
 - Hand-written v1.0.0 changelog entry.
 
