@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@fhir-dsl/smart": "workspace:*",
+    "@types/node": "^25.6.0",
     "jose": "^5.9.6"
   },
   "files": [

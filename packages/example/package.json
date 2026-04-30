@@ -10,5 +10,8 @@
   "dependencies": {
     "@fhir-dsl/core": "workspace:*",
     "@fhir-dsl/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
   }
 }

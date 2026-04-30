@@ -82,12 +82,20 @@ importers:
       commander:
         specifier: ^14.0.3
         version: 14.0.3
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/core:
     dependencies:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/example:
     dependencies:
@@ -97,12 +105,20 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/fhirpath:
     dependencies:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/generator:
     dependencies:
@@ -116,6 +132,9 @@ importers:
       '@fhir-dsl/fhirpath':
         specifier: workspace:*
         version: link:../fhirpath
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/mcp:
     dependencies:
@@ -132,6 +151,9 @@ importers:
       '@fhir-dsl/smart':
         specifier: workspace:*
         version: link:../smart
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
       jose:
         specifier: ^5.9.6
         version: 5.10.0
@@ -144,6 +166,10 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/smart:
     dependencies:
@@ -153,16 +179,32 @@ importers:
       jose:
         specifier: ^5.9.6
         version: 5.10.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
   packages/terminology:
     dependencies:
       '@fhir-dsl/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
-  packages/utils: {}
+  packages/utils:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
 
 packages:
 

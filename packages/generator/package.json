@@ -29,7 +29,8 @@
     "@fhir-dsl/utils": "workspace:*"
   },
   "devDependencies": {
-    "@fhir-dsl/fhirpath": "workspace:*"
+    "@fhir-dsl/fhirpath": "workspace:*",
+    "@types/node": "^25.6.0"
   },
   "files": [
     "dist"

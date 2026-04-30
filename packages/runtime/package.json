@@ -46,5 +46,8 @@
     "runtime",
     "typescript",
     "healthcare"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
 }

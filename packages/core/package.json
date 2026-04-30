@@ -49,5 +49,8 @@
     "kysely",
     "healthcare",
     "hl7"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
 }

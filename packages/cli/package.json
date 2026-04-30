@@ -37,5 +37,8 @@
     "typescript",
     "hl7",
     "healthcare"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
 }
