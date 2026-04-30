@@ -260,7 +260,7 @@ for await (const p of fhir
 const FEATURES = [
   {
     title: 'Type-Safe Queries',
-    desc: 'Every resource, search parameter, and operator is validated at compile time. No malformed FHIR queries at runtime.',
+    desc: 'Every resource, search parameter, operator, modifier, include, _has, and chained hop is validated at compile time. No malformed FHIR queries at runtime.',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 12l2 2 4-4" />
@@ -270,7 +270,7 @@ const FEATURES = [
   },
   {
     title: 'Code Generation',
-    desc: 'Generate TypeScript interfaces from official StructureDefinitions. R4, R4B, R5, R6, or any published IG.',
+    desc: 'Generate TypeScript interfaces, profile schemas, ValueSet enums, and FHIRPath builders from any FHIR version (R4 / R4B / R5 / R6) or any published IG.',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="16 18 22 12 16 6" />
@@ -280,7 +280,7 @@ const FEATURES = [
   },
   {
     title: 'Profile-Aware',
-    desc: 'Query against US Core or custom IG profiles with automatic type narrowing — profile constraints enforced by the type system.',
+    desc: 'Query US Core, IPS, or any custom IG with automatic type narrowing. Slicing, typed extensions, and profile cardinality all enforced by the type system.',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -288,34 +288,175 @@ const FEATURES = [
     ),
   },
   {
-    title: 'Immutable Builders',
-    desc: 'Every query method returns a new instance. Safe to store, fork, and compose — no hidden mutation.',
+    title: 'Standard Schema Validators',
+    desc: 'Optional zod or zero-dep native validators conforming to Standard Schema V1, with FHIRPath invariants (pat-1, dom-3, …) wired in automatically.',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 2l4 4-4 4" />
-        <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-        <path d="M7 22l-4-4 4-4" />
-        <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+  },
+  {
+    title: 'FHIRPath Builder',
+    desc: 'Type-safe FHIRPath expressions with autocomplete at every step, compilation to FHIRPath strings, and runtime evaluation. 70+ functions across the N1 spec.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 3l4 18" />
+        <path d="M19 3l-4 18" />
+        <path d="M3 8h18" />
+        <path d="M3 16h18" />
+      </svg>
+    ),
+  },
+  {
+    title: 'SMART on FHIR v2',
+    desc: 'PKCE-S256, backend-services JWT (RS384 / ES384), patient-launch refresh-token rotation. Lazy-loaded — bearer-only deployments never pay the jose cost.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Terminology Engine',
+    desc: 'is-a, descendent-of, and regex ValueSet filters with transitive subsumption. Bundled $expand, $validate-code, $lookup, $translate, $subsumes operations.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="6" r="3" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="18" r="3" />
+        <path d="M12 9v3" />
+        <path d="M9 16l-2-1" />
+        <path d="M15 16l2-1" />
+      </svg>
+    ),
+  },
+  {
+    title: 'MCP Server (LLM bridge)',
+    desc: 'Generated tool surface for any LLM agent, with stdio + streamable HTTP transports, three pluggable auth strategies, write gating, and full audit.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+        <circle cx="12" cy="10" r="2" />
       </svg>
     ),
   },
   {
     title: 'Zero Runtime Overhead',
-    desc: 'The core DSL has no runtime dependencies beyond @fhir-dsl/types. Type safety compiles away to plain objects.',
+    desc: 'The core DSL has no runtime dependencies beyond @fhir-dsl/types. Dual ESM/CJS. Type safety compiles away to plain objects.',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
       </svg>
     ),
   },
+];
+
+const STATS = [
+  { value: '4', label: 'FHIR Versions', sub: 'R4 · R4B · R5 · R6' },
+  { value: '10', label: 'Workspace Packages', sub: 'core · runtime · cli · …' },
+  { value: '70+', label: 'FHIRPath Functions', sub: 'N1 spec coverage' },
+  { value: '1.6K+', label: 'Tests Passing', sub: 'lint · typecheck · vitest' },
+];
+
+const PACKAGES = [
   {
-    title: 'Kysely-Inspired',
-    desc: 'If you know Kysely, you already know fhir-dsl. A familiar fluent, chainable API adapted to the FHIR REST spec.',
+    name: '@fhir-dsl/core',
+    desc: 'Query builder DSL — search, read, batch, transactions, terminology ops, capability guard.',
+    accent: 'blue',
+  },
+  {
+    name: '@fhir-dsl/runtime',
+    desc: 'HTTP executor with pagination, error handling, bundle resolution, slice helpers.',
+    accent: 'blue',
+  },
+  {
+    name: '@fhir-dsl/cli',
+    desc: 'fhir-gen — generate, capability, validate, scaffold-ig, diff, mcp.',
+    accent: 'cyan',
+  },
+  {
+    name: '@fhir-dsl/types',
+    desc: 'Branded FHIR R4/R5 primitives, base datatypes, runtime parsers.',
+    accent: 'cyan',
+  },
+  {
+    name: '@fhir-dsl/generator',
+    desc: 'Code generation engine — resources, profiles, slices, typed extensions, layers, IG manifests.',
+    accent: 'violet',
+  },
+  {
+    name: '@fhir-dsl/fhirpath',
+    desc: 'Type-safe FHIRPath expression builder + invariant evaluator.',
+    accent: 'violet',
+  },
+  {
+    name: '@fhir-dsl/terminology',
+    desc: 'CodeSystem hierarchy + ValueSet filter engine (is-a, descendent-of, regex).',
+    accent: 'amber',
+  },
+  {
+    name: '@fhir-dsl/smart',
+    desc: 'SMART on FHIR v2 — PKCE-S256, backend services, scope DSL.',
+    accent: 'amber',
+  },
+  {
+    name: '@fhir-dsl/mcp',
+    desc: 'MCP server — generic FHIR verbs as tools, pluggable auth, audit, stdio + HTTP.',
+    accent: 'rose',
+  },
+  {
+    name: '@fhir-dsl/utils',
+    desc: 'Shared utilities used across the workspace.',
+    accent: 'rose',
+  },
+];
+
+const USE_CASES = [
+  {
+    title: 'EHR & FHIR Integrators',
+    desc: 'Hit US Core, Epic, Cerner, HAPI, or any custom IG with compile-time-checked queries. Profile-aware, slice-aware, no string guessing.',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3" />
-        <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
-        <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Health-Tech Platforms',
+    desc: 'Generate types from your tenant\'s IG, validate every payload at the boundary, and ship a single FHIR client across services with no version drift.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
+  },
+  {
+    title: 'AI & LLM Agents',
+    desc: 'Expose a FHIR endpoint as an MCP tool surface in one command. Read-only by default, write gating per resource type, full audit, stdio + HTTP transports.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="9" cy="9" r="1.2" />
+        <circle cx="15" cy="9" r="1.2" />
+        <path d="M8 15c1.5 1.2 6.5 1.2 8 0" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Conformance Authors',
+    desc: 'Compile FHIRPath invariants, run them against generated Standard Schema validators, and emit OperationOutcome — all from your test suite.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M9 13h6" />
+        <path d="M9 17h6" />
       </svg>
     ),
   },
@@ -487,11 +628,12 @@ function Features() {
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <span className={styles.eyebrow}>Why fhir-dsl</span>
-        <h2 className={styles.sectionTitle}>Built for the FHIR spec, not around it</h2>
+        <span className={styles.eyebrow}>Capabilities</span>
+        <h2 className={styles.sectionTitle}>The FHIR toolchain, end to end</h2>
         <p className={styles.sectionLead}>
-          End-to-end type safety from the StructureDefinitions on the server to
-          the `.where()` calls in your editor.
+          From StructureDefinitions on the server to the <code>.where()</code> calls
+          in your editor — types, validators, FHIRPath, terminology, SMART, and an
+          MCP bridge.
         </p>
       </div>
 
@@ -501,6 +643,70 @@ function Features() {
             <div className={styles.featureIcon}>{f.icon}</div>
             <h3 className={styles.featureTitle}>{f.title}</h3>
             <p className={styles.featureDesc}>{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Stats() {
+  return (
+    <section className={styles.statsSection}>
+      <div className={styles.statsGrid}>
+        {STATS.map((s) => (
+          <div key={s.label} className={styles.stat}>
+            <div className={styles.statValue}>{s.value}</div>
+            <div className={styles.statLabel}>{s.label}</div>
+            <div className={styles.statSub}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Packages() {
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <span className={styles.eyebrow}>Workspace</span>
+        <h2 className={styles.sectionTitle}>Ten focused packages, one toolchain</h2>
+        <p className={styles.sectionLead}>
+          Install only what you need. <code>core</code> + <code>runtime</code> get
+          you a typed client; everything else is opt-in.
+        </p>
+      </div>
+
+      <div className={styles.packagesGrid}>
+        {PACKAGES.map((p) => (
+          <div
+            key={p.name}
+            className={`${styles.package} ${styles[`accent-${p.accent}`] ?? ''}`}
+          >
+            <div className={styles.packageName}>{p.name}</div>
+            <div className={styles.packageDesc}>{p.desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function UseCases() {
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <span className={styles.eyebrow}>Built for</span>
+        <h2 className={styles.sectionTitle}>Wherever FHIR meets TypeScript</h2>
+      </div>
+
+      <div className={styles.useCases}>
+        {USE_CASES.map((u) => (
+          <div key={u.title} className={styles.useCase}>
+            <div className={styles.useCaseIcon}>{u.icon}</div>
+            <h3 className={styles.useCaseTitle}>{u.title}</h3>
+            <p className={styles.useCaseDesc}>{u.desc}</p>
           </div>
         ))}
       </div>
@@ -538,9 +744,12 @@ export default function Home() {
           tagline={siteConfig.tagline}
           version={siteConfig.customFields?.version}
         />
+        <Stats />
         <Walkthrough />
-        <Playground />
         <Features />
+        <Playground />
+        <Packages />
+        <UseCases />
         <CTA />
       </main>
     </Layout>

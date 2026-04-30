@@ -1,19 +1,26 @@
 # fhir-dsl
 
-A fully type-safe FHIR query builder and code generator for TypeScript, inspired by [Kysely](https://github.com/kysely-org/kysely).
+[![npm version](https://img.shields.io/npm/v/@fhir-dsl/core.svg?label=%40fhir-dsl%2Fcore)](https://www.npmjs.com/package/@fhir-dsl/core)
+[![CI](https://github.com/awbx/fhir-dsl/actions/workflows/ci.yml/badge.svg)](https://github.com/awbx/fhir-dsl/actions/workflows/ci.yml)
+[![Release](https://github.com/awbx/fhir-dsl/actions/workflows/release.yml/badge.svg)](https://github.com/awbx/fhir-dsl/actions/workflows/release.yml)
+[![Docs](https://github.com/awbx/fhir-dsl/actions/workflows/deploy-docs.yml/badge.svg)](https://awbx.github.io/fhir-dsl/)
+[![License](https://img.shields.io/npm/l/@fhir-dsl/core.svg)](./LICENSE)
+[![Node](https://img.shields.io/node/v/@fhir-dsl/core.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Build FHIR REST queries with compile-time type safety for resources, search parameters, profiles, and includes — no more string guessing.
+**The TypeScript FHIR toolchain.** A typed query builder ([Kysely](https://github.com/kysely-org/kysely)-inspired), a code generator that emits resources / profiles / ValueSets / search-param types from any FHIR version or IG, a FHIRPath builder + invariant evaluator, optional [Standard Schema V1](https://standardschema.dev/) validators (zod or zero-dep native), SMART on FHIR v2 auth, a terminology engine with real `is-a` / `descendent-of` / regex filters, and an MCP server that exposes any FHIR endpoint to an LLM agent.
+
+Compile-time type safety for resources, search parameters, profiles, slices, includes, `_has`, chained params, and FHIRPath expressions — no more string guessing, no runtime dependencies in the core DSL beyond `@fhir-dsl/types`.
 
 **[Documentation](https://awbx.github.io/fhir-dsl/)** | **[Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start)** | **[CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage)** | **[Roadmap](https://awbx.github.io/fhir-dsl/docs/roadmap)**
 
 <video src="https://github.com/user-attachments/assets/64947e51-cdd0-41fc-b7e0-01d68009ffc8" autoplay muted loop playsinline controls width="100%"></video>
 
-
 ## Why fhir-dsl?
 
-Working with FHIR APIs in TypeScript typically means dealing with untyped JSON, memorizing search parameter names, and hoping your query strings are correct. Bugs surface at runtime, not at build time.
+Working with FHIR in TypeScript typically means juggling untyped JSON, memorizing search-parameter names, hand-rolling validators, hand-rolling auth, and hand-rolling whatever bridge gets your data to an agent. Bugs surface at runtime; integrations ossify around whichever pieces you happened to build first.
 
-**fhir-dsl** fixes this by generating TypeScript types directly from official FHIR StructureDefinitions and wiring them into a fluent query builder. The result: autocomplete in your editor, compile-time validation of every query, and zero runtime overhead.
+**fhir-dsl** is a single coherent toolchain. Generate types from any FHIR version or IG. Query through a fluent builder that's checked at compile time. Validate with optional Standard Schema V1 validators that have FHIRPath invariants wired in. Authenticate with SMART v2 (PKCE-S256, backend-services JWT, patient-launch refresh-token rotation). Walk terminology with a real subsumption engine. Bridge to an LLM with the bundled MCP server. Each piece works alone; together they replace ~6 hand-rolled libraries that would otherwise drift.
 
 ## Features
 

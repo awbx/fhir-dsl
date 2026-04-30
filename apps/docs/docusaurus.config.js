@@ -5,7 +5,7 @@ const rootPkg = require('../../package.json');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'fhir-dsl',
-  tagline: 'Type-safe FHIR query builder and code generator for TypeScript',
+  tagline: 'The TypeScript FHIR toolchain — typed query builder, code generator, FHIRPath, validators, SMART, terminology, and an MCP bridge.',
   favicon: 'img/favicon.ico',
 
   url: 'https://awbx.github.io',
