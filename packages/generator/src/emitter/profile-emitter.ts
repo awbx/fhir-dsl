@@ -3,13 +3,28 @@ import type { ProfileModel, SliceModel } from "../model/profile-model.js";
 import type { PropertyModel, TypeRef } from "../model/resource-model.js";
 import type { TypeMapper } from "../spec/type-mapping.js";
 
-export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
+/**
+ * URL → typed extension name. Lets profile emission narrow extension
+ * slices (e.g. `extension:race`) from the bare `Extension` type to the
+ * generated typed shape (`USCoreRaceExtension`) when the slice's
+ * profile URL points at an extension we generated. #46.
+ */
+export type ExtensionTypeMap = ReadonlyMap<string, string>;
+
+export interface EmitProfileOptions {
+  extensionTypeMap?: ExtensionTypeMap | undefined;
+}
+
+export function emitProfile(model: ProfileModel, mapper: TypeMapper, options: EmitProfileOptions = {}): string {
   const lines: string[] = [];
   const primitiveImports = new Set<string>();
   const datatypeImports = new Set<string>();
+  /** Extension typed names → file slug (`uscore-race-extension`). */
+  const extensionImports = new Map<string, string>();
+  const extensionTypeMap = options.extensionTypeMap;
 
   collectImports(model.constrainedProperties, mapper, primitiveImports, datatypeImports);
-  collectSliceImports(model.slices, mapper, primitiveImports, datatypeImports);
+  collectSliceImports(model.slices, mapper, primitiveImports, datatypeImports, extensionImports, extensionTypeMap);
 
   // Import the base resource type
   const baseFileName = toKebabCase(model.baseResourceType);
@@ -22,6 +37,10 @@ export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
   if (datatypeImports.size > 0) {
     const sorted = [...datatypeImports].sort();
     lines.push(`import type { ${sorted.join(", ")} } from "../datatypes.js";`);
+  }
+
+  for (const [name, slug] of [...extensionImports].sort(([a], [b]) => a.localeCompare(b))) {
+    lines.push(`import type { ${name} } from "../extensions/${slug}.js";`);
   }
 
   lines.push(`import type { ${model.baseResourceType} } from "../resources/${baseFileName}.js";`);
@@ -48,7 +67,7 @@ export function emitProfile(model: ProfileModel, mapper: TypeMapper): string {
   // user code reaches for `.extension_usCoreRace` to get the type-narrowed
   // hint of which element is intended.
   for (const slice of model.slices) {
-    lines.push(`  ${formatSliceProperty(slice, mapper)}`);
+    lines.push(`  ${formatSliceProperty(slice, mapper, extensionTypeMap)}`);
   }
 
   lines.push("}");
@@ -122,10 +141,15 @@ function formatPropertyType(prop: PropertyModel, mapper: TypeMapper): string {
   return prop.types.map((t) => formatTypeRef(t, mapper)).join(" | ");
 }
 
-function formatTypeRef(typeRef: TypeRef, mapper: TypeMapper): string {
+function formatTypeRef(typeRef: TypeRef, mapper: TypeMapper, extensionUrl?: string | undefined): string {
   if (typeRef.code === "Reference" && typeRef.targetProfiles?.length) {
     const targets = typeRef.targetProfiles.map((t) => `"${t}"`).join(" | ");
     return `Reference<${targets}>`;
+  }
+  // For Extension slices with a known URL but no generated typed shape,
+  // narrow via the URL parameter so callers at least get the literal.
+  if (typeRef.code === "Extension" && extensionUrl) {
+    return `Extension<"${extensionUrl}">`;
   }
   return mapper.fhirTypeToTs(typeRef.code);
 }
@@ -152,22 +176,33 @@ function collectImports(
   }
 }
 
-function formatSliceProperty(slice: SliceModel, mapper: TypeMapper): string {
+function formatSliceProperty(slice: SliceModel, mapper: TypeMapper, extensionTypeMap?: ExtensionTypeMap): string {
   // All slices are emitted as optional — the slice-named field is a
   // type-level convenience pointing at one (or several) elements of the
   // underlying array, and absence of the field never means absence of the
   // array. Cardinality is preserved via single-vs-array-of regardless.
-  const tsType = formatSliceType(slice, mapper);
+  const tsType = formatSliceType(slice, mapper, extensionTypeMap);
   const arraySuffix = isMultiCardinality(slice.max) ? "[]" : "";
   return `${slice.basePropName}_${slice.sanitizedName}?: ${tsType}${arraySuffix};`;
 }
 
-function formatSliceType(slice: SliceModel, mapper: TypeMapper): string {
-  if (slice.types.length === 0) return "Extension";
-  if (slice.types.length === 1) {
-    return formatTypeRef(slice.types[0]!, mapper);
+function formatSliceType(slice: SliceModel, mapper: TypeMapper, extensionTypeMap?: ExtensionTypeMap): string {
+  // Prefer a generated typed extension when the slice points at an
+  // Extension whose URL we know. `extension_race?: USCoreRaceExtension`
+  // beats `extension_race?: Extension` — the consumer gets the typed
+  // value field and the URL literal-typed.
+  if (slice.extensionUrl && extensionTypeMap) {
+    const typedName = extensionTypeMap.get(slice.extensionUrl);
+    if (typedName) return typedName;
   }
-  return slice.types.map((t) => formatTypeRef(t, mapper)).join(" | ");
+  if (slice.types.length === 0) {
+    if (slice.extensionUrl) return `Extension<"${slice.extensionUrl}">`;
+    return "Extension";
+  }
+  if (slice.types.length === 1) {
+    return formatTypeRef(slice.types[0]!, mapper, slice.extensionUrl);
+  }
+  return slice.types.map((t) => formatTypeRef(t, mapper, slice.extensionUrl)).join(" | ");
 }
 
 function isMultiCardinality(max: string): boolean {
@@ -181,10 +216,21 @@ function collectSliceImports(
   mapper: TypeMapper,
   primitives: Set<string>,
   datatypes: Set<string>,
+  extensionImports: Map<string, string>,
+  extensionTypeMap: ExtensionTypeMap | undefined,
 ): void {
   for (const slice of slices) {
+    // Slice points at a generated typed extension — import it instead
+    // of the bare Extension. Extension import isn't needed in that case.
+    if (slice.extensionUrl && extensionTypeMap) {
+      const typedName = extensionTypeMap.get(slice.extensionUrl);
+      if (typedName) {
+        extensionImports.set(typedName, toKebabCase(typedName));
+        continue;
+      }
+    }
     if (slice.types.length === 0) {
-      // Default Extension fallback.
+      // Default Extension fallback (URL-narrowed if we have it).
       datatypes.add("Extension");
       continue;
     }

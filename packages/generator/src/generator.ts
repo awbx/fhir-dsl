@@ -376,9 +376,14 @@ export async function generate(options: GeneratorOptions): Promise<void> {
       const profilesDir = join(versionDir, "profiles");
       await mkdir(profilesDir, { recursive: true });
 
+      // URL → typed extension class name. Lets profile slices that
+      // point at a generated extension narrow from `Extension` to e.g.
+      // `USCoreRaceExtension`. (#46)
+      const extensionTypeMap = new Map(allExtensions.map((e) => [e.url, e.name]));
+
       for (const profile of allProfiles) {
         const fileName = `${toKebabCase(profile.name)}.ts`;
-        await writeFile(join(profilesDir, fileName), emitProfile(profile, mapper), "utf-8");
+        await writeFile(join(profilesDir, fileName), emitProfile(profile, mapper, { extensionTypeMap }), "utf-8");
       }
 
       await writeFile(join(profilesDir, "index.ts"), emitProfileIndex(allProfiles), "utf-8");

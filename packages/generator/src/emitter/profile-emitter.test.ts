@@ -191,8 +191,62 @@ describe("emitProfile", () => {
       }),
       MAPPER,
     );
-    expect(output).toContain("extension_race?: Extension;");
+    // URL-narrowed Extension when no typed-extension map is provided.
+    expect(output).toContain(
+      'extension_race?: Extension<"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race">;',
+    );
     expect(output).not.toContain("extension_race?: Extension[]");
+  });
+
+  it("narrows extension slices to typed extension when in extensionTypeMap (#46)", () => {
+    const output = emitProfile(
+      makeProfile({
+        slices: [
+          {
+            basePropName: "extension",
+            sliceName: "race",
+            sanitizedName: "race",
+            min: 0,
+            max: "1",
+            types: [{ code: "Extension" }],
+            discriminator: [{ type: "value", path: "url" }],
+            extensionUrl: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          },
+        ],
+      }),
+      MAPPER,
+      {
+        extensionTypeMap: new Map([
+          ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-race", "USCoreRaceExtension"],
+        ]),
+      },
+    );
+    expect(output).toContain("extension_race?: USCoreRaceExtension;");
+    expect(output).toContain('import type { USCoreRaceExtension } from "../extensions/uscore-race-extension.js";');
+    // Should NOT also import bare Extension when the typed name covers it.
+    expect(output).not.toMatch(/import type \{[^}]*\bExtension\b[^}]*\} from "\.\.\/datatypes\.js"/);
+  });
+
+  it("falls back to URL-narrowed Extension when typeMap lacks the URL", () => {
+    const output = emitProfile(
+      makeProfile({
+        slices: [
+          {
+            basePropName: "extension",
+            sliceName: "unknown",
+            sanitizedName: "unknown",
+            min: 0,
+            max: "1",
+            types: [{ code: "Extension" }],
+            discriminator: [{ type: "value", path: "url" }],
+            extensionUrl: "http://example.com/no-typed-extension",
+          },
+        ],
+      }),
+      MAPPER,
+      { extensionTypeMap: new Map() },
+    );
+    expect(output).toContain('extension_unknown?: Extension<"http://example.com/no-typed-extension">;');
   });
 
   it("emits slice-named optional array fields when max > 1", () => {
