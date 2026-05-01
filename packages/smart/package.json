@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@fhir-dsl/core": "workspace:*",
+    "@fhir-dsl/utils": "workspace:*",
     "jose": "^5.9.6"
   },
   "files": [

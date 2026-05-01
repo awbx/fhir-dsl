@@ -1,3 +1,4 @@
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { PathOp } from "../ops.js";
 
 export interface IterationLocals {
@@ -66,9 +67,9 @@ export interface TerminologyResolver {
 }
 
 /** Thrown when strict-mode evaluation detects a spec violation. */
-export class FhirPathEvaluationError extends Error {
+export class FhirPathEvaluationError extends FhirDslError<"fhirpath.evaluation", undefined> {
+  readonly kind = "fhirpath.evaluation" as const;
   constructor(message: string) {
-    super(message);
-    this.name = "FhirPathEvaluationError";
+    super(message, undefined);
   }
 }

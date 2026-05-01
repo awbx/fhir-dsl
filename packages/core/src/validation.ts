@@ -1,3 +1,5 @@
+import { FhirDslError } from "@fhir-dsl/utils";
+
 /**
  * Minimal Standard Schema V1 shape — enough to validate() a value without
  * depending on the `@standard-schema/spec` package. Generated schemas from
@@ -23,28 +25,46 @@ export interface SchemaRegistry {
   readonly profiles?: Readonly<Record<string, Readonly<Record<string, StandardSchemaLike>>>>;
 }
 
-export class ValidationUnavailableError extends Error {
+export class ValidationUnavailableError extends FhirDslError<"core.validation_unavailable", undefined> {
+  readonly kind = "core.validation_unavailable" as const;
   constructor() {
     super(
       ".validate() was called but no schemas are configured on the client. " +
         "Regenerate your types with `fhir-gen generate --validator native` (or `zod`), " +
         "and ensure the generated createClient() is wired up (or pass `schemas` to createFhirClient directly).",
+      undefined,
     );
-    this.name = "ValidationUnavailableError";
   }
 }
 
-export class ValidationError extends Error {
+export interface ValidationErrorContext {
+  readonly resourceType: string;
+  readonly issues: ReadonlyArray<{ message: string; path?: ReadonlyArray<PropertyKey> }>;
+  readonly index?: number;
+}
+
+export class ValidationError extends FhirDslError<"core.validation", ValidationErrorContext> {
+  readonly kind = "core.validation" as const;
+  readonly resourceType: string;
+  readonly issues: ReadonlyArray<{ message: string; path?: ReadonlyArray<PropertyKey> }>;
+  readonly index?: number;
+
   constructor(
-    public readonly resourceType: string,
-    public readonly issues: ReadonlyArray<{ message: string; path?: ReadonlyArray<PropertyKey> }>,
-    public readonly index?: number,
+    resourceType: string,
+    issues: ReadonlyArray<{ message: string; path?: ReadonlyArray<PropertyKey> }>,
+    index?: number,
   ) {
     const loc = index !== undefined ? `data[${index}]` : resourceType;
     const first = issues[0];
     const where = first?.path && first.path.length > 0 ? `.${first.path.join(".")}` : "";
-    super(`Validation failed for ${loc}${where}: ${first?.message ?? "unknown"} (${issues.length} issue(s))`);
-    this.name = "ValidationError";
+    super(`Validation failed for ${loc}${where}: ${first?.message ?? "unknown"} (${issues.length} issue(s))`, {
+      resourceType,
+      issues,
+      ...(index !== undefined ? { index } : {}),
+    });
+    this.resourceType = resourceType;
+    this.issues = issues;
+    if (index !== undefined) this.index = index;
   }
 }
 

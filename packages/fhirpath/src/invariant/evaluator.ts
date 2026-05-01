@@ -1,3 +1,4 @@
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
 
 // Phase 6 — evaluator for the parsed FHIRPath invariant AST. FHIRPath is
@@ -17,7 +18,12 @@ export interface EvalContext {
   resource: unknown;
 }
 
-export class FhirPathInvariantEvalError extends Error {}
+export class FhirPathInvariantEvalError extends FhirDslError<"fhirpath.invariant_eval", undefined> {
+  readonly kind = "fhirpath.invariant_eval" as const;
+  constructor(message?: string) {
+    super(message ?? "FHIRPath invariant evaluation error", undefined);
+  }
+}
 
 export function evaluateExpr(expr: Expr, ctx: EvalContext): Collection {
   switch (expr.kind) {

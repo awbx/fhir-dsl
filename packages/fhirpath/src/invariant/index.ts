@@ -1,3 +1,4 @@
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
 import { evaluateExpr, FhirPathInvariantEvalError } from "./evaluator.js";
 import { FhirPathParseError, parseExpression } from "./parser.js";
@@ -137,12 +138,15 @@ export function validateInvariants(
   return { resourceType: "OperationOutcome", issue: issues };
 }
 
-export class FhirPathInvariantCompileError extends Error {
-  constructor(
-    message: string,
-    public readonly definition: InvariantDefinition,
-  ) {
-    super(message);
+export class FhirPathInvariantCompileError extends FhirDslError<
+  "fhirpath.invariant_compile",
+  { definition: InvariantDefinition }
+> {
+  readonly kind = "fhirpath.invariant_compile" as const;
+  readonly definition: InvariantDefinition;
+  constructor(message: string, definition: InvariantDefinition) {
+    super(message, { definition });
+    this.definition = definition;
   }
 }
 

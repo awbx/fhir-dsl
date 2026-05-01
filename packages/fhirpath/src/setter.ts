@@ -20,15 +20,16 @@
  * `extension(url)` or `resolve()`.
  */
 
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { OperatorOp, PathOp } from "./ops.js";
 import type { JsonPatchOp } from "./types.js";
 
 export type { JsonPatchOp };
 
-export class FhirPathSetterError extends Error {
+export class FhirPathSetterError extends FhirDslError<"fhirpath.setter", undefined> {
+  readonly kind = "fhirpath.setter" as const;
   constructor(message: string) {
-    super(message);
-    this.name = "FhirPathSetterError";
+    super(message, undefined);
   }
 }
 

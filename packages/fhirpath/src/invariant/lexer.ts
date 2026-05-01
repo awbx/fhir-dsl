@@ -5,6 +5,8 @@
 // the literals invariants actually use (numbers, booleans, single-quoted
 // strings).
 
+import { FhirDslError } from "@fhir-dsl/utils";
+
 export type TokenType =
   | "ident"
   | "string"
@@ -59,12 +61,12 @@ const KEYWORDS = new Map<string, TokenType>([
   ["false", "false"],
 ]);
 
-export class FhirPathLexerError extends Error {
-  constructor(
-    message: string,
-    public readonly pos: number,
-  ) {
-    super(`FHIRPath lex error at ${pos}: ${message}`);
+export class FhirPathLexerError extends FhirDslError<"fhirpath.lexer", { pos: number }> {
+  readonly kind = "fhirpath.lexer" as const;
+  readonly pos: number;
+  constructor(message: string, pos: number) {
+    super(`FHIRPath lex error at ${pos}: ${message}`, { pos });
+    this.pos = pos;
   }
 }
 

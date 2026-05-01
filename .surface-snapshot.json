@@ -405,6 +405,10 @@
         "kind": "class"
       },
       {
+        "name": "AsyncPollingTimeoutErrorContext",
+        "kind": "interface"
+      },
+      {
         "name": "AuthConfig",
         "kind": "type"
       },
@@ -571,6 +575,10 @@
       {
         "name": "FhirRequestError",
         "kind": "class"
+      },
+      {
+        "name": "FhirRequestErrorContext",
+        "kind": "interface"
       },
       {
         "name": "FhirSchema",
@@ -921,6 +929,10 @@
         "kind": "class"
       },
       {
+        "name": "ValidationErrorContext",
+        "kind": "interface"
+      },
+      {
         "name": "ValidationUnavailableError",
         "kind": "class"
       },
@@ -961,6 +973,10 @@
       {
         "name": "FhirError",
         "kind": "class"
+      },
+      {
+        "name": "FhirErrorContext",
+        "kind": "interface"
       },
       {
         "name": "FhirExecutor",
@@ -1275,6 +1291,10 @@
         "kind": "class"
       },
       {
+        "name": "DiscoveryErrorContext",
+        "kind": "interface"
+      },
+      {
         "name": "exchangeCode",
         "kind": "function"
       },
@@ -1383,6 +1403,10 @@
         "kind": "class"
       },
       {
+        "name": "SmartAuthErrorContext",
+        "kind": "interface"
+      },
+      {
         "name": "SmartClient",
         "kind": "class"
       },
@@ -1459,11 +1483,27 @@
         "kind": "function"
       },
       {
+        "name": "Err",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirDslError",
+        "kind": "class"
+      },
+      {
         "name": "fhirPathToPropertyName",
         "kind": "function"
       },
       {
         "name": "fhirTypeToFileName",
+        "kind": "function"
+      },
+      {
+        "name": "formatErrorChain",
+        "kind": "function"
+      },
+      {
+        "name": "isFhirDslError",
         "kind": "function"
       },
       {
@@ -1479,8 +1519,32 @@
         "kind": "type"
       },
       {
+        "name": "mapErr",
+        "kind": "function"
+      },
+      {
+        "name": "mapOk",
+        "kind": "function"
+      },
+      {
+        "name": "match",
+        "kind": "function"
+      },
+      {
+        "name": "Ok",
+        "kind": "interface"
+      },
+      {
+        "name": "Result",
+        "kind": "type"
+      },
+      {
         "name": "searchParamTypeToTs",
         "kind": "function"
+      },
+      {
+        "name": "SerializedFhirDslError",
+        "kind": "interface"
       },
       {
         "name": "toCamelCase",
@@ -1492,6 +1556,14 @@
       },
       {
         "name": "toPascalCase",
+        "kind": "function"
+      },
+      {
+        "name": "tryAsync",
+        "kind": "function"
+      },
+      {
+        "name": "trySync",
         "kind": "function"
       }
     ],

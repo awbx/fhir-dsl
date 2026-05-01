@@ -20,6 +20,8 @@
  * units. Use `parseUnit(unit)` for the canonical form.
  */
 
+import { FhirDslError } from "@fhir-dsl/utils";
+
 /** SI base dimension vector. Each axis records the exponent of that base. */
 export interface Dim {
   m: number;
@@ -181,10 +183,10 @@ const UNSUPPORTED: Record<string, string> = {
   Np: "neper is a logarithmic unit; not supported",
 };
 
-export class UcumError extends Error {
+export class UcumError extends FhirDslError<"fhirpath.ucum", undefined> {
+  readonly kind = "fhirpath.ucum" as const;
   constructor(message: string) {
-    super(message);
-    this.name = "UcumError";
+    super(message, undefined);
   }
 }
 

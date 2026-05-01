@@ -1,3 +1,4 @@
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
 import { type Token, type TokenType, tokenize } from "./lexer.js";
 
@@ -16,12 +17,12 @@ import { type Token, type TokenType, tokenize } from "./lexer.js";
 //
 // `or`/`xor` share precedence (left-assoc); `implies` is right-assoc.
 
-export class FhirPathParseError extends Error {
-  constructor(
-    message: string,
-    public readonly pos: number,
-  ) {
-    super(`FHIRPath parse error at ${pos}: ${message}`);
+export class FhirPathParseError extends FhirDslError<"fhirpath.parse", { pos: number }> {
+  readonly kind = "fhirpath.parse" as const;
+  readonly pos: number;
+  constructor(message: string, pos: number) {
+    super(`FHIRPath parse error at ${pos}: ${message}`, { pos });
+    this.pos = pos;
   }
 }
 

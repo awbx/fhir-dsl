@@ -1,4 +1,5 @@
 import type { Resource } from "@fhir-dsl/types";
+import { FhirDslError } from "@fhir-dsl/utils";
 import type { AuthConfig } from "./auth.js";
 import type { CompiledQuery } from "./compiled-query.js";
 import {
@@ -239,24 +240,43 @@ function sleepWithAbort(ms: number, signal: AbortSignal | undefined): Promise<vo
 
 // --- Error class ---
 
-export class FhirRequestError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly statusText: string,
-    public readonly operationOutcome: unknown,
-  ) {
-    super(`FHIR request failed: ${status} ${statusText}`);
-    this.name = "FhirRequestError";
+export interface FhirRequestErrorContext {
+  readonly status: number;
+  readonly statusText: string;
+  readonly operationOutcome: unknown;
+}
+
+export class FhirRequestError extends FhirDslError<"core.request", FhirRequestErrorContext> {
+  readonly kind = "core.request" as const;
+  readonly status: number;
+  readonly statusText: string;
+  readonly operationOutcome: unknown;
+
+  constructor(status: number, statusText: string, operationOutcome: unknown) {
+    super(`FHIR request failed: ${status} ${statusText}`, { status, statusText, operationOutcome });
+    this.status = status;
+    this.statusText = statusText;
+    this.operationOutcome = operationOutcome;
   }
 }
 
-export class AsyncPollingTimeoutError extends Error {
-  constructor(
-    public readonly statusUrl: string,
-    public readonly attempts: number,
-  ) {
-    super(`Async operation did not complete after ${attempts} polls of ${statusUrl}`);
-    this.name = "AsyncPollingTimeoutError";
+export interface AsyncPollingTimeoutErrorContext {
+  readonly statusUrl: string;
+  readonly attempts: number;
+}
+
+export class AsyncPollingTimeoutError extends FhirDslError<
+  "core.async_polling_timeout",
+  AsyncPollingTimeoutErrorContext
+> {
+  readonly kind = "core.async_polling_timeout" as const;
+  readonly statusUrl: string;
+  readonly attempts: number;
+
+  constructor(statusUrl: string, attempts: number) {
+    super(`Async operation did not complete after ${attempts} polls of ${statusUrl}`, { statusUrl, attempts });
+    this.statusUrl = statusUrl;
+    this.attempts = attempts;
   }
 }
 

@@ -26,7 +26,8 @@
   },
   "dependencies": {
     "@fhir-dsl/core": "workspace:*",
-    "@fhir-dsl/types": "workspace:*"
+    "@fhir-dsl/types": "workspace:*",
+    "@fhir-dsl/utils": "workspace:*"
   },
   "files": [
     "dist"

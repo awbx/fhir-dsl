@@ -92,6 +92,9 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+      '@fhir-dsl/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@types/node':
         specifier: ^25.6.0
@@ -115,6 +118,9 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+      '@fhir-dsl/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@types/node':
         specifier: ^25.6.0
@@ -166,6 +172,9 @@ importers:
       '@fhir-dsl/types':
         specifier: workspace:*
         version: link:../types
+      '@fhir-dsl/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@types/node':
         specifier: ^25.6.0
@@ -176,6 +185,9 @@ importers:
       '@fhir-dsl/core':
         specifier: workspace:*
         version: link:../core
+      '@fhir-dsl/utils':
+        specifier: workspace:*
+        version: link:../utils
       jose:
         specifier: ^5.9.6
         version: 5.10.0
