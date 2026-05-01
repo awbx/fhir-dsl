@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.55.0] - 2026-05-01
+
+### Other
+
+- Theme 4.1 + 4.3 — deprecation pass + docs parity (`1019b30`)
+
 ## [0.54.0] - 2026-05-01
 
 ### Other
