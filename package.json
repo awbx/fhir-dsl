@@ -4,7 +4,7 @@
   "private": true,
   "description": "Type-safe FHIR client & code generator, inspired by Kysely",
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "pnpm -r --filter '!@fhir-dsl/his-demo' run build",
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "dev": "pnpm -r run dev",
@@ -19,6 +19,7 @@
     "version:bump": "node scripts/bump-version.mjs",
     "demo": "pnpm --filter @fhir-dsl/his-demo run dev",
     "demo:gen": "pnpm --filter @fhir-dsl/his-demo run gen",
+    "demo:build": "pnpm --filter @fhir-dsl/his-demo run gen && pnpm --filter @fhir-dsl/his-demo run build",
     "prepare": "husky"
   },
   "keywords": [
