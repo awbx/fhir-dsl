@@ -8,6 +8,23 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.0] - 2026-05-01
+
+### Features
+
+- add v1.0.0 plan (`4c62608`)
+
+### Other
+
+- Phase 8 streamable HTTP — GET/SSE + batched JSON-RPC (`5cb9344`)
+- deps: add @types/node devDependency to every workspace package (`63fb479`)
+- docs: badges, broaden README scope, redesign landing page (`c91642f`)
+- docs: escape &lt; in roadmap perf-baseline bullet so MDX doesn't read it as JSX (`cb39e7f`)
+- V1_PLAN: drop atomic-ehr deps, defer UCUM and downloader rework (`67a6548`)
+- docs: close pre-v1 doc gaps (`8fbf1f9`)
+- docs: tick remaining Phase 0 + 8.6 boxes (verified shipped) (`cd9152a`)
+- docs: sweep stale plan checkboxes, drop historical audit/prompts (`b0247b6`)
+
 ## [0.50.0] - 2026-04-29
 
 ### Other
