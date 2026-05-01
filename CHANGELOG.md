@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.52.0] - 2026-05-01
+
+### Other
+
+- Phase 6 deeper — per-property invariants (`433d7a0`)
+
 ## [0.51.0] - 2026-05-01
 
 ### Features
