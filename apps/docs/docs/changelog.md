@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-05-01
+
+### Other
+
+- feat: unified error handling — FhirDslError base + Result&lt;T,E> helpers (`ef0ac30`)
+
 ## [1.1.0] - 2026-05-01
 
 ### Bug Fixes
