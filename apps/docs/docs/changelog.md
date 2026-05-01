@@ -8,6 +8,13 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-05-01
+
+### Bug Fixes
+
+- fix(fhirpath): native UCUM core for Quantity comparisons (#51) (`fd17432`)
+- fix(fhirpath): resolveReference + terminology hooks (#52) (`172079d`)
+
 ## [1.0.1] - 2026-05-01
 
 ### Bug Fixes
