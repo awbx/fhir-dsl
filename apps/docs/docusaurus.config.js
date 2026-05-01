@@ -42,6 +42,13 @@ const config = {
 
   headTags: [
     {
+      tagName: 'meta',
+      attributes: {
+        name: 'google-site-verification',
+        content: 'ED4RyWoVl1m4zxyECeRoEyT3SWJwzseJ-AzEP_Nwfl4',
+      },
+    },
+    {
       tagName: 'link',
       attributes: { rel: 'preconnect', href: 'https://github.com' },
     },
