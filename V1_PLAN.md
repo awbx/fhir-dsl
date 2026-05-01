@@ -1,10 +1,15 @@
-# v1.0.0 Plan
+# v1.0.0 Plan ✅ shipped
 
-The 0.x line is feature-complete against the FHIR-compliance plan
+**Status: shipped at v1.0.0.** Every theme in this plan is checked
+off; the curated narrative for what landed lives at
+`audit/v1-changelog.md`. This file is preserved as the historical
+plan that drove the v0.51-v1.0.0 ship line.
+
+The 0.x line was feature-complete against the FHIR-compliance plan
 (see `FHIR_COMPLIANCE_PLAN.md` — every Phase 0–8 row in the shipped
 table is `[x]` as of v0.50.0). v1.0.0 is a **stability commitment**,
 not a feature ship: API freeze, semver discipline, and the small set
-of cleanups that should land before the freeze takes effect.
+of cleanups that landed before the freeze took effect.
 
 ## What v1 means
 
@@ -245,7 +250,7 @@ Documented here so they don't bleed scope:
 | v0.54.0 | 2.1 + 2.3 | ✅ Document UCUM + FHIRPath-subset gaps |
 | v0.55.0 | 4.1 + 4.3 | ✅ Deprecation pass + docs parity |
 | v0.56.0 | 4.2 + 4.4 | ✅ Perf baseline + hand-written changelog |
-| v1.0.0  |  | API freeze. Tag `surface-v1.0.0` from the locked snapshot. |
+| v1.0.0  |  | ✅ API freeze. Tagged `surface-v1.0.0` from the locked snapshot. |
 
 Each version is independently mergeable. Order is suggested, not
 required — anything can slip without blocking the rest.
