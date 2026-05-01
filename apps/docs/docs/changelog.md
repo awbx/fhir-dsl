@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.53.0] - 2026-05-01
+
+### Other
+
+- Theme 3.1 — FHIRPath setValue / createPatch (#50) (`25d5bbb`)
+
 ## [0.52.0] - 2026-05-01
 
 ### Other
