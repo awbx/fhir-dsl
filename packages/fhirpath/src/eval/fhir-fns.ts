@@ -1,6 +1,6 @@
 import type { FhirFnOp } from "../ops.js";
 import { isPrimitiveBox, unwrapPrimitive } from "./_internal/primitive-box.js";
-import type { EvalContext } from "./types.js";
+import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 
 // FHIR R5 §2.1.9.6: hasValue()/getValue() operate on a singleton whose value
 // is a FHIR primitive. Plain JS primitives qualify; a boxed primitive
@@ -29,23 +29,72 @@ export function evalFhirFn(op: FhirFnOp, collection: unknown[], ctx: EvalContext
 
     case "resolve":
       return collection.flatMap((item) => resolveOne(item, ctx));
+
+    case "conformsTo": {
+      const fn = ctx.terminology?.conformsTo;
+      if (!fn) {
+        throw new FhirPathEvaluationError(
+          "conformsTo() requires `terminology.conformsTo` on EvalOptions; supply a synchronous resolver.",
+        );
+      }
+      return collection.length === 0 ? [] : [fn(collection[0], op.profileUrl)];
+    }
+
+    case "memberOf": {
+      const fn = ctx.terminology?.memberOf;
+      if (!fn) {
+        throw new FhirPathEvaluationError(
+          "memberOf() requires `terminology.memberOf` on EvalOptions; supply a synchronous resolver.",
+        );
+      }
+      return collection.length === 0 ? [] : [fn(collection[0], op.valueSetUrl)];
+    }
+
+    case "subsumes": {
+      const fn = ctx.terminology?.subsumes;
+      if (!fn) {
+        throw new FhirPathEvaluationError(
+          "subsumes() requires `terminology.subsumes` on EvalOptions; supply a synchronous resolver.",
+        );
+      }
+      return collection.length === 0 ? [] : [fn(collection[0], op.other)];
+    }
+
+    case "subsumedBy": {
+      const fn = ctx.terminology?.subsumedBy;
+      if (!fn) {
+        throw new FhirPathEvaluationError(
+          "subsumedBy() requires `terminology.subsumedBy` on EvalOptions; supply a synchronous resolver.",
+        );
+      }
+      return collection.length === 0 ? [] : [fn(collection[0], op.other)];
+    }
   }
 }
 
 function resolveOne(item: unknown, ctx: EvalContext): unknown[] {
   const ref = extractReferenceString(item);
   if (ref === undefined) return [];
-  const bundle = ctx.rootResource as { resourceType?: unknown; entry?: unknown } | undefined;
-  if (!bundle || bundle.resourceType !== "Bundle" || !Array.isArray(bundle.entry)) return [];
 
-  for (const entry of bundle.entry as Array<Record<string, unknown>>) {
-    if (entry.fullUrl === ref) {
-      if (entry.resource !== undefined) return [entry.resource];
+  // Bundle frame first — this is the well-known FHIRPath spec form and
+  // works without any resolver wiring.
+  const bundle = ctx.rootResource as { resourceType?: unknown; entry?: unknown } | undefined;
+  if (bundle && bundle.resourceType === "Bundle" && Array.isArray(bundle.entry)) {
+    for (const entry of bundle.entry as Array<Record<string, unknown>>) {
+      if (entry.fullUrl === ref && entry.resource !== undefined) return [entry.resource];
+      const resource = entry.resource as { resourceType?: unknown; id?: unknown } | undefined;
+      if (resource && typeof resource.resourceType === "string" && typeof resource.id === "string") {
+        if (`${resource.resourceType}/${resource.id}` === ref) return [resource];
+      }
     }
-    const resource = entry.resource as { resourceType?: unknown; id?: unknown } | undefined;
-    if (resource && typeof resource.resourceType === "string" && typeof resource.id === "string") {
-      if (`${resource.resourceType}/${resource.id}` === ref) return [resource];
-    }
+  }
+
+  // Fall through to the user-supplied resolver if present. This is the
+  // path for non-Bundle evaluations (validating a single resource against
+  // its profile, for instance) where references point at a wider store.
+  if (ctx.resolveReference) {
+    const resolved = ctx.resolveReference(ref);
+    if (resolved !== undefined) return [resolved];
   }
   return [];
 }

@@ -160,7 +160,18 @@ export type AggregateOp =
 
 // --- FHIR-specific functions (§2.1.9 / FP.12) ---
 
-export type FhirFnOp = { type: "hasValue" } | { type: "getValue" } | { type: "htmlChecks" } | { type: "resolve" };
+export type FhirFnOp =
+  | { type: "hasValue" }
+  | { type: "getValue" }
+  | { type: "htmlChecks" }
+  | { type: "resolve" }
+  // Terminology-bound functions per FHIR R5 §2.1.9. Each requires an
+  // injected resolver via `EvalOptions.terminology`; without one they
+  // throw `FhirPathEvaluationError`. Issue #52.
+  | { type: "conformsTo"; profileUrl: string }
+  | { type: "memberOf"; valueSetUrl: string }
+  | { type: "subsumes"; other: string }
+  | { type: "subsumedBy"; other: string };
 
 // --- Environment / iteration variables (§5 intro / §9) ---
 

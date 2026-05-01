@@ -10,7 +10,12 @@ import { evalNav } from "./eval/nav.js";
 import { evalOperator } from "./eval/operators.js";
 import { evalString } from "./eval/strings.js";
 import { evalSubsetting } from "./eval/subsetting.js";
-import { type EvalContext, FhirPathEvaluationError, type IterationLocals } from "./eval/types.js";
+import {
+  type EvalContext,
+  FhirPathEvaluationError,
+  type IterationLocals,
+  type TerminologyResolver,
+} from "./eval/types.js";
 import { evalUtility } from "./eval/utility.js";
 import type { PathOp, VarOp } from "./ops.js";
 
@@ -29,6 +34,21 @@ export interface EvalOptions {
    * resolved from the evaluation context and do not require an env entry.
    */
   env?: Readonly<Record<string, unknown>>;
+  /**
+   * Reference resolver for `resolve()` outside a Bundle frame. The
+   * Bundle-walk path is always tried first; if it fails (or there is
+   * no Bundle), the resolver is invoked with the canonical reference
+   * string (e.g. `"Patient/123"` or a full URL). Returning `undefined`
+   * means "not found" and produces an empty result. Issue #52.
+   */
+  resolveReference?: (reference: string) => unknown;
+  /**
+   * Terminology hooks for `conformsTo`, `memberOf`, `subsumes`,
+   * `subsumedBy`. Each method is independently optional — calling a
+   * FHIRPath terminology function whose hook is missing throws
+   * `FhirPathEvaluationError`. Issue #52.
+   */
+  terminology?: TerminologyResolver;
 }
 
 const UCUM_URI = "http://unitsofmeasure.org";
@@ -72,6 +92,8 @@ function buildEvalContext(rootResource: unknown, options?: EvalOptions): EvalCon
       return runOps(innerOps, startCollection, ctx);
     },
     ...(strict !== undefined ? { strict } : {}),
+    ...(options?.resolveReference ? { resolveReference: options.resolveReference } : {}),
+    ...(options?.terminology ? { terminology: options.terminology } : {}),
   };
   return ctx;
 }
@@ -267,6 +289,10 @@ function dispatch(op: PathOp, collection: unknown[], ctx: EvalContext): unknown[
     case "getValue":
     case "htmlChecks":
     case "resolve":
+    case "conformsTo":
+    case "memberOf":
+    case "subsumes":
+    case "subsumedBy":
       return evalFhirFn(op, collection, ctx);
 
     // --- Aggregates (§5.3) ---

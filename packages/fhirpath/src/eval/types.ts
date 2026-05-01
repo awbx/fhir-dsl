@@ -39,6 +39,30 @@ export interface EvalContext {
   /** Strict mode (§4.5): multi-element singleton-eval throws instead of
    *  silently returning `[]`. Default false (matches HAPI/fhirpath.js/Firely). */
   strict?: boolean;
+  /** Optional reference resolver for `resolve()` outside a Bundle frame.
+   *  Receives the canonical reference string (e.g. `"Patient/123"` or a
+   *  full URL) and returns the target resource if it can be looked up
+   *  synchronously, otherwise `undefined`. Issue #52. */
+  resolveReference?: (reference: string) => unknown;
+  /** Terminology resolvers for `conformsTo`, `memberOf`, `subsumes`,
+   *  `subsumedBy`. Each method is independently optional — missing
+   *  methods cause `FhirPathEvaluationError` when reached. Issue #52. */
+  terminology?: TerminologyResolver;
+}
+
+/**
+ * Synchronous terminology hooks consumed by FHIRPath terminology
+ * functions. Callers that need network-bound terminology lookups should
+ * pre-resolve into a local cache and expose it through these methods.
+ *
+ * `coding` may be a Coding, a CodeableConcept, or a `code` string.
+ * `a`/`b` for subsumption are Codings or `code` strings.
+ */
+export interface TerminologyResolver {
+  conformsTo?: (resource: unknown, profileUrl: string) => boolean;
+  memberOf?: (coding: unknown, valueSetUrl: string) => boolean;
+  subsumes?: (a: unknown, b: unknown) => boolean;
+  subsumedBy?: (a: unknown, b: unknown) => boolean;
 }
 
 /** Thrown when strict-mode evaluation detects a spec violation. */

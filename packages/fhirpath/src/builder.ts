@@ -256,6 +256,28 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
         };
       }
 
+      // --- Terminology functions (FHIR R5 §2.1.9) ---
+      // Each compiles to a valid FHIRPath expression and round-trips
+      // through external evaluators. At evaluate() time they consult
+      // hooks on `EvalOptions.terminology`. Issue #52.
+
+      if (prop === "conformsTo") {
+        return (profileUrl: string) =>
+          createExprProxy(`${path}.conformsTo('${profileUrl}')`, [...ops, { type: "conformsTo", profileUrl }]);
+      }
+      if (prop === "memberOf") {
+        return (valueSetUrl: string) =>
+          createExprProxy(`${path}.memberOf('${valueSetUrl}')`, [...ops, { type: "memberOf", valueSetUrl }]);
+      }
+      if (prop === "subsumes") {
+        return (other: string) =>
+          createExprProxy(`${path}.subsumes('${other}')`, [...ops, { type: "subsumes", other }]);
+      }
+      if (prop === "subsumedBy") {
+        return (other: string) =>
+          createExprProxy(`${path}.subsumedBy('${other}')`, [...ops, { type: "subsumedBy", other }]);
+      }
+
       // --- Collection ops that take another expression ---
 
       if (prop === "union" || prop === "combine" || prop === "intersect" || prop === "exclude") {

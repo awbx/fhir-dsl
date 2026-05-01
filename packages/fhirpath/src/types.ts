@@ -335,6 +335,23 @@ export interface FhirPathUtilityOps<T> {
   today(): FhirPathExpr<string>;
 }
 
+/**
+ * Terminology functions per FHIR R5 §2.1.9. Each compiles to a valid
+ * FHIRPath expression (so it round-trips through external evaluators)
+ * and at evaluate-time consults a synchronous resolver supplied via
+ * `EvalOptions.terminology`. Issue #52.
+ */
+export interface FhirPathTerminologyOps {
+  /** True if the focus resource conforms to the given profile URL. */
+  conformsTo(profileUrl: string): FhirPathExpr<boolean>;
+  /** True if the focus Coding/CodeableConcept is a member of the named ValueSet. */
+  memberOf(valueSetUrl: string): FhirPathExpr<boolean>;
+  /** True if the focus code subsumes (is more general than) `other`. */
+  subsumes(other: string): FhirPathExpr<boolean>;
+  /** True if the focus code is subsumed by `other`. */
+  subsumedBy(other: string): FhirPathExpr<boolean>;
+}
+
 /** Composed FHIRPath operations interface */
 export interface FhirPathOps<T>
   extends FhirPathCoreOps<T>,
@@ -346,6 +363,7 @@ export interface FhirPathOps<T>
     FhirPathMathOps,
     FhirPathConversionOps,
     FhirPathBooleanOps,
+    FhirPathTerminologyOps,
     FhirPathUtilityOps<T> {}
 
 /**

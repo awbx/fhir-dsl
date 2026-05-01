@@ -1217,6 +1217,10 @@
         "kind": "other"
       },
       {
+        "name": "TerminologyResolver",
+        "kind": "other"
+      },
+      {
         "name": "Unwrap",
         "kind": "other"
       },
