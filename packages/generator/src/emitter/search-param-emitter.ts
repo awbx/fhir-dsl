@@ -79,6 +79,12 @@ export function emitSearchParams(
       if (param.type === "composite" && param.components?.length) {
         const componentEntries = param.components.map((c) => `"${c.code}": ${searchParamTypeToTs(c.type)}`).join("; ");
         paramLines.push(`  "${param.code}": CompositeParam<{ ${componentEntries} }>;`);
+      } else if (isBooleanChoiceTokenPattern(param)) {
+        // Choice-type field where the search param's expression is the
+        // boolean-existence pattern (`X.exists() and X != false`). Narrow
+        // the token to "true" | "false" so callers can't pass arbitrary
+        // strings — the server will silently never match them.
+        paramLines.push(`  "${param.code}": TokenParam<"true" | "false">;`);
       } else {
         const boundType = resolveSearchParamBinding(param, resourceType, searchParamBindingMap);
         if (boundType) {
@@ -104,6 +110,21 @@ export function emitSearchParams(
   lines.push(...paramLines);
 
   return `${lines.join("\n")}\n`;
+}
+
+/**
+ * FHIR search params over choice-type fields like `Patient.deceased[x]`
+ * use the expression `X.exists() and X != false` to mean "is the patient
+ * known-deceased". The search-param TYPE is `token`, but the only valid
+ * tokens are `"true"` and `"false"` — anything else silently never matches.
+ *
+ * Detect that exact shape so we can narrow the token to the two literal
+ * values. Whitespace and the resource prefix are tolerant.
+ */
+const BOOLEAN_CHOICE_PATTERN = /^(\S+)\.exists\(\)\s+and\s+\1\s*!=\s*false$/;
+function isBooleanChoiceTokenPattern(param: { type: string; expression?: string | undefined }): boolean {
+  if (param.type !== "token" || !param.expression) return false;
+  return BOOLEAN_CHOICE_PATTERN.test(param.expression.trim());
 }
 
 function resolveSearchParamBinding(

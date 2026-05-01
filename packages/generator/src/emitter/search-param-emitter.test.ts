@@ -185,6 +185,59 @@ describe("emitSearchParams", () => {
     expect(output).toMatch(/DomainResourceSearchParams extends CommonSearchParams \{\s*\n\s*"_text": StringParam/);
   });
 
+  it("narrows boolean-choice token search params (Patient.deceased[x] pattern) to true | false", () => {
+    // FHIR's `Patient.deceased` search param is type=token, but the
+    // expression `Patient.deceased.exists() and Patient.deceased != false`
+    // means only the token values "true" and "false" are meaningful.
+    // Issue #45.
+    const params = new Map([
+      [
+        "Patient",
+        {
+          params: [
+            {
+              code: "deceased",
+              type: "token",
+              expression: "Patient.deceased.exists() and Patient.deceased != false",
+            },
+            { code: "active", type: "token", expression: "Patient.active" },
+          ],
+        },
+      ],
+    ]);
+
+    const output = emitSearchParams(params as any);
+
+    expect(output).toContain('"deceased": TokenParam<"true" | "false">;');
+    // Sibling token params with non-boolean expressions stay loose.
+    expect(output).toContain('"active": TokenParam;');
+  });
+
+  it("does not narrow non-boolean token expressions that happen to mention false", () => {
+    // The pattern is exact: `<X>.exists() and <X> != false`. Anything
+    // else (different operator, different operand, extra clauses) keeps
+    // the looser TokenParam to avoid false-positives on unrelated codes.
+    const params = new Map([
+      [
+        "Test",
+        {
+          params: [
+            { code: "a", type: "token", expression: "Test.flag = false" },
+            { code: "b", type: "token", expression: "Test.x.exists() and Test.x != true" },
+            { code: "c", type: "token", expression: "Test.x.exists() and Test.y != false" },
+          ],
+        },
+      ],
+    ]);
+
+    const output = emitSearchParams(params as any);
+
+    expect(output).toContain('"a": TokenParam;');
+    expect(output).toContain('"b": TokenParam;');
+    expect(output).toContain('"c": TokenParam;');
+    expect(output).not.toContain('TokenParam<"true"');
+  });
+
   it("emits CommonSearchParams once and extends per resource", () => {
     const params = new Map([
       ["Patient", { params: [{ code: "name", type: "string" }] }],
