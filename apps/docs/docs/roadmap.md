@@ -12,26 +12,23 @@ The full plan lives in [`V1_PLAN.md`](https://github.com/awbx/fhir-dsl/blob/main
 
 ## Towards v1.0.0
 
-### Cleanups landing before the freeze
+### Shipped on the v0.5x line
 
-- **Streamable HTTP — finish the spec.** Today's `httpTransport()` only handles POST → single JSON response. SSE on GET (for server-initiated notifications), `text/event-stream` responses, and batched JSON-RPC arrays land before v1 so the framing isn't observable later.
-- **Per-property invariants.** Phase 6 follow-up (v0.49.0) wires invariants on root + backbone elements; deeper-level constraints flow into the same `s.refine()` machinery.
+- **v0.51.0 — Streamable HTTP MCP transport.** `httpTransport()` now implements the spec end-to-end: POST → single JSON, POST → `text/event-stream`, GET → server-initiated SSE stream, batched JSON-RPC arrays. See the [MCP guide](./guides/mcp.md).
+- **v0.52.0 — Per-property invariants.** `ElementDefinition.constraint[*]` at any nesting level (root, backbone, deep nested) now compiles into `s.refine()` wrappers around the property's own schema. See [validation](./guides/validation.md).
+- **v0.53.0 — FHIRPath `setValue` / `createPatch`** ([#50](https://github.com/awbx/fhir-dsl/issues/50)). Every typed builder leaf now exposes write helpers that return a new resource (immutable) or an RFC 6902 JSON Patch document, creating intermediate nodes per `where()` predicates.
+- **v0.54.0 — Coverage gaps documented.** UCUM ([#51](https://github.com/awbx/fhir-dsl/issues/51)) and the unimplemented FHIRPath functions ([#52](https://github.com/awbx/fhir-dsl/issues/52)) are scope-frozen for v1; the boundary is documented in `packages/fhirpath/README.md`.
 
-### Known limitations to document loudly before the freeze
+### Known limitations carried into v1
 
-- **UCUM-aware quantity ops are deferred to post-v1.** `5 'kg' = 5000 'g'` returns `false` today, FHIRPath quantity arithmetic returns empty, and `<`/`>` cast through `NaN`. A correct in-house UCUM implementation is ~2-3KLoC and out of scope for the v1 freeze; we'll document the gap and ship a v2 that addresses it driven by real user-reported failures rather than speculation.
-- **The FHIRPath evaluator covers a subset of N1.** The supported surface is the patterns FHIR invariants and common navigation actually use. The boundary will be documented in `packages/fhirpath/README.md` before the freeze so users know when to file a missing-feature ticket vs. choose a different evaluator.
+- **UCUM-aware quantity ops are not implemented.** `5 'kg' = 5000 'g'` returns `false`. Normalise units upstream of FHIRPath. Native UCUM is tracked as [#51](https://github.com/awbx/fhir-dsl/issues/51).
+- **A few FHIRPath functions compile but throw at evaluate time.** `resolve()`, `extension(url)` (full form), `descendants()`, `repeat()`, and the terminology-bound functions. Tracked as [#52](https://github.com/awbx/fhir-dsl/issues/52).
 
-### One open feature ask
+### Stability scaffolding remaining for v1
 
-- **FHIRPath `setValue()` / `createPatch()`** ([#50](https://github.com/awbx/fhir-dsl/issues/50)) — write through a typed FHIRPath builder back to a resource (or emit a JSON Patch), creating intermediate nodes per `where()` predicates.
-
-### Stability scaffolding
-
-- Deprecation pass with `@deprecated` tags + console warnings.
-- Performance baseline (generator under 30s on R4 + US Core; 1k-resource Bundle under 100ms parse+validate; FHIRPath 10k iters under 500ms).
-- Documentation parity between README, generated TSDoc, and this docs site.
-- Hand-written v1.0.0 changelog entry.
+- **v0.55.0 — Deprecation pass.** Surface diff against v0.30.0 baseline shows zero removals or renames; nothing to deprecate. Doc parity sweep across README, TSDoc, and this site.
+- **v0.56.0 — Performance baseline.** Generator under 30s on R4 + US Core; 1k-resource Bundle under 100ms parse+validate; FHIRPath 10k iters under 500ms. Numbers go in `audit/perf-baseline.md`.
+- **v1.0.0 — API freeze.** Tag `surface-v1.0.0` from the locked snapshot.
 
 ## Out of scope for v1, in scope for v2
 

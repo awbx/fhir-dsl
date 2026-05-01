@@ -143,6 +143,32 @@ const addressCount = fhirpath<"Patient">("Patient")
 
 ---
 
+## Write-back: `setValue` and `createPatch`
+
+Every typed builder leaf also exposes write helpers (v0.53.0+).
+
+```ts
+import { fhirpath } from "@fhir-dsl/fhirpath";
+import type { Patient } from "./fhir/r4";
+
+const path = fhirpath<Patient>("Patient")
+  .name.where(($this) => $this.use.eq("official")).given;
+
+// Returns a NEW resource (deep-cloned). The original is untouched.
+const next = path.setValue(patient, ["Maximilian"]);
+
+// Or emit an RFC 6902 JSON Patch document for transport / external apply.
+const patch = path.createPatch(patient, ["Maximilian"]);
+// [{ op: "add", path: "/name", value: [{ use: "official" }] },
+//  { op: "add", path: "/name/0/given", value: ["Maximilian"] }]
+```
+
+**Supported subset.** Property navigation and `where($this => $this.field.eq(value))`, plus `and`-joined conjunctions of equalities. Filter ops (`first()`, `last()`, `index()`), `or`-joined predicates, and `not` throw `FhirPathSetterError` — they cannot be inverted into a partial template.
+
+When the where()-matched element does not exist, the setter creates it with the predicate's fields populated (so `.where(use=official)` seeds `{ use: "official" }` into the array). The patch output collapses "create empty array" + "append template" into a single seeded `add` patch.
+
+---
+
 ## Gotchas
 
 - **Empty propagates.** FHIRPath returns `[]` for missing properties, which means `empty()` / `exists()` / `.eq(x)` all behave predictably — but JS `undefined` checks do not translate. Never mix `x === undefined` into a FHIRPath chain; use `.exists()` / `.empty()`.

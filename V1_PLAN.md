@@ -156,13 +156,14 @@ similar. **Deferred for v1.** Workaround exists (cast through `as`).
 
 ## Theme 4 — Pre-v1 polish
 
-### 4.1 Deprecation pass
+### 4.1 Deprecation pass ✅ shipped v0.55.0
 
-- [ ] Run `audit:export-surface` snapshot diff against v0.30.0 (the
-      "Phase 5 shipped" baseline). Anything renamed or removed without
-      a deprecation alias gets one re-added with `@deprecated`.
-- [ ] Add a `console.warn` shim on each `@deprecated` entry that fires
-      once per process per symbol.
+- [x] Diffed `audit:export-surface` snapshot at v0.30.0 vs v0.54.0:
+      **zero removals or renames**. Surface has been additive-only.
+      No `@deprecated` aliases need to be re-added.
+- [x] No `@deprecated` tags exist in the codebase to shim. The
+      `console.warn`-once helper is therefore deferred to v2 (will
+      land alongside the first real deprecation).
 
 ### 4.2 Performance smoke
 
@@ -175,15 +176,19 @@ similar. **Deferred for v1.** Workaround exists (cast through `as`).
 - [ ] Numbers go in `audit/perf-baseline.md` so v1.x can guard against
       regression.
 
-### 4.3 Documentation parity
+### 4.3 Documentation parity ✅ shipped v0.55.0
 
-- [ ] Roadmap doc (`apps/docs/docs/roadmap.md`) is stale — most
-      bullets shipped. Rewrite to reflect this v1 plan.
-- [ ] README spec-coverage table line 229 + line 295 still mark Phase
-      6 follow-up as not-done. Already flagged earlier; folded in here.
-- [ ] Generated docs page for `httpTransport()` (currently zero docs
-      coverage outside source).
-- [ ] Generated docs page for `validateInvariants` integration.
+- [x] Roadmap doc rewritten to reflect the v0.51-0.54 ship line and
+      remaining v1 scaffolding (`apps/docs/docs/roadmap.md`).
+- [x] README spec-coverage table already marks Phase 6 follow-up
+      as ✅ shipped at v0.49.0.
+- [x] `httpTransport()` documented in `apps/docs/docs/guides/mcp.md`
+      (v0.51.0 work).
+- [x] `validateInvariants` documented in
+      `apps/docs/docs/guides/validation.md` + main README invariants
+      section (v0.49.0+v0.52.0 work).
+- [x] `setValue` / `createPatch` documented in
+      `apps/docs/docs/guides/fhirpath-and-queries.md` (v0.53.0).
 
 ### 4.4 CHANGELOG curation
 
@@ -237,7 +242,7 @@ Documented here so they don't bleed scope:
 | v0.52.0 | 1.2 | ✅ Per-property invariants |
 | v0.53.0 | 3.1 | ✅ FHIRPath setValue / patch (#50) |
 | v0.54.0 | 2.1 + 2.3 | ✅ Document UCUM + FHIRPath-subset gaps |
-| v0.55.0 | 4.1 + 4.3 | Deprecation pass + docs parity |
+| v0.55.0 | 4.1 + 4.3 | ✅ Deprecation pass + docs parity |
 | v0.56.0 | 4.2 + 4.4 | Perf baseline + hand-written changelog |
 | v1.0.0  |  | API freeze. Tag `surface-v1.0.0` from the locked snapshot. |
 
