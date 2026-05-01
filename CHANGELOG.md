@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.56.0] - 2026-05-01
+
+### Other
+
+- Theme 4.2 + 4.4 — perf baseline + curated v1 changelog (`290d524`)
+
 ## [0.55.0] - 2026-05-01
 
 ### Other
