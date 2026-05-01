@@ -51,20 +51,17 @@ MCP spec:
 - [x] Batched JSON-RPC arrays accepted on POST; per-entry errors
       preserved with the right `id`.
 
-### 1.2 Per-property invariants (Phase 6 deeper)
+### 1.2 Per-property invariants (Phase 6 deeper) ✅ shipped v0.52.0
 
-Phase 6 follow-up (v0.49.0) wires invariants on root + backbone
-elements. Per-property invariants (e.g. `Identifier.value` constraints)
-flow into the same `s.refine()` machinery but the parser only walks the
-top two levels today.
-
-- [ ] Extend `parseStructureDefinition` to thread invariants down the
-      property tree.
-- [ ] Schema emitter wraps individual property schemas (not just the
-      object) when their `ElementDefinition.constraint[*]` is present.
-- [ ] Skip if it costs >10% on validator generation time.
-
-**Cost.** M — ~200 LoC, mostly tree-walking + tests.
+- [x] Extended the parser to extract property-level
+      `ElementDefinition.constraint[*]` (filtering trivially-inherited
+      `ele-1` so generated output isn't bloated by universal Element
+      constraints we already enforce structurally).
+- [x] New `refine` schema-AST node wraps the property's computed schema
+      so the predicate evaluates against the property *value* rather
+      than the parent resource. Both zod and native adapters render it.
+- [x] Per-property and resource-level invariants compose: a property
+      with its own constraint sits inside the parent's `s.refine` call.
 
 ---
 
@@ -234,7 +231,7 @@ Documented here so they don't bleed scope:
 | Version | Theme | Notes |
 |---|---|---|
 | v0.51.0 | 1.1 | ✅ Streamable HTTP — GET/SSE + batched JSON-RPC |
-| v0.52.0 | 1.2 | Per-property invariants |
+| v0.52.0 | 1.2 | ✅ Per-property invariants |
 | v0.53.0 | 3.1 | FHIRPath setValue / patch (#50) |
 | v0.54.0 | 2.1 + 2.3 | Document UCUM + FHIRPath-subset gaps |
 | v0.55.0 | 4.1 + 4.3 | Deprecation pass + docs parity |

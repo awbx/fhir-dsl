@@ -129,6 +129,12 @@ function propertyToNode(prop: PropertyModel, ctx: EmitContext): SchemaNode {
   if (prop.isArray) {
     node = prop.isRequired ? { kind: "array", inner: node, minItems: 1 } : { kind: "array", inner: node };
   }
+  // Per-property invariants — wrap with a `refine` node so the predicate
+  // evaluates against the property value (not the parent resource).
+  const invariants = toInvariantNodes(prop.invariants, ctx);
+  if (invariants) {
+    node = { kind: "refine", inner: node, invariants };
+  }
   return node;
 }
 

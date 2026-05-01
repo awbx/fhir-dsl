@@ -336,6 +336,74 @@ describe("parseStructureDefinition", () => {
     expect(bb.invariants?.[0]?.expression).toBe("name.exists() or telecom.exists()");
   });
 
+  it("attaches property-level invariants to the right PropertyModel", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          { path: "TestResource" },
+          {
+            path: "TestResource.identifier",
+            type: [{ code: "Identifier" }],
+            min: 0,
+            max: "*",
+            constraint: [
+              {
+                key: "id-2",
+                severity: "error",
+                human: "Identifier value must be present",
+                expression: "value.exists()",
+              },
+            ],
+          },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+
+    const model = parseStructureDefinition(sd, CATALOG);
+    const identifier = model.properties.find((p) => p.name === "identifier")!;
+    expect(identifier.invariants).toBeDefined();
+    expect(identifier.invariants?.[0]?.key).toBe("id-2");
+    // Resource-level invariants are unaffected.
+    expect(model.invariants).toBeUndefined();
+  });
+
+  it("filters out trivially-inherited ele-1 from property invariants", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          { path: "TestResource" },
+          {
+            path: "TestResource.identifier",
+            type: [{ code: "Identifier" }],
+            min: 0,
+            max: "*",
+            constraint: [
+              {
+                key: "ele-1",
+                severity: "error",
+                human: "All FHIR elements must have a @value or children",
+                expression: "hasValue() or (children().count() > id.count())",
+              },
+              {
+                key: "us-core-1",
+                severity: "error",
+                human: "Custom",
+                expression: "value.exists()",
+              },
+            ],
+          },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+
+    const model = parseStructureDefinition(sd, CATALOG);
+    const identifier = model.properties.find((p) => p.name === "identifier")!;
+    expect(identifier.invariants).toHaveLength(1);
+    expect(identifier.invariants?.[0]?.key).toBe("us-core-1");
+  });
+
   it("returns undefined invariants when constraint[] is missing or empty", () => {
     const noConstraints = parseStructureDefinition(makeSD(), CATALOG);
     expect(noConstraints.invariants).toBeUndefined();

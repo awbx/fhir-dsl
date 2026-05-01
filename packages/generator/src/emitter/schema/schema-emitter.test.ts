@@ -339,6 +339,42 @@ describe("emitResourceSchema invariants", () => {
     expect(out).not.toContain("s.refine");
   });
 
+  it("wraps a per-property schema in s.refine when the property has invariants", () => {
+    const model: ResourceModel = {
+      name: "Profiled",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [
+        {
+          name: "value",
+          types: [{ code: "string" }],
+          isRequired: false,
+          isArray: false,
+          isChoiceType: false,
+          invariants: [
+            {
+              key: "us-core-1",
+              severity: "error",
+              human: "Value must look like an identifier",
+              expression: "matches('^[A-Z0-9]+$')",
+            },
+          ],
+        },
+      ],
+      backboneElements: [],
+    };
+    const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(),
+    });
+    expect(out).toContain("validateInvariants");
+    expect(out).toContain("s.refine(");
+    expect(out).toContain('key: "us-core-1"');
+    // The property field still references the refined schema.
+    expect(out).toMatch(/value:\s*\{\s*schema:\s*s\.refine\(/);
+  });
+
   it("invariants: false opt-out strips constraints from emitted output", () => {
     const out = emitResourceSchema(patientWithInvariants(), nativeAdapter, {
       mapper: MAPPER,

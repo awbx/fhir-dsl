@@ -130,6 +130,7 @@ function elementToProperty(
   catalog: SpecCatalog,
 ): PropertyModel {
   const name = fhirPathToPropertyName(element.path);
+  const invariants = extractPropertyInvariants(element.constraint);
 
   if (element.contentReference && resourceName) {
     const refPath = element.contentReference.replace(/^#/, "");
@@ -142,6 +143,7 @@ function elementToProperty(
       isArray: element.max === "*",
       isChoiceType: false,
       description: element.short,
+      invariants,
     };
   }
 
@@ -156,6 +158,7 @@ function elementToProperty(
     isChoiceType: false,
     description: element.short,
     binding,
+    invariants,
   };
 }
 
@@ -163,6 +166,7 @@ function expandChoiceType(element: FhirElementDefinition, catalog: SpecCatalog):
   const baseName = fhirPathToPropertyName(element.path).replace("[x]", "");
   const types = element.type ?? [];
   const binding = extractBinding(element);
+  const invariants = extractPropertyInvariants(element.constraint);
 
   return types.map((type) => ({
     name: baseName + capitalizeFirst(resolveFhirPathType(type.code, catalog)),
@@ -172,6 +176,7 @@ function expandChoiceType(element: FhirElementDefinition, catalog: SpecCatalog):
     isChoiceType: true,
     description: element.short,
     binding,
+    invariants,
   }));
 }
 
@@ -226,6 +231,23 @@ function parseBackboneElement(
   }
 
   return { name, path: bbPath, properties, invariants };
+}
+
+/**
+ * Property-level invariants filter out trivially-inherited base constraints
+ * (`ele-1` "All FHIR elements must have a @value or children") that we already
+ * enforce structurally and that would otherwise appear on every emitted
+ * property schema.
+ */
+const TRIVIAL_INHERITED_INVARIANT_KEYS = new Set(["ele-1"]);
+
+function extractPropertyInvariants(
+  constraints: FhirElementDefinitionConstraint[] | undefined,
+): InvariantModel[] | undefined {
+  if (!constraints?.length) return undefined;
+  const filtered = constraints.filter((c) => c.key && !TRIVIAL_INHERITED_INVARIANT_KEYS.has(c.key));
+  if (!filtered.length) return undefined;
+  return extractInvariants(filtered);
 }
 
 function extractInvariants(constraints: FhirElementDefinitionConstraint[] | undefined): InvariantModel[] | undefined {

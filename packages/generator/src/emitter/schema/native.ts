@@ -70,6 +70,10 @@ function renderNode(node: SchemaNode, indent: number, rules: PrimitiveRules): st
       const obj = renderObject(node.fields, indent, rules);
       return node.invariants?.length ? wrapWithInvariants(obj, node.invariants, indent) : obj;
     }
+    case "refine": {
+      const inner = renderNode(node.inner, indent, rules);
+      return wrapWithInvariants(inner, node.invariants, indent);
+    }
   }
 }
 

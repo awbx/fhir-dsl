@@ -16,6 +16,7 @@ export type SchemaNode =
   | { kind: "union"; options: SchemaNode[] }
   | { kind: "ref"; name: string }
   | { kind: "lazy"; ref: string }
+  | { kind: "refine"; inner: SchemaNode; invariants: InvariantNode[] }
   | { kind: "unknown" };
 
 export interface ObjectField {

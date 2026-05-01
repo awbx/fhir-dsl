@@ -6,6 +6,8 @@ export interface PropertyModel {
   isChoiceType: boolean;
   description?: string | undefined;
   binding?: BindingModel | undefined;
+  /** ElementDefinition.constraint[*] declared on this property element. */
+  invariants?: InvariantModel[] | undefined;
 }
 
 export interface TypeRef {
