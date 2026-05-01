@@ -45,7 +45,10 @@
       "!**/.cache",
       "!**/.docusaurus",
       "!**/generated",
-      "!**/pnpm-lock.yaml"
+      "!**/pnpm-lock.yaml",
+      "!apps/his-demo",
+      "!**/src/fhir",
+      "!**/routeTree.gen.ts"
     ]
   }
 }

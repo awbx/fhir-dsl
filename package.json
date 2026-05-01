@@ -17,6 +17,8 @@
     "audit:export-surface:check": "node scripts/export-surface.mjs --check",
     "test:fhir-conformance": "vitest run conformance",
     "version:bump": "node scripts/bump-version.mjs",
+    "demo": "pnpm --filter @fhir-dsl/his-demo run dev",
+    "demo:gen": "pnpm --filter @fhir-dsl/his-demo run gen",
     "prepare": "husky"
   },
   "keywords": [
@@ -44,6 +46,10 @@
   "pnpm": {
     "overrides": {
       "webpack": "~5.105.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
   }
 }
