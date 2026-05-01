@@ -8,6 +8,20 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-05-01
+
+### Bug Fixes
+
+- fix(generator): break TDZ + cycles in native validator emitter (#38) (`2be6f29`)
+
+### Other
+
+- feat(apps): caduceus — HIS demo on TanStack Start (`2aa8b63`)
+- feat: add @fhir-dsl/tanstack-query — typed bindings for React Query (`fde1339`)
+- docs: deep audit and refresh against v1.x surface (`263ce46`)
+- docs(fhirpath): fix stale spec-coverage table (`b984745`)
+- docs: catch the docs site up to v1.2.0 (`85e649d`)
+
 ## [1.2.0] - 2026-05-01
 
 ### Other
