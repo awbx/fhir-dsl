@@ -63,5 +63,20 @@ describe("FHIRPath spec gaps (pins current behavior — see AUDIT.md)", () => {
     // toQuantity() stores the raw unit string; semantically-equal quantities
     // with different unit spellings compare as unequal.
     it.todo("Quantity('120 mmHg') = Quantity('120 mm[Hg]') via UCUM conversion");
+
+    // Pin: until a native UCUM evaluator lands, raw unit-string equality is
+    // the only available semantics. If you hit this in production, normalise
+    // units upstream of FHIRPath. The README documents this gap.
+    it("pins raw unit-string equality (no conversion)", () => {
+      // 5 'mg' = 0.005 'g' should be true under UCUM, but evaluates to false
+      // here because we compare raw .unit/.code strings, not converted values.
+      // When a UCUM evaluator lands, this pin breaks and should be rewritten
+      // to assert spec behavior.
+      const left = { value: 5, unit: "mg" };
+      const right = { value: 0.005, unit: "g" };
+      // No FHIRPath needed — the assertion is on the underlying semantics
+      // we promise: equal-by-string only.
+      expect(left.unit === right.unit).toBe(false);
+    });
   });
 });

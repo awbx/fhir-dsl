@@ -67,9 +67,51 @@ fhirpath<Observation>("Observation")
 // "Observation.value.ofType(Quantity).value"
 ```
 
+### Write-back: `setValue` and `createPatch`
+
+Every expression also exposes typed write helpers. `setValue` returns a new (deep-cloned) resource with the path updated; `createPatch` returns the equivalent RFC 6902 JSON Patch document.
+
+```ts
+const next = fhirpath<Patient>("Patient")
+  .name.where($this => $this.use.eq("official")).given
+  .setValue(patient, ["Maximilian"]);
+
+const patch = fhirpath<Patient>("Patient")
+  .name.where($this => $this.use.eq("official")).given
+  .createPatch(patient, ["Maximilian"]);
+// [{ op: "add", path: "/name", value: [{ use: "official" }] },
+//  { op: "add", path: "/name/0/given", value: ["Maximilian"] }]
+```
+
+Supported subset: property navigation and `where($this => $this.field.eq(value))` (plus `and`-joined conjunctions of equalities). Filter ops (`first()`, `last()`, `index()`), `or`-joined predicates, and `not` throw `FhirPathSetterError` — they can't be inverted into a partial template.
+
 ## Supported Functions
 
 Navigation, filtering, subsetting, string manipulation, math, type conversion, utility, and boolean operators — 60+ FHIRPath functions are supported. See the [FHIRPath docs](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview) for the full list.
+
+## Coverage Gaps
+
+The evaluator targets a pragmatic subset of FHIRPath. The following are intentionally **not** implemented in v1; track issues for v2 if you hit one in production:
+
+### UCUM (units of measure)
+
+`Quantity` literals and arithmetic operate on raw `value` and `unit`/`code` strings. There is **no UCUM-aware unit conversion**: `5 'mg' = 0.005 'g'` evaluates to `false`, not `true`. If you need true UCUM equivalence/conversion at evaluate time, normalise units upstream of FHIRPath.
+
+A native UCUM evaluator is tracked for post-v1 — see [#51](https://github.com/awbx/fhir-dsl/issues/51). We deliberately do not pull in third-party FHIR-ecosystem UCUM libraries as runtime deps.
+
+### FHIRPath functions not implemented at evaluate time
+
+Tracked for post-v1 in [#52](https://github.com/awbx/fhir-dsl/issues/52). These compile to a valid expression string (so they round-trip through FHIRPath servers and `.compile()`), but `evaluate()` will throw `FhirPathEvaluationError` if reached:
+
+- `resolve()` — would need a Bundle/reference resolver injected at evaluate time.
+- `extension(url)` — partial; works for the common `extension.where(url=…)` shape but not the full StructureDefinition-aware variant.
+- `descendants()` and `repeat(projection)` — recursion is bounded, but the operators are not surface-frozen for v1.
+- `conformsTo(...)`, `memberOf(...)`, `subsumes(...)`, `subsumedBy(...)` — terminology-server-bound; out of scope for the in-process evaluator.
+
+### Predicate and write-back caveats
+
+- `setValue` / `createPatch` only invert `eq`-shaped predicates joined by `and`. `or`/`not` throw deliberately — there is no unique partial template to construct.
+- `where()` predicates passed to evaluator do support the full op set; the restriction is specific to write-back.
 
 ## License
 

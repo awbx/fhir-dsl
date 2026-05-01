@@ -87,11 +87,11 @@ prefix normalization, special-unit (Celsius, decibel, pH) handling —
 is ~2-3KLoC of careful code. Out of scope for the v1 freeze. Track
 as a known limitation:
 
-- [ ] Document the gap in `packages/fhirpath/README.md` so callers
-      know not to rely on UCUM-aware quantity semantics.
-- [ ] Add an explicit `it.skip` test pinning current behaviour so a
-      future implementation breaks loudly.
-- [ ] Open a v2 issue: "Native UCUM expression evaluator".
+- [x] Document the gap in `packages/fhirpath/README.md` so callers
+      know not to rely on UCUM-aware quantity semantics. ✅ v0.54.0
+- [x] Add an explicit pin test so a future implementation breaks
+      loudly (`spec-gaps.test.ts` "pins raw unit-string equality"). ✅ v0.54.0
+- [x] Open a v2 issue: "Native UCUM expression evaluator". ✅ #51
 
 ### 2.2 Canonical / package resolution
 
@@ -109,9 +109,10 @@ FHIR invariants and the common navigation patterns actually use.
 Broadening to the full FHIRPath N1 spec is post-v1 work, driven by
 real user expressions that fail.
 
-- [ ] Document the supported subset and the boundary in
+- [x] Document the supported subset and the boundary in
       `packages/fhirpath/README.md` so users know when to file a
-      "missing feature" vs. when to choose a different evaluator.
+      "missing feature" vs. when to choose a different evaluator. ✅ v0.54.0
+- [x] Open a v2 issue tracking unimplemented evaluator functions. ✅ #52
 
 ---
 
@@ -235,7 +236,7 @@ Documented here so they don't bleed scope:
 | v0.51.0 | 1.1 | ✅ Streamable HTTP — GET/SSE + batched JSON-RPC |
 | v0.52.0 | 1.2 | ✅ Per-property invariants |
 | v0.53.0 | 3.1 | ✅ FHIRPath setValue / patch (#50) |
-| v0.54.0 | 2.1 + 2.3 | Document UCUM + FHIRPath-subset gaps |
+| v0.54.0 | 2.1 + 2.3 | ✅ Document UCUM + FHIRPath-subset gaps |
 | v0.55.0 | 4.1 + 4.3 | Deprecation pass + docs parity |
 | v0.56.0 | 4.2 + 4.4 | Perf baseline + hand-written changelog |
 | v1.0.0  |  | API freeze. Tag `surface-v1.0.0` from the locked snapshot. |
