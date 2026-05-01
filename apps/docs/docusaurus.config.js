@@ -95,6 +95,25 @@ const config = {
     },
   ],
 
+  plugins: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      /** @type {import('@easyops-cn/docusaurus-search-local').PluginOptions} */
+      ({
+        hashed: true,
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: true,
+        docsRouteBasePath: '/docs',
+        highlightSearchTermsOnTargetPage: true,
+        searchResultLimits: 10,
+        searchBarShortcut: true,
+        searchBarShortcutHint: true,
+        explicitSearchResultPath: true,
+      }),
+    ],
+  ],
+
   presets: [
     [
       'classic',
@@ -115,6 +134,9 @@ const config = {
           priority: 0.7,
           ignorePatterns: ['/tags/**'],
           filename: 'sitemap.xml',
+          // lastmod from each doc's last update (git-tracked or frontmatter).
+          // Lets Google prioritize recrawls for recently-changed pages.
+          lastmod: 'datetime',
         },
       }),
     ],
