@@ -95,9 +95,28 @@ The evaluator targets a pragmatic subset of FHIRPath. The following are intentio
 
 ### UCUM (units of measure)
 
-`Quantity` literals and arithmetic operate on raw `value` and `unit`/`code` strings. There is **no UCUM-aware unit conversion**: `5 'mg' = 0.005 'g'` evaluates to `false`, not `true`. If you need true UCUM equivalence/conversion at evaluate time, normalise units upstream of FHIRPath.
+Same-dimension `Quantity` comparisons and conversions are supported via a
+native UCUM core (no third-party deps). `5 'mg' = 0.005 'g'` evaluates
+to `true`; `5 'mg' < 1 'g'` evaluates to `true`; `convert(760, 'mmHg', 'atm')`
+returns ≈ 1.
 
-A native UCUM evaluator is tracked for post-v1 — see [#51](https://github.com/awbx/fhir-dsl/issues/51). We deliberately do not pull in third-party FHIR-ecosystem UCUM libraries as runtime deps.
+Coverage:
+
+- SI base units (m, g, s, mol, K, A, cd) and SI prefixes (n μ m c d k M G T)
+- Common derived/healthcare units: L, Hz, Pa, N, J, W, V, Ω, mmHg, bar, atm
+- Time: s, min, h, d, wk, mo, a (with conversion to seconds)
+- Compound forms with one `/`: `mg/dL`, `mmol/L`, `/min`, `kg/m2`
+- Bracketed UCUM specials: `mm[Hg]` → mmHg
+- Quantity.code is preferred over Quantity.unit for unit lookup (FHIR
+  convention: code is the UCUM symbol, unit is the human display)
+
+Out of scope (parser throws `UcumError` to avoid silent wrong answers):
+
+- Offset units: Celsius, Fahrenheit (not pure scale)
+- Logarithmic units: pH, bel, decibel, neper
+- Multi-`/` compound expressions like `mol/(L.s)`
+
+For unsupported special units, normalise upstream of FHIRPath.
 
 ### FHIRPath functions not implemented at evaluate time
 

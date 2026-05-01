@@ -1,6 +1,7 @@
 import type { CompiledPredicate, OperatorOp } from "../ops.js";
 import { fhirpathEqual } from "./_internal/equality.js";
 import { unwrapPrimitive } from "./_internal/primitive-box.js";
+import { quantityCompare, UcumError } from "./_internal/ucum.js";
 import { type EvalContext, FhirPathEvaluationError } from "./types.js";
 
 export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalContext): unknown[] {
@@ -12,16 +13,16 @@ export function evalOperator(op: OperatorOp, collection: unknown[], ctx: EvalCon
       return evalComparison(collection, op.value, ctx, (a, b) => !fhirpathEqual(a, b));
 
     case "lt":
-      return evalComparison(collection, op.value, ctx, (a, b) => (a as number) < (b as number));
+      return evalComparison(collection, op.value, ctx, (a, b) => quantityAwareLess(a, b, "<"));
 
     case "gt":
-      return evalComparison(collection, op.value, ctx, (a, b) => (a as number) > (b as number));
+      return evalComparison(collection, op.value, ctx, (a, b) => quantityAwareLess(b, a, ">"));
 
     case "lte":
-      return evalComparison(collection, op.value, ctx, (a, b) => (a as number) <= (b as number));
+      return evalComparison(collection, op.value, ctx, (a, b) => !quantityAwareLess(b, a, "<="));
 
     case "gte":
-      return evalComparison(collection, op.value, ctx, (a, b) => (a as number) >= (b as number));
+      return evalComparison(collection, op.value, ctx, (a, b) => !quantityAwareLess(a, b, ">="));
 
     case "and": {
       const left = toSingletonBoolean(collection, ctx, "and (left)");
@@ -110,6 +111,48 @@ function evalComparison(
   }
 
   return [comparator(left, right)];
+}
+
+/**
+ * Quantity-aware strict-less. Two same-dimension Quantities are compared
+ * by canonical SI value (`5 'mg' < 1 'g'` → true). Plain numbers fall
+ * through to `<`. Quantities with parseable but incompatible dimensions,
+ * or unparseable units, fall back to numeric `.value` ordering — that's
+ * not great but at least doesn't throw on healthy data; tests cover the
+ * principled-good cases. Issue #51.
+ */
+function quantityAwareLess(a: unknown, b: unknown, opName: string): boolean {
+  if (isQuantityShape(a) && isQuantityShape(b)) {
+    const ua = quantityUnit(a);
+    const ub = quantityUnit(b);
+    if (ua !== undefined && ub !== undefined) {
+      try {
+        const sign = quantityCompare({ value: a.value, unit: ua }, { value: b.value, unit: ub });
+        if (sign !== null) return sign < 0;
+      } catch (err) {
+        if (err instanceof UcumError) {
+          throw new FhirPathEvaluationError(`${opName} on Quantity: ${err.message}`);
+        }
+        throw err;
+      }
+    }
+    return (a.value as number) < (b.value as number);
+  }
+  return (a as number) < (b as number);
+}
+
+function isQuantityShape(v: unknown): v is { value: number; unit?: string; code?: string } {
+  if (v == null || typeof v !== "object" || Array.isArray(v)) return false;
+  if ("resourceType" in v) return false;
+  const obj = v as Record<string, unknown>;
+  if (typeof obj.value !== "number") return false;
+  return "unit" in obj || "code" in obj || "system" in obj;
+}
+
+function quantityUnit(q: { unit?: string; code?: string }): string | undefined {
+  if (typeof q.code === "string" && q.code !== "") return q.code;
+  if (typeof q.unit === "string" && q.unit !== "") return q.unit;
+  return undefined;
 }
 
 function isCompiledPredicate(value: unknown): value is CompiledPredicate {
