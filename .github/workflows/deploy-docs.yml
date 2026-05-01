@@ -75,7 +75,7 @@ jobs:
           SITEMAP=https://awbx.github.io/fhir-dsl/sitemap.xml
           # Wait briefly for the deploy edge to flush, then extract URLs from sitemap.
           sleep 30
-          URLS=$(curl -sf "$SITEMAP" | grep -oE '<loc>[^<]+</loc>' | sed 's:</?loc>::g')
+          URLS=$(curl -sf "$SITEMAP" | grep -oE '<loc>[^<]+</loc>' | sed -E 's|</?loc>||g')
           if [ -z "$URLS" ]; then
             echo "No URLs found in sitemap; skipping IndexNow notify."
             exit 0
