@@ -169,6 +169,59 @@ When the where()-matched element does not exist, the setter creates it with the 
 
 ---
 
+## Quantity comparisons (UCUM-aware, v1.1.0+)
+
+`Quantity` equality and ordering go through a native UCUM core with no third-party dependency. Same-dimension values compare by their canonical SI value:
+
+```ts
+import { fhirpath } from "@fhir-dsl/fhirpath";
+
+const obs = {
+  resourceType: "Observation" as const,
+  valueQuantity: { value: 5, unit: "mg" },
+};
+
+fhirpath<typeof obs>("Observation")
+  .valueQuantity.where(($) => $.eq({ value: 0.005, unit: "g" }))
+  .exists()
+  .evaluate(obs);
+// → [true]
+```
+
+**Coverage** — SI base units + prefixes, common healthcare units (`mmHg`, `mmol/L`, `mg/dL`, `[iU]`…), single-`/` compounds (`kg/m2`, `/min`), and the bracketed `mm[Hg]` form. `Quantity.code` is preferred over `Quantity.unit` when both are present (FHIR convention: code is the UCUM symbol, unit is the human display).
+
+**Out of scope** — Offset units (Celsius, Fahrenheit) and logarithmic units (pH, decibel) throw `UcumError` at parse time so silent wrong answers don't slip through. Multi-`/` compound expressions like `mol/(L.s)` are not parsed; normalise upstream of FHIRPath if you hit them.
+
+---
+
+## Resolve and terminology hooks (v1.1.0+)
+
+`resolve()` consults `EvalOptions.resolveReference` after the Bundle-walk path misses, so non-Bundle frames can still resolve references against an external store:
+
+```ts
+fhirpath<Observation>("Observation")
+  .performer.resolve()
+  .evaluate(obs, {
+    resolveReference: (ref) => myCache.get(ref) ?? undefined,
+  });
+```
+
+The terminology functions (`conformsTo`, `memberOf`, `subsumes`, `subsumedBy`) compile to spec-correct FHIRPath strings — so they round-trip through external evaluators — and at evaluate-time consult `EvalOptions.terminology`:
+
+```ts
+fhirpath<Patient>("Patient")
+  .conformsTo("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+  .evaluate(patient, {
+    terminology: {
+      conformsTo: (resource, profileUrl) => myValidator(resource, profileUrl),
+    },
+  });
+```
+
+All resolver methods are synchronous; pre-resolve any network-bound terminology lookups into a local cache and expose them through these hooks. Missing methods throw `FhirPathEvaluationError` with a clear message naming the option field to populate.
+
+---
+
 ## Gotchas
 
 - **Empty propagates.** FHIRPath returns `[]` for missing properties, which means `empty()` / `exists()` / `.eq(x)` all behave predictably — but JS `undefined` checks do not translate. Never mix `x === undefined` into a FHIRPath chain; use `.exists()` / `.empty()`.
@@ -183,5 +236,6 @@ When the where()-matched element does not exist, the setter creates it with the 
 
 - [`@fhir-dsl/fhirpath` API reference](../api/fhirpath.md)
 - [`@fhir-dsl/core` API reference](../api/core.md) — see `.filter()`, `.where()`, `.select()`
+- [Error handling](./error-handling.md) — `FhirPathEvaluationError`, `FhirPathSetterError`, `UcumError` all extend `FhirDslError` with the `kind` discriminator and `Result<T, E>` integration
 - [Edge cases](../edge-cases.md) — condition-tree compile paths and `_filter` server compat
 - [LLM usage guide](../llm-usage.md) — safe generation patterns when producing this combination
