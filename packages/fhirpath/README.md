@@ -2,7 +2,7 @@
 
 Type-safe FHIRPath expression builder for TypeScript with IDE autocomplete, compilation to FHIRPath strings, and runtime evaluation.
 
-Covers ~85% of the official FHIRPath spec including 60+ functions, expression predicates, and operators.
+Covers the pragmatic subset of the official FHIRPath spec that FHIR invariants and common navigation actually exercise — see the [coverage table](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview#fhirpath-spec-coverage) for the canonical breakdown. Plus FHIR-specific extensions: native UCUM-aware `Quantity`, terminology resolver hooks, `setValue` / `createPatch` write-back, and synchronous `resolve()` against a Bundle frame or external store.
 
 ## Install
 
@@ -85,52 +85,49 @@ const patch = fhirpath<Patient>("Patient")
 
 Supported subset: property navigation and `where($this => $this.field.eq(value))` (plus `and`-joined conjunctions of equalities). Filter ops (`first()`, `last()`, `index()`), `or`-joined predicates, and `not` throw `FhirPathSetterError` — they can't be inverted into a partial template.
 
-## Supported Functions
+## Evaluator hooks
 
-Navigation, filtering, subsetting, string manipulation, math, type conversion, utility, and boolean operators — 60+ FHIRPath functions are supported. See the [FHIRPath docs](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview) for the full list.
+`expr.evaluate(resource, options?)` accepts an `EvalOptions` argument so non-Bundle frames can still resolve references and terminology calls without a network round-trip:
 
-## Coverage Gaps
+```ts
+fhirpath<Observation>("Observation")
+  .performer.resolve()
+  .evaluate(obs, {
+    resolveReference: (ref) => myCache.get(ref) ?? undefined,
+  });
 
-The evaluator targets a pragmatic subset of FHIRPath. The following are intentionally **not** implemented in v1; track issues for v2 if you hit one in production:
+fhirpath<Patient>("Patient")
+  .conformsTo("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+  .evaluate(patient, {
+    terminology: {
+      conformsTo: (resource, profileUrl) => myValidator(resource, profileUrl),
+    },
+  });
+```
 
-### UCUM (units of measure)
+All resolver methods are synchronous — pre-resolve any network-bound lookups into a local cache. `resolve()` consults `EvalOptions.resolveReference` only after the Bundle-walk path misses, so Bundle-rooted evaluations still work without configuration. `conformsTo` / `memberOf` / `subsumes` / `subsumedBy` compile to spec-correct strings (they round-trip through external evaluators) and dispatch through `EvalOptions.terminology` at evaluate-time. Missing methods raise `FhirPathEvaluationError` naming the option field to populate.
 
-Same-dimension `Quantity` comparisons and conversions are supported via a
-native UCUM core (no third-party deps). `5 'mg' = 0.005 'g'` evaluates
-to `true`; `5 'mg' < 1 'g'` evaluates to `true`; `convert(760, 'mmHg', 'atm')`
-returns ≈ 1.
+## Error classes
 
-Coverage:
+Every error this package raises extends [`FhirDslError`](https://awbx.github.io/fhir-dsl/docs/guides/error-handling) — pattern-match on `kind`, read structured `context`, and serialise with `toJSON()`:
 
-- SI base units (m, g, s, mol, K, A, cd) and SI prefixes (n μ m c d k M G T)
-- Common derived/healthcare units: L, Hz, Pa, N, J, W, V, Ω, mmHg, bar, atm
-- Time: s, min, h, d, wk, mo, a (with conversion to seconds)
-- Compound forms with one `/`: `mg/dL`, `mmol/L`, `/min`, `kg/m2`
-- Bracketed UCUM specials: `mm[Hg]` → mmHg
-- Quantity.code is preferred over Quantity.unit for unit lookup (FHIR
-  convention: code is the UCUM symbol, unit is the human display)
+| Class | `kind` | When |
+|---|---|---|
+| `FhirPathEvaluationError` | `fhirpath.evaluation` | Runtime evaluator errors (missing terminology resolver, malformed input, etc.) |
+| `FhirPathSetterError` | `fhirpath.setter` | `setValue` / `createPatch` invoked on a non-invertible path |
+| `FhirPathInvariantLexerError` | `fhirpath.invariant.lexer` | `compileInvariant()` lex failure |
+| `FhirPathInvariantParseError` | `fhirpath.invariant.parser` | `compileInvariant()` parse failure |
+| `FhirPathInvariantEvalError` | `fhirpath.invariant.evaluator` | `validateInvariants()` runtime failure |
+| `UcumError` | `fhirpath.ucum` | UCUM parse/convert failures (offset units, multi-`/`, dimension mismatch) |
 
-Out of scope (parser throws `UcumError` to avoid silent wrong answers):
+## Coverage gaps
 
-- Offset units: Celsius, Fahrenheit (not pure scale)
-- Logarithmic units: pH, bel, decibel, neper
-- Multi-`/` compound expressions like `mol/(L.s)`
+The full coverage table — including the FHIR extensions (UCUM, write-back, `resolve()`, terminology) — lives in [the spec-coverage docs](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview#fhirpath-spec-coverage). Items still pending:
 
-For unsupported special units, normalise upstream of FHIRPath.
-
-### FHIRPath functions not implemented at evaluate time
-
-Tracked for post-v1 in [#52](https://github.com/awbx/fhir-dsl/issues/52). These compile to a valid expression string (so they round-trip through FHIRPath servers and `.compile()`), but `evaluate()` will throw `FhirPathEvaluationError` if reached:
-
-- `resolve()` — would need a Bundle/reference resolver injected at evaluate time.
-- `extension(url)` — partial; works for the common `extension.where(url=…)` shape but not the full StructureDefinition-aware variant.
-- `descendants()` and `repeat(projection)` — recursion is bounded, but the operators are not surface-frozen for v1.
-- `conformsTo(...)`, `memberOf(...)`, `subsumes(...)`, `subsumedBy(...)` — terminology-server-bound; out of scope for the in-process evaluator.
-
-### Predicate and write-back caveats
-
-- `setValue` / `createPatch` only invert `eq`-shaped predicates joined by `and`. `or`/`not` throw deliberately — there is no unique partial template to construct.
-- `where()` predicates passed to evaluator do support the full op set; the restriction is specific to write-back.
+- **`~` / `!~` (equivalence operators)** — tracked at [`spec-compliance.test.ts FP-EQ-003`](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts).
+- **UCUM offset / logarithmic units** — Celsius / Fahrenheit / pH / bel / dB throw `UcumError` at parse time so silent wrong answers don't slip through. Normalise upstream.
+- **UCUM multi-`/` compound expressions** — `mol/(L.s)` is not parsed; single-`/` (`mg/dL`, `kg/m2`, `/min`) covers every healthcare case in current scope.
+- **`setValue` / `createPatch`** only invert `eq`-shaped predicates joined by `and`. `or`-joined predicates, `not`, and filter ops (`first()`, `last()`, `index()`) throw `FhirPathSetterError` — there is no unique partial template to construct. Predicates passed to `evaluate()` have no such restriction.
 
 ## License
 

@@ -16,9 +16,13 @@ fhir-dsl/
 │   ├── core/           # @fhir-dsl/core - Query builder DSL
 │   ├── runtime/        # @fhir-dsl/runtime - HTTP executor
 │   ├── types/          # @fhir-dsl/types - Base type definitions
+│   ├── fhirpath/       # @fhir-dsl/fhirpath - Typed FHIRPath builder + evaluator
+│   ├── terminology/    # @fhir-dsl/terminology - ValueSet/CodeSystem expansion + validate-code
+│   ├── smart/          # @fhir-dsl/smart - SMART-on-FHIR auth (PKCE, backend-services)
+│   ├── mcp/            # @fhir-dsl/mcp - Model Context Protocol server
 │   ├── generator/      # @fhir-dsl/generator - Code generation engine
 │   ├── cli/            # @fhir-dsl/cli - Command-line interface
-│   ├── utils/          # @fhir-dsl/utils - Shared utilities
+│   ├── utils/          # @fhir-dsl/utils - Shared error/Result toolkit + helpers
 │   └── example/        # Example project with generated types
 ├── package.json        # Workspace root
 ├── pnpm-workspace.yaml # Workspace config
@@ -36,7 +40,7 @@ fhir-dsl/
 
 ```bash
 # Clone the repo
-git clone https://github.com/abdel/fhir-dsl.git
+git clone https://github.com/awbx/fhir-dsl.git
 cd fhir-dsl
 
 # Install dependencies

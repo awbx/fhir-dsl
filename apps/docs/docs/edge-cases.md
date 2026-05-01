@@ -452,20 +452,21 @@ the `FhirError` / `FhirRequestError`. This is deliberate — we don't
 fail on non-JSON errors, but we don't pretend they're OperationOutcomes
 either.
 
-**Workaround.**
+**Workaround.** Both classes extend [`FhirDslError`](./guides/error-handling.md) (`FhirError` has `kind: "runtime.fhir"`, `FhirRequestError` has `kind: "core.request"`) — match on `kind` and read the structured `context`:
 
 ```ts
-import { FhirRequestError } from "@fhir-dsl/core";
+import { isFhirDslError } from "@fhir-dsl/utils";
 
 try {
   await fhir.read("Patient", id).execute();
 } catch (e) {
-  if (e instanceof FhirRequestError) {
-    const outcome = (e.body as { issue?: unknown[] } | undefined)?.issue;
+  if (isFhirDslError(e) && (e.kind === "runtime.fhir" || e.kind === "core.request")) {
+    const outcome = (e.context.operationOutcome as { issue?: unknown[] } | undefined)?.issue;
     if (outcome) console.error("OperationOutcome:", outcome);
-    else console.error("Raw body:", (e as { responseText?: string }).responseText);
+    else console.error("Raw body:", (e.context as { responseText?: string }).responseText);
+  } else {
+    throw e;
   }
-  throw e;
 }
 ```
 

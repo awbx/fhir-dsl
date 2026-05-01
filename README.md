@@ -10,7 +10,7 @@
 
 **The TypeScript FHIR toolchain.** A typed query builder ([Kysely](https://github.com/kysely-org/kysely)-inspired), a code generator that emits resources / profiles / ValueSets / search-param types from any FHIR version or IG, a FHIRPath builder + invariant evaluator, optional [Standard Schema V1](https://standardschema.dev/) validators (zod or zero-dep native), SMART on FHIR v2 auth, a terminology engine with real `is-a` / `descendent-of` / regex filters, and an MCP server that exposes any FHIR endpoint to an LLM agent.
 
-Compile-time type safety for resources, search parameters, profiles, slices, includes, `_has`, chained params, and FHIRPath expressions — no more string guessing, no runtime dependencies in the core DSL beyond `@fhir-dsl/types`.
+Compile-time type safety for resources, search parameters, profiles, slices, includes, `_has`, chained params, and FHIRPath expressions — no more string guessing, and no third-party runtime dependencies (the core DSL pulls only `@fhir-dsl/types` and `@fhir-dsl/utils` for the shared error contract; UCUM and Result/Effect-style helpers ship in-house).
 
 **[Documentation](https://awbx.github.io/fhir-dsl/)** | **[Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start)** | **[CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage)** | **[Roadmap](https://awbx.github.io/fhir-dsl/docs/roadmap)**
 
@@ -25,12 +25,13 @@ Working with FHIR in TypeScript typically means juggling untyped JSON, memorizin
 ## Features
 
 - **Type-safe query builder** — Autocomplete and compile-time checks for resource types, search parameters, operators, includes, reverse includes, chained parameters, composite parameters, and `_has` filtering. See [DSL Syntax](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax).
-- **FHIRPath expression builder** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers the core of the FHIRPath N1 spec (70+ functions across navigation, filtering, subsetting, combining, conversions, strings, math, arithmetic, existence, boolean logic, type operators, tree navigation, aggregates, environment variables, and FHIR-specific functions like `extension()` and `resolve()`). See [Spec Coverage](#spec-coverage) below.
+- **FHIRPath expression builder + evaluator** — Type-safe FHIRPath expressions with autocomplete, compilation to FHIRPath strings, and runtime evaluation. Covers the pragmatic subset of the FHIRPath N1 spec that FHIR invariants and common navigation actually exercise (see the [coverage table](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview#fhirpath-spec-coverage)). Plus FHIR-specific extensions: native UCUM-aware `Quantity` (`5 'mg' = 0.005 'g'` is `true`), terminology resolver hooks (`conformsTo` / `memberOf` / `subsumes` / `subsumedBy`), `setValue` / `createPatch` write-back (RFC 6902), and a synchronous `resolve()` against a Bundle frame or external store.
 - **Profile-aware queries** — Query against US Core or any custom Implementation Guide with automatic type narrowing to profile-specific interfaces.
 - **Code generation from spec** — Generate TypeScript types from any FHIR version (R4, R4B, R5, R6) and any published IG. See [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage).
 - **Runtime validation (optional)** — Opt in with `--validator native|zod` to emit [Standard Schema V1](https://standardschema.dev/) validators for every resource, datatype, binding, and profile. Chain `.validate()` on any read/search for client-side schema checks; server-side FHIR `$validate` is a separate operation invoked via `client.operation("$validate", ...)`. See [Validation](https://awbx.github.io/fhir-dsl/docs/guides/validation).
+- **Unified error handling** — Every error in the monorepo extends `FhirDslError` with a `kind` discriminator, structured `context`, ES2022 `cause` chain, and `toJSON()` for transport-safe serialisation. A `Result<T, E>` + `tryAsync` toolkit gives Effect-style typed handling without `try`/`catch`. See [Error Handling](https://awbx.github.io/fhir-dsl/docs/guides/error-handling).
 - **Immutable builders** — Every query method returns a new builder instance, safe to reuse, fork, and compose.
-- **Zero runtime dependencies** — Core DSL depends only on `@fhir-dsl/types`.
+- **No third-party runtime deps** — Core DSL depends only on `@fhir-dsl/types` and `@fhir-dsl/utils`. UCUM, terminology, FHIRPath, and the error contract are all in-house.
 - **Dual ESM/CJS** — Works in any Node.js environment out of the box.
 
 ## Who Is This For?
@@ -53,7 +54,7 @@ Working with FHIR in TypeScript typically means juggling untyped JSON, memorizin
 | [`@fhir-dsl/terminology`](./packages/terminology) | CodeSystem hierarchy + ValueSet filter engine (`is-a`, `descendent-of`, `regex`) | Used internally by the generator; also usable standalone |
 | [`@fhir-dsl/smart`](./packages/smart) | SMART on FHIR v2 — PKCE-S256, backend services, scope DSL | Only when integrating with SMART-secured FHIR servers |
 | [`@fhir-dsl/mcp`](./packages/mcp) | MCP server: ~10 generic FHIR verbs as tools, pluggable auth/audit | When exposing a FHIR endpoint to an LLM agent |
-| [`@fhir-dsl/utils`](./packages/utils) | Shared utilities | Only if building custom tooling |
+| [`@fhir-dsl/utils`](./packages/utils) | Cross-package error contract (`FhirDslError` + `Result<T, E>` + `tryAsync` / `match` / `mapErr` / `mapOk`), leveled logger, naming helpers | Re-exported by every other package; install directly only when extending the contract from your own code |
 
 For detailed installation instructions, see the [Installation Guide](https://awbx.github.io/fhir-dsl/docs/getting-started/installation).
 
@@ -235,6 +236,11 @@ fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.
 | MCP server generation — generator + CLI integration | ✅ | `fhir-gen generate --mcp <out>` emits a server scaffold; `fhir-gen mcp <baseUrl>` launches one inline (Phases 8.8+8.9, v0.46.0+v0.47.0). |
 | MCP server generation — streamable HTTP transport | ✅ | `httpTransport()` accepts JSON-RPC over POST with optional CORS, auth hook, body cap, and external-server mounting (Phase 8 streamable HTTP, v0.50.0). |
 | Phase 6 follow-up — invariants in emitted validators | ✅ | `--validator` automatically wires `validateInvariants` via `s.refine` (native) / `.superRefine` (zod); opt out with `--no-invariants` (v0.49.0). |
+| FHIRPath — write-back (`setValue` / `createPatch`) | ✅ | Every typed leaf inverts an `eq`-shaped predicate path into a deep-cloned next resource or an RFC 6902 JSON Patch (v0.53.0+). |
+| FHIRPath — UCUM-aware `Quantity` | ✅ | Same-dimension equality + ordering via a native UCUM core (SI base + prefixes, common healthcare units, single-`/` compounds, bracketed `mm[Hg]`); offset / log / multi-`/` units throw `UcumError` instead of silent wrong answers (v1.1.0). |
+| FHIRPath — `resolve()` + terminology resolver hooks | ✅ | `resolve()` walks the rootResource Bundle and falls through to `EvalOptions.resolveReference`; `conformsTo` / `memberOf` / `subsumes` / `subsumedBy` compile to spec strings and dispatch through `EvalOptions.terminology` (v1.1.0). |
+| Cross-package error contract | ✅ | Every error in `@fhir-dsl/*` extends `FhirDslError` (`kind` discriminator, structured `context`, ES2022 `cause` chain, `toJSON()`); paired with a `Result<T, E>` + `tryAsync` / `match` / `mapErr` / `mapOk` toolkit for Effect-style typed handling (v1.2.0). |
+| Public API surface frozen | ✅ | v1.0.0 shipped 2026-05-01. Surface across all 10 packages locked at the [`surface-v1.0.0`](https://github.com/awbx/fhir-dsl/releases/tag/surface-v1.0.0) tag — minor releases add to it, patch releases fix bugs in it, breaking changes wait for v2. |
 
 Drift between this table and the code is caught by `pnpm audit:export-surface` — every PR that changes the public surface must refresh `.surface-snapshot.json`.
 
@@ -448,25 +454,31 @@ pnpm test        # Run tests
 ```
 fhir-dsl/
   packages/
-    types/       # FHIR type definitions (generated + hand-written)
-    core/        # Query builder DSL - the main user-facing API
-    runtime/     # HTTP executor, pagination, error handling
-    fhirpath/    # Type-safe FHIRPath expression builder
-    generator/   # Parses StructureDefinitions, emits TypeScript
-    cli/         # CLI wrapping the generator
-    utils/       # Shared naming/type-mapping utilities
+    types/         # FHIR type definitions (generated + hand-written)
+    utils/         # Cross-package error contract + Result toolkit + naming helpers
+    core/          # Query builder DSL - the main user-facing API
+    runtime/       # HTTP executor, pagination, error handling
+    fhirpath/      # Type-safe FHIRPath expression builder + evaluator (UCUM, write-back, terminology hooks)
+    terminology/   # ValueSet / CodeSystem expansion + validate-code engine
+    smart/         # SMART-on-FHIR v2 (PKCE-S256, backend-services, patient-launch)
+    mcp/           # MCP server: ~10 generic FHIR verbs as tools, pluggable auth/audit
+    generator/     # Parses StructureDefinitions, emits TypeScript
+    cli/           # CLI wrapping the generator
 ```
 
 **Dependency graph:**
 
 ```
-cli -> generator -> utils
-core -> types
-fhirpath -> types
-runtime -> core, types
+cli      -> generator -> utils, types
+core     -> utils, types
+runtime  -> core, utils, types
+fhirpath -> utils, types
+terminology -> utils, types
+smart    -> utils
+mcp      -> core, runtime, fhirpath, smart (lazy), utils, types
 ```
 
-Core and CLI are fully decoupled. Runtime does not depend on CLI or generator. For more details, see the [Architecture Overview](https://awbx.github.io/fhir-dsl/docs/architecture/overview).
+Core and CLI are fully decoupled. Runtime does not depend on CLI or generator. The `@fhir-dsl/smart` import in `mcp` is lazy-loaded — bearer-only deployments never pay the `jose` cost. For more details, see the [Architecture Overview](https://awbx.github.io/fhir-dsl/docs/architecture/overview).
 
 ## Documentation
 
@@ -477,6 +489,8 @@ Full documentation is available at **[awbx.github.io/fhir-dsl](https://awbx.gith
 - [Quick Start](https://awbx.github.io/fhir-dsl/docs/getting-started/quick-start) — Get up and running
 - [Core Concepts](https://awbx.github.io/fhir-dsl/docs/core-concepts/overview) — Resources, DSL syntax, and how the type system works
 - [DSL Syntax Reference](https://awbx.github.io/fhir-dsl/docs/core-concepts/dsl-syntax) — Full API for search, read, transactions, and profiles
+- [Error Handling](https://awbx.github.io/fhir-dsl/docs/guides/error-handling) — `FhirDslError` contract, `Result<T, E>` toolkit, `tryAsync` / `match` / `mapErr`
+- [FHIRPath + Query Builder](https://awbx.github.io/fhir-dsl/docs/guides/fhirpath-and-queries) — Server-side `_filter`, post-fetch projection, write-back, terminology hooks, UCUM-aware Quantity
 - [Query Patterns](https://awbx.github.io/fhir-dsl/docs/examples/queries) — Common query examples
 - [Working with Patients](https://awbx.github.io/fhir-dsl/docs/examples/patient) — Patient-focused examples
 - [CLI Usage](https://awbx.github.io/fhir-dsl/docs/cli/usage) — Code generation options and output structure

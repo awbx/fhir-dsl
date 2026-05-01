@@ -152,19 +152,35 @@ const smart = new SmartClient({
 
 ## Error Handling
 
-- `SmartAuthError` — raised by the token endpoint with RFC 6749 `error` / `error_description` fields.
-- `DiscoveryError` — raised when `.well-known/smart-configuration` can't be fetched or parsed.
+Both error classes extend [`FhirDslError`](https://awbx.github.io/fhir-dsl/docs/guides/error-handling) — pattern-match on `kind` and read structured `context` instead of parsing `.message`. `toJSON()` gives a transport-safe payload for logs and error trackers.
+
+| Class | `kind` | When |
+|---|---|---|
+| `SmartAuthError` | `smart.auth` | RFC 6749 §5.2 token-endpoint error response (`context.error` is the canonical OAuth2 code: `invalid_grant`, `invalid_client`, …) |
+| `DiscoveryError` | `smart.discovery` | `.well-known/smart-configuration` unreachable, malformed, or missing required endpoints |
 
 ```ts
-import { SmartAuthError } from "@fhir-dsl/smart";
+import { isFhirDslError } from "@fhir-dsl/utils";
 
 try {
   await exchangeCode({ /* … */ });
 } catch (err) {
-  if (err instanceof SmartAuthError) {
-    console.error(err.error, err.errorDescription, err.status);
+  if (isFhirDslError(err) && err.kind === "smart.auth") {
+    // err.context.error is the RFC 6749 code: "invalid_grant", "invalid_client", …
+    if (err.context.error === "invalid_grant") promptReauth();
+    else throw err;
   }
 }
+```
+
+Or skip the `try`/`catch` and use the `Result` toolkit directly:
+
+```ts
+import { tryAsync } from "@fhir-dsl/utils";
+import { SmartAuthError } from "@fhir-dsl/smart";
+
+const r = await tryAsync<TokenResponse, SmartAuthError>(() => exchangeCode({ /* … */ }));
+if (!r.ok) console.error(r.error.kind, r.error.context.error);
 ```
 
 ## Documentation

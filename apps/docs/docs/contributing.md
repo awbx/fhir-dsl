@@ -19,7 +19,7 @@ We welcome contributions to fhir-dsl. This guide covers how to set up the projec
 ### Setup
 
 ```bash
-git clone https://github.com/abdel/fhir-dsl.git
+git clone https://github.com/awbx/fhir-dsl.git
 cd fhir-dsl
 pnpm install
 pnpm build
@@ -50,9 +50,13 @@ packages/
   core/        # Query builder (most contributions go here)
   runtime/     # HTTP executor
   types/       # Base FHIR types
+  fhirpath/    # Typed FHIRPath builder + evaluator
+  terminology/ # ValueSet/CodeSystem expansion + validate-code
+  smart/       # SMART-on-FHIR auth (PKCE, backend-services)
+  mcp/         # Model Context Protocol server
   generator/   # Code generation
   cli/         # CLI wrapper
-  utils/       # Shared utilities
+  utils/       # Shared error/Result toolkit + helpers
 ```
 
 ### 3. Run Tests

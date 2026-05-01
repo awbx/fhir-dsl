@@ -222,6 +222,52 @@ const smartConfig = await discoverSmartConfiguration("https://fhir.example/r4");
 
 ---
 
+### `SmartAuthError` / `DiscoveryError`
+**Signature**
+```ts
+class SmartAuthError extends FhirDslError<"smart.auth", SmartAuthErrorContext> {
+  readonly kind: "smart.auth";
+  readonly error: string;             // RFC 6749 §5.2 token-endpoint error code
+  readonly errorDescription?: string;
+  readonly status?: number;
+  readonly body?: unknown;
+}
+interface SmartAuthErrorContext {
+  readonly error: string;
+  readonly errorDescription?: string;
+  readonly status?: number;
+  readonly body?: unknown;
+}
+
+class DiscoveryError extends FhirDslError<"smart.discovery", DiscoveryErrorContext> {
+  readonly kind: "smart.discovery";
+  readonly url: string;
+  readonly status?: number;
+}
+interface DiscoveryErrorContext {
+  readonly url: string;
+  readonly status?: number;
+}
+```
+**Example**
+```ts
+import { isFhirDslError } from "@fhir-dsl/utils";
+
+try {
+  await exchangeCode({ smartConfig, clientId, redirectUri, code, codeVerifier });
+} catch (err) {
+  if (isFhirDslError(err) && err.kind === "smart.auth") {
+    // err.context.error is the RFC 6749 code: "invalid_grant", "invalid_client", …
+    if (err.context.error === "invalid_grant") promptReauth();
+    else throw err;
+  }
+}
+```
+
+**Notes** — Both extend [`FhirDslError`](./utils.md#fhirdslerror); pattern-match on `kind` and read the structured `context` instead of parsing `.message`. `SmartAuthError` mirrors the [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2) token-endpoint error response — the `error` field is the canonical OAuth2 code (`invalid_grant`, `invalid_client`, `unauthorized_client`, …), not the human description.
+
+---
+
 ### PKCE primitives — `generateCodeVerifier`, `codeChallengeS256`, `generateState`, `base64UrlEncode`
 **Signature**
 ```ts

@@ -62,6 +62,41 @@ const profile = parseProfile(profileDef);
 const searchParams = parseSearchParameters(searchParamDefs);
 ```
 
+### Emit a runnable MCP server alongside the typed client
+
+Pass `mcp: { outDir }` (or `--mcp <dir>` from the CLI) to scaffold a full MCP server next to the generated types — `server.ts` shim, `mcp.config.json` seeded with the IG's resource types, and a README. Launch it with `FHIR_BASE_URL=… node mcp-server/server.ts`.
+
+```ts
+await generate({
+  version: "r4",
+  outDir: "./src/fhir",
+  igs: ["hl7.fhir.us.core@6.1.0"],
+  mcp: { outDir: "./mcp-server" },
+});
+```
+
+### Standard Schema validators with auto-wired invariants
+
+Pass `validator: "native" | "zod"` to emit Standard Schema V1 validators for every resource, datatype, binding, and profile. From v0.49.0 onward, every emitted schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds — so `.validate()` rejects resources that pass the shape check but fail an invariant. Opt out with `noInvariants: true`. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency when invariants are wired.
+
+```ts
+await generate({
+  version: "r4",
+  outDir: "./src/fhir",
+  validator: "native",          // or "zod"
+  strictExtensible: false,      // treat extensible bindings as open (default) vs. closed
+  // noInvariants: true,        // optional: skip the FHIRPath invariant wiring
+});
+```
+
+### Boolean-existence search-param emitter (v1.0.1, fixes #45)
+
+When a search parameter's expression matches the `<X>.exists() and <X> != false` pattern (FHIR's idiomatic "is the boolean true?" shape — used by `Patient.active`, `Account.active`, …), the emitter now narrows the typed value to `TokenParam<"true" | "false">` instead of leaving it as a free-form token. Round-trip with `.where("active", "eq", "true")` is type-safe.
+
+### Profile slice → typed extension narrowing (v1.0.1, fixes #46)
+
+Profiles are emitted with an `ExtensionTypeMap` so slice fields whose `type[].profile` references a generated `Extension<URL>` interface are narrowed to that exact branded interface. For example, US Core Patient's `extension_usCoreRace?` is typed as `Extension<"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race">`, not the open `Extension` union — the `.value[x]` payload, the `.url` constant, and any nested slices come along for the ride.
+
 ## What Gets Generated
 
 ```
@@ -73,8 +108,18 @@ out/
   search-params.ts   # Typed search parameters per resource
   resources/         # One file per resource
   profiles/          # One file per profile (when IGs are included)
+  schemas/           # Standard Schema validators (when validator is set)
   spec/              # Markdown spec files (when includeSpec: true)
-  client.ts          # Pre-configured FhirClient type
+  client.ts          # Pre-configured FhirClient type with typed createClient()
+```
+
+When `mcp: { outDir }` is also set:
+
+```
+mcp-server/
+  server.ts          # Runnable MCP shim that calls createServer({ ... })
+  mcp.config.json    # IG-seeded config (resource-type allowlist, defaults)
+  README.md          # Launch instructions
 ```
 
 ## License

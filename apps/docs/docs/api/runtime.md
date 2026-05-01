@@ -136,13 +136,22 @@ const { data, included, hasNext, nextUrl } = unwrapBundle<Patient, Organization>
 ### `FhirError`, `OperationOutcome`, `OperationOutcomeIssue`
 **Signature**
 ```ts
-class FhirError extends Error {
+class FhirError extends FhirDslError<"runtime.fhir", FhirErrorContext> {
+  readonly kind: "runtime.fhir";
   readonly status: number;
   readonly statusText: string;
   readonly operationOutcome?: OperationOutcome | null;
   readonly responseText?: string; // raw body when it wasn't JSON
   readonly issues: OperationOutcomeIssue[];
 }
+interface FhirErrorContext {
+  readonly status: number;
+  readonly statusText: string;
+  readonly operationOutcome?: OperationOutcome | null;
+  readonly responseText?: string;
+  readonly issues: readonly OperationOutcomeIssue[];
+}
+
 interface OperationOutcome { resourceType: "OperationOutcome"; issue: OperationOutcomeIssue[]; }
 interface OperationOutcomeIssue {
   severity: "fatal" | "error" | "warning" | "information";
@@ -164,4 +173,16 @@ try {
 }
 ```
 
-**Notes** — When the server returns a non-JSON body (HTML error page, `text/plain` from an auth proxy), `operationOutcome` stays `null` and `responseText` carries the raw text so diagnostics aren't lost.
+Or with the `Result` toolkit, no `try`/`catch`:
+
+```ts
+import { tryAsync } from "@fhir-dsl/utils";
+import { FhirError } from "@fhir-dsl/runtime";
+
+const r = await tryAsync<unknown, FhirError>(() =>
+  exec.execute({ method: "GET", path: "Patient/does-not-exist", params: [] }),
+);
+if (!r.ok) console.error(r.error.kind, r.error.context.status, r.error.context.issues);
+```
+
+**Notes** — Extends [`FhirDslError`](./utils.md#fhirdslerror) with `kind: "runtime.fhir"`. When the server returns a non-JSON body (HTML error page, `text/plain` from an auth proxy), `operationOutcome` stays `null` and `responseText` carries the raw text so diagnostics aren't lost. Pattern-match on `kind` and read `context` instead of parsing `.message`; `toJSON()` is transport-safe across MCP, logs, and error trackers.

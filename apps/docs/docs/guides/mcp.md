@@ -80,6 +80,7 @@ Options:
 | `authenticate` | none | `(req) => boolean \| Promise<boolean>`. Return `false` to short-circuit with `401`. |
 | `maxRequestBytes` | `1 << 20` (1 MiB) | Hard cap on request body size; over-cap requests get `413`. |
 | `server` | none | Pre-built `http.Server` to mount onto, instead of starting a new one. Useful when MCP shares a process with an unrelated HTTP service. |
+| `sseKeepaliveMs` | `30000` | Comment-line keepalive interval for long-lived SSE streams (proxies often kill idle connections at 60 s). |
 
 Calling `transport.url()` before `start()` throws; call it afterwards to get the resolved URL (with the actual port if you passed `0`).
 
@@ -100,13 +101,13 @@ await server.listen(transport);
 
 When `options.server` is provided, the transport never calls `listen()` or `close()` — the caller owns the lifecycle.
 
-#### Currently out of scope (planned for v1)
+#### Streamable HTTP coverage
 
-- GET `/mcp` opening an SSE stream for server-initiated notifications.
-- `text/event-stream` responses for streaming tool output.
-- Batched JSON-RPC arrays.
+The transport implements the full [Streamable HTTP](https://modelcontextprotocol.io/docs/concepts/transports#streamable-http) shape:
 
-The dispatcher today only emits single synchronous responses, so SSE has no producer yet. Tracked in `V1_PLAN.md` Theme 1.1.
+- **POST `/mcp`** accepts a single JSON-RPC message or a batched array; the response is `application/json` by default, or `text/event-stream` when the client sends `Accept: text/event-stream` (one event per response, then the stream closes).
+- **GET `/mcp`** opens a long-lived SSE stream for server-initiated notifications, kept alive by comment lines at `sseKeepaliveMs` intervals.
+- **`stop()`** ends every in-flight SSE stream before closing the underlying `http.Server` so the process can exit cleanly.
 
 ## Auth strategies
 

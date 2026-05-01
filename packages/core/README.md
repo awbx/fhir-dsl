@@ -27,16 +27,26 @@ This generates a `FhirSchema` type along with typed resources, search parameters
 
 ### 2. Create a client
 
+The CLI emits a pre-bound `createClient` for your generated schema — that's the recommended entry point. It calls `createFhirClient<FhirSchema>` under the hood with the schema, search params, includes, and validators all pre-wired:
+
+```ts
+import { createClient } from "./fhir/r4"; // generated in step 1
+
+const fhir = createClient({
+  baseUrl: "https://hapi.fhir.org/baseR4",
+  auth: { type: "bearer", credentials: "your-token" },
+});
+```
+
+If you prefer to wire the schema yourself (e.g. when bundling for a web client), `createFhirClient` is exported directly:
+
 ```ts
 import { createFhirClient } from "@fhir-dsl/core";
-import type { FhirSchema } from "./fhir"; // generated in step 1
+import type { FhirSchema } from "./fhir";
 
 const fhir = createFhirClient<FhirSchema>({
   baseUrl: "https://hapi.fhir.org/baseR4",
-  auth: {
-    type: "bearer",
-    credentials: "your-token",
-  },
+  auth: { type: "bearer", credentials: "your-token" },
 });
 ```
 
@@ -143,6 +153,62 @@ const result = await fhir
   })
   .delete("Observation", "789")
   .execute();
+```
+
+### Server-side `_filter` via FHIRPath
+
+`.filter()` accepts a raw FHIRPath string or a built `FhirPathExpr` (anything with `.compile(): string`) and emits the FHIR `_filter` search param. Compose typed expressions with `@fhir-dsl/fhirpath` for end-to-end type safety:
+
+```ts
+import { fhirpath } from "@fhir-dsl/fhirpath";
+
+const officialFamilyIsSmith = fhirpath<"Patient">("Patient")
+  .name.where(($) => $.use.eq("official"))
+  .family.eq("Smith");
+
+const result = await fhir
+  .search("Patient")
+  .filter(officialFamilyIsSmith)
+  .execute();
+// GET /Patient?_filter=Patient.name.where(use%20%3D%20%27official%27).family%20%3D%20%27Smith%27
+```
+
+Not every server supports `_filter`. Check `CapabilityStatement.rest.searchParam` before relying on it. See the [FHIRPath + Query Builder guide](https://awbx.github.io/fhir-dsl/docs/guides/fhirpath-and-queries) for the full pattern catalogue (server `_filter`, post-fetch projection, client filtering, aggregates).
+
+### Errors
+
+Every error from this package extends [`FhirDslError`](https://awbx.github.io/fhir-dsl/docs/guides/error-handling) — pattern-match on `kind`, read structured `context`, and serialise with `toJSON()`:
+
+| Class | `kind` | When |
+|---|---|---|
+| `FhirRequestError` | `core.request` | Non-2xx HTTP response (`context.status`, `context.statusText`, `context.operationOutcome`) |
+| `AsyncPollingTimeoutError` | `core.async_polling_timeout` | `async` polling exceeded `maxAttempts` |
+| `ValidationError` | `core.validation` | A resource failed Standard Schema validation; `context.issues` lists every failure |
+| `ValidationUnavailableError` | `core.validation_unavailable` | `.validate()` called without a `SchemaRegistry` |
+
+```ts
+import { isFhirDslError } from "@fhir-dsl/utils";
+import { FhirRequestError } from "@fhir-dsl/core";
+
+try {
+  await fhir.read("Patient", "missing").execute();
+} catch (err) {
+  if (err instanceof FhirRequestError) {
+    console.error(err.context.status, err.context.operationOutcome);
+  } else if (isFhirDslError(err)) {
+    console.error(err.kind, err.context);
+  } else {
+    throw err;
+  }
+}
+```
+
+Or with the `Result` toolkit, no `try`/`catch`:
+
+```ts
+import { tryAsync } from "@fhir-dsl/utils";
+const r = await tryAsync(() => fhir.read("Patient", "missing").execute());
+if (!r.ok) console.error(r.error.kind);
 ```
 
 ### Compile without executing

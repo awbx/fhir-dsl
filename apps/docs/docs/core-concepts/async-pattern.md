@@ -153,26 +153,31 @@ createFhirClient({ async: { pollingInterval: 500,    maxAttempts: 20 } }); // up
 When `maxAttempts` is exhausted without a terminal response, the client throws:
 
 ```typescript
-class AsyncPollingTimeoutError extends Error {
-  constructor(
-    public readonly statusUrl: string,
-    public readonly attempts: number,
-  );
+class AsyncPollingTimeoutError extends FhirDslError<"core.async_polling_timeout", AsyncPollingTimeoutErrorContext> {
+  readonly kind: "core.async_polling_timeout";
+  readonly statusUrl: string;
+  readonly attempts: number;
+}
+interface AsyncPollingTimeoutErrorContext {
+  readonly statusUrl: string;
+  readonly attempts: number;
 }
 ```
 
-(`packages/core/src/fhir-client.ts:243`.) Catch it separately from `FhirRequestError`:
+(`packages/core/src/fhir-client.ts`.) Like every error in the monorepo, it extends [`FhirDslError`](../guides/error-handling.md) — pattern-match on `kind` rather than the class identity, and read structured `context` instead of parsing `.message`. Catch it separately from `FhirRequestError`:
 
 ```typescript
+import { isFhirDslError } from "@fhir-dsl/utils";
+
 try {
   const bundle = await fhir
     .operation("$export", { scope: { kind: "system" } })
     .execute({ prefer: { respondAsync: true } });
 } catch (err) {
-  if (err instanceof AsyncPollingTimeoutError) {
-    // Pick up later by polling err.statusUrl yourself, or give up
-  }
-  throw err;
+  if (isFhirDslError(err) && err.kind === "core.async_polling_timeout") {
+    // Pick up later by polling err.context.statusUrl yourself, or give up
+    console.warn(`gave up after ${err.context.attempts} polls of ${err.context.statusUrl}`);
+  } else throw err;
 }
 ```
 

@@ -66,19 +66,36 @@ const result = unwrapBundle<Patient, Practitioner>(bundle);
 
 ### Error Handling
 
+`FhirError` extends [`FhirDslError`](https://awbx.github.io/fhir-dsl/docs/guides/error-handling) with `kind: "runtime.fhir"`. The same payload is available on the instance fields, on `error.context`, and inside `error.toJSON()` for transport.
+
 ```ts
 import { FhirError } from "@fhir-dsl/runtime";
+import { isFhirDslError } from "@fhir-dsl/utils";
 
 try {
   await executor.execute(query);
 } catch (error) {
-  if (error instanceof FhirError) {
-    console.error(error.status, error.statusText);
-    for (const issue of error.issues) {
+  if (isFhirDslError(error) && error.kind === "runtime.fhir") {
+    console.error(error.context.status, error.context.statusText);
+    for (const issue of error.context.issues) {
       console.error(issue.severity, issue.diagnostics);
     }
+    // Transport-safe across MCP, logs, error trackers:
+    sendToErrorTracker(error.toJSON());
+    // Walks the ES2022 cause chain (e.g. fetch failures wrapped by FhirError):
+    // formatErrorChain(error) → "FhirError: 503 Service Unavailable ← TypeError: fetch failed"
   }
 }
+```
+
+Or skip the `try`/`catch` entirely with the `Result` toolkit:
+
+```ts
+import { tryAsync } from "@fhir-dsl/utils";
+import { FhirError } from "@fhir-dsl/runtime";
+
+const r = await tryAsync<unknown, FhirError>(() => executor.execute(query));
+if (!r.ok) console.error(r.error.kind, r.error.context.issues);
 ```
 
 ## Configuration
