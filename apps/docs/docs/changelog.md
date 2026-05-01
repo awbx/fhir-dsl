@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - 2026-05-01
+
+### Other
+
+- v1 freeze — mark plan complete (`e3ac57e`)
+
 ## [0.56.0] - 2026-05-01
 
 ### Other
