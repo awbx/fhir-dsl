@@ -8,6 +8,12 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.54.0] - 2026-05-01
+
+### Other
+
+- Theme 2.1 + 2.3 — document FHIRPath coverage gaps for v1 (`5b8131a`)
+
 ## [0.53.0] - 2026-05-01
 
 ### Other
