@@ -13,7 +13,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "gen": "fhir-gen generate --version r4 --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4"
+    "gen": "fhir-gen generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.1",

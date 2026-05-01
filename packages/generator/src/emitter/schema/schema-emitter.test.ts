@@ -385,6 +385,147 @@ describe("emitResourceSchema invariants", () => {
     expect(out).not.toContain("s.refine");
     expect(out).not.toContain("pat-1");
   });
+
+  it("wraps self-recursive backbone refs in s.lazy to avoid TDZ violations", () => {
+    // Mirrors CodeSystem.concept: a backbone whose `concept` field is an array
+    // of itself. Naively emitting `s.array(CodeSystemConceptSchema)` references
+    // the const before its initializer finishes — runtime ReferenceError.
+    const codeSystem: ResourceModel = {
+      name: "CodeSystem",
+      url: "http://hl7.org/fhir/StructureDefinition/CodeSystem",
+      kind: "resource",
+      isAbstract: false,
+      properties: [
+        {
+          name: "concept",
+          types: [{ code: "CodeSystemConcept" }],
+          isRequired: false,
+          isArray: true,
+          isChoiceType: false,
+        },
+      ],
+      backboneElements: [
+        {
+          name: "CodeSystemConcept",
+          path: "CodeSystem.concept",
+          properties: [
+            { name: "code", types: [{ code: "code" }], isRequired: true, isArray: false, isChoiceType: false },
+            {
+              name: "concept",
+              types: [{ code: "CodeSystemConcept" }],
+              isRequired: false,
+              isArray: true,
+              isChoiceType: false,
+            },
+          ],
+        },
+      ],
+    };
+    const out = emitResourceSchema(codeSystem, nativeAdapter, { mapper: MAPPER, importedDatatypes: new Set() });
+    // Self-ref inside the backbone gets lazy-wrapped...
+    expect(out).toContain("concept: { schema: s.array(s.lazy(() => CodeSystemConceptSchema))");
+    // ...the const itself gets a StandardSchema annotation so TS can resolve the cycle...
+    expect(out).toContain("export const CodeSystemConceptSchema: StandardSchema<unknown> =");
+    expect(out).toContain('import type { StandardSchema } from "../__runtime.js";');
+    // ...but the main resource (declared after the backbone) refers to it directly.
+    const mainStart = out.indexOf("export const CodeSystemSchema");
+    expect(mainStart).toBeGreaterThan(-1);
+    expect(out.slice(mainStart)).toContain("concept: { schema: s.array(CodeSystemConceptSchema)");
+    expect(out.slice(mainStart)).not.toContain("s.lazy(() => CodeSystemConceptSchema)");
+  });
+
+  it("does not annotate non-recursive backbones (keeps inferred types)", () => {
+    const out = emitResourceSchema(patientModel(), nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(["HumanName"]),
+      bindingTypeMap: makeBindingMap(),
+    });
+    // Plain backbone — no self-reference, no annotation, no StandardSchema import.
+    expect(out).toContain("export const PatientContactSchema = s.object(");
+    expect(out).not.toContain("PatientContactSchema: StandardSchema");
+    expect(out).not.toContain("StandardSchema");
+  });
+
+  it("annotates mutually-recursive backbones (GraphDefinition.link ↔ link.target pattern)", () => {
+    // Mirrors GraphDefinition: Link refers to LinkTarget which refers back to Link.
+    // The first backbone emits a lazy ref (forward) and needs the type annotation;
+    // the second can use a direct ref but its source backbone's annotation is what
+    // breaks the cycle for the inferred types.
+    const model: ResourceModel = {
+      name: "GraphDefinition",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [],
+      backboneElements: [
+        {
+          name: "GraphDefinitionLink",
+          path: "GraphDefinition.link",
+          properties: [
+            {
+              name: "target",
+              types: [{ code: "GraphDefinitionLinkTarget" }],
+              isRequired: false,
+              isArray: true,
+              isChoiceType: false,
+            },
+          ],
+        },
+        {
+          name: "GraphDefinitionLinkTarget",
+          path: "GraphDefinition.link.target",
+          properties: [
+            {
+              name: "link",
+              types: [{ code: "GraphDefinitionLink" }],
+              isRequired: false,
+              isArray: true,
+              isChoiceType: false,
+            },
+          ],
+        },
+      ],
+    };
+    const out = emitResourceSchema(model, nativeAdapter, { mapper: MAPPER, importedDatatypes: new Set() });
+    // GraphDefinitionLink (declared first) lazily refs the not-yet-declared target → annotated.
+    expect(out).toContain("export const GraphDefinitionLinkSchema: StandardSchema<unknown> =");
+    expect(out).toContain("target: { schema: s.array(s.lazy(() => GraphDefinitionLinkTargetSchema))");
+    // GraphDefinitionLinkTarget (declared second) refs the already-declared sibling directly.
+    const secondStart = out.indexOf("export const GraphDefinitionLinkTargetSchema");
+    expect(secondStart).toBeGreaterThan(-1);
+    expect(out.slice(secondStart)).toContain("link: { schema: s.array(GraphDefinitionLinkSchema)");
+  });
+
+  it("uses lazy for forward refs between sibling backbones (declaration order matters)", () => {
+    // First backbone references the second — second isn't declared yet,
+    // so the ref must be lazy.
+    const model: ResourceModel = {
+      name: "Foo",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [],
+      backboneElements: [
+        {
+          name: "FooFirst",
+          path: "Foo.first",
+          properties: [
+            { name: "child", types: [{ code: "FooSecond" }], isRequired: false, isArray: false, isChoiceType: false },
+          ],
+        },
+        {
+          name: "FooSecond",
+          path: "Foo.second",
+          properties: [
+            { name: "label", types: [{ code: "string" }], isRequired: false, isArray: false, isChoiceType: false },
+          ],
+        },
+      ],
+    };
+    const out = emitResourceSchema(model, nativeAdapter, { mapper: MAPPER, importedDatatypes: new Set() });
+    // Forward ref FooFirst → FooSecond (not yet declared) → lazy.
+    expect(out).toContain("child: { schema: s.lazy(() => FooSecondSchema)");
+  });
 });
 
 describe("emitDatatypeSchemas", () => {
@@ -438,21 +579,32 @@ describe("emitDatatypeSchemas", () => {
 });
 
 describe("emitResourceSchemaIndex", () => {
-  it("re-exports each resource schema in alpha order", () => {
+  it("re-exports the top-level schema from each resource in alpha order", () => {
     const models = [{ name: "Patient" } as ResourceModel, { name: "Observation" } as ResourceModel];
     const out = emitResourceSchemaIndex(models);
-    expect(out).toBe('export * from "./observation.schema.js";\nexport * from "./patient.schema.js";\n');
+    expect(out).toBe(
+      'export { ObservationSchema } from "./observation.schema.js";\nexport { PatientSchema } from "./patient.schema.js";\n',
+    );
+  });
+
+  it("does not export backbones via the index (avoids name collisions with terminology bindings)", () => {
+    // Backbones like SpecimenCollectionSchema collide with ValueSet binding constants
+    // (e.g. SpecimenCollection from a SNOMED expansion). Narrowed re-exports avoid TS2308.
+    const out = emitResourceSchemaIndex([{ name: "Specimen" } as ResourceModel]);
+    expect(out).toBe('export { SpecimenSchema } from "./specimen.schema.js";\n');
+    expect(out).not.toContain("export *");
   });
 });
 
 describe("emitSchemaRootIndex", () => {
-  it("includes terminology and profiles conditionally", () => {
+  it("includes profiles conditionally and never re-exports terminology (collision-prone)", () => {
     const both = emitSchemaRootIndex(true, true);
     expect(both).toContain("./datatypes.js");
     expect(both).toContain("./resources/index.js");
-    expect(both).toContain("./terminology.js");
     expect(both).toContain("./profiles/index.js");
     expect(both).toContain("./schema-registry.js");
+    // Terminology consts can collide with resource schema names (e.g. PractitionerRole) — keep them off the root.
+    expect(both).not.toContain("./terminology.js");
 
     const neither = emitSchemaRootIndex(false, false);
     expect(neither).not.toContain("terminology");

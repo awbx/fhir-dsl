@@ -14,8 +14,10 @@ interface EmitContext {
   sameFileDatatypes: ReadonlySet<string>;
   /** Names of datatype schemas that live in ../datatypes.ts (imported). No lazy needed. */
   importedDatatypes: ReadonlySet<string>;
-  /** Names of backbone schemas declared earlier in the same file. No lazy needed. */
+  /** Names of backbone schemas in the same file (declared either earlier or later). */
   localBackbones: ReadonlySet<string>;
+  /** Names of backbones already fully declared at the current emit point. Refs to backbones in `localBackbones` but not in `declaredBackbones` are forward refs and need lazy wrapping. */
+  declaredBackbones: Set<string>;
   strictExtensible?: boolean | undefined;
   /** When false, drop ElementDefinition.constraint[*] invariants from emitted schemas. */
   emitInvariants: boolean;
@@ -25,6 +27,8 @@ interface EmitContext {
   terminologyImports: Set<string>;
   /** Mutated: set when any schema in this file uses invariants and needs the FHIRPath import. */
   needsInvariantImport: { value: boolean };
+  /** Mutated when emitting a backbone that has any forward ref to a sibling/self backbone; the const needs a type annotation to break TS inference cycles. */
+  currentBackboneTracker?: { name: string; hadForwardRef: boolean } | undefined;
 }
 
 function resolveBindingName(valueSet: string, map: BindingTypeMap): string | undefined {
@@ -100,7 +104,13 @@ function typeRefToNode(t: TypeRef, prop: PropertyModel, ctx: EmitContext): Schem
   if (ctx.mapper.isPrimitive(t.code)) return { kind: "primitive", fhirType: t.code };
 
   if (ctx.localBackbones.has(t.code)) {
-    return makeRef(`${t.code}Schema`, false);
+    // Forward refs (incl. self-refs in recursive backbones like CodeSystem.concept) need lazy wrapping
+    // to avoid TDZ violations on the generated `const X = s.object({ ...refs to X... })` declarations.
+    const isForward = !ctx.declaredBackbones.has(t.code);
+    if (isForward && ctx.currentBackboneTracker) {
+      ctx.currentBackboneTracker.hadForwardRef = true;
+    }
+    return makeRef(`${t.code}Schema`, isForward);
   }
 
   if (ctx.sameFileDatatypes.has(t.code)) {
@@ -177,6 +187,7 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
     sameFileDatatypes: new Set(),
     importedDatatypes: options.importedDatatypes,
     localBackbones: new Set(model.backboneElements.map((bb) => bb.name)),
+    declaredBackbones: new Set(),
     strictExtensible: options.strictExtensible,
     emitInvariants: options.invariants !== false,
     datatypeImports: new Set(),
@@ -184,17 +195,34 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
     needsInvariantImport: { value: false },
   };
 
+  const runtimePath = options.runtimePath ?? "../__runtime.js";
+  const annotation = adapter.datatypeAnnotation?.(runtimePath);
+  let needsAnnotationImport = false;
+
   const body: string[] = [];
   for (const bb of model.backboneElements) {
+    const tracker = { name: bb.name, hadForwardRef: false };
+    ctx.currentBackboneTracker = tracker;
     const fields = propertiesToFields(bb.properties, ctx);
-    body.push(
-      adapter.declareConst(`${bb.name}Schema`, {
-        kind: "object",
-        fields,
-        invariants: toInvariantNodes(bb.invariants, ctx),
-      }),
-    );
+    ctx.currentBackboneTracker = undefined;
+    const decl = adapter.declareConst(`${bb.name}Schema`, {
+      kind: "object",
+      fields,
+      invariants: toInvariantNodes(bb.invariants, ctx),
+    });
+    if (tracker.hadForwardRef && annotation) {
+      // Recursive backbones (self-ref like CodeSystem.concept, or mutual like
+      // GraphDefinition.link ↔ link.target) need an explicit type annotation
+      // so TS can resolve the lazy thunks' return types — otherwise TS7022 / TS7024.
+      needsAnnotationImport = true;
+      body.push(
+        decl.replace(`export const ${bb.name}Schema =`, `export const ${bb.name}Schema: ${annotation.annotation} =`),
+      );
+    } else {
+      body.push(decl);
+    }
     body.push("");
+    ctx.declaredBackbones.add(bb.name);
   }
 
   const mainFields: ObjectField[] = [];
@@ -210,9 +238,12 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
     }),
   );
 
-  const header: string[] = [adapter.libImport({ runtimePath: options.runtimePath ?? "../__runtime.js" })];
+  const header: string[] = [adapter.libImport({ runtimePath })];
   if (ctx.needsInvariantImport.value) {
     header.push('import { validateInvariants } from "@fhir-dsl/fhirpath";');
+  }
+  if (needsAnnotationImport && annotation?.importStatement) {
+    header.push(annotation.importStatement);
   }
   if (ctx.datatypeImports.size > 0) {
     const names = [...ctx.datatypeImports].sort().map((n) => `${n}Schema`);
@@ -245,6 +276,7 @@ export function emitDatatypeSchemas(
     sameFileDatatypes: sameFile,
     importedDatatypes: new Set(),
     localBackbones: new Set(),
+    declaredBackbones: new Set(),
     strictExtensible: options.strictExtensible,
     emitInvariants: options.invariants !== false,
     datatypeImports: new Set(),
@@ -260,11 +292,13 @@ export function emitDatatypeSchemas(
   for (const model of sorted) {
     // Backbone schemas first (local to this model within the file).
     ctx.localBackbones = new Set(model.backboneElements.map((bb) => bb.name));
+    ctx.declaredBackbones = new Set();
     for (const bb of model.backboneElements) {
       const fields = propertiesToFields(bb.properties, ctx);
       const bbNode: SchemaNode = { kind: "object", fields, invariants: toInvariantNodes(bb.invariants, ctx) };
       body.push(renderDatatypeConst(adapter, `${bb.name}Schema`, bbNode, annotation?.annotation));
       body.push("");
+      ctx.declaredBackbones.add(bb.name);
     }
     // Datatype main schema — fields use lazy() for cross-datatype refs (handled by makeRef).
     const fields = propertiesToFields(model.properties, ctx);
@@ -306,18 +340,28 @@ function renderDatatypeConst(
   return decl.replace(`export const ${name} =`, `export const ${name}: ${annotation} =`);
 }
 
-/** Emit `schemas/resources/index.ts` re-export list. */
+/** Emit `schemas/resources/index.ts` re-export list.
+ *
+ * Re-exports only the top-level resource schema from each file (not backbones).
+ * Backbone schema names (e.g. `SpecimenCollectionSchema`) can collide with
+ * terminology binding constants generated from ValueSets — using `export *`
+ * surfaces those collisions to downstream consumers as TS2308 errors. Backbones
+ * are still importable directly from `./X.schema.js` if needed. */
 export function emitResourceSchemaIndex(resources: ResourceModel[]): string {
   const lines = [...resources]
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map((r) => `export * from "./${toKebabCase(r.name)}.schema.js";`);
+    .map((r) => `export { ${r.name}Schema } from "./${toKebabCase(r.name)}.schema.js";`);
   return `${lines.join("\n")}\n`;
 }
 
-/** Top-level schemas/index.ts */
-export function emitSchemaRootIndex(hasTerminology: boolean, hasProfiles: boolean): string {
+/** Top-level schemas/index.ts.
+ *
+ * Terminology binding constants are intentionally NOT re-exported at the root —
+ * ValueSet binding names (e.g. `PractitionerRole` from a SNOMED expansion) can
+ * collide with top-level FHIR resource schema names. Consumers can still import
+ * from `./schemas/terminology.js` directly when needed. */
+export function emitSchemaRootIndex(_hasTerminology: boolean, hasProfiles: boolean): string {
   const lines = ['export * from "./datatypes.js";', 'export * from "./resources/index.js";'];
-  if (hasTerminology) lines.push('export * from "./terminology.js";');
   if (hasProfiles) lines.push('export * from "./profiles/index.js";');
   lines.push('export * from "./schema-registry.js";');
   return `${lines.join("\n")}\n`;
