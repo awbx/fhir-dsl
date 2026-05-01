@@ -55,6 +55,7 @@ Working with FHIR in TypeScript typically means juggling untyped JSON, memorizin
 | [`@fhir-dsl/smart`](./packages/smart) | SMART on FHIR v2 — PKCE-S256, backend services, scope DSL | Only when integrating with SMART-secured FHIR servers |
 | [`@fhir-dsl/mcp`](./packages/mcp) | MCP server: ~10 generic FHIR verbs as tools, pluggable auth/audit | When exposing a FHIR endpoint to an LLM agent |
 | [`@fhir-dsl/utils`](./packages/utils) | Cross-package error contract (`FhirDslError` + `Result<T, E>` + `tryAsync` / `match` / `mapErr` / `mapOk`), leveled logger, naming helpers | Re-exported by every other package; install directly only when extending the contract from your own code |
+| [`@fhir-dsl/tanstack-query`](./packages/tanstack-query) | TanStack Query bindings — `queryOptions(builder)` + `mutationOptions(factory)` with derived `queryKey`, `AbortSignal` forwarding, and `FhirDslError`-typed error channels | When integrating fhir-dsl into a React app that uses TanStack Query |
 
 For detailed installation instructions, see the [Installation Guide](https://awbx.github.io/fhir-dsl/docs/getting-started/installation).
 
@@ -459,6 +460,7 @@ fhir-dsl/
     core/          # Query builder DSL - the main user-facing API
     runtime/       # HTTP executor, pagination, error handling
     fhirpath/      # Type-safe FHIRPath expression builder + evaluator (UCUM, write-back, terminology hooks)
+    tanstack-query/# TanStack Query bindings: queryOptions / mutationOptions wrappers
     terminology/   # ValueSet / CodeSystem expansion + validate-code engine
     smart/         # SMART-on-FHIR v2 (PKCE-S256, backend-services, patient-launch)
     mcp/           # MCP server: ~10 generic FHIR verbs as tools, pluggable auth/audit
@@ -473,6 +475,7 @@ cli      -> generator -> utils, types
 core     -> utils, types
 runtime  -> core, utils, types
 fhirpath -> utils, types
+tanstack-query -> core, utils, react-query (peer)
 terminology -> utils, types
 smart    -> utils
 mcp      -> core, runtime, fhirpath, smart (lazy), utils, types

@@ -6,7 +6,7 @@ sidebar_label: Overview
 
 # Architecture
 
-fhir-dsl is a monorepo of ten decoupled packages, each with a clear responsibility. Understanding how they fit together helps you choose the right packages for your project and extend the system when needed.
+fhir-dsl is a monorepo of eleven decoupled packages, each with a clear responsibility. Understanding how they fit together helps you choose the right packages for your project and extend the system when needed.
 
 ## Package Dependency Graph
 
@@ -33,15 +33,21 @@ LLM bridge (runtime, optional)
 ┌──────┐
 │ mcp  │ ──> core, runtime, fhirpath, smart (lazy), utils
 └──────┘
+
+React layer (runtime, optional)
+┌─────────────────┐
+│ tanstack-query  │ ──> core, utils, react-query (peer)
+└─────────────────┘
 ```
 
 Every other package re-exports its error subclasses from **`utils`**, so the `FhirDslError` / `Result<T, E>` contract is shared across stacks (introduced in v1.2.0).
 
-There are three logical groups:
+There are four logical groups:
 
 1. **Generation stack** (`cli` → `generator` → `terminology` → `utils`) — runs at build time to produce TypeScript types.
 2. **Query stack** (`smart` → `core` ← `runtime`, with `fhirpath` as a sibling over `types`) — runs at application time to build and execute queries.
 3. **LLM bridge** (`mcp`) — depends on the query stack and lazy-loads `smart` only when the configured auth strategy needs JWT signing.
+4. **React layer** (`tanstack-query`) — turns any terminal builder into a typed TanStack Query options object. `@tanstack/react-query` is an optional peer dependency.
 
 Generation and query stacks have **no cross-dependencies**. The generator doesn't import from core, and core doesn't import from the generator. They communicate through generated code — the types produced by the generation stack are consumed by the query stack.
 
@@ -110,6 +116,18 @@ Parallel to core — it consumes the generated resource types directly, not the 
 - Evaluating expressions against in-memory resources
 - Building reusable navigation over nested resource shapes
 - Round-tripping write-back as JSON Patch documents to external apply
+
+### @fhir-dsl/tanstack-query
+
+Optional [TanStack Query](https://tanstack.com/query) bindings for React apps. Wraps every fhir-dsl terminal builder (`fhir.read(...)`, `fhir.search(...)`, `fhir.update(...)`, …) into a typed `UseQueryOptions` / `UseMutationOptions` object — `queryKey` is derived from `compile()` (sorted, JSON-comparable), `queryFn` forwards `AbortSignal` into `execute()`, and the error channel is typed as `FhirDslError` so `result.error?.kind` narrows automatically.
+
+```ts
+useQuery(queryOptions(fhir.read("Patient", id)));         // result.data: Patient | undefined
+useMutation(mutationOptions((p: Patient) => fhir.update(p)));
+useMutation(mutationOptionsBound(fhir.delete("Patient", id)));
+```
+
+`@tanstack/react-query` is an optional peer dependency — installing this package without React Query never pulls it in. See the [API reference](../api/tanstack-query.md).
 
 ### @fhir-dsl/generator
 

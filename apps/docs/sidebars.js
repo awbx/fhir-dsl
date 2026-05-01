@@ -29,6 +29,7 @@ const sidebars = {
         'api/core',
         'api/runtime',
         'api/fhirpath',
+        'api/tanstack-query',
         'api/cli',
         'api/generator',
         'api/smart',

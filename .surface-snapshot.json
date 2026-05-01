@@ -1783,6 +1783,32 @@
         "name": "VerbResult",
         "kind": "other"
       }
+    ],
+    "@fhir-dsl/tanstack-query": [
+      {
+        "name": "FhirQueryBuilder",
+        "kind": "interface"
+      },
+      {
+        "name": "FhirQueryKey",
+        "kind": "type"
+      },
+      {
+        "name": "isFhirDslError",
+        "kind": "other"
+      },
+      {
+        "name": "mutationOptions",
+        "kind": "function"
+      },
+      {
+        "name": "mutationOptionsBound",
+        "kind": "function"
+      },
+      {
+        "name": "queryOptions",
+        "kind": "function"
+      }
     ]
   }
 }

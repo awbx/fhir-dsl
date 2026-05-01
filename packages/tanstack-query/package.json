@@ -1,0 +1,61 @@
+{
+  "name": "@fhir-dsl/tanstack-query",
+  "version": "1.2.0",
+  "description": "TanStack Query bindings for fhir-dsl: queryOptions(builder) + mutationOptions(factory).",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Abdelhadi Sabani",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awbx/fhir-dsl.git",
+    "directory": "packages/tanstack-query"
+  },
+  "homepage": "https://awbx.github.io/fhir-dsl/",
+  "keywords": [
+    "fhir",
+    "react-query",
+    "tanstack-query",
+    "typescript",
+    "type-safe"
+  ],
+  "dependencies": {
+    "@fhir-dsl/core": "workspace:*",
+    "@fhir-dsl/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/query-core": "^5.0.0",
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/query-core": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    }
+  }
+}

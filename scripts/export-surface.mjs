@@ -27,6 +27,7 @@ const packages = [
 	"generator",
 	"cli",
 	"mcp",
+	"tanstack-query",
 ];
 
 function symbolKind(sym) {
