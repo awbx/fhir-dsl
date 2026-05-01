@@ -118,7 +118,29 @@ export interface FhirPathCoreOps<T> {
    * Pass `{ strict: true }` to raise on §4.5 singleton-eval violations.
    */
   evaluate(resource: unknown, options?: { strict?: boolean }): Unwrap<T>[];
+  /**
+   * Write `value` at the path encoded by this expression and return a
+   * new resource. Missing intermediate nodes are created. `where()`
+   * predicates compose into partial templates so a missing array
+   * element is appended with the predicate's fields populated.
+   *
+   * Supports navigation + `where(\$this => \$this.field.eq(v))`-shaped
+   * predicates (and their `and`-joined conjunctions). Throws
+   * `FhirPathSetterError` for ops that can't be inverted (filter
+   * functions, math, `select`, type narrowing, …).
+   */
+  setValue<R>(resource: R, value: T): R;
+  /**
+   * Same path semantics as `setValue`, but emits an RFC 6902 JSON
+   * Patch document (`add` / `replace`) instead of mutating a clone.
+   */
+  createPatch(resource: unknown, value: T): JsonPatchOp[];
 }
+
+export type JsonPatchOp =
+  | { op: "add"; path: string; value: unknown }
+  | { op: "replace"; path: string; value: unknown }
+  | { op: "remove"; path: string };
 
 export interface FhirPathExistenceOps<T> {
   /** Filter by field equality (legacy shorthand) */

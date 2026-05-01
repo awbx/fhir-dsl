@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29",
+  "generatedAt": "2026-05-01",
   "packages": {
     "@fhir-dsl/types": [
       {
@@ -1073,6 +1073,10 @@
         "kind": "other"
       },
       {
+        "name": "createFhirPatch",
+        "kind": "other"
+      },
+      {
         "name": "createPredicateProxy",
         "kind": "other"
       },
@@ -1125,6 +1129,10 @@
         "kind": "other"
       },
       {
+        "name": "FhirPathSetterError",
+        "kind": "other"
+      },
+      {
         "name": "FhirTypeMap",
         "kind": "other"
       },
@@ -1150,6 +1158,10 @@
       },
       {
         "name": "IsPrimitive",
+        "kind": "other"
+      },
+      {
+        "name": "JsonPatchOp",
         "kind": "other"
       },
       {
@@ -1190,6 +1202,10 @@
       },
       {
         "name": "PredicateOps",
+        "kind": "other"
+      },
+      {
+        "name": "setFhirPathValue",
         "kind": "other"
       },
       {

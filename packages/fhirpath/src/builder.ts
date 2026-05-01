@@ -2,6 +2,7 @@ import type { EvalOptions } from "./evaluator.js";
 import { evaluate } from "./evaluator.js";
 import { createPredicateProxy, extractPredicate, PREDICATE_SYMBOL } from "./expression.js";
 import type { CompiledPredicate, PathOp } from "./ops.js";
+import { createPatch as createPatchInternal, setValue as setValueInternal } from "./setter.js";
 import type { FhirPathExpr, FhirPathResource } from "./types.js";
 
 // --- Nullary functions: called with no arguments, return () => proxy ---
@@ -131,6 +132,11 @@ function createExprProxy<T>(path: string, ops: PathOp[]): FhirPathExpr<T> {
       if (prop === "compile") return () => path;
 
       if (prop === "evaluate") return (resource: unknown, options?: EvalOptions) => evaluate(ops, resource, options);
+
+      // Write-back through the typed path (#50).
+      if (prop === "setValue") return (resource: unknown, value: unknown) => setValueInternal(resource, ops, value);
+      if (prop === "createPatch")
+        return (resource: unknown, value: unknown) => createPatchInternal(resource, ops, value);
 
       // --- Nullary functions ---
 

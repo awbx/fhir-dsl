@@ -41,6 +41,12 @@ export type {
   UtilityOp,
   VarOp,
 } from "./ops.js";
+export {
+  createPatch as createFhirPatch,
+  FhirPathSetterError,
+  type JsonPatchOp,
+  setValue as setFhirPathValue,
+} from "./setter.js";
 export type {
   FhirPathExpr,
   FhirPathOps,

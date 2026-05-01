@@ -119,21 +119,23 @@ real user expressions that fail.
 
 Repo state: 3 open issues at v1 plan time.
 
-### 3.1 #50 — FHIRPath setValue / patch via builder
+### 3.1 #50 — FHIRPath setValue / patch via builder ✅ shipped v0.53.0
 
 User-driven feature. The builder already encodes a typed path; setting
 a value through that path (creating intermediate nodes per `where()`
 restrictions) is genuinely useful and has no equivalent in atomic-ehr's
 fhirpath.
 
-- [ ] Design `PathEvaluator<R, V>` interface from the issue body:
-      `getValue()`, `setValue()`, `createPatch()`.
-- [ ] Implement `setValue` for the simple navigation subset (`a.b.c`).
-- [ ] Implement `setValue` through `where()` predicates — create
+- [x] Wire `setValue(resource, value)` and `createPatch(resource, value)`
+      onto every typed builder leaf via the proxy.
+- [x] Implement `setValue` for the simple navigation subset (`a.b.c`).
+- [x] Implement `setValue` through `where()` predicates — create
       missing intermediate objects matching the predicate constraints.
-- [ ] Emit FHIR JSON Patch via `createPatch()` (Phase 7-style
-      surface).
-- [ ] Test fixture matches the issue's example.
+      Conjunctions of `eq` checks supported; `or`/`not` rejected.
+- [x] Emit RFC 6902 JSON Patch via `createPatch()` with proper JSON
+      Pointer escaping (`~` → `~0`, `/` → `~1`).
+- [x] Test fixture matches the issue's example. Throws
+      `FhirPathSetterError` on filter ops or non-invertible predicates.
 
 **Cost.** L — 1.5 days. Real new feature surface; warrants a minor.
 
@@ -232,7 +234,7 @@ Documented here so they don't bleed scope:
 |---|---|---|
 | v0.51.0 | 1.1 | ✅ Streamable HTTP — GET/SSE + batched JSON-RPC |
 | v0.52.0 | 1.2 | ✅ Per-property invariants |
-| v0.53.0 | 3.1 | FHIRPath setValue / patch (#50) |
+| v0.53.0 | 3.1 | ✅ FHIRPath setValue / patch (#50) |
 | v0.54.0 | 2.1 + 2.3 | Document UCUM + FHIRPath-subset gaps |
 | v0.55.0 | 4.1 + 4.3 | Deprecation pass + docs parity |
 | v0.56.0 | 4.2 + 4.4 | Perf baseline + hand-written changelog |
