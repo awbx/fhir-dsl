@@ -7,7 +7,7 @@ const BASE_URL = '/fhir-dsl/';
 const FULL_SITE_URL = `${SITE_URL}${BASE_URL}`;
 const SITE_DESCRIPTION =
   'The TypeScript FHIR toolchain — typed query builder, code generator, FHIRPath, validators, SMART-on-FHIR, terminology, and an MCP bridge.';
-const SOCIAL_CARD = 'img/social-card.svg';
+const SOCIAL_CARD = 'img/social-card.png';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -96,6 +96,7 @@ const config = {
   ],
 
   plugins: [
+    './plugins/api-jsonld.mjs',
     [
       require.resolve('@easyops-cn/docusaurus-search-local'),
       /** @type {import('@easyops-cn/docusaurus-search-local').PluginOptions} */
