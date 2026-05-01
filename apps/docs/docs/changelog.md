@@ -8,6 +8,13 @@ sidebar_label: Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-05-01
+
+### Bug Fixes
+
+- fix(generator): narrow profile slice types to typed extensions (#46) (`2f606c7`)
+- fix(generator): narrow boolean-choice token search params (#45) (`dc7589e`)
+
 ## [1.0.0] - 2026-05-01
 
 ### Other
