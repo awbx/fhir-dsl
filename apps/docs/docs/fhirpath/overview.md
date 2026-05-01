@@ -208,7 +208,7 @@ fhirpath<Organization>("Organization")
 
 ## FHIRPath Spec Coverage
 
-The package implements approximately 85% of the [official FHIRPath specification](https://hl7.org/fhirpath/):
+`@fhir-dsl/fhirpath` covers the pragmatic subset of the [official FHIRPath specification](https://hl7.org/fhirpath/) that FHIR invariants and common navigation actually use, plus FHIR-specific extensions (UCUM-aware Quantity, terminology hooks, write-back).
 
 | Category | Functions | Status |
 |---|---|---|
@@ -219,9 +219,17 @@ The package implements approximately 85% of the [official FHIRPath specification
 | Combining | union, combine | Implemented |
 | String | indexOf, substring, startsWith, endsWith, contains, upper, lower, replace, matches, replaceMatches, length, toChars | Implemented |
 | Math | abs, ceiling, exp, floor, ln, log, power, round, sqrt, truncate | Implemented |
+| Arithmetic | `.add()`, `.sub()`, `.mul()`, `.div()`, `.divTrunc()` (`div`), `.mod()`, `.concat()` (`&`) — chained builder methods that compile to the spec operators | Implemented |
 | Conversion | toBoolean, toInteger, toDecimal, toString, toDate, toDateTime, toTime, toQuantity, convertsTo* | Implemented |
 | Operators | `=`, `!=`, `<`, `>`, `<=`, `>=`, and, or, xor, not, implies, is, as | Implemented |
+| Aggregate | `aggregate(fn, init?)`, plus shorthands `sum()`, `min()`, `max()`, `avg()` | Implemented |
 | Utility | trace, now, today, timeOfDay, iif | Implemented |
-| Aggregate | aggregate() | Not yet |
-| Equality | ~ (equivalent), !~ (not equivalent) | Not yet |
-| Arithmetic | +, -, *, /, mod, div (standalone operators) | Not yet |
+| FHIR — write-back | `setValue(resource, value)`, `createPatch(resource, value)` (RFC 6902) | Implemented (v0.53.0) |
+| FHIR — quantity | UCUM-aware equality + ordering on same-dimension `Quantity` (`5 'mg' = 0.005 'g'` is `true`) | Implemented (v1.1.0) |
+| FHIR — references | `resolve()` walks the rootResource Bundle; `EvalOptions.resolveReference` hook for non-Bundle frames | Implemented (v1.1.0) |
+| FHIR — terminology | `conformsTo(profile)`, `memberOf(valueSet)`, `subsumes(other)`, `subsumedBy(other)` — compile to spec strings, evaluate via `EvalOptions.terminology` resolver | Implemented (v1.1.0) |
+| FHIR — invariants | `compileInvariant()` + `validateInvariants()` against `ElementDefinition.constraint[*].expression` | Implemented |
+| FHIR — extensions | `extension(url)` (sugar for `.extension.where(url = '<url>')`) | Implemented |
+| Equivalence | `~` (equivalence), `!~` (not equivalence) | **Not yet** — track at [spec-compliance.test.ts FP-EQ-003](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts) |
+| UCUM — special units | Offset units (Celsius, Fahrenheit) and logarithmic units (pH, decibel) | **Not supported** — parser throws `UcumError` instead of producing silent wrong answers; normalise upstream |
+| UCUM — multi-`/` | Multi-factor compound expressions like `mol/(L.s)` | **Not yet** — single-`/` covers every healthcare case in current scope |
