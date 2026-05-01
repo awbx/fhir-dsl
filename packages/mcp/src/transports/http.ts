@@ -2,20 +2,20 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { AddressInfo } from "node:net";
 import type { Dispatcher, McpRequest, McpResponse, Transport } from "../types.js";
 
-// Streamable HTTP transport for MCP — POST JSON-RPC to a single endpoint;
-// server replies with `Content-Type: application/json`. Spec:
+// Streamable HTTP transport for MCP. Spec:
 //   https://modelcontextprotocol.io/docs/concepts/transports#streamable-http
 //
-// Initial scope:
-//   - POST /mcp accepts a JSON-RPC request body, returns a single response.
+// Surface:
+//   - POST /mcp accepts a single JSON-RPC body or a batched array; returns
+//     either application/json (default) or text/event-stream when the client
+//     asks for it via the Accept header.
+//   - GET /mcp opens an SSE stream for server-initiated notifications. The
+//     dispatcher today only emits responses to POSTed requests, so the GET
+//     stream is keepalive-only at the moment — the framing is in place so
+//     adding producers later isn't an observable change.
 //   - Optional CORS for browser-hosted clients.
 //   - Optional authenticate hook — return false to short-circuit with 401.
 //   - The transport binds its own http.Server unless caller provides one.
-//
-// Out of scope here (follow-ups):
-//   - GET /mcp opening an SSE stream for server-initiated notifications.
-//   - text/event-stream responses for streaming tool output.
-//   - Batched JSON-RPC arrays.
 
 export interface HttpTransportOptions {
   /** TCP port. Default 0 (ephemeral — read back via the returned `url()`). */
@@ -30,6 +30,11 @@ export interface HttpTransportOptions {
   authenticate?: (req: IncomingMessage) => boolean | Promise<boolean>;
   /** Hard cap on request body size — protects against memory exhaustion. Default 1 MiB. */
   maxRequestBytes?: number;
+  /**
+   * Interval (ms) for keepalive comments on long-lived SSE streams. Keeps
+   * intermediaries from idling the connection out. Default 30s; 0 disables.
+   */
+  sseKeepaliveMs?: number;
   /**
    * Optional pre-built http.Server. When provided, the transport mounts its
    * route handler on the existing server instead of starting its own — handy
@@ -46,6 +51,7 @@ export interface HttpTransport extends Transport {
 }
 
 const DEFAULT_MAX_BYTES = 1 << 20;
+const DEFAULT_SSE_KEEPALIVE_MS = 30_000;
 
 export function httpTransport(options: HttpTransportOptions = {}): HttpTransport {
   const path = options.path ?? "/mcp";
@@ -53,11 +59,14 @@ export function httpTransport(options: HttpTransportOptions = {}): HttpTransport
   const port = options.port ?? 0;
   const cors = options.cors === true;
   const maxBytes = options.maxRequestBytes ?? DEFAULT_MAX_BYTES;
+  const keepaliveMs = options.sseKeepaliveMs ?? DEFAULT_SSE_KEEPALIVE_MS;
   const ownsServer = !options.server;
   const server = options.server ?? createServer();
 
   let listening = false;
   let resolvedUrl: string | undefined;
+  // Track active SSE streams so stop() can release them cleanly.
+  const sseStreams = new Set<ServerResponse>();
 
   const transport: HttpTransport = {
     async start(dispatcher: Dispatcher) {
@@ -66,7 +75,9 @@ export function httpTransport(options: HttpTransportOptions = {}): HttpTransport
         path,
         cors,
         maxBytes,
+        keepaliveMs,
         authenticate: options.authenticate,
+        sseStreams,
       });
       server.on("request", handler);
 
@@ -85,6 +96,16 @@ export function httpTransport(options: HttpTransportOptions = {}): HttpTransport
       resolvedUrl = formatUrl(addr, host, path);
     },
     async stop() {
+      // Close any in-flight SSE streams first — otherwise server.close()
+      // hangs waiting for them.
+      for (const res of sseStreams) {
+        try {
+          res.end();
+        } catch {
+          /* ignore */
+        }
+      }
+      sseStreams.clear();
       if (!ownsServer || !listening) return;
       await new Promise<void>((resolve, reject) => {
         server.close((err) => (err ? reject(err) : resolve()));
@@ -108,7 +129,9 @@ interface HandlerConfig {
   path: string;
   cors: boolean;
   maxBytes: number;
+  keepaliveMs: number;
   authenticate?: HttpTransportOptions["authenticate"];
+  sseStreams: Set<ServerResponse>;
 }
 
 function makeRequestHandler(cfg: HandlerConfig): (req: IncomingMessage, res: ServerResponse) => void {
@@ -120,8 +143,8 @@ function makeRequestHandler(cfg: HandlerConfig): (req: IncomingMessage, res: Ser
 async function handleRequest(req: IncomingMessage, res: ServerResponse, cfg: HandlerConfig): Promise<void> {
   if (cfg.cors) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Mcp-Session-Id");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, Mcp-Session-Id");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   }
 
   // Path mismatch — let other handlers (e.g. user's own routes) try.
@@ -138,9 +161,24 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, cfg: Han
     return;
   }
 
+  if (req.method === "GET") {
+    // Spec: GET on the streamable HTTP endpoint opens an SSE stream for
+    // server-initiated notifications. Auth applies here too.
+    if (cfg.authenticate) {
+      const ok = await cfg.authenticate(req);
+      if (!ok) {
+        res.statusCode = 401;
+        res.end();
+        return;
+      }
+    }
+    openServerStream(res, cfg);
+    return;
+  }
+
   if (req.method !== "POST") {
     res.statusCode = 405;
-    res.setHeader("Allow", "POST, OPTIONS");
+    res.setHeader("Allow", "GET, POST, OPTIONS");
     res.end();
     return;
   }
@@ -169,11 +207,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, cfg: Han
     return;
   }
 
-  let request: McpRequest;
+  let parsed: unknown;
   try {
-    request = JSON.parse(body) as McpRequest;
+    parsed = JSON.parse(body);
   } catch {
-    sendJsonRpc(res, {
+    sendJsonRpc(res, req, cfg, {
       jsonrpc: "2.0",
       id: null,
       error: { code: -32700, message: "Parse error: invalid JSON" },
@@ -181,34 +219,128 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, cfg: Han
     return;
   }
 
-  if (request.jsonrpc !== "2.0" || typeof request.method !== "string") {
-    sendJsonRpc(res, {
+  // §Streamable HTTP: client may POST a single message or a batched array.
+  const requests = Array.isArray(parsed) ? (parsed as unknown[]) : [parsed];
+
+  if (Array.isArray(parsed) && requests.length === 0) {
+    // Empty array is malformed per JSON-RPC §2.7.
+    sendJsonRpc(res, req, cfg, {
       jsonrpc: "2.0",
-      id: request?.id ?? null,
-      error: { code: -32600, message: "Invalid request" },
+      id: null,
+      error: { code: -32600, message: "Invalid request: empty batch" },
     });
     return;
   }
 
-  let response: McpResponse;
+  const responses: McpResponse[] = [];
+  for (const item of requests) {
+    responses.push(await dispatchOne(item, cfg.dispatcher));
+  }
+
+  if (Array.isArray(parsed)) {
+    sendJsonRpc(res, req, cfg, responses);
+  } else {
+    sendJsonRpc(res, req, cfg, responses[0] ?? { jsonrpc: "2.0", id: null });
+  }
+}
+
+async function dispatchOne(raw: unknown, dispatcher: Dispatcher): Promise<McpResponse> {
+  if (
+    raw == null ||
+    typeof raw !== "object" ||
+    (raw as McpRequest).jsonrpc !== "2.0" ||
+    typeof (raw as McpRequest).method !== "string"
+  ) {
+    return {
+      jsonrpc: "2.0",
+      id: (raw as { id?: McpResponse["id"] } | null)?.id ?? null,
+      error: { code: -32600, message: "Invalid request" },
+    };
+  }
+  const request = raw as McpRequest;
   try {
-    response = await cfg.dispatcher.handleRequest(request);
+    return await dispatcher.handleRequest(request);
   } catch (err) {
-    sendJsonRpc(res, {
+    return {
       jsonrpc: "2.0",
       id: request.id ?? null,
       error: { code: -32603, message: `Internal error: ${err instanceof Error ? err.message : String(err)}` },
-    });
-    return;
+    };
   }
-
-  sendJsonRpc(res, response);
 }
 
-function sendJsonRpc(res: ServerResponse, response: McpResponse): void {
+function clientWantsSse(req: IncomingMessage): boolean {
+  const accept = req.headers.accept;
+  if (!accept) return false;
+  return accept.split(",").some((entry) => entry.trim().toLowerCase().startsWith("text/event-stream"));
+}
+
+function sendJsonRpc(
+  res: ServerResponse,
+  req: IncomingMessage,
+  cfg: HandlerConfig,
+  response: McpResponse | McpResponse[],
+): void {
+  if (clientWantsSse(req)) {
+    sendSseResponse(res, cfg, response);
+    return;
+  }
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(response));
+}
+
+function sendSseResponse(res: ServerResponse, cfg: HandlerConfig, response: McpResponse | McpResponse[]): void {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  // Disable proxy buffering (nginx-friendly).
+  res.setHeader("X-Accel-Buffering", "no");
+
+  const messages = Array.isArray(response) ? response : [response];
+  for (const msg of messages) {
+    res.write(`event: message\ndata: ${JSON.stringify(msg)}\n\n`);
+  }
+  // Spec: the response stream closes after the final response to the
+  // originating request is sent. The dispatcher today produces exactly one
+  // reply per request, so we close immediately.
+  res.end();
+  cfg.sseStreams.delete(res);
+}
+
+function openServerStream(res: ServerResponse, cfg: HandlerConfig): void {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  // Initial connection-confirmation comment.
+  res.write(": connected\n\n");
+
+  cfg.sseStreams.add(res);
+
+  let keepalive: NodeJS.Timeout | undefined;
+  if (cfg.keepaliveMs > 0) {
+    keepalive = setInterval(() => {
+      try {
+        res.write(": keepalive\n\n");
+      } catch {
+        clearInterval(keepalive);
+      }
+    }, cfg.keepaliveMs);
+    keepalive.unref?.();
+  }
+
+  const cleanup = () => {
+    if (keepalive) clearInterval(keepalive);
+    cfg.sseStreams.delete(res);
+  };
+
+  res.on("close", cleanup);
+  res.on("error", cleanup);
 }
 
 function matchesPath(reqUrl: string | undefined, expected: string): boolean {

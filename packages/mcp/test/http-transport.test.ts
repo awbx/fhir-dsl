@@ -77,10 +77,10 @@ describe("httpTransport", () => {
     expect(body.error?.message).toContain("boom");
   });
 
-  it("rejects non-POST methods with 405", async () => {
+  it("rejects non-GET/POST methods with 405", async () => {
     active = httpTransport();
     await active.start(makeStubDispatcher());
-    const res = await fetch(active.url());
+    const res = await fetch(active.url(), { method: "DELETE" });
     expect(res.status).toBe(405);
     expect(res.headers.get("allow")).toContain("POST");
   });
@@ -127,6 +127,103 @@ describe("httpTransport", () => {
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get("access-control-allow-origin")).toBe("*");
     expect(preflight.headers.get("access-control-allow-methods")).toContain("POST");
+  });
+
+  describe("batched JSON-RPC", () => {
+    it("dispatches every entry in an array body and returns an array response", async () => {
+      active = httpTransport();
+      await active.start(makeStubDispatcher());
+      const res = await postJson(active.url(), [
+        { jsonrpc: "2.0", id: 1, method: "ping" },
+        { jsonrpc: "2.0", id: 2, method: "pong" },
+      ]);
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as McpResponse[];
+      expect(Array.isArray(body)).toBe(true);
+      expect(body).toHaveLength(2);
+      expect(body[0]).toMatchObject({ id: 1, result: { echo: "ping" } });
+      expect(body[1]).toMatchObject({ id: 2, result: { echo: "pong" } });
+    });
+
+    it("rejects an empty array with -32600", async () => {
+      active = httpTransport();
+      await active.start(makeStubDispatcher());
+      const res = await postJson(active.url(), []);
+      const body = (await res.json()) as McpResponse;
+      expect(body.error?.code).toBe(-32600);
+    });
+
+    it("returns -32600 for malformed entries inside a valid batch", async () => {
+      active = httpTransport();
+      await active.start(makeStubDispatcher());
+      const res = await postJson(active.url(), [{ jsonrpc: "2.0", id: 1, method: "ping" }, { not: "a request" }]);
+      const body = (await res.json()) as McpResponse[];
+      expect(body[0]).toMatchObject({ id: 1, result: { echo: "ping" } });
+      expect(body[1]?.error?.code).toBe(-32600);
+    });
+  });
+
+  describe("text/event-stream responses", () => {
+    it("returns SSE when the client requests it on POST", async () => {
+      active = httpTransport();
+      await active.start(makeStubDispatcher());
+      const res = await postJson(
+        active.url(),
+        { jsonrpc: "2.0", id: 1, method: "ping" },
+        { headers: { "Content-Type": "application/json", Accept: "text/event-stream" } },
+      );
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/event-stream");
+      const text = await res.text();
+      expect(text).toContain("event: message");
+      expect(text).toContain('"echo":"ping"');
+    });
+  });
+
+  describe("GET /mcp server-initiated stream", () => {
+    it("opens an SSE stream and sends a connected comment", async () => {
+      active = httpTransport({ sseKeepaliveMs: 0 });
+      await active.start(makeStubDispatcher());
+
+      const ctrl = new AbortController();
+      const res = await fetch(active.url(), {
+        method: "GET",
+        headers: { Accept: "text/event-stream" },
+        signal: ctrl.signal,
+      });
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/event-stream");
+
+      const reader = res.body?.getReader();
+      expect(reader).toBeDefined();
+      const { value } = await (reader as ReadableStreamDefaultReader<Uint8Array>).read();
+      const chunk = new TextDecoder().decode(value);
+      expect(chunk).toContain(": connected");
+
+      ctrl.abort();
+    });
+
+    it("releases active SSE streams when stop() is called", async () => {
+      active = httpTransport({ sseKeepaliveMs: 0 });
+      await active.start(makeStubDispatcher());
+
+      const ctrl = new AbortController();
+      const res = await fetch(active.url(), {
+        method: "GET",
+        headers: { Accept: "text/event-stream" },
+        signal: ctrl.signal,
+      });
+
+      // Read one chunk so the stream is fully open.
+      const reader = res.body?.getReader();
+      await (reader as ReadableStreamDefaultReader<Uint8Array>).read();
+
+      // stop() must not hang on the active stream.
+      const stopP = active.stop?.();
+      await Promise.race([stopP, new Promise((_, reject) => setTimeout(() => reject(new Error("stop hung")), 2000))]);
+      ctrl.abort();
+      active = undefined;
+    });
   });
 
   it("attaches to a caller-provided http.Server without owning lifecycle", async () => {

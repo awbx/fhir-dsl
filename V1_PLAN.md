@@ -39,20 +39,17 @@ These are the items the previous audit-pass already filed as issues but
 flagged as defensive or low-priority. Re-evaluating them with v1 in
 mind: a few should ship, a few stay deferred. None require new design.
 
-### 1.1 Phase 8 streamable HTTP — finish the spec
+### 1.1 Phase 8 streamable HTTP — finish the spec ✅ shipped v0.51.0
 
-Today's `httpTransport()` only handles POST → single JSON response.
-Spec compliance for "Streamable HTTP" needs:
+`httpTransport()` now matches the full Streamable HTTP shape from the
+MCP spec:
 
-- [ ] GET `/mcp` opens an SSE stream for server-initiated notifications.
-- [ ] `text/event-stream` response when the dispatcher emits multiple
-      messages (currently it doesn't, but the framing should land
-      before v1 ships so it's not a breaking change later).
-- [ ] Batched JSON-RPC arrays accepted on POST.
-
-**Cost.** S — ~150 LoC across `transports/http.ts`.
-**Why now.** Adding SSE later means changing the response
-`Content-Type` heuristic, which is observable. Better in pre-1.0.
+- [x] GET `/mcp` opens an SSE stream for server-initiated notifications
+      (keepalive-only today; framing in place for future producers).
+- [x] `text/event-stream` response on POST when the client sends
+      `Accept: text/event-stream`.
+- [x] Batched JSON-RPC arrays accepted on POST; per-entry errors
+      preserved with the right `id`.
 
 ### 1.2 Per-property invariants (Phase 6 deeper)
 
@@ -236,7 +233,7 @@ Documented here so they don't bleed scope:
 
 | Version | Theme | Notes |
 |---|---|---|
-| v0.51.0 | 1.1 | Streamable HTTP — SSE + batched JSON-RPC |
+| v0.51.0 | 1.1 | ✅ Streamable HTTP — GET/SSE + batched JSON-RPC |
 | v0.52.0 | 1.2 | Per-property invariants |
 | v0.53.0 | 3.1 | FHIRPath setValue / patch (#50) |
 | v0.54.0 | 2.1 + 2.3 | Document UCUM + FHIRPath-subset gaps |
