@@ -1,6 +1,7 @@
 ---
 id: async-pattern
 title: Async Pattern
+description: The compile() / execute() split — every fhir-dsl builder is synchronous up to the network call, with AbortSignal forwarding and Prefer respond-async support.
 sidebar_label: Async Pattern
 sidebar_position: 6
 ---

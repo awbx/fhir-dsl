@@ -1,6 +1,7 @@
 ---
 id: immutability
 title: Immutable Builders
+description: Every fhir-dsl builder method returns a new instance — how immutability lets you fork queries safely, share base configs, and reason about composition.
 sidebar_label: Immutability
 sidebar_position: 5
 ---

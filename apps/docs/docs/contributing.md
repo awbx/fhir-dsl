@@ -1,6 +1,7 @@
 ---
 id: contributing
 title: Contributing
+description: How to contribute to fhir-dsl — development setup, monorepo layout, testing, the public-surface freeze, and the release flow.
 sidebar_label: Contributing
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: usage
 title: CLI Usage
+description: fhir-gen CLI reference — generate typed FHIR clients, compile FHIRPath expressions, and inspect spec catalogs from the command line.
 sidebar_label: CLI Usage
 ---
 

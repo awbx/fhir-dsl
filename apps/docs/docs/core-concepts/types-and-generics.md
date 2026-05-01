@@ -1,6 +1,7 @@
 ---
 id: types-and-generics
 title: Types and Generics
+description: The schema-parameterized generics that drive autocomplete on every where() / include() / sort() — and why fhir-dsl never falls back to any.
 sidebar_label: Types and Generics
 sidebar_position: 4
 ---

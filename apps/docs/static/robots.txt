@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://awbx.github.io/fhir-dsl/sitemap.xml

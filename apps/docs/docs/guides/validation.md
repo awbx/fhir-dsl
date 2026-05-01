@@ -1,6 +1,7 @@
 ---
 id: validation
 title: Runtime Validation
+description: Validate resources against generated Standard Schema validators — with FHIRPath invariants, profile narrowing, and structured Issue diagnostics.
 sidebar_label: Validation
 ---
 

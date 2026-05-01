@@ -1,6 +1,7 @@
 ---
 id: patient
 title: Working with Patients
+description: Patient resource patterns — typed search by name/birthdate, profile narrowing (US Core), include() for related resources, and write-back via JSON Patch.
 sidebar_label: Patient Examples
 ---
 

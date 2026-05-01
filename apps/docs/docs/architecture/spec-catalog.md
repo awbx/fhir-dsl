@@ -1,6 +1,7 @@
 ---
 id: spec-catalog
 title: SpecCatalog
+description: How fhir-gen uses SpecCatalog to drive R4/R5 type generation deterministically across FHIR spec versions, with a reproducible cache and lockfile.
 sidebar_label: SpecCatalog (v0.19)
 ---
 

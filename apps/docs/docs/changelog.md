@@ -1,6 +1,7 @@
 ---
 id: changelog
 title: Changelog
+description: Release notes for fhir-dsl across all packages — features, fixes, and breaking changes from v0 through the current 1.x line.
 sidebar_label: Changelog
 ---
 

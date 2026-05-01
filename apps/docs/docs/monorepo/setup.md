@@ -1,6 +1,7 @@
 ---
 id: setup
 title: Monorepo Setup
+description: Wire fhir-dsl into a pnpm/turbo monorepo — where to put generated types, shared client config, and per-app build settings.
 sidebar_label: Monorepo Setup
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: complete-workflow
 title: Complete Workflow
+description: An end-to-end fhir-dsl walkthrough — bootstrap a project, generate types, compose typed queries, write back, and validate against a real server.
 sidebar_label: Complete Workflow
 ---
 

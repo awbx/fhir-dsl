@@ -1,6 +1,7 @@
 ---
 id: overview
 title: Architecture
+description: How fhir-dsl's eleven decoupled packages compose — types → core → runtime, plus FHIRPath, generator, SMART, terminology, MCP, and TanStack Query bindings.
 sidebar_label: Overview
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: dsl-syntax
 title: DSL Syntax
+description: The fluent fhir-dsl builder syntax across read / search / create / update / patch / delete / transaction — with typed where, include, sort, and filter.
 sidebar_label: DSL Syntax
 sidebar_position: 2
 ---

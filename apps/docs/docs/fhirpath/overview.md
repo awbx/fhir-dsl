@@ -1,6 +1,7 @@
 ---
 id: overview
 title: FHIRPath Expression Builder
+description: Type-safe FHIRPath — build, compile, and evaluate expressions against typed resources, with UCUM-aware Quantity comparisons and JSON Patch write-back.
 sidebar_label: Overview
 ---
 

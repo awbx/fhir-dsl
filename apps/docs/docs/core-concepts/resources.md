@@ -1,6 +1,7 @@
 ---
 id: resources
 title: Resources and Schema
+description: How fhir-dsl models FHIR resources, profiles, and search parameters as a generated TypeScript schema and feeds them to every typed builder.
 sidebar_label: Resources
 sidebar_position: 3
 ---

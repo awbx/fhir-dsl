@@ -1,6 +1,7 @@
 ---
 id: terminology
 title: Terminology Engine
+description: Resolve, expand, and validate ValueSets and CodeSystems offline — with required/extensible binding enforcement and FHIRPath conformsTo() hooks.
 sidebar_label: Terminology
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: mcp
 title: MCP Server (LLM bridge)
+description: Run @fhir-dsl/mcp as a Model Context Protocol server so Claude (and other LLMs) can search, read, validate, and optionally write FHIR resources.
 sidebar_label: MCP Server
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: queries
 title: Query Patterns
+description: Common fhir-dsl query patterns — chained, _has, _filter, paginated, included, and aggregate searches with copy-paste examples.
 sidebar_label: Query Patterns
 ---
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1a3a"/>
+      <stop offset="100%" stop-color="#0b5fff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80, 140)">
+    <rect width="120" height="120" rx="24" fill="#fff" opacity="0.15"/>
+    <path d="M28 36h64M28 60h48M28 84h36" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <text x="240" y="220" font-family="Inter, system-ui, sans-serif" font-size="84" font-weight="700" fill="#fff">fhir-dsl</text>
+  <text x="240" y="290" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="500" fill="#cbd5ff">The TypeScript FHIR toolchain</text>
+  <text x="80" y="430" font-family="Inter, system-ui, sans-serif" font-size="24" fill="#e6ecff">Typed query builder · Code generator · FHIRPath</text>
+  <text x="80" y="470" font-family="Inter, system-ui, sans-serif" font-size="24" fill="#e6ecff">Validators · SMART · Terminology · MCP bridge</text>
+  <text x="80" y="560" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#9bb1ff">github.com/awbx/fhir-dsl</text>
+</svg>

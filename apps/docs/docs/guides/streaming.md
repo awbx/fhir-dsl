@@ -1,6 +1,7 @@
 ---
 id: streaming
 title: Streaming & Lazy Loading
+description: Stream large FHIR Bundles page-by-page with async iterables, AbortSignal cancellation, and back-pressure-aware consumption.
 sidebar_label: Streaming & Lazy Loading
 ---
 

@@ -1,6 +1,7 @@
 ---
 id: smart
 title: SMART on FHIR
+description: End-to-end SMART-on-FHIR v2 — discovery, PKCE patient launch, token exchange, and refresh — wired into fhir-dsl through the AuthProvider contract.
 sidebar_label: SMART on FHIR
 ---
 

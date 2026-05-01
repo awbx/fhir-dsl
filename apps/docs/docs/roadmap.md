@@ -1,6 +1,7 @@
 ---
 id: roadmap
 title: Roadmap
+description: Upcoming work for fhir-dsl — planned features, deferred items, and the long-term direction across all packages.
 sidebar_label: Roadmap
 ---
 

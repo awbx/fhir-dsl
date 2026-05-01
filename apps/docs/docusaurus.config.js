@@ -2,14 +2,21 @@
 
 const rootPkg = require('../../package.json');
 
+const SITE_URL = 'https://awbx.github.io';
+const BASE_URL = '/fhir-dsl/';
+const FULL_SITE_URL = `${SITE_URL}${BASE_URL}`;
+const SITE_DESCRIPTION =
+  'The TypeScript FHIR toolchain — typed query builder, code generator, FHIRPath, validators, SMART-on-FHIR, terminology, and an MCP bridge.';
+const SOCIAL_CARD = 'img/social-card.svg';
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'fhir-dsl',
-  tagline: 'The TypeScript FHIR toolchain — typed query builder, code generator, FHIRPath, validators, SMART, terminology, and an MCP bridge.',
-  favicon: 'img/favicon.ico',
+  tagline: SITE_DESCRIPTION,
+  favicon: 'img/favicon.svg',
 
-  url: 'https://awbx.github.io',
-  baseUrl: '/fhir-dsl/',
+  url: SITE_URL,
+  baseUrl: BASE_URL,
 
   organizationName: 'awbx',
   projectName: 'fhir-dsl',
@@ -33,6 +40,54 @@ const config = {
     locales: ['en'],
   },
 
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: { rel: 'preconnect', href: 'https://github.com' },
+    },
+    {
+      tagName: 'meta',
+      attributes: { name: 'theme-color', content: '#0b5fff' },
+    },
+    {
+      tagName: 'script',
+      attributes: { type: 'application/ld+json' },
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareSourceCode',
+        name: 'fhir-dsl',
+        description: SITE_DESCRIPTION,
+        codeRepository: 'https://github.com/awbx/fhir-dsl',
+        programmingLanguage: 'TypeScript',
+        license: 'https://github.com/awbx/fhir-dsl/blob/main/LICENSE',
+        url: FULL_SITE_URL,
+        keywords: [
+          'FHIR',
+          'TypeScript',
+          'HL7',
+          'FHIRPath',
+          'SMART-on-FHIR',
+          'healthcare',
+          'interoperability',
+          'code generator',
+          'query builder',
+          'MCP',
+        ],
+      }),
+    },
+    {
+      tagName: 'script',
+      attributes: { type: 'application/ld+json' },
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'fhir-dsl docs',
+        url: FULL_SITE_URL,
+        description: SITE_DESCRIPTION,
+      }),
+    },
+  ],
+
   presets: [
     [
       'classic',
@@ -41,10 +96,18 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/awbx/fhir-dsl/tree/main/apps/docs/',
+          showLastUpdateTime: true,
+          showLastUpdateAuthor: false,
         },
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
+        },
+        sitemap: {
+          changefreq: 'weekly',
+          priority: 0.7,
+          ignorePatterns: ['/tags/**'],
+          filename: 'sitemap.xml',
         },
       }),
     ],
@@ -53,6 +116,24 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      image: SOCIAL_CARD,
+      metadata: [
+        { name: 'description', content: SITE_DESCRIPTION },
+        {
+          name: 'keywords',
+          content:
+            'FHIR, TypeScript, FHIRPath, SMART-on-FHIR, HL7, healthcare interoperability, code generator, query builder, MCP, validators, terminology',
+        },
+        { name: 'author', content: 'Abdelhadi Sabani' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: 'fhir-dsl — TypeScript FHIR toolchain' },
+        { name: 'twitter:description', content: SITE_DESCRIPTION },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: 'fhir-dsl — TypeScript FHIR toolchain' },
+        { property: 'og:description', content: SITE_DESCRIPTION },
+        { property: 'og:url', content: FULL_SITE_URL },
+        { property: 'og:site_name', content: 'fhir-dsl' },
+      ],
       navbar: {
         title: 'fhir-dsl',
         items: [
@@ -89,7 +170,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright \u00a9 ${new Date().getFullYear()} fhir-dsl contributors. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} fhir-dsl contributors. Built with Docusaurus.`,
       },
       prism: {
         theme: require('prism-react-renderer').themes.github,

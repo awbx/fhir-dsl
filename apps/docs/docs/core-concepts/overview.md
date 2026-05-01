@@ -1,6 +1,7 @@
 ---
 id: overview
 title: Core Concepts
+description: The three pillars of fhir-dsl — typed builders, the SpecCatalog-driven generated schema, and the async compile/execute contract.
 sidebar_label: Overview
 sidebar_position: 1
 ---
