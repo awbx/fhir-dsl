@@ -84,6 +84,7 @@ const sidebars = {
         'recipes/conditional-transaction',
       ],
     },
+    'demo',
     'edge-cases',
     'llm-usage',
     {

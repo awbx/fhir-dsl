@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'apps/docs/**'
+      - 'apps/his-demo/**'
+      - 'packages/**'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
@@ -39,6 +41,31 @@ jobs:
       - name: Build Docusaurus
         working-directory: apps/docs
         run: pnpm build
+
+      - name: Generate FHIR types for demo
+        working-directory: apps/his-demo
+        run: pnpm gen
+
+      - name: Build demo (static SPA)
+        working-directory: apps/his-demo
+        env:
+          DEMO_STATIC: '1'
+          DEMO_BASE_PATH: /fhir-dsl/demo/
+        run: pnpm build
+
+      - name: Stage demo into docs build
+        run: |
+          set -euo pipefail
+          DEMO_SRC=apps/his-demo/dist/client
+          DEMO_DST=apps/docs/build/demo
+          mkdir -p "$DEMO_DST"
+          cp -R "$DEMO_SRC"/. "$DEMO_DST"/
+          # GitHub Pages serves /demo/ → /demo/index.html (root-route SPA shell);
+          # /demo/<deep-route> → /demo/404.html (which is the same SPA shell, so the
+          # client-side router handles the deep route after hydration).
+          cp "$DEMO_DST/_shell.html" "$DEMO_DST/index.html"
+          cp "$DEMO_DST/_shell.html" "$DEMO_DST/404.html"
+          echo "demo size: $(du -sh $DEMO_DST | cut -f1)"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

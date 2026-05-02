@@ -7,9 +7,15 @@ import { getContext } from './integrations/tanstack-query/root-provider'
 export function getRouter() {
   const context = getContext()
 
+  // Strip trailing slash so basepath '/fhir-dsl/demo/' becomes '/fhir-dsl/demo'.
+  // TanStack Router expects no trailing slash; '/' stays as '/' for normal builds.
+  const rawBase = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
+  const basepath = rawBase === '' ? '/' : rawBase
+
   const router = createTanStackRouter({
     routeTree,
     context,
+    basepath,
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

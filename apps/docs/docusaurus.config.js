@@ -174,6 +174,15 @@ const config = {
             label: 'Docs',
           },
           {
+            // pathname:// prefix bypasses Docusaurus's broken-link checker —
+            // the demo lives outside the Docusaurus tree (built separately and
+            // copied into build/demo/ by the deploy workflow).
+            href: 'pathname:///demo/',
+            label: 'Demo',
+            position: 'left',
+            target: '_self',
+          },
+          {
             href: 'https://github.com/awbx/fhir-dsl',
             label: 'GitHub',
             position: 'right',

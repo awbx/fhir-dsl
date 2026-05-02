@@ -20,6 +20,11 @@ interface MyRouterContext {
 	queryClient: QueryClient;
 }
 
+// In static SPA builds (GitHub Pages at /fhir-dsl/demo) the /api/chat and
+// /api/mcp server routes don't exist. Hide the chatbot UI to keep the demo
+// honest about what's actually working.
+const IS_STATIC = import.meta.env.BASE_URL !== "/";
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
 		meta: [
@@ -40,7 +45,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="min-h-dvh bg-background text-foreground antialiased">
 				<AppShell>{children}</AppShell>
-				<ChatDrawer />
+				{IS_STATIC ? null : <ChatDrawer />}
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}
 					plugins={[
@@ -81,13 +86,15 @@ function AppShell({ children }: { children: React.ReactNode }) {
 						>
 							Playground
 						</Link>
-						<button
-							type="button"
-							className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
-							data-chatbot-trigger
-						>
-							<MessageSquare className="h-3.5 w-3.5" /> Chat
-						</button>
+						{IS_STATIC ? null : (
+							<button
+								type="button"
+								className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+								data-chatbot-trigger
+							>
+								<MessageSquare className="h-3.5 w-3.5" /> Chat
+							</button>
+						)}
 					</nav>
 				</div>
 			</header>
