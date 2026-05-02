@@ -49,11 +49,11 @@ jobs:
         run: pnpm build
 
       - name: Generate FHIR types for demo
-        # Use npx so the CLI binary resolves cleanly — pnpm install doesn't
-        # always wire the workspace bin symlink when @fhir-dsl/cli's dist/
-        # is built after install, and npx falls back to the npm registry.
+        # npx needs --package because @fhir-dsl/cli's bin is named `fhir-gen`,
+        # not `cli` — npx can't auto-resolve. Explicit form fetches the package
+        # from npm and runs the right binary.
         working-directory: apps/his-demo
-        run: npx -y @fhir-dsl/cli generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4
+        run: npx -y --package=@fhir-dsl/cli fhir-gen generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4
 
       - name: Build demo (static SPA)
         working-directory: apps/his-demo
