@@ -31,6 +31,10 @@ const config = defineConfig({
             // (/patients/$id) still only resolve via in-app navigation.
             prerender: { enabled: true, crawlLinks: true },
           },
+          // SMART OAuth lands users at /launch and /callback as direct hits
+          // (not in-app navigation), so they need physical files too. The
+          // navbar doesn't link to them, so crawlLinks alone misses them.
+          pages: [{ path: '/launch' }, { path: '/callback' }],
         }),
         viteReact(),
       ]
