@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2026-05-02
+
+### Bug Fixes
+
+- fix(ci): IndexNow URL extraction — use sed -E for the optional / in </?loc> (`d7d2a9f`)
+
+### Other
+
+- docs(seo): PNG social card, per-page TechArticle JSON-LD, IndexNow ping (`90554ef`)
+- docs(seo): add sitemap lastmod, local search, custom 404 (`30df73a`)
+- ci: skip his-demo from root build (needs generated FHIR types) (`fe3181b`)
+- docs(seo): add Google Search Console verification meta (`b71459f`)
+- docs(seo): wire description metadata, OG/Twitter cards, JSON-LD, sitemap, robots (`59008eb`)
+
 ## [1.2.1] - 2026-05-01
 
 ### Bug Fixes

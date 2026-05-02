@@ -1,6 +1,6 @@
 {
   "name": "@fhir-dsl/cli",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "CLI tool for generating type-safe FHIR TypeScript types from HL7 specs and profiles",
   "type": "module",
   "bin": {
