@@ -49,11 +49,12 @@ jobs:
         run: pnpm build
 
       - name: Generate FHIR types for demo
-        # npx needs --package because @fhir-dsl/cli's bin is named `fhir-gen`,
-        # not `cli` — npx can't auto-resolve. Explicit form fetches the package
-        # from npm and runs the right binary.
+        # Invoke the workspace CLI directly — pnpm's bin symlink isn't reliable
+        # in CI because pnpm install runs before @fhir-dsl/cli's dist/ exists,
+        # and npx through both bash and dash kept resolving to "fhir-gen: not
+        # found". The dist exists now (Build workspace packages step above).
         working-directory: apps/his-demo
-        run: npx -y --package=@fhir-dsl/cli fhir-gen generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4
+        run: node ${{ github.workspace }}/packages/cli/dist/index.js generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4
 
       - name: Build demo (static SPA)
         working-directory: apps/his-demo
