@@ -2,7 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { exchangeCode, type SmartConfiguration } from "@fhir-dsl/smart";
 import { withAbsoluteExpiry } from "@fhir-dsl/smart";
-import { SMART_CONFIG, TOKEN_STORE_KEY, buildLauncherEntryUrl } from "#/lib/smart-config";
+import {
+	SMART_CONFIG,
+	TOKEN_STORE_KEY,
+	buildLauncherEntryUrl,
+	getRedirectUri,
+} from "#/lib/smart-config";
 import { tokenStore } from "#/lib/smart-store";
 import { formatError } from "#/lib/error-toast";
 
@@ -64,7 +69,7 @@ function CallbackPage() {
 				const tokens = await exchangeCode({
 					smartConfig: pending.smartConfig,
 					clientId: SMART_CONFIG.clientId,
-					redirectUri: SMART_CONFIG.redirectUri,
+					redirectUri: getRedirectUri(),
 					code,
 					codeVerifier: pending.codeVerifier,
 				});

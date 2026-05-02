@@ -7,7 +7,7 @@ import {
 	generateCodeVerifier,
 	generateState,
 } from "@fhir-dsl/smart";
-import { SMART_CONFIG, buildLauncherEntryUrl } from "#/lib/smart-config";
+import { SMART_CONFIG, buildLauncherEntryUrl, getRedirectUri } from "#/lib/smart-config";
 import { formatError } from "#/lib/error-toast";
 
 interface LaunchSearch {
@@ -56,7 +56,7 @@ function LaunchPage() {
 				const authorizeUrl = buildAuthorizeUrl({
 					smartConfig,
 					clientId: SMART_CONFIG.clientId,
-					redirectUri: SMART_CONFIG.redirectUri,
+					redirectUri: getRedirectUri(),
 					scope: SMART_CONFIG.scope,
 					state,
 					codeChallenge,

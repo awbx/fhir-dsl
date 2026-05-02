@@ -70,10 +70,11 @@ jobs:
           DEMO_DST=apps/docs/build/demo
           mkdir -p "$DEMO_DST"
           cp -R "$DEMO_SRC"/. "$DEMO_DST"/
-          # GitHub Pages serves /demo/ → /demo/index.html (root-route SPA shell);
-          # /demo/<deep-route> → /demo/404.html (which is the same SPA shell, so the
-          # client-side router handles the deep route after hydration).
-          cp "$DEMO_DST/_shell.html" "$DEMO_DST/index.html"
+          # Prerender already produced index.html for /, /patients, /playground.
+          # Copy _shell.html → 404.html so direct hits to unrendered routes
+          # (e.g. /patients/<id>) still load the SPA shell and let the client
+          # router resolve the deep link. (GitHub Pages's site-level 404
+          # fallback is Docusaurus's, not ours, so per-app 404.html is needed.)
           cp "$DEMO_DST/_shell.html" "$DEMO_DST/404.html"
           echo "demo size: $(du -sh $DEMO_DST | cut -f1)"
 

@@ -22,7 +22,14 @@ const config = defineConfig({
         tanstackStart({
           spa: {
             enabled: true,
-            prerender: { enabled: true },
+            // crawlLinks follows <a> tags from the SPA shell so the navbar's
+            // /patients and /playground get prerendered as physical
+            // dist/client/<route>/index.html files. Required because GitHub
+            // Pages's 404 fallback is site-level (/fhir-dsl/404.html =
+            // Docusaurus's 404), not per-subdir, so deep links need real
+            // files instead of a SPA-shell fallback. Parameterized routes
+            // (/patients/$id) still only resolve via in-app navigation.
+            prerender: { enabled: true, crawlLinks: true },
           },
         }),
         viteReact(),
