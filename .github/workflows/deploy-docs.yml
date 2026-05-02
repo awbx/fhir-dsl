@@ -40,8 +40,8 @@ jobs:
 
       - name: Build workspace packages
         # Builds every @fhir-dsl/* package (excludes apps/his-demo via the
-        # root build script's filter). Required so `fhir-gen` is on PATH for
-        # the demo gen step below.
+        # root build script's filter). Required so the @fhir-dsl/cli dist
+        # exists for the demo gen step below.
         run: pnpm build
 
       - name: Build Docusaurus
@@ -49,8 +49,11 @@ jobs:
         run: pnpm build
 
       - name: Generate FHIR types for demo
+        # Invoke the CLI directly — pnpm install creates the bin symlink at
+        # workspace install time when dist/ doesn't exist yet, so the
+        # node_modules/.bin/fhir-gen wrapper isn't reliably present in CI.
         working-directory: apps/his-demo
-        run: pnpm gen
+        run: node ../../packages/cli/dist/index.js generate --version r4 --validator native --expand-valuesets --resolve-codesystems --cache ./.fhir-cache --out ./src/fhir/r4
 
       - name: Build demo (static SPA)
         working-directory: apps/his-demo
