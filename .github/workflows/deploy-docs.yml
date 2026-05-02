@@ -38,6 +38,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build workspace packages
+        # Builds every @fhir-dsl/* package (excludes apps/his-demo via the
+        # root build script's filter). Required so `fhir-gen` is on PATH for
+        # the demo gen step below.
+        run: pnpm build
+
       - name: Build Docusaurus
         working-directory: apps/docs
         run: pnpm build
