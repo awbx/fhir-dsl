@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Database, FlaskConical, MessageSquare, ShieldCheck } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { buildLauncherEntryUrl } from "#/lib/smart-config";
@@ -27,10 +27,10 @@ function Home() {
 						</a>
 					</Button>
 					<Button asChild variant="outline" size="lg">
-						<a href="/patients">Browse without login</a>
+						<Link to="/patients">Browse without login</Link>
 					</Button>
 					<Button asChild variant="ghost" size="lg">
-						<a href="/playground">FHIRPath playground</a>
+						<Link to="/playground">FHIRPath playground</Link>
 					</Button>
 				</div>
 				<p className="text-xs text-muted-foreground">
@@ -46,13 +46,13 @@ function Home() {
 					icon={<Database className="h-5 w-5" />}
 					title="Typed search builder"
 					code={`fhir.search("Patient")\n  .where("name:contains", "eq", q)\n  .include("general-practitioner")\n  .sort("birthdate", "desc")\n  .execute();`}
-					href="/patients"
+					to="/patients"
 				/>
 				<FeatureCard
 					icon={<FlaskConical className="h-5 w-5" />}
 					title="FHIRPath + UCUM"
 					code={`fhirpath<Observation>(\"Observation\")\n  .valueQuantity\n  .where($ => $.eq({ value: 0.005, unit: \"g\" }))\n  .exists()\n  .evaluate(obs); // [true]`}
-					href="/playground"
+					to="/playground"
 				/>
 				<FeatureCard
 					icon={<ShieldCheck className="h-5 w-5" />}
@@ -72,32 +72,40 @@ function Home() {
 	);
 }
 
-function FeatureCard({
-	icon,
-	title,
-	code,
-	href,
-	hint,
-}: {
+type FeatureCardProps = {
 	icon: React.ReactNode;
 	title: string;
 	code: string;
-	href: string;
 	hint?: string;
-}) {
-	return (
-		<a
-			href={href}
-			className="group flex flex-col gap-3 rounded-lg border border-border bg-card p-5 transition hover:border-primary/40"
-		>
+} & ({ to: "/patients" | "/playground" } | { href: string });
+
+function FeatureCard(props: FeatureCardProps) {
+	const cardClass =
+		"group flex flex-col gap-3 rounded-lg border border-border bg-card p-5 transition hover:border-primary/40";
+	const inner = (
+		<>
 			<div className="flex items-center gap-2 text-sm font-medium text-foreground">
-				<span className="rounded bg-primary/10 p-1.5 text-primary">{icon}</span>
-				{title}
+				<span className="rounded bg-primary/10 p-1.5 text-primary">{props.icon}</span>
+				{props.title}
 			</div>
 			<pre className="overflow-x-auto rounded bg-muted/50 p-3 text-[11px] leading-snug text-muted-foreground">
-				<code>{code}</code>
+				<code>{props.code}</code>
 			</pre>
-			{hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+			{props.hint ? <p className="text-xs text-muted-foreground">{props.hint}</p> : null}
+		</>
+	);
+	// Internal SPA routes go through TanStack Link so the basepath
+	// (/fhir-dsl/demo/) is honored. External URLs and "#" stay as <a>.
+	if ("to" in props) {
+		return (
+			<Link to={props.to} className={cardClass}>
+				{inner}
+			</Link>
+		);
+	}
+	return (
+		<a href={props.href} className={cardClass}>
+			{inner}
 		</a>
 	);
 }
