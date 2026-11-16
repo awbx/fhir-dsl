@@ -63,9 +63,12 @@ Subclasses set `kind` to a unique string literal and pass relevant fields throug
 | `FhirPathLexerError` (fhirpath) | `"fhirpath.lexer"` | `{ pos }` |
 | `FhirPathParseError` (fhirpath) | `"fhirpath.parse"` | `{ pos }` |
 | `FhirPathInvariantCompileError` (fhirpath) | `"fhirpath.invariant_compile"` | `{ definition }` |
+| `FhirPathInvariantEvalError` (fhirpath) | `"fhirpath.invariant_eval"` | `undefined` |
 | `UcumError` (fhirpath) | `"fhirpath.ucum"` | `undefined` |
 | `SmartAuthError` (smart) | `"smart.auth"` | `{ error, errorDescription?, status?, body? }` |
 | `DiscoveryError` (smart) | `"smart.discovery"` | `{ url, status? }` |
+
+`FhirPathLexerError` and `FhirPathParseError` come from the invariant expression parser: `parseInvariantExpression()` throws them, while `compileInvariant()` wraps them in `FhirPathInvariantCompileError`. `FhirPathInvariantEvalError` never leaves `@fhir-dsl/fhirpath` — `check()` turns it into an indeterminate result. Of the fhirpath classes, only `FhirPathEvaluationError`, `FhirPathSetterError` and `FhirPathInvariantCompileError` are exported; match the rest on `kind`.
 
 Existing fields are preserved — `err.status`, `err.issues`, `err.pos`, `err.definition` etc. all keep working. `kind`, `context`, and `toJSON()` are additive.
 

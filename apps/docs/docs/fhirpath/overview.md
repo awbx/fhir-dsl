@@ -229,8 +229,8 @@ fhirpath<Organization>("Organization")
 | FHIR — quantity | UCUM-aware equality + ordering on same-dimension `Quantity` (`5 'mg' = 0.005 'g'` is `true`) | Implemented (v1.1.0) |
 | FHIR — references | `resolve()` walks the rootResource Bundle; `EvalOptions.resolveReference` hook for non-Bundle frames | Implemented (v1.1.0) |
 | FHIR — terminology | `conformsTo(profile)`, `memberOf(valueSet)`, `subsumes(other)`, `subsumedBy(other)` — compile to spec strings, evaluate via `EvalOptions.terminology` resolver | Implemented (v1.1.0) |
-| FHIR — invariants | `compileInvariant()` + `validateInvariants()` against `ElementDefinition.constraint[*].expression` | Implemented |
+| FHIR — invariants | `compileInvariant()` + `validateInvariants()` against `ElementDefinition.constraint[*].expression`. A separate engine that supports the subset core invariants use — including `%resource` / `%rootResource` / `%context`, `\|`, `is` / `as`, `~` / `!~`, choice-type navigation (`value` → `valueQuantity`) and precision-aware date comparison. Expressions it can't decide are indeterminate (reported as warnings), never false errors | Implemented |
 | FHIR — extensions | `extension(url)` (sugar for `.extension.where(url = '<url>')`) | Implemented |
-| Equivalence | `~` (equivalence), `!~` (not equivalence) | **Not yet** — track at [spec-compliance.test.ts FP-EQ-003](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts) |
+| Equivalence | `~` (equivalence), `!~` (not equivalence) | **Not yet** in the builder / `evaluate()` (the invariant engine accepts them) — track at [spec-compliance.test.ts FP-EQ-003](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts) |
 | UCUM — special units | Offset units (Celsius, Fahrenheit) and logarithmic units (pH, decibel) | **Not supported** — parser throws `UcumError` instead of producing silent wrong answers; normalise upstream |
 | UCUM — multi-`/` | Multi-factor compound expressions like `mol/(L.s)` | **Not yet** — single-`/` covers every healthcare case in current scope |

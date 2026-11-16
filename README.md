@@ -228,7 +228,7 @@ fhir-dsl is audited against the FHIR architectural overview (https://build.fhir.
 | REST — `_include` / `_revinclude` runtime resolution | ✅ | `Bundle.resolveReference` walks fragment → fullUrl → `Type/id` (Phase 4.2, v0.29.0). |
 | References — `Reference<T>` target narrowing | ✅ | Generated from `targetProfile`. |
 | FHIRPath — N1 core | ✅ | Arithmetic, env vars, `$index`/`$total`, aggregates, `resolve`/`hasValue`, `extension(url)`. |
-| FHIRPath — invariants compiled to runtime predicates | ✅ | `compileInvariant` + `validateInvariants` returning OperationOutcome (Phase 6, v0.40.0). Subset: identifiers/member access, `exists`/`empty`/`matches`/`count`/`where`/`hasValue`, `and`/`or`/`xor`/`implies`/`not`, comparisons, parentheses, indexers, three-valued logic. |
+| FHIRPath — invariants compiled to runtime predicates | ✅ | `compileInvariant` + `validateInvariants` returning OperationOutcome (Phase 6, v0.40.0). Subset covers every R4 core invariant: member access (including choice types and keywords after `.`), `%resource`/`%rootResource`/`%context`/`%ucum`/`%sct`/`%loinc`, `\|`, `is`/`as`, the common existence/filter/subset/string functions, precision-aware date comparisons, three-valued logic. Anything the JSON can't decide is indeterminate, never a false error. |
 | SMART on FHIR v2 | ✅ | PKCE-S256, backend services, scope DSL. |
 | Layered framework (Foundation/Base/Clinical/Financial/Specialized) | ✅ | `LAYER_OF`, `referencesUpward` emitted under `<version>/layers.ts` (Phase 5, v0.30.0). |
 | MCP server generation — package + dispatcher | ✅ | `@fhir-dsl/mcp` ships generic verb tools, audit sinks, stdio transport, FHIR URI templates with `resources/read` (Phases 8.1–8.3, v0.41.0+). |
@@ -285,13 +285,18 @@ Mapping of [FHIR R5 search features](https://fhir.hl7.org/fhir/search.html) to t
 
 ## Invariants (FHIRPath → Predicates)
 
-`@fhir-dsl/fhirpath` exposes a runtime invariant evaluator that compiles `ElementDefinition.constraint[*].expression` strings into predicates and surfaces results as `OperationOutcome` issues. The supported subset covers the patterns FHIR core invariants actually use:
+`@fhir-dsl/fhirpath` exposes a runtime invariant evaluator that compiles `ElementDefinition.constraint[*].expression` strings into predicates and surfaces results as `OperationOutcome` issues. It is a separate, smaller engine than the expression builder's `evaluate()`. The supported subset covers the patterns FHIR core invariants use (all 242 R4 core invariants compile):
 
-- Identifiers and member access (`name.given`, `extension.url`)
-- Function calls: `exists()`, `empty()`, `count()`, `where()`, `select()`, `matches('regex')`, `hasValue()`, `first()`/`last()`/`tail()`/`single()`, `iif()`, `distinct()`, `startsWith`/`endsWith`/`contains`/`length`/`toString`
+- Identifiers and member access (`name.given`, `extension.url`). Keywords are accepted as names after `.`, so `.not()` works. Choice types resolve: `value` reaches `valueQuantity`, `valueString`, etc. (only for known `[x]` bases, so `reference` never matches `referenceRange`)
+- Environment variables: `%resource`, `%rootResource`, `%context`, `%ucum`, `%sct`, `%loinc`
+- Functions: `exists()` (with or without criteria), `empty()`, `count()`, `where()`, `select()`, `all()`, `allTrue()`, `anyTrue()`, `not()`, `iif()`, `hasValue()`, `matches('regex')`, `first()`/`last()`/`tail()`/`single()`, `distinct()`/`isDistinct()`, `union()`/`combine()`/`intersect()`/`exclude()`, `subsetOf()`/`supersetOf()`, `children()`/`descendants()`, `is()`/`as()`/`ofType()`, `trace()`, `toString()`/`toInteger()`, `startsWith`/`endsWith`/`contains`/`substring`/`lower`/`upper`/`length`
 - Boolean operators: `and`, `or`, `xor`, `implies`, `not` (with FHIRPath three-valued logic)
-- Comparison/equivalence: `=`, `!=`, `<`, `>`, `<=`, `>=`, `~`, `!~`, `in`
-- Arithmetic, parentheses, indexers, `$this`, scalar literals
+- Comparison/equivalence: `=`, `!=`, `<`, `>`, `<=`, `>=`, `~`, `!~`, `in`, infix `contains`
+- Type operators `is` / `as`, union `|`
+- Arithmetic (`+` also concatenates strings), `&`, parentheses, indexers, `$this`, scalar literals
+- Date/dateTime comparison follows FHIRPath precision rules, not string order: zoned dateTimes compare as instants, dates compare at the shared precision. When the values are equal at the shared precision but the precisions differ (`2020-02-15` vs `2020-02`), or one dateTime has a zone and the other doesn't, the result is indeterminate
+
+When an expression can't be decided from the JSON alone, `check()` returns `passed: "indeterminate"` and `validateInvariants` reports a `warning` issue — never a false `error`. This covers unsupported functions (`resolve()`, `htmlChecks()`, `replaceMatches()`), `%resource` on an element validated outside its resource (e.g. `ref-1` on a standalone `Reference`), type tests JSON can't settle (`is canonical` vs `is uri` on a string), and empty results. `compileInvariant` throws `FhirPathInvariantCompileError` for an expression it can't parse; `validateInvariants` reports the same case as a warning instead of throwing.
 
 ```ts
 import { compileInvariant, validateInvariants } from "@fhir-dsl/fhirpath";
@@ -307,7 +312,7 @@ const result = inv.check(patient);            // { passed: true | false | "indet
 const oo = validateInvariants(patient, [inv]); // { resourceType: "OperationOutcome", issue: [...] }
 ```
 
-Generator wiring is automatic when `--validator` is used: every emitted resource and backbone schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds. Opt out with `fhir-gen generate --validator native --no-invariants`. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency. (Phase 6 follow-up, v0.49.0.)
+Generator wiring is automatic when `--validator` is used: every emitted resource and backbone schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds. Only `error`-severity issues fail validation, so warnings and indeterminate results never reject a resource. Property-level invariants on repeating elements run against each item. Opt out with `fhir-gen generate --validator native --no-invariants`. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency. (Phase 6 follow-up, v0.49.0.)
 
 ## MCP Server (Model Context Protocol)
 
