@@ -10,6 +10,8 @@ export type Expr =
   | { kind: "member"; left: Expr; name: string }
   | { kind: "index"; left: Expr; index: Expr }
   | { kind: "call"; left: Expr | null; name: string; args: Expr[] }
+  | { kind: "env"; name: string } // `%resource`, `%ucum`, …
+  | { kind: "typeop"; op: "is" | "as"; left: Expr; type: string } // `x is Quantity`
   | { kind: "unary"; op: "not" | "-"; arg: Expr }
   | {
       kind: "binary";
@@ -31,7 +33,9 @@ export type Expr =
         | "div"
         | "mod"
         | "&"
+        | "|"
         | "in"
+        | "contains"
         | "~"
         | "!~";
       left: Expr;

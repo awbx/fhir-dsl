@@ -1,6 +1,7 @@
 import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
 import { evaluateExpr, FhirPathInvariantEvalError } from "./evaluator.js";
+import { FhirPathLexerError } from "./lexer.js";
 import { FhirPathParseError, parseExpression } from "./parser.js";
 
 // Phase 6 — public surface for the FHIR invariant subset of FHIRPath.
@@ -64,7 +65,7 @@ export function compileInvariant(definition: InvariantDefinition): CompiledInvar
   try {
     ast = parseExpression(definition.expression);
   } catch (err) {
-    if (err instanceof FhirPathParseError) {
+    if (err instanceof FhirPathParseError || err instanceof FhirPathLexerError) {
       throw new FhirPathInvariantCompileError(`failed to compile ${definition.key}: ${err.message}`, definition);
     }
     throw err;
@@ -112,7 +113,22 @@ export function validateInvariants(
 ): OperationOutcome {
   const issues: InvariantIssue[] = [];
   for (const inv of invariants) {
-    const compiled = "ast" in inv ? inv : compileInvariant(inv);
+    let compiled: CompiledInvariant;
+    try {
+      compiled = "ast" in inv ? inv : compileInvariant(inv);
+    } catch (err) {
+      // An expression outside the supported subset must not crash validation
+      // of the resource: report it the same way as an indeterminate result.
+      if (!(err instanceof FhirPathInvariantCompileError)) throw err;
+      issues.push({
+        severity: "warning",
+        code: "invariant",
+        diagnostics: `${err.definition.key} could not be evaluated against this resource`,
+        expression: [err.definition.expression],
+        details: { text: err.message },
+      });
+      continue;
+    }
     const result = compiled.check(resource);
     if (result.passed === false) {
       issues.push({

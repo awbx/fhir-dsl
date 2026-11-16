@@ -1,5 +1,6 @@
 import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
+import { isOfType, lookupProperty, normaliseTypeName } from "./fhir-types.js";
 
 // Phase 6 — evaluator for the parsed FHIRPath invariant AST. FHIRPath is
 // a *collection* language: every expression returns a list, and a
@@ -14,7 +15,11 @@ export type Collection = unknown[];
 export interface EvalContext {
   /** The implicit `this` collection (root resource, or `$this` inside calls). */
   this: Collection;
-  /** Root resource — used for `%resource` / `%context`-style env vars (not yet supported). */
+  /**
+   * The value the invariant was evaluated against — `%context`. It is also
+   * `%resource` / `%rootResource` when it is a resource; for a datatype or
+   * backbone element the enclosing resource is unknown, so those throw.
+   */
   resource: unknown;
 }
 
@@ -42,6 +47,10 @@ export function evaluateExpr(expr: Expr, ctx: EvalContext): Collection {
       if (n === null || n < 0 || n >= base.length) return [];
       return [base[n]];
     }
+    case "env":
+      return evalEnv(expr.name, ctx);
+    case "typeop":
+      return evalTypeOp(expr.op, evaluateExpr(expr.left, ctx), expr.type);
     case "unary":
       return evalUnary(expr, ctx);
     case "binary":
@@ -49,6 +58,55 @@ export function evaluateExpr(expr: Expr, ctx: EvalContext): Collection {
     case "call":
       return evalCall(expr, ctx);
   }
+}
+
+const ENV_CONSTANTS: Readonly<Record<string, string>> = {
+  ucum: "http://unitsofmeasure.org",
+  sct: "http://snomed.info/sct",
+  loinc: "http://loinc.org",
+};
+
+function evalEnv(name: string, ctx: EvalContext): Collection {
+  if (name === "context") return ctx.resource == null ? [] : [ctx.resource];
+  if (name === "resource" || name === "rootResource") {
+    const r = ctx.resource;
+    if (r != null && typeof r === "object" && typeof (r as Record<string, unknown>).resourceType === "string") {
+      return [r];
+    }
+    throw new FhirPathInvariantEvalError(`%${name} is unknown when validating an element outside its resource`);
+  }
+  const constant = ENV_CONSTANTS[name];
+  if (constant !== undefined) return [constant];
+  throw new FhirPathInvariantEvalError(`unsupported environment variable: %${name}`);
+}
+
+function typeTest(item: unknown, type: string): boolean {
+  const result = isOfType(item, normaliseTypeName(type));
+  if (result === undefined) throw new FhirPathInvariantEvalError(`cannot determine whether value is ${type}`);
+  return result;
+}
+
+function evalTypeOp(op: "is" | "as", subject: Collection, type: string): Collection {
+  if (subject.length === 0) return [];
+  if (op === "is") {
+    if (subject.length > 1) throw new FhirPathInvariantEvalError("'is' requires a singleton");
+    return [typeTest(subject[0], type)];
+  }
+  return subject.filter((item) => typeTest(item, type));
+}
+
+// The type argument of `is(T)` / `as(T)` / `ofType(T)` is a type name, not an expression.
+function typeArg(expr: Extract<Expr, { kind: "call" }>): string {
+  const arg = expr.args[0];
+  if (arg?.kind === "ident") return arg.name;
+  if (arg?.kind === "member" && arg.left.kind === "ident") return `${arg.left.name}.${arg.name}`;
+  throw new FhirPathInvariantEvalError(`${expr.name}() expects a type name`);
+}
+
+function distinct(c: Collection): Collection {
+  const out: Collection = [];
+  for (const item of c) if (!out.some((v) => sameValue(v, item))) out.push(item);
+  return out;
 }
 
 function evalUnary(expr: Extract<Expr, { kind: "unary" }>, ctx: EvalContext): Collection {
@@ -96,9 +154,20 @@ function evalBinary(expr: Extract<Expr, { kind: "binary" }>, ctx: EvalContext): 
       const ln = singleton(l);
       const rn = singleton(r);
       if (ln === null || rn === null) return [];
-      return [compare(expr.op, ln, rn)];
+      const result = compare(expr.op, ln, rn);
+      return result === null ? [] : [result];
     }
-    case "+":
+    case "+": {
+      const l = evaluateExpr(expr.left, ctx);
+      const r = evaluateExpr(expr.right, ctx);
+      const ls = singletonString(l);
+      const rs = singletonString(r);
+      if (ls !== null && rs !== null) return [ls + rs];
+      const ln = singletonNumber(l);
+      const rn = singletonNumber(r);
+      if (ln === null || rn === null) return [];
+      return [ln + rn];
+    }
     case "-":
     case "*":
     case "/":
@@ -115,6 +184,15 @@ function evalBinary(expr: Extract<Expr, { kind: "binary" }>, ctx: EvalContext): 
       const rs = singletonString(evaluateExpr(expr.right, ctx)) ?? "";
       return [ls + rs];
     }
+    case "contains": {
+      const l = evaluateExpr(expr.left, ctx);
+      const r = evaluateExpr(expr.right, ctx);
+      if (r.length === 0) return [];
+      const item = r[0];
+      return [l.some((v) => sameValue(v, item))];
+    }
+    case "|":
+      return distinct([...evaluateExpr(expr.left, ctx), ...evaluateExpr(expr.right, ctx)]);
     case "in": {
       const l = evaluateExpr(expr.left, ctx);
       const r = evaluateExpr(expr.right, ctx);
@@ -224,6 +302,72 @@ function evalCall(expr: Extract<Expr, { kind: "call" }>, ctx: EvalContext): Coll
       if (cond === false && expr.args[2]) return evaluateExpr(expr.args[2], ctx);
       return [];
     }
+    case "is":
+      return evalTypeOp("is", subject, typeArg(expr));
+    case "as":
+    case "ofType":
+      return evalTypeOp("as", subject, typeArg(expr));
+    case "union":
+      return distinct([...subject, ...evaluateExpr(expr.args[0]!, ctx)]);
+    case "combine":
+      return [...subject, ...evaluateExpr(expr.args[0]!, ctx)];
+    case "intersect": {
+      const other = evaluateExpr(expr.args[0]!, ctx);
+      return distinct(subject.filter((item) => other.some((v) => sameValue(v, item))));
+    }
+    case "exclude": {
+      const other = evaluateExpr(expr.args[0]!, ctx);
+      return subject.filter((item) => !other.some((v) => sameValue(v, item)));
+    }
+    case "isDistinct":
+      return [distinct(subject).length === subject.length];
+    case "subsetOf": {
+      const other = evaluateExpr(expr.args[0]!, ctx);
+      return [subject.every((item) => other.some((v) => sameValue(v, item)))];
+    }
+    case "supersetOf": {
+      const other = evaluateExpr(expr.args[0]!, ctx);
+      return [other.every((item) => subject.some((v) => sameValue(v, item)))];
+    }
+    case "trace":
+      return subject;
+    case "children":
+      return navigateChildren(subject);
+    case "descendants": {
+      const out: Collection = [];
+      const seen = new WeakSet<object>();
+      let frontier = subject;
+      while (frontier.length > 0) {
+        const next = navigateChildren(frontier.filter((v) => v != null && typeof v === "object" && !seen.has(v)));
+        for (const v of frontier) if (v != null && typeof v === "object") seen.add(v);
+        out.push(...next);
+        frontier = next;
+      }
+      return out;
+    }
+    case "toInteger": {
+      const v = singleton(subject);
+      if (typeof v === "number") return Number.isInteger(v) ? [v] : [];
+      if (typeof v === "boolean") return [v ? 1 : 0];
+      if (typeof v === "string" && /^[+-]?\d+$/.test(v)) return [Number(v)];
+      return [];
+    }
+    case "substring": {
+      const s = singletonString(subject);
+      const start = singletonNumber(evaluateExpr(expr.args[0]!, ctx));
+      if (s === null || start === null || start < 0 || start >= s.length) return [];
+      if (!expr.args[1]) return [s.slice(start)];
+      const len = singletonNumber(evaluateExpr(expr.args[1], ctx));
+      return len === null ? [s.slice(start)] : [s.slice(start, start + Math.max(0, len))];
+    }
+    case "lower": {
+      const s = singletonString(subject);
+      return s === null ? [] : [s.toLowerCase()];
+    }
+    case "upper": {
+      const s = singletonString(subject);
+      return s === null ? [] : [s.toUpperCase()];
+    }
     case "distinct": {
       const seen = new Set<string>();
       const out: Collection = [];
@@ -244,12 +388,26 @@ function isTruthyPredicate(arg: Expr, ctx: EvalContext): boolean {
   return toBooleanCollection(evaluateExpr(arg, ctx)) === true;
 }
 
+function navigateChildren(collection: Collection): Collection {
+  const out: Collection = [];
+  for (const item of collection) {
+    if (item == null || typeof item !== "object") continue;
+    for (const value of Object.values(item as Record<string, unknown>)) {
+      if (value == null) continue;
+      if (Array.isArray(value)) out.push(...value);
+      else out.push(value);
+    }
+  }
+  return out;
+}
+
 function navigate(collection: Collection, name: string): Collection {
   const out: Collection = [];
   for (const item of collection) {
     if (item == null) continue;
     if (typeof item !== "object") continue;
-    const value = (item as Record<string, unknown>)[name];
+    // `value` reaches `valueQuantity` etc. (FHIR choice types).
+    const value = lookupProperty(item as Record<string, unknown>, name);
     if (value == null) continue;
     if (Array.isArray(value)) out.push(...value);
     else out.push(value);
@@ -339,7 +497,7 @@ function sameValue(a: unknown, b: unknown): boolean {
   return false;
 }
 
-function compare(op: "<" | ">" | "<=" | ">=", l: unknown, r: unknown): boolean {
+function compare(op: "<" | ">" | "<=" | ">=", l: unknown, r: unknown): boolean | null {
   if (typeof l === "number" && typeof r === "number") {
     switch (op) {
       case "<":
@@ -353,6 +511,20 @@ function compare(op: "<" | ">" | "<=" | ">=", l: unknown, r: unknown): boolean {
     }
   }
   if (typeof l === "string" && typeof r === "string") {
+    const temporal = compareTemporal(l, r);
+    if (temporal !== undefined) {
+      if (temporal === null) return null;
+      switch (op) {
+        case "<":
+          return temporal < 0;
+        case ">":
+          return temporal > 0;
+        case "<=":
+          return temporal <= 0;
+        case ">=":
+          return temporal >= 0;
+      }
+    }
     switch (op) {
       case "<":
         return l < r;
@@ -365,6 +537,43 @@ function compare(op: "<" | ">" | "<=" | ">=", l: unknown, r: unknown): boolean {
     }
   }
   throw new FhirPathInvariantEvalError(`cannot compare ${typeof l} with ${typeof r}`);
+}
+
+// FHIR date / dateTime / instant: YYYY[-MM[-DD[Thh:mm[:ss[.sss]][Z|±hh:mm]]]].
+const TEMPORAL = /^(\d{4})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)(Z|[+-]\d{2}:\d{2})?)?)?)?$/;
+
+/**
+ * Compare two FHIR date/dateTime strings per FHIRPath §5.4: compare at the
+ * shared precision; if equal there but the precisions differ, the result is
+ * unknown. Returns `undefined` when either side is not a date, `null` when
+ * the order is unknown, otherwise a negative / zero / positive number.
+ */
+function compareTemporal(l: string, r: string): number | null | undefined {
+  const a = TEMPORAL.exec(l);
+  const b = TEMPORAL.exec(r);
+  if (!a || !b) return undefined;
+  const aHasTime = a[4] !== undefined;
+  const bHasTime = b[4] !== undefined;
+  if (aHasTime && bHasTime) {
+    // Times without a zone can't be ordered against zoned ones.
+    if ((a[5] === undefined) !== (b[5] === undefined)) return null;
+    if (a[5] !== undefined) {
+      const aSec = a[4]!.length > 5;
+      const bSec = b[4]!.length > 5;
+      if (aSec !== bSec) return null;
+      return Date.parse(l) - Date.parse(r);
+    }
+    return l < r ? -1 : l > r ? 1 : 0;
+  }
+  // Date parts (year, month, day) at the shared precision.
+  const aParts = [a[1], a[2], a[3]].filter((p) => p !== undefined);
+  const bParts = [b[1], b[2], b[3]].filter((p) => p !== undefined);
+  const shared = Math.min(aParts.length, bParts.length);
+  for (let i = 0; i < shared; i++) {
+    if (aParts[i]! !== bParts[i]!) return aParts[i]! < bParts[i]! ? -1 : 1;
+  }
+  if (aParts.length !== bParts.length || aHasTime !== bHasTime) return null;
+  return 0;
 }
 
 function arithmetic(op: "+" | "-" | "*" | "/" | "div" | "mod", l: number, r: number): number {

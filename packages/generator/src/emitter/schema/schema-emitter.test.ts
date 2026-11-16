@@ -375,6 +375,35 @@ describe("emitResourceSchema invariants", () => {
     expect(out).toMatch(/value:\s*\{\s*schema:\s*s\.refine\(/);
   });
 
+  it("applies a repeating property's invariants to each item, not the array", () => {
+    // FHIR evaluates element constraints per instance — ext-1 on `extension`
+    // must see one Extension, not the whole array.
+    const model: ResourceModel = {
+      name: "Profiled",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [
+        {
+          name: "extension",
+          types: [{ code: "string" }],
+          isRequired: false,
+          isArray: true,
+          isChoiceType: false,
+          invariants: [
+            { key: "ext-1", severity: "error", human: "h", expression: "extension.exists() != value.exists()" },
+          ],
+        },
+      ],
+      backboneElements: [],
+    };
+    const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(),
+    });
+    expect(out).toMatch(/extension:\s*\{\s*schema:\s*s\.array\(\s*s\.refine\(/);
+  });
+
   it("invariants: false opt-out strips constraints from emitted output", () => {
     const out = emitResourceSchema(patientWithInvariants(), nativeAdapter, {
       mapper: MAPPER,
