@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-11-16
+
+### Bug Fixes
+
+- fix(generator): validate inherited Resource/DomainResource/BackboneElement fields (`91f8d69`)
+- fix(fhirpath): cheaper indeterminate %resource, safer invariant regexes (`4d6ca5d`)
+- fix(fhirpath): share choice-type dispatch between both engines (`b022dbe`)
+- fix(fhirpath): evaluate standard R4 invariants (.not(), %resource, value[x]) (`c662ae1`)
+- fix(demo): home page CTAs use TanStack Link to honor basepath (`8ba22e2`)
+- fix(demo): prerender /launch + /callback for SMART OAuth (`d851033`)
+- fix(demo): prerender deep routes + derive SMART URLs from origin (`af597fe`)
+- fix(ci): invoke fhir-gen via direct node path (`01e84ab`)
+- fix(ci): npx --package=@fhir-dsl/cli — bin name (fhir-gen) doesn't match package (`18d0222`)
+- fix(ci): invoke fhir-gen via direct node path in demo gen (`27295fc`)
+- fix(ci): build workspace packages before demo gen so fhir-gen is on PATH (`78c6d4f`)
+
+### Other
+
+- docs: document narrative, resolve and regex behaviour and inherited-field validation (`81e6f44`)
+- feat(fhirpath): support resolve(), htmlChecks() and replaceMatches() in invariants (`c863766`)
+- docs: document shared choice-type navigation and invariant parse cache (`a4e90b4`)
+- perf(fhirpath): cache parsed invariant expressions (`031636c`)
+- docs: drop unverified invariant count from README (`92910fa`)
+- docs: sync invariant and error-kind docs with current code (`0e8467f`)
+- ci: use npx -y @fhir-dsl/cli for demo gen step (`33878cf`)
+- docs(demo): host the his-demo as a static SPA at /fhir-dsl/demo (`ba8c6fa`)
+
 ## [1.2.2] - 2026-05-02
 
 ### Bug Fixes
