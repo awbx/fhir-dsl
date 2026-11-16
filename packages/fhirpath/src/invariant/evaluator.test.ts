@@ -539,3 +539,55 @@ describe("invariant — resolve()", () => {
     );
   });
 });
+
+describe("invariant — regex and keyword-name fixes", () => {
+  const check = (expression: string, value: unknown) =>
+    compileInvariant({ key: "k", expression, severity: "error", human: "h" }).check(value).passed;
+
+  it("matches() with an invalid pattern is indeterminate, not false", () => {
+    expect(check("id.matches('[')", { id: "x" })).toBe("indeterminate");
+  });
+
+  it("accepts R4 patterns that are invalid in unicode regex mode", () => {
+    // From the R4 spec; `\-` and `\@` are identity escapes rejected by the `u` flag.
+    expect(check("id.matches('^[a-zA-Z0-9\\\\/\\\\-_\\\\[\\\\]\\\\@]+$')", { id: "a-b/c" })).toBe(true);
+    expect(check("id.replaceMatches('\\\\-', '_') = 'a_b'", { id: "a-b" })).toBe(true);
+  });
+
+  it("div, mod and in are names at the start of an operand", () => {
+    expect(check("div.exists()", { div: "<div/>" })).toBe(true);
+    expect(check("mod.empty() and in.empty()", {})).toBe(true);
+    // ...and still operators between operands.
+    expect(check("(7 div 2) = 3 and (7 mod 2) = 1 and ('a' in ('a' | 'b'))", {})).toBe(true);
+  });
+});
+
+describe("invariant — %resource outside its resource (#59)", () => {
+  const ref1 = {
+    key: "ref-1",
+    severity: "error" as const,
+    human: "SHALL have a contained resource if a local reference is provided",
+    expression: "reference.startsWith('#').not() or (reference.substring(1) in %rootResource.contained.id)",
+  };
+
+  it("reports the same indeterminate result on every call", () => {
+    const first = validateInvariants({ reference: "#p1" }, [ref1]);
+    const second = validateInvariants({ reference: "#p2" }, [ref1]);
+    expect(first).toEqual(second);
+    expect(first.issue).toEqual([
+      expect.objectContaining({
+        severity: "warning",
+        details: {
+          text: "ref-1: evaluation error — %rootResource is unknown when validating an element outside its resource",
+        },
+      }),
+    ]);
+  });
+
+  it("names the variable that was used", () => {
+    const inv = compileInvariant({ ...ref1, expression: "%resource.exists()" });
+    expect(inv.check({}).message).toBe(
+      "ref-1: evaluation error — %resource is unknown when validating an element outside its resource",
+    );
+  });
+});

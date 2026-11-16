@@ -68,6 +68,18 @@ const ENV_CONSTANTS: Readonly<Record<string, string>> = {
   loinc: "http://loinc.org",
 };
 
+// `%resource` on an element validated outside its resource is the common
+// indeterminate case in generated schemas (e.g. ref-1 on every Reference).
+// Constructing an Error captures a stack trace, which dominated validation
+// time, so these two are built once and rethrown. The class and message are
+// the same as a fresh error; nothing reads the stack.
+const UNKNOWN_ROOT_ERRORS: Readonly<Record<"resource" | "rootResource", FhirPathInvariantEvalError>> = {
+  resource: new FhirPathInvariantEvalError("%resource is unknown when validating an element outside its resource"),
+  rootResource: new FhirPathInvariantEvalError(
+    "%rootResource is unknown when validating an element outside its resource",
+  ),
+};
+
 function evalEnv(name: string, ctx: EvalContext): Collection {
   if (name === "context") return ctx.resource == null ? [] : [ctx.resource];
   if (name === "resource" || name === "rootResource") {
@@ -75,7 +87,7 @@ function evalEnv(name: string, ctx: EvalContext): Collection {
     if (r != null && typeof r === "object" && typeof (r as Record<string, unknown>).resourceType === "string") {
       return [r];
     }
-    throw new FhirPathInvariantEvalError(`%${name} is unknown when validating an element outside its resource`);
+    throw UNKNOWN_ROOT_ERRORS[name];
   }
   const constant = ENV_CONSTANTS[name];
   if (constant !== undefined) return [constant];
@@ -234,11 +246,14 @@ function evalCall(expr: Extract<Expr, { kind: "call" }>, ctx: EvalContext): Coll
       const target = singletonString(subject);
       const pattern = singletonString(evaluateExpr(expr.args[0]!, ctx));
       if (target === null || pattern === null) return [];
+      let re: RegExp;
       try {
-        return [new RegExp(pattern).test(target)];
+        re = new RegExp(pattern);
       } catch {
-        return [false];
+        // An unreadable pattern says nothing about the data.
+        throw new FhirPathInvariantEvalError(`invalid regular expression: ${pattern}`);
       }
+      return [re.test(target)];
     }
     case "replaceMatches": {
       if (expr.args.length !== 2) throw new FhirPathInvariantEvalError("replaceMatches() expects two arguments");
@@ -250,7 +265,7 @@ function evalCall(expr: Extract<Expr, { kind: "call" }>, ctx: EvalContext): Coll
       if (pattern === null || substitution === null) return [];
       let regex: RegExp;
       try {
-        regex = new RegExp(pattern, "gu");
+        regex = new RegExp(pattern, "g");
       } catch {
         throw new FhirPathInvariantEvalError(`replaceMatches(): invalid regular expression ${pattern}`);
       }
