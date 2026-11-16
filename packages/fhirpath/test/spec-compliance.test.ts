@@ -1280,16 +1280,17 @@ describe("FHIR-specific functions (FP-FHIR-*)", () => {
   /**
    * FP-FHIR-013 — spec §2.1.9.4 / FHIRPath §6.4 choice-type navigation.
    * Per decisions.md FP.6 (BUG-HIGH): `.value` on Observation must resolve
-   * via the `value[x]` expansion. Two failing assertions lock in the two
-   * sides of the contract:
+   * via the `value[x]` expansion. Two assertions lock in the two sides of
+   * the contract:
    *   (a) the explicit `valueQuantity` form must return `[]` — there is no
    *       such field on the test fixture unless it's been chosen.
    *   (b) the implicit `.value` form must dispatch to the chosen variant
    *       (`valueQuantity` here) and return the payload.
    *
-   * The builder/planner today emits a single `nav(prop="value")` op, so
-   * `.value` returns `[]` unconditionally — (b) fails. When the builder
-   * gains polymorphic expansion, (a) remains a regression pin.
+   * `nav` resolves (b) at runtime through `src/fhir-choice.ts`, the same
+   * `[x]` base / FHIR-type-suffix tables the invariant engine uses (#56).
+   * Wider coverage (all R4–R6 bases, `referenceRange` / `valueFoo`
+   * non-matches, typed `is`/`as`/`ofType`) lives in test/issue-56.test.ts.
    */
   it("FP-FHIR-013a: fp<Obs>().valueQuantity on obs-with-valueString returns [] (spec §2.1.9.4)", () => {
     // The un-chosen explicit variant must yield []. Regression pin for the

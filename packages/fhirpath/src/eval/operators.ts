@@ -1,3 +1,4 @@
+import { choiceTypeOf, choiceTypeSatisfies } from "../fhir-choice.js";
 import type { CompiledPredicate, OperatorOp } from "../ops.js";
 import { fhirpathEqual } from "./_internal/equality.js";
 import { unwrapPrimitive } from "./_internal/primitive-box.js";
@@ -190,6 +191,9 @@ function matchesType(item: unknown, typeName: string): boolean {
       return typeof unwrapped === "number";
   }
   if (typeof item !== "object") return false;
+  // Objects reached through a choice key (`valueQuantity`) carry their type.
+  const known = choiceTypeOf(item);
+  if (known !== undefined) return choiceTypeSatisfies(known, typeName);
   if ("resourceType" in (item as Record<string, unknown>)) {
     return (item as Record<string, unknown>).resourceType === typeName;
   }

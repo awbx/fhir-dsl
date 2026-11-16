@@ -1,38 +1,12 @@
+import { findChoiceVariant, recordChoiceType } from "../fhir-choice.js";
 import type { NavOp } from "../ops.js";
 import { boxPrimitive } from "./_internal/primitive-box.js";
 
 // FHIRPath §2.1.9.4 / FHIR §2.1.9.1.1: navigating to a `value[x]` base label
-// must dispatch to whichever variant is present on the element (`valueQuantity`,
-// `valueString`, …). The runtime has no SpecCatalog, so gate the sibling scan
-// on this allowlist of known R5 choice-type base names. Non-choice props like
-// `reference` stay on direct-lookup semantics and cannot trip over siblings
-// such as `referenceRange`.
-const CHOICE_TYPE_BASES: ReadonlySet<string> = new Set([
-  "value",
-  "effective",
-  "onset",
-  "abatement",
-  "deceased",
-  "multipleBirth",
-  "occurrence",
-  "medication",
-  "reported",
-  "born",
-  "allowed",
-  "dose",
-  "rate",
-  "performed",
-  "timing",
-  "indication",
-  "asNeeded",
-  "amount",
-  "collected",
-  "instantiates",
-  "serviced",
-  "product",
-  "result",
-  "source",
-]);
+// dispatches to whichever variant is present on the element (`valueQuantity`,
+// `valueString`, …). The base/suffix tables are shared with the invariant
+// engine (`../fhir-choice.ts`); non-choice props like `reference` keep
+// direct-lookup semantics and cannot trip over siblings such as `referenceRange`.
 
 function isPrimitiveValue(v: unknown): v is string | number | boolean {
   const t = typeof v;
@@ -62,34 +36,31 @@ function mergePrimitiveSibling(value: unknown, sibling: unknown): unknown[] {
   return [value];
 }
 
-function dispatchChoiceType(item: Record<string, unknown>, prop: string): unknown {
-  if (!CHOICE_TYPE_BASES.has(prop)) return undefined;
-  for (const key of Object.keys(item)) {
-    if (key.length > prop.length && key.startsWith(prop)) {
-      const next = key.charCodeAt(prop.length);
-      if (next >= 65 && next <= 90) return item[key];
-    }
-  }
-  return undefined;
-}
-
 export function evalNav(op: NavOp, collection: unknown[]): unknown[] {
   switch (op.type) {
     case "nav":
       return collection.flatMap((item) => {
         if (item == null || typeof item !== "object") return [];
         const obj = item as Record<string, unknown>;
-        let val: unknown = obj[op.prop];
+        let key = op.prop;
+        let val: unknown = obj[key];
         // §5.1 edge-case a.3 (BUG-024): distinguish explicit-null property
         // values (present but null-valued → yield `{null}`) from absence
         // (yield `{}`). Only `undefined` triggers choice-type fallback and
         // empty return; an explicit `null` is a present collection member.
-        if (val === undefined) val = dispatchChoiceType(obj, op.prop);
-        if (val === undefined) return [];
+        if (val === undefined) {
+          const variant = findChoiceVariant(obj, op.prop);
+          if (variant === undefined) return [];
+          recordChoiceType(variant.value, variant.type);
+          key = variant.key;
+          val = variant.value;
+        }
         // FP.9 / §2.1.9.2: primitive properties may carry metadata on a
         // `_<prop>` sibling (id, extension, …). Merge the sibling with the
-        // primitive so `.extension` / `.id` navigation reaches it.
-        const sibling = obj[`_${op.prop}`];
+        // primitive so `.extension` / `.id` navigation reaches it. For a
+        // dispatched choice the sibling follows the concrete key
+        // (`_valueString`), not the base label.
+        const sibling = obj[`_${key}`];
         if (sibling !== undefined) return mergePrimitiveSibling(val, sibling);
         return Array.isArray(val) ? val : [val];
       });
