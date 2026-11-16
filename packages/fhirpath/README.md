@@ -115,16 +115,19 @@ Every error this package raises extends [`FhirDslError`](https://awbx.github.io/
 |---|---|---|
 | `FhirPathEvaluationError` | `fhirpath.evaluation` | Runtime evaluator errors (missing terminology resolver, malformed input, etc.) |
 | `FhirPathSetterError` | `fhirpath.setter` | `setValue` / `createPatch` invoked on a non-invertible path |
-| `FhirPathInvariantLexerError` | `fhirpath.invariant.lexer` | `compileInvariant()` lex failure |
-| `FhirPathInvariantParseError` | `fhirpath.invariant.parser` | `compileInvariant()` parse failure |
-| `FhirPathInvariantEvalError` | `fhirpath.invariant.evaluator` | `validateInvariants()` runtime failure |
+| `FhirPathInvariantCompileError` | `fhirpath.invariant_compile` | `compileInvariant()` cannot lex or parse the expression. Wraps the underlying lexer/parser error; `context.definition` holds the invariant |
+| `FhirPathLexerError` | `fhirpath.lexer` | Invariant-expression lex failure, thrown by `parseInvariantExpression()` |
+| `FhirPathParseError` | `fhirpath.parse` | Invariant-expression parse failure, thrown by `parseInvariantExpression()` |
+| `FhirPathInvariantEvalError` | `fhirpath.invariant_eval` | Invariant evaluation failure. Caught inside `check()` and reported as an indeterminate result; it does not escape `compileInvariant()` / `validateInvariants()` |
 | `UcumError` | `fhirpath.ucum` | UCUM parse/convert failures (offset units, multi-`/`, dimension mismatch) |
+
+Only `FhirPathEvaluationError`, `FhirPathSetterError` and `FhirPathInvariantCompileError` are exported from the package entry point. Match the others on `kind` (or use `isFhirDslError` from `@fhir-dsl/utils`).
 
 ## Coverage gaps
 
 The full coverage table — including the FHIR extensions (UCUM, write-back, `resolve()`, terminology) — lives in [the spec-coverage docs](https://awbx.github.io/fhir-dsl/docs/fhirpath/overview#fhirpath-spec-coverage). Items still pending:
 
-- **`~` / `!~` (equivalence operators)** — tracked at [`spec-compliance.test.ts FP-EQ-003`](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts).
+- **`~` / `!~` (equivalence operators)** in the expression builder and `evaluate()` — tracked at [`spec-compliance.test.ts FP-EQ-003`](https://github.com/awbx/fhir-dsl/blob/main/packages/fhirpath/test/spec-compliance.test.ts). The invariant engine (`compileInvariant` / `validateInvariants`) does accept them.
 - **UCUM offset / logarithmic units** — Celsius / Fahrenheit / pH / bel / dB throw `UcumError` at parse time so silent wrong answers don't slip through. Normalise upstream.
 - **UCUM multi-`/` compound expressions** — `mol/(L.s)` is not parsed; single-`/` (`mg/dL`, `kg/m2`, `/min`) covers every healthcare case in current scope.
 - **`setValue` / `createPatch`** only invert `eq`-shaped predicates joined by `and`. `or`-joined predicates, `not`, and filter ops (`first()`, `last()`, `index()`) throw `FhirPathSetterError` — there is no unique partial template to construct. Predicates passed to `evaluate()` have no such restriction.

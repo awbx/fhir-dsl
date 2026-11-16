@@ -68,11 +68,15 @@ export function parseStructureDefinition(sd: FhirStructureDefinition, catalog: S
 
   const backboneElements: BackboneElementModel[] = [];
   const properties: PropertyModel[] = [];
+  const inheritedProperties: PropertyModel[] = [];
 
   for (const element of directChildren) {
     const propName = fhirPathToPropertyName(element.path);
 
-    if (skipProps.has(propName)) continue;
+    if (skipProps.has(propName)) {
+      inheritedProperties.push(elementToProperty(element, sd.name, catalog));
+      continue;
+    }
 
     const types = element.type ?? [];
     const isChoiceType = element.path.endsWith("[x]");
@@ -108,6 +112,7 @@ export function parseStructureDefinition(sd: FhirStructureDefinition, catalog: S
     isAbstract: sd.abstract,
     baseType,
     properties,
+    inheritedProperties: inheritedProperties.length > 0 ? inheritedProperties : undefined,
     backboneElements,
     description: elements[0]?.definition,
     invariants: rootInvariants,
@@ -201,9 +206,13 @@ function parseBackboneElement(
   const invariants = extractInvariants(element.constraint);
   const backboneBaseProps = catalog.baseProperties.get("BackboneElement") ?? new Set<string>();
   const properties: PropertyModel[] = [];
+  const inheritedProperties: PropertyModel[] = [];
   for (const child of children) {
     const childPropName = fhirPathToPropertyName(child.path);
-    if (backboneBaseProps.has(childPropName)) continue;
+    if (backboneBaseProps.has(childPropName)) {
+      inheritedProperties.push(elementToProperty(child, resourceName, catalog));
+      continue;
+    }
 
     const isChoice = child.path.endsWith("[x]");
     if (isChoice) {
@@ -230,7 +239,13 @@ function parseBackboneElement(
     properties.push(elementToProperty(child, resourceName, catalog));
   }
 
-  return { name, path: bbPath, properties, invariants };
+  return {
+    name,
+    path: bbPath,
+    properties,
+    inheritedProperties: inheritedProperties.length > 0 ? inheritedProperties : undefined,
+    invariants,
+  };
 }
 
 /**

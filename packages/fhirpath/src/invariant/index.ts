@@ -1,8 +1,7 @@
 import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
+import { parseCached } from "./cache.js";
 import { evaluateExpr, FhirPathInvariantEvalError } from "./evaluator.js";
-import { FhirPathLexerError } from "./lexer.js";
-import { FhirPathParseError, parseExpression } from "./parser.js";
 
 // Phase 6 — public surface for the FHIR invariant subset of FHIRPath.
 //
@@ -14,6 +13,9 @@ import { FhirPathParseError, parseExpression } from "./parser.js";
 // The module also exposes `validateInvariants(resource, invariants)` which
 // returns OperationOutcome-shaped issues, suitable for surfacing through
 // the existing `@fhir-dsl/runtime` error channels.
+//
+// Parsed expressions are cached by expression string (see ./cache.ts), so
+// passing the same definitions on every call does not re-parse them.
 
 export interface InvariantDefinition {
   /** `ElementDefinition.constraint.key` (e.g. `pat-1`). */
@@ -30,6 +32,7 @@ export interface InvariantDefinition {
 
 export interface CompiledInvariant {
   definition: InvariantDefinition;
+  /** Parsed expression. Shared through the parse cache and frozen: do not mutate. */
   ast: Expr;
   /**
    * Evaluate the invariant against a resource. Returns:
@@ -61,49 +64,15 @@ export interface OperationOutcome {
 }
 
 export function compileInvariant(definition: InvariantDefinition): CompiledInvariant {
-  let ast: Expr;
-  try {
-    ast = parseExpression(definition.expression);
-  } catch (err) {
-    if (err instanceof FhirPathParseError || err instanceof FhirPathLexerError) {
-      throw new FhirPathInvariantCompileError(`failed to compile ${definition.key}: ${err.message}`, definition);
-    }
-    throw err;
+  const parsed = parseCached(definition.expression);
+  if (!parsed.ok) {
+    throw new FhirPathInvariantCompileError(compileErrorMessage(definition, parsed.error), definition);
   }
+  const { ast } = parsed;
   return {
     definition,
     ast,
-    check(resource) {
-      try {
-        const result = evaluateExpr(ast, { this: [resource], resource });
-        if (result.length === 0) {
-          return {
-            passed: "indeterminate",
-            key: definition.key,
-            severity: definition.severity,
-            message: `${definition.key}: ${definition.human}`,
-          };
-        }
-        const value = result[0];
-        const passed = value === true;
-        return {
-          passed,
-          key: definition.key,
-          severity: definition.severity,
-          message: passed ? `${definition.key}: ok` : `${definition.key}: ${definition.human}`,
-        };
-      } catch (err) {
-        if (err instanceof FhirPathInvariantEvalError) {
-          return {
-            passed: "indeterminate",
-            key: definition.key,
-            severity: definition.severity,
-            message: `${definition.key}: evaluation error — ${err.message}`,
-          };
-        }
-        throw err;
-      }
-    },
+    check: (resource) => checkAst(ast, definition, resource),
   };
 }
 
@@ -113,30 +82,37 @@ export function validateInvariants(
 ): OperationOutcome {
   const issues: InvariantIssue[] = [];
   for (const inv of invariants) {
-    let compiled: CompiledInvariant;
-    try {
-      compiled = "ast" in inv ? inv : compileInvariant(inv);
-    } catch (err) {
-      // An expression outside the supported subset must not crash validation
-      // of the resource: report it the same way as an indeterminate result.
-      if (!(err instanceof FhirPathInvariantCompileError)) throw err;
-      issues.push({
-        severity: "warning",
-        code: "invariant",
-        diagnostics: `${err.definition.key} could not be evaluated against this resource`,
-        expression: [err.definition.expression],
-        details: { text: err.message },
-      });
-      continue;
+    let definition: InvariantDefinition;
+    let result: InvariantResult;
+    if ("ast" in inv) {
+      definition = inv.definition;
+      result = inv.check(resource);
+    } else {
+      definition = inv;
+      // Definitions go straight through the parse cache rather than
+      // `compileInvariant`, so the hot path allocates no wrapper or error.
+      const parsed = parseCached(definition.expression);
+      if (!parsed.ok) {
+        // An expression outside the supported subset must not crash validation
+        // of the resource: report it the same way as an indeterminate result.
+        issues.push({
+          severity: "warning",
+          code: "invariant",
+          diagnostics: `${definition.key} could not be evaluated against this resource`,
+          expression: [definition.expression],
+          details: { text: compileErrorMessage(definition, parsed.error) },
+        });
+        continue;
+      }
+      result = checkAst(parsed.ast, definition, resource);
     }
-    const result = compiled.check(resource);
     if (result.passed === false) {
       issues.push({
         severity: result.severity,
         code: "invariant",
-        diagnostics: compiled.definition.human,
-        expression: [compiled.definition.expression],
-        details: { text: `${compiled.definition.key}: ${compiled.definition.human}` },
+        diagnostics: definition.human,
+        expression: [definition.expression],
+        details: { text: `${definition.key}: ${definition.human}` },
       });
     } else if (result.passed === "indeterminate") {
       // We surface indeterminate results as warnings — they signal an
@@ -145,13 +121,48 @@ export function validateInvariants(
       issues.push({
         severity: "warning",
         code: "invariant",
-        diagnostics: `${compiled.definition.key} could not be evaluated against this resource`,
-        expression: [compiled.definition.expression],
+        diagnostics: `${definition.key} could not be evaluated against this resource`,
+        expression: [definition.expression],
         details: { text: result.message },
       });
     }
   }
   return { resourceType: "OperationOutcome", issue: issues };
+}
+
+function checkAst(ast: Expr, definition: InvariantDefinition, resource: unknown): InvariantResult {
+  try {
+    const result = evaluateExpr(ast, { this: [resource], resource });
+    if (result.length === 0) {
+      return {
+        passed: "indeterminate",
+        key: definition.key,
+        severity: definition.severity,
+        message: `${definition.key}: ${definition.human}`,
+      };
+    }
+    const passed = result[0] === true;
+    return {
+      passed,
+      key: definition.key,
+      severity: definition.severity,
+      message: passed ? `${definition.key}: ok` : `${definition.key}: ${definition.human}`,
+    };
+  } catch (err) {
+    if (err instanceof FhirPathInvariantEvalError) {
+      return {
+        passed: "indeterminate",
+        key: definition.key,
+        severity: definition.severity,
+        message: `${definition.key}: evaluation error — ${err.message}`,
+      };
+    }
+    throw err;
+  }
+}
+
+function compileErrorMessage(definition: InvariantDefinition, err: Error): string {
+  return `failed to compile ${definition.key}: ${err.message}`;
 }
 
 export class FhirPathInvariantCompileError extends FhirDslError<

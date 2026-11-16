@@ -150,6 +150,12 @@ function propertyToNode(prop: PropertyModel, ctx: EmitContext): SchemaNode {
   return node;
 }
 
+// Inherited base properties (`id`, `meta`, `text`, `extension`, …) come first,
+// matching the order of the FHIR snapshot.
+function withInherited(m: { properties: PropertyModel[]; inheritedProperties?: PropertyModel[] | undefined }) {
+  return m.inheritedProperties ? [...m.inheritedProperties, ...m.properties] : m.properties;
+}
+
 function propertiesToFields(properties: PropertyModel[], ctx: EmitContext): ObjectField[] {
   return properties.map((prop) => ({
     name: prop.name,
@@ -205,7 +211,7 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
   for (const bb of model.backboneElements) {
     const tracker = { name: bb.name, hadForwardRef: false };
     ctx.currentBackboneTracker = tracker;
-    const fields = propertiesToFields(bb.properties, ctx);
+    const fields = propertiesToFields(withInherited(bb), ctx);
     ctx.currentBackboneTracker = undefined;
     const decl = adapter.declareConst(`${bb.name}Schema`, {
       kind: "object",
@@ -231,7 +237,7 @@ export function emitResourceSchema(model: ResourceModel, adapter: ValidatorAdapt
   if (model.kind === "resource") {
     mainFields.push({ name: "resourceType", schema: { kind: "literal", value: model.name }, optional: false });
   }
-  mainFields.push(...propertiesToFields(model.properties, ctx));
+  mainFields.push(...propertiesToFields(withInherited(model), ctx));
   body.push(
     adapter.declareConst(`${model.name}Schema`, {
       kind: "object",
@@ -296,14 +302,14 @@ export function emitDatatypeSchemas(
     ctx.localBackbones = new Set(model.backboneElements.map((bb) => bb.name));
     ctx.declaredBackbones = new Set();
     for (const bb of model.backboneElements) {
-      const fields = propertiesToFields(bb.properties, ctx);
+      const fields = propertiesToFields(withInherited(bb), ctx);
       const bbNode: SchemaNode = { kind: "object", fields, invariants: toInvariantNodes(bb.invariants, ctx) };
       body.push(renderDatatypeConst(adapter, `${bb.name}Schema`, bbNode, annotation?.annotation));
       body.push("");
       ctx.declaredBackbones.add(bb.name);
     }
     // Datatype main schema — fields use lazy() for cross-datatype refs (handled by makeRef).
-    const fields = propertiesToFields(model.properties, ctx);
+    const fields = propertiesToFields(withInherited(model), ctx);
     const mainNode: SchemaNode = { kind: "object", fields, invariants: toInvariantNodes(model.invariants, ctx) };
     body.push(renderDatatypeConst(adapter, `${model.name}Schema`, mainNode, annotation?.annotation));
     body.push("");

@@ -79,7 +79,13 @@ Bindings on `Coding` and `CodeableConcept` emit inline objects that narrow the `
 
 ### FHIRPath invariants
 
-Every `ElementDefinition.constraint[*]` from the spec or your IG -- root-level (`dom-3`, `dom-6`, etc.) and backbone-level (`pat-1` on `Patient.contact`, `obs-7` on `Observation`, ...) -- is wired into the emitted schema automatically. Each schema with constraints is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` from `@fhir-dsl/fhirpath` after structural validation succeeds. Errors surface as Standard Schema issues; `severity: "warning"` constraints are filtered out so they don't fail validation but remain reported by `validateInvariants` directly.
+Every `ElementDefinition.constraint[*]` from the spec or your IG -- root-level (`dom-3`, `dom-6`, etc.) and backbone-level (`pat-1` on `Patient.contact`, `obs-7` on `Observation`, ...) -- is wired into the emitted schema automatically. Each schema with constraints is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` from `@fhir-dsl/fhirpath` after structural validation succeeds. Errors surface as Standard Schema issues whose `message` is the constraint's `human` text; `severity: "warning"` constraints are filtered out so they don't fail validation but remain reported by `validateInvariants` directly.
+
+Only an `error`-severity constraint that evaluates to `false` fails validation. When the invariant engine can't decide a constraint from the JSON alone, the result is *indeterminate*: `validateInvariants` reports it as a `warning` issue, so the generated schema ignores it. That happens for unsupported functions, for invalid regular expressions, for narrative markup `htmlChecks()` can't read with certainty, for references `resolve()` can't settle, for `%resource` on an element validated outside its resource (e.g. `ref-1` on a `Reference` datatype schema), for type tests JSON can't settle (`is canonical` vs `is uri`), for date comparisons whose precisions overlap (`2020-02-15` vs `2020-02`), for expressions that evaluate to empty, and for expressions the engine can't parse. An invariant never rejects a resource because the engine couldn't evaluate it.
+
+Constraints on a repeating element (`ext-1` on `extension`, `pat-1` on `Patient.contact`) are checked against each item, not the array.
+
+Resource and backbone schemas include the fields inherited from `Resource`, `DomainResource` and `BackboneElement` (`id`, `meta`, `implicitRules`, `language`, `text`, `extension`, `modifierExtension`), so their structure and constraints are checked too — for example `txt-1` / `txt-2` on a resource's narrative and `ext-1` on its extensions. `contained` resources are accepted as-is; they aren't validated against their own resource schema.
 
 ```ts
 // A Patient.contact with no name/telecom/address/organization fails pat-1.
@@ -87,7 +93,7 @@ const result = await PatientSchema["~standard"].validate({
   resourceType: "Patient",
   contact: [{}], // <-- violates pat-1
 });
-// result.issues[0].message → "pat-1: SHALL at least contain a contact's details ..."
+// result.issues[0].message → "SHALL at least contain a contact's details ..."
 ```
 
 Generated projects need `@fhir-dsl/fhirpath` as a runtime dep. Opt out with `fhir-gen generate --validator native --no-invariants` if you don't want the dependency.

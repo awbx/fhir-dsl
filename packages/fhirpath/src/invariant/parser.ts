@@ -231,6 +231,11 @@ class Parser {
         this.expect("rparen");
         return inner;
       }
+      // `div`, `mod` and `in` are operators only between operands; at the
+      // start of an operand they're names (`div.exists()` on a Narrative).
+      case "div":
+      case "mod":
+      case "in":
       case "ident": {
         // Identifiers can also be the head of a function call:
         //   exists()             — no left operand

@@ -20,7 +20,7 @@ import { generate } from "@fhir-dsl/generator";
 await generate({
   version: "r4",
   outDir: "./src/fhir",
-  igs: ["hl7.fhir.us.core@6.1.0"],
+  ig: ["hl7.fhir.us.core@6.1.0"],
 });
 ```
 
@@ -64,20 +64,20 @@ const searchParams = parseSearchParameters(searchParamDefs);
 
 ### Emit a runnable MCP server alongside the typed client
 
-Pass `mcp: { outDir }` (or `--mcp <dir>` from the CLI) to scaffold a full MCP server next to the generated types — `server.ts` shim, `mcp.config.json` seeded with the IG's resource types, and a README. Launch it with `FHIR_BASE_URL=… node mcp-server/server.ts`.
+Pass `mcpOutDir` (or `--mcp <dir>` from the CLI) to scaffold a full MCP server next to the generated types — `server.ts` shim, `mcp.config.json` seeded with the IG's resource types, and a README. Launch it with `FHIR_BASE_URL=… node mcp-server/server.ts`.
 
 ```ts
 await generate({
   version: "r4",
   outDir: "./src/fhir",
-  igs: ["hl7.fhir.us.core@6.1.0"],
-  mcp: { outDir: "./mcp-server" },
+  ig: ["hl7.fhir.us.core@6.1.0"],
+  mcpOutDir: "./mcp-server",
 });
 ```
 
 ### Standard Schema validators with auto-wired invariants
 
-Pass `validator: "native" | "zod"` to emit Standard Schema V1 validators for every resource, datatype, binding, and profile. From v0.49.0 onward, every emitted schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds — so `.validate()` rejects resources that pass the shape check but fail an invariant. Opt out with `noInvariants: true`. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency when invariants are wired.
+Pass `validator: "native" | "zod"` to emit Standard Schema V1 validators for every resource, datatype, binding, and profile. From v0.49.0 onward, every emitted schema with `ElementDefinition.constraint[*]` is wrapped in `s.refine(...)` (native) or `.superRefine(...)` (zod) that calls `validateInvariants` after structural validation succeeds — so `.validate()` rejects resources that pass the shape check but fail an invariant. Invariants are on by default whenever `validator` is set; opt out with `invariants: false`. Only `error`-severity invariants that evaluate to `false` fail validation — warnings and indeterminate results (an expression the engine can't decide or can't compile) never reject a resource. Property-level invariants on repeating elements are checked against each item, not the array. Generated projects need `@fhir-dsl/fhirpath` as a runtime dependency when invariants are wired.
 
 ```ts
 await generate({
@@ -85,7 +85,7 @@ await generate({
   outDir: "./src/fhir",
   validator: "native",          // or "zod"
   strictExtensible: false,      // treat extensible bindings as open (default) vs. closed
-  // noInvariants: true,        // optional: skip the FHIRPath invariant wiring
+  // invariants: false,         // optional: skip the FHIRPath invariant wiring
 });
 ```
 
@@ -113,7 +113,7 @@ out/
   client.ts          # Pre-configured FhirClient type with typed createClient()
 ```
 
-When `mcp: { outDir }` is also set:
+When `mcpOutDir` is also set:
 
 ```
 mcp-server/

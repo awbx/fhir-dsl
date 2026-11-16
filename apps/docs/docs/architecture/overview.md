@@ -108,8 +108,8 @@ Type-safe [FHIRPath](https://hl7.org/fhirpath/) expression builder + evaluator. 
 - **Native UCUM-aware `Quantity`** (v1.1.0) — same-dimension equality + ordering with no third-party dependency. Offset / log / multi-`/` units throw `UcumError` instead of returning silent wrong answers.
 - **`setValue` / `createPatch`** (v0.53.0) — every typed leaf inverts an `eq`-shaped predicate path into a deep-cloned next resource or an RFC 6902 JSON Patch.
 - **`resolve()` + terminology resolver hooks** (v1.1.0) — `EvalOptions.resolveReference` is consulted after the Bundle-walk path misses; `conformsTo` / `memberOf` / `subsumes` / `subsumedBy` compile to spec strings and dispatch through `EvalOptions.terminology`.
-- **Expression predicates** with `$this`, polymorphic narrowing via `ofType()`, string/math/conversion helpers, and FHIRPath's full operator set (`and`, `or`, `xor`, `implies`, `not`, comparisons, equivalence pending).
-- **`compileInvariant` / `validateInvariants`** — runtime evaluator over `ElementDefinition.constraint[*].expression` that returns OperationOutcome issues; auto-wired into emitted Standard Schema validators when `--validator` is set.
+- **Expression predicates** with `$this`, polymorphic narrowing via `ofType()`, string/math/conversion helpers, and FHIRPath's operator set (`and`, `or`, `xor`, `implies`, `not`, comparisons; `~` / `!~` equivalence is pending in the builder).
+- **`compileInvariant` / `validateInvariants`** — separate runtime evaluator over `ElementDefinition.constraint[*].expression` (it accepts `~` / `!~`, `|`, `is` / `as` and `%resource`) that returns OperationOutcome issues, reporting anything it can't decide as a warning rather than an error; auto-wired into emitted Standard Schema validators when `--validator` is set.
 
 Parallel to core — it consumes the generated resource types directly, not the `FhirSchema`. Use it for:
 

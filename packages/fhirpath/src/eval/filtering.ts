@@ -1,3 +1,4 @@
+import { choiceTypeOf, choiceTypeSatisfies } from "../fhir-choice.js";
 import type { FilterOp } from "../ops.js";
 import type { EvalContext } from "./types.js";
 
@@ -108,6 +109,10 @@ function matchesType(item: unknown, typeName: string): boolean {
   }
 
   if (typeof item !== "object") return false;
+  // An object reached through a choice key (`valueQuantity`) has a known
+  // type; trust it over the duck-type heuristics below.
+  const known = choiceTypeOf(item);
+  if (known !== undefined) return choiceTypeSatisfies(known, typeName);
   const obj = item as Record<string, unknown>;
 
   // FHIR resource type check
