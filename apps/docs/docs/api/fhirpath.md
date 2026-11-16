@@ -32,7 +32,7 @@ npm install @fhir-dsl/fhirpath
 | **Invariants** | | |
 | `compileInvariant` / `validateInvariants` | function | Compile FHIR `ElementDefinition.constraint[*]` expressions into runtime predicates and apply them. |
 | `parseInvariantExpression` | function | Parse a FHIRPath invariant expression to an `InvariantExpr` AST without compiling. Throws the unwrapped lexer / parser error (`kind` `"fhirpath.lexer"` / `"fhirpath.parse"`). |
-| `CompiledInvariant` / `InvariantDefinition` / `InvariantIssue` / `InvariantResult` / `OperationOutcome` / `InvariantExpr` | type | Invariant types. |
+| `CompiledInvariant` / `InvariantDefinition` / `InvariantIssue` / `InvariantResult` / `OperationOutcome` / `InvariantExpr` | type | Invariant types. `CompiledInvariant.ast` is shared through the parse cache and frozen — don't mutate it. |
 | `FhirPathInvariantCompileError` | class | Thrown by `compileInvariant()` when an expression can't be lexed or parsed. `validateInvariants()` reports the same case as a warning issue instead of throwing. |
 | **Predicate plumbing** | | |
 | `createPredicateProxy` | function | Build a proxy that records predicate ops for later extraction. |

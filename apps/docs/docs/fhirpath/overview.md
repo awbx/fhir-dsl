@@ -174,6 +174,8 @@ fhirpath<Observation>("Observation")
 // "Observation.value.ofType(Quantity).value"
 ```
 
+At evaluation time, navigating a choice element by its base name (`value`) returns whichever variant is present on the JSON (`valueQuantity`, `valueString`, …). A key matches only when the base is a known `[x]` element in FHIR R4–R6 and the suffix is a FHIR type name, so `reference` never matches `referenceRange`. A property present under the exact name always wins, and an explicit `null` is kept. Primitive extensions come from the concrete key's sibling (`_valueString`). `ofType()`, `is` and `as` use the type named by the matched key, and treat the Quantity profiles (`Age`, `Count`, `Distance`, `Duration`, `SimpleQuantity`, `MoneyQuantity`) as `Quantity`. The invariant evaluator uses the same rules.
+
 The `FhirTypeMap` interface is extensible via declaration merging to add your own types.
 
 ## Utility Functions

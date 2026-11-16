@@ -298,6 +298,8 @@ Mapping of [FHIR R5 search features](https://fhir.hl7.org/fhir/search.html) to t
 
 When an expression can't be decided from the JSON alone, `check()` returns `passed: "indeterminate"` and `validateInvariants` reports a `warning` issue — never a false `error`. This covers unsupported functions (`resolve()`, `htmlChecks()`, `replaceMatches()`), `%resource` on an element validated outside its resource (e.g. `ref-1` on a standalone `Reference`), type tests JSON can't settle (`is canonical` vs `is uri` on a string), and empty results. `compileInvariant` throws `FhirPathInvariantCompileError` for an expression it can't parse; `validateInvariants` reports the same case as a warning instead of throwing.
 
+Parsed expressions are cached per process by expression string (up to 1,000 entries, oldest evicted first), so `validateInvariants` called with plain definitions — as generated schemas do — parses each expression once. Cached ASTs are frozen.
+
 ```ts
 import { compileInvariant, validateInvariants } from "@fhir-dsl/fhirpath";
 
