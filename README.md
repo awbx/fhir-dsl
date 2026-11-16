@@ -285,7 +285,7 @@ Mapping of [FHIR R5 search features](https://fhir.hl7.org/fhir/search.html) to t
 
 ## Invariants (FHIRPath → Predicates)
 
-`@fhir-dsl/fhirpath` exposes a runtime invariant evaluator that compiles `ElementDefinition.constraint[*].expression` strings into predicates and surfaces results as `OperationOutcome` issues. It is a separate, smaller engine than the expression builder's `evaluate()`. The supported subset covers the patterns FHIR core invariants use (all 242 R4 core invariants compile):
+`@fhir-dsl/fhirpath` exposes a runtime invariant evaluator that compiles `ElementDefinition.constraint[*].expression` strings into predicates and surfaces results as `OperationOutcome` issues. It is a separate, smaller engine than the expression builder's `evaluate()`. The supported subset covers the patterns FHIR core invariants use:
 
 - Identifiers and member access (`name.given`, `extension.url`). Keywords are accepted as names after `.`, so `.not()` works. Choice types resolve: `value` reaches `valueQuantity`, `valueString`, etc. (only for known `[x]` bases, so `reference` never matches `referenceRange`)
 - Environment variables: `%resource`, `%rootResource`, `%context`, `%ucum`, `%sct`, `%loinc`
