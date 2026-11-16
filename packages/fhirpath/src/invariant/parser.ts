@@ -5,12 +5,16 @@ import { type Token, type TokenType, tokenize } from "./lexer.js";
 // Phase 6 — Pratt parser for the FHIRPath invariant subset. The grammar
 // roughly follows §6 of the FHIRPath 2.0 spec, restricted to:
 //
-//   primary    := literal | ident | $this | "(" expr ")"
-//   call-tail  := primary { "." ident "(" args? ")"  |  "." ident  |  "[" expr "]" }
+//   primary    := literal | ident | $this | %env | "(" expr ")"
+//   call-tail  := primary { "." name "(" args? ")"  |  "." name  |  "[" expr "]" }
+//
+// After a ".", keywords are plain names: `.not()` is the FHIRPath function.
 //   unary      := "-" unary | "not" unary | call-tail
 //   mul        := unary  { ("*"|"/"|"div"|"mod") unary }
 //   add        := mul    { ("+"|"-"|"&") mul }
-//   compare    := add    { ("<"|">"|"<="|">="|"="|"!="|"~"|"!~"|"in") add }
+//   type       := add    { ("is"|"as") type-specifier }
+//   union      := type   { "|" type }
+//   compare    := union  { ("<"|">"|"<="|">="|"="|"!="|"~"|"!~"|"in"|"contains") union }
 //   and-expr   := compare { "and" compare }
 //   or-expr    := and-expr { ("or"|"xor") and-expr }
 //   implies    := or-expr  { "implies" or-expr }
@@ -90,14 +94,46 @@ class Parser {
   }
 
   compare(): Expr {
-    let left = this.add();
-    while (this.match("eq", "neq", "lt", "gt", "lte", "gte", "tilde-eq", "neq-tilde", "in")) {
+    let left = this.union();
+    while (
+      this.match("eq", "neq", "lt", "gt", "lte", "gte", "tilde-eq", "neq-tilde", "in") ||
+      (this.peek().type === "ident" && this.peek().value === "contains")
+    ) {
       const t = this.advance();
-      const op = compareTokenToOp(t.type);
-      const right = this.add();
+      const op = t.type === "ident" ? "contains" : compareTokenToOp(t.type);
+      const right = this.union();
       left = { kind: "binary", op, left, right };
     }
     return left;
+  }
+
+  union(): Expr {
+    let left = this.typeExpr();
+    while (this.match("pipe")) {
+      this.advance();
+      const right = this.typeExpr();
+      left = { kind: "binary", op: "|", left, right };
+    }
+    return left;
+  }
+
+  typeExpr(): Expr {
+    let left = this.add();
+    while (this.peek().type === "ident" && (this.peek().value === "is" || this.peek().value === "as")) {
+      const op = this.advance().value as "is" | "as";
+      left = { kind: "typeop", op, left, type: this.typeSpecifier() };
+    }
+    return left;
+  }
+
+  // `Quantity`, `FHIR.Quantity`, `System.String`.
+  typeSpecifier(): string {
+    let name = this.expect("ident").value;
+    while (this.match("dot") && this.peek(1).type === "ident") {
+      this.advance();
+      name += `.${this.advance().value}`;
+    }
+    return name;
   }
 
   add(): Expr {
@@ -144,7 +180,7 @@ class Parser {
     while (this.match("dot", "lbracket")) {
       if (this.match("dot")) {
         this.advance();
-        const name = this.expect("ident").value;
+        const name = this.memberName();
         if (this.match("lparen")) {
           this.advance();
           const args = this.argList();
@@ -164,9 +200,19 @@ class Parser {
     return left;
   }
 
+  // A member name after ".": an identifier, or a keyword used as one.
+  memberName(): string {
+    const t = this.peek();
+    if (t.type === "ident" || KEYWORD_TOKENS.has(t.type)) return this.advance().value;
+    throw new FhirPathParseError(`expected ident but got ${t.type} (${JSON.stringify(t.value)})`, t.pos);
+  }
+
   primary(): Expr {
     const t = this.peek();
     switch (t.type) {
+      case "env":
+        this.advance();
+        return { kind: "env", name: t.value };
       case "string":
         this.advance();
         return { kind: "literal", value: t.value };
@@ -215,6 +261,19 @@ class Parser {
     return args;
   }
 }
+
+const KEYWORD_TOKENS: ReadonlySet<TokenType> = new Set<TokenType>([
+  "and",
+  "or",
+  "xor",
+  "implies",
+  "not",
+  "in",
+  "div",
+  "mod",
+  "true",
+  "false",
+]);
 
 function compareTokenToOp(t: TokenType): "=" | "!=" | "<" | ">" | "<=" | ">=" | "~" | "!~" | "in" {
   switch (t) {

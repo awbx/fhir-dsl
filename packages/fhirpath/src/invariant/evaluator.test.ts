@@ -35,10 +35,9 @@ describe("invariant — ext-1: extension xor value", () => {
   });
 
   it("passes when only value[x] is present", () => {
-    expect(inv.check({ url: "http://x", valueString: "ok" }).passed).toBe(false);
-    // Note: with just `value` not `valueString`, the spec actually wants
-    // navigation through `Extension.value[x]`. The hand-rolled `value`
-    // field exercises the path semantics directly.
+    // `value` resolves through the `value[x]` choice variant.
+    expect(inv.check({ url: "http://x", valueString: "ok" }).passed).toBe(true);
+    expect(inv.check({ url: "http://x", valueQuantity: { value: 1 } }).passed).toBe(true);
     expect(inv.check({ url: "http://x", value: [1] }).passed).toBe(true);
   });
 
@@ -168,5 +167,160 @@ describe("validateInvariants", () => {
       { key: "pat-1", expression: "name.exists()", severity: "error", human: "must have name" },
     ]);
     expect(oo.issue).toEqual([]);
+  });
+});
+
+// Issue #54: standard R4 invariants using `.not()`, `%resource`, `|`, `is`
+// and `value[x]` failed to compile or evaluated wrongly.
+describe("invariant — standard R4 constraints (#54)", () => {
+  const per1 = {
+    key: "per-1",
+    severity: "error" as const,
+    human: "If present, start SHALL have a lower value than end",
+    expression: "start.hasValue().not() or end.hasValue().not() or (start <= end)",
+  };
+
+  it("per-1: compiles the .not() method form and flags start > end", () => {
+    const oo = validateInvariants({ start: "2020-02-01", end: "2020-01-01" }, [per1]);
+    expect(oo.issue).toHaveLength(1);
+    expect(oo.issue[0]).toMatchObject({ severity: "error", code: "invariant" });
+    expect(validateInvariants({ start: "2020-01-01", end: "2020-02-01" }, [per1]).issue).toEqual([]);
+    expect(validateInvariants({ start: "2020-01-01" }, [per1]).issue).toEqual([]);
+  });
+
+  it("per-1: compares dateTimes by instant, not by string", () => {
+    // 10:00+02:00 is 08:00Z, which is before 09:00Z.
+    const oo = validateInvariants({ start: "2020-01-01T10:00:00+02:00", end: "2020-01-01T09:00:00Z" }, [per1]);
+    expect(oo.issue).toEqual([]);
+  });
+
+  it("per-1: mixed precision that overlaps is not an error", () => {
+    // `2020-02-15` vs `2020-02`: equal at month precision, so the order is unknown.
+    const oo = validateInvariants({ start: "2020-02-15", end: "2020-02" }, [per1]);
+    expect(oo.issue.filter((i) => i.severity === "error")).toEqual([]);
+    expect(validateInvariants({ start: "2020-03-15", end: "2020-02" }, [per1]).issue[0]?.severity).toBe("error");
+  });
+
+  it("keywords are plain names after a dot", () => {
+    const inv = compileInvariant({
+      key: "k",
+      expression: "a.not() and b.exists().not()",
+      severity: "error",
+      human: "h",
+    });
+    expect(inv.check({ a: false }).passed).toBe(true);
+  });
+
+  const obs7 = {
+    key: "obs-7",
+    severity: "error" as const,
+    human:
+      "If Observation.code is the same as an Observation.component.code then the value element SHALL NOT be present",
+    expression: "value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()",
+  };
+
+  it("obs-7: lexes %resource and passes a valid Observation", () => {
+    const oo = validateInvariants({ resourceType: "Observation", code: { text: "x" } }, [obs7]);
+    expect(oo).toEqual({ resourceType: "OperationOutcome", issue: [] });
+  });
+
+  it("obs-7: flags a value alongside a component sharing the Observation code", () => {
+    const coding = [{ system: "http://loinc.org", code: "8480-6" }];
+    const oo = validateInvariants(
+      { resourceType: "Observation", code: { coding }, valueQuantity: { value: 1 }, component: [{ code: { coding } }] },
+      [obs7],
+    );
+    expect(oo.issue[0]?.severity).toBe("error");
+  });
+
+  it("obs-6: resolves value against valueQuantity", () => {
+    const obs6 = {
+      key: "obs-6",
+      severity: "error" as const,
+      human: "dataAbsentReason SHALL only be present if Observation.value[x] is not present",
+      expression: "dataAbsentReason.empty() or value.empty()",
+    };
+    const oo = validateInvariants(
+      { resourceType: "Observation", valueQuantity: { value: 5, unit: "mg" }, dataAbsentReason: { text: "unknown" } },
+      [obs6],
+    );
+    expect(oo.issue).toHaveLength(1);
+    expect(oo.issue[0]?.severity).toBe("error");
+  });
+
+  it("choice dispatch does not leak into non-choice siblings", () => {
+    // `reference` is not a choice base, so it must not pick up `referenceRange`.
+    const inv = compileInvariant({ key: "k", expression: "reference.empty()", severity: "error", human: "h" });
+    expect(inv.check({ referenceRange: [{ text: "x" }] }).passed).toBe(true);
+  });
+
+  it("%resource on an element outside its resource is indeterminate, not an error", () => {
+    // ref-1 is attached to the Reference datatype; the enclosing resource is unknown there.
+    const ref1 = {
+      key: "ref-1",
+      severity: "error" as const,
+      human: "SHALL have a contained resource if a local reference is provided",
+      expression:
+        "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+    };
+    const oo = validateInvariants({ reference: "#p1" }, [ref1]);
+    expect(oo.issue.filter((i) => i.severity === "error")).toEqual([]);
+    // On a resource root, %rootResource is the resource itself.
+    const resource = { resourceType: "Observation", contained: [{ resourceType: "Patient", id: "p1" }] };
+    const inv = compileInvariant({ ...ref1, expression: "'p1' in %rootResource.contained.id" });
+    expect(inv.check(resource).passed).toBe(true);
+  });
+
+  it("dom-3 compiles and passes a resource without contained resources", () => {
+    const dom3 = {
+      key: "dom-3",
+      severity: "error" as const,
+      human: "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource",
+      expression:
+        "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+    };
+    expect(validateInvariants({ resourceType: "Patient" }, [dom3]).issue).toEqual([]);
+  });
+
+  it("supports the | union operator", () => {
+    const app3 = {
+      key: "app-3",
+      severity: "error" as const,
+      human: "Only proposed or cancelled appointments can be missing start/end dates",
+      expression: "(start.exists() and end.exists()) or (status in ('proposed' | 'cancelled' | 'waitlist'))",
+    };
+    expect(validateInvariants({ status: "proposed" }, [app3]).issue).toEqual([]);
+    expect(validateInvariants({ status: "booked" }, [app3]).issue[0]?.severity).toBe("error");
+  });
+
+  it("supports the is type operator on choice values", () => {
+    const que7 = {
+      key: "que-7",
+      severity: "error" as const,
+      human: "If the operator is 'exists', the value must be a boolean",
+      expression: "operator = 'exists' implies (answer is Boolean)",
+    };
+    expect(validateInvariants({ operator: "exists", answerBoolean: true }, [que7]).issue).toEqual([]);
+    expect(validateInvariants({ operator: "exists", answerCoding: { code: "x" } }, [que7]).issue[0]?.severity).toBe(
+      "error",
+    );
+  });
+
+  it("supports the infix contains operator", () => {
+    const inv = compileInvariant({ key: "k", expression: "tags contains 'a'", severity: "error", human: "h" });
+    expect(inv.check({ tags: ["a", "b"] }).passed).toBe(true);
+    expect(inv.check({ tags: ["b"] }).passed).toBe(false);
+  });
+
+  it("compileInvariant wraps lexer errors as compile errors", () => {
+    expect(() => compileInvariant({ key: "k", expression: "a # b", severity: "error", human: "h" })).toThrow(
+      /failed to compile k/,
+    );
+  });
+
+  it("validateInvariants reports an unsupported expression as a warning instead of throwing", () => {
+    const oo = validateInvariants({}, [{ key: "k", expression: "a # b", severity: "error", human: "h" }]);
+    expect(oo.issue).toHaveLength(1);
+    expect(oo.issue[0]?.severity).toBe("warning");
   });
 });

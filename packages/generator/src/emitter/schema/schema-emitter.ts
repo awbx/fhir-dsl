@@ -136,14 +136,16 @@ function propertyToNode(prop: PropertyModel, ctx: EmitContext): SchemaNode {
   if (prop.types.length === 0) return { kind: "unknown" };
   const typeNodes = prop.types.map((t) => typeRefToNode(t, prop, ctx));
   let node: SchemaNode = typeNodes.length === 1 ? typeNodes[0]! : { kind: "union", options: typeNodes };
-  if (prop.isArray) {
-    node = prop.isRequired ? { kind: "array", inner: node, minItems: 1 } : { kind: "array", inner: node };
-  }
   // Per-property invariants — wrap with a `refine` node so the predicate
-  // evaluates against the property value (not the parent resource).
+  // evaluates against the element (not the parent resource). FHIR evaluates
+  // an element's constraints once per instance, so for repeating elements the
+  // refine wraps each item, not the array.
   const invariants = toInvariantNodes(prop.invariants, ctx);
   if (invariants) {
     node = { kind: "refine", inner: node, invariants };
+  }
+  if (prop.isArray) {
+    node = prop.isRequired ? { kind: "array", inner: node, minItems: 1 } : { kind: "array", inner: node };
   }
   return node;
 }

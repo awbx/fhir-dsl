@@ -40,6 +40,8 @@ export type TokenType =
   | "star"
   | "slash"
   | "amp"
+  | "pipe"
+  | "env"
   | "eof";
 
 export interface Token {
@@ -133,6 +135,27 @@ export function tokenize(source: string): Token[] {
         while (i < source.length && source[i]! >= "0" && source[i]! <= "9") i++;
       }
       tokens.push({ type: "number", value: source.slice(start, i), pos: start });
+      continue;
+    }
+
+    // Environment variable: `%resource`, `%`vs-name``, `%'vs-name'`.
+    if (ch === "%") {
+      const start = i;
+      i++;
+      const quote = source[i];
+      if (quote === "`" || quote === "'") {
+        i++;
+        while (i < source.length && source[i] !== quote) i++;
+        if (i >= source.length) throw new FhirPathLexerError("unterminated environment variable", start);
+        tokens.push({ type: "env", value: source.slice(start + 2, i), pos: start });
+        i++;
+        continue;
+      }
+      if (i >= source.length || !isIdentStart(source[i]!)) {
+        throw new FhirPathLexerError("expected environment variable name after %", start);
+      }
+      while (i < source.length && isIdentPart(source[i]!)) i++;
+      tokens.push({ type: "env", value: source.slice(start + 1, i), pos: start });
       continue;
     }
 
@@ -241,6 +264,10 @@ export function tokenize(source: string): Token[] {
         continue;
       case "&":
         tokens.push({ type: "amp", value: "&", pos: i });
+        i++;
+        continue;
+      case "|":
+        tokens.push({ type: "pipe", value: "|", pos: i });
         i++;
         continue;
     }
