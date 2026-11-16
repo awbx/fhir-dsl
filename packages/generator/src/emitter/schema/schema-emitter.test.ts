@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ResourceModel } from "../../model/resource-model.js";
+import type { PropertyModel, ResourceModel } from "../../model/resource-model.js";
 import { makeFallbackMapper } from "../../spec/test-helpers.js";
 import type { BindingTypeMap } from "../terminology-emitter.js";
 import { nativeAdapter } from "./native.js";
@@ -402,6 +402,48 @@ describe("emitResourceSchema invariants", () => {
       importedDatatypes: new Set(),
     });
     expect(out).toMatch(/extension:\s*\{\s*schema:\s*s\.array\(\s*s\.refine\(/);
+  });
+
+  it("emits inherited base properties into resource and backbone schemas", () => {
+    // Types inherit these via `extends DomainResource`; schemas must list them
+    // so `text`, `meta`, `extension` (and their constraints) are validated.
+    const ext: PropertyModel = {
+      name: "extension",
+      types: [{ code: "Extension" }],
+      isRequired: false,
+      isArray: true,
+      isChoiceType: false,
+    };
+    const model: ResourceModel = {
+      name: "Thing",
+      url: "x",
+      kind: "resource",
+      isAbstract: false,
+      properties: [
+        { name: "status", types: [{ code: "string" }], isRequired: false, isArray: false, isChoiceType: false },
+      ],
+      inheritedProperties: [
+        { name: "text", types: [{ code: "Narrative" }], isRequired: false, isArray: false, isChoiceType: false },
+        ext,
+      ],
+      backboneElements: [
+        {
+          name: "ThingPart",
+          path: "Thing.part",
+          properties: [
+            { name: "label", types: [{ code: "string" }], isRequired: false, isArray: false, isChoiceType: false },
+          ],
+          inheritedProperties: [ext],
+        },
+      ],
+    };
+    const out = emitResourceSchema(model, nativeAdapter, {
+      mapper: MAPPER,
+      importedDatatypes: new Set(["Narrative", "Extension"]),
+    });
+    expect(out).toMatch(/text:\s*\{\s*schema:\s*NarrativeSchema/);
+    expect(out).toMatch(/export const ThingPartSchema = s\.object\(\{\s*extension:/);
+    expect(out).toMatch(/resourceType:[^\n]*\n\s*text:/);
   });
 
   it("invariants: false opt-out strips constraints from emitted output", () => {

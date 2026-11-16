@@ -75,6 +75,41 @@ describe("parseStructureDefinition", () => {
     expect(propNames).not.toContain("modifierExtension");
   });
 
+  it("keeps inherited DomainResource properties separately for validator schemas", () => {
+    const model = parseStructureDefinition(makeSD(), CATALOG);
+    expect(model.inheritedProperties?.map((p) => p.name)).toEqual([
+      "id",
+      "meta",
+      "text",
+      "contained",
+      "extension",
+      "modifierExtension",
+    ]);
+    expect(model.inheritedProperties?.find((p) => p.name === "extension")).toMatchObject({
+      types: [{ code: "Extension" }],
+      isArray: true,
+    });
+  });
+
+  it("keeps inherited BackboneElement properties on backbones", () => {
+    const sd = makeSD({
+      snapshot: {
+        element: [
+          { path: "TestResource" },
+          { path: "TestResource.contact", type: [{ code: "BackboneElement" }], min: 0, max: "*" },
+          { path: "TestResource.contact.id", type: [{ code: "http://hl7.org/fhirpath/System.String" }], max: "1" },
+          { path: "TestResource.contact.extension", type: [{ code: "Extension" }], min: 0, max: "*" },
+          { path: "TestResource.contact.modifierExtension", type: [{ code: "Extension" }], min: 0, max: "*" },
+          { path: "TestResource.contact.name", type: [{ code: "HumanName" }], min: 0, max: "1" },
+        ],
+      },
+      baseDefinition: undefined,
+    });
+    const bb = parseStructureDefinition(sd, CATALOG).backboneElements[0]!;
+    expect(bb.properties.map((p) => p.name)).toEqual(["name"]);
+    expect(bb.inheritedProperties?.map((p) => p.name)).toEqual(["id", "extension", "modifierExtension"]);
+  });
+
   it("includes resource-specific properties", () => {
     const model = parseStructureDefinition(makeSD(), CATALOG);
     const propNames = model.properties.map((p) => p.name);

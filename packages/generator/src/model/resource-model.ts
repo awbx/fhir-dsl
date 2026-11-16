@@ -22,6 +22,13 @@ export interface ResourceModel {
   isAbstract: boolean;
   baseType?: string | undefined;
   properties: PropertyModel[];
+  /**
+   * Properties inherited from `Resource` / `DomainResource` (`id`, `meta`,
+   * `text`, `contained`, `extension`, …). Types reach them through
+   * `extends DomainResource`; validator schemas need them listed so their
+   * structure and constraints (e.g. txt-1 on `text.div`) are checked.
+   */
+  inheritedProperties?: PropertyModel[] | undefined;
   backboneElements: BackboneElementModel[];
   description?: string | undefined;
   /** ElementDefinition.constraint[*] from the root element. */
@@ -32,6 +39,8 @@ export interface BackboneElementModel {
   name: string;
   path: string;
   properties: PropertyModel[];
+  /** Properties inherited from `BackboneElement` (`id`, `extension`, `modifierExtension`); see ResourceModel. */
+  inheritedProperties?: PropertyModel[] | undefined;
   /** ElementDefinition.constraint[*] from the backbone's root element. */
   invariants?: InvariantModel[] | undefined;
 }
