@@ -324,3 +324,218 @@ describe("invariant — standard R4 constraints (#54)", () => {
     expect(oo.issue[0]?.severity).toBe("warning");
   });
 });
+
+const check = (expression: string, value: unknown) =>
+  compileInvariant({ key: "k", expression, severity: "error", human: "h" }).check(value).passed;
+
+describe("invariant — replaceMatches()", () => {
+  it("replaces every match, with $n group substitution", () => {
+    expect(check("a.replaceMatches('o', '0') = 'f00 b00'", { a: "foo boo" })).toBe(true);
+    expect(check("a.replaceMatches('(\\\\w+)@(\\\\w+)', '$2 at $1') = 'b at a'", { a: "a@b" })).toBe(true);
+  });
+
+  it("handles sdf-8a's type-name extraction", () => {
+    expect(check("a.replaceMatches('\\\\..*', '') = 'Patient'", { a: "Patient.name.given" })).toBe(true);
+    expect(check("a.replaceMatches('\\\\..*', '') = 'Patient'", { a: "Observation.code" })).toBe(false);
+  });
+
+  it("is empty on empty input", () => {
+    expect(check("a.replaceMatches('o', '0').empty()", {})).toBe(true);
+  });
+
+  it("is indeterminate on an invalid regex, a non-string subject or a wrong arity", () => {
+    expect(check("a.replaceMatches('(', 'x') = 'y'", { a: "abc" })).toBe("indeterminate");
+    expect(check("a.replaceMatches('o', '0') = 'y'", { a: ["o", "o"] })).toBe("indeterminate");
+    expect(check("a.replaceMatches('o', '0') = 'y'", { a: 1 })).toBe("indeterminate");
+    expect(check("a.replaceMatches('o') = 'y'", { a: "o" })).toBe("indeterminate");
+  });
+});
+
+describe("invariant — htmlChecks() (txt-1 / txt-2)", () => {
+  const NS = 'xmlns="http://www.w3.org/1999/xhtml"';
+  const txt = (div: unknown) => check("htmlChecks()", div);
+
+  it("accepts ordinary narrative", () => {
+    expect(txt(`<div ${NS}>Hello</div>`)).toBe(true);
+    expect(
+      txt(
+        `<div ${NS}><p class="x" style="color:red">A &amp; B&#160;&lt;</p><table border="1"><tr><td colspan="2">x</td></tr></table>` +
+          `<a href="http://example.org/?a=1&amp;b=2" title='a > b'>link</a><br/><ul><li>i</li></ul></div>`,
+      ),
+    ).toBe(true);
+    expect(txt(`<div ${NS}><!-- comment --><![CDATA[ x < y ]]></div>`)).toBe(true);
+    expect(txt(`<div ${NS}><img src="#pic" alt=""/></div>`)).toBe(true);
+    expect(txt(`<div ${NS}>&nbsp;</div>`)).toBe(true);
+  });
+
+  it("rejects a root that isn't an XHTML div", () => {
+    expect(txt(`<p ${NS}>x</p>`)).toBe(false);
+    expect(txt("<div>x</div>")).toBe(false);
+    expect(txt('<div xmlns="http://example.org">x</div>')).toBe(false);
+  });
+
+  it("rejects disallowed elements and attributes", () => {
+    expect(txt(`<div ${NS}><script>alert(1)</script>x</div>`)).toBe(false);
+    expect(txt(`<div ${NS}><form><input type="text"/></form>x</div>`)).toBe(false);
+    expect(txt(`<div ${NS}><iframe src="http://x"></iframe>x</div>`)).toBe(false);
+    expect(txt(`<div ${NS}><style>p{}</style>x</div>`)).toBe(false);
+    expect(txt(`<div ${NS}><font color="red">x</font></div>`)).toBe(false);
+    expect(txt(`<div ${NS}><ins>x</ins></div>`)).toBe(false);
+    expect(txt(`<div ${NS}><p onclick="f()">x</p></div>`)).toBe(false);
+    expect(txt(`<div ${NS}><a href=" JavaScript:alert(1)">x</a></div>`)).toBe(false);
+    expect(txt(`<div ${NS}><a href="jav&#x09;ascript:alert(1)">x</a></div>`)).toBe(false);
+  });
+
+  it("rejects narrative without content", () => {
+    expect(txt(`<div ${NS}></div>`)).toBe(false);
+    expect(txt(`<div ${NS}/>`)).toBe(false);
+    expect(txt(`<div ${NS}> <p>\n</p> &#32;</div>`)).toBe(false);
+  });
+
+  it("is indeterminate on markup it can't read", () => {
+    expect(txt(`<div ${NS}><p>x</div>`)).toBe("indeterminate");
+    expect(txt(`<div ${NS}>a & b</div>`)).toBe("indeterminate");
+    expect(txt(`<div ${NS}><td nowrap>x</td></div>`)).toBe("indeterminate");
+    expect(txt(`<div ${NS}>x</div>trailing`)).toBe("indeterminate");
+    expect(txt(`<?xml version="1.0"?><div ${NS}>x</div>`)).toBe("indeterminate");
+    expect(txt(`<div ${NS}><svg:svg xmlns:svg="http://www.w3.org/2000/svg"/>x</div>`)).toBe("indeterminate");
+    expect(txt(`<div ${NS}>x`)).toBe("indeterminate");
+    expect(txt(42)).toBe("indeterminate");
+  });
+
+  it("is empty when there is no div", () => {
+    expect(check("text.htmlChecks().empty()", {})).toBe(true);
+  });
+});
+
+describe("invariant — resolve()", () => {
+  // ctm-1 lives on CareTeam.participant; here it is evaluated from the CareTeam.
+  const ctm1 =
+    "participant.all(onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists())))";
+
+  it("resolves #id against the root's contained resources", () => {
+    const careTeam = (type: string) => ({
+      resourceType: "CareTeam",
+      contained: [{ resourceType: type, id: "m" }],
+      participant: [{ member: { reference: "#m" }, onBehalfOf: { reference: "Organization/1" } }],
+    });
+    expect(check(ctm1, careTeam("Practitioner"))).toBe(true);
+    expect(check(ctm1, careTeam("Patient"))).toBe(false);
+  });
+
+  it("resolves a dangling #id to empty when the root has contained resources", () => {
+    const res = {
+      resourceType: "CareTeam",
+      contained: [{ resourceType: "Patient", id: "p" }],
+      participant: [{ member: { reference: "#other" } }],
+    };
+    expect(check("participant.member.resolve().empty()", res)).toBe(true);
+    expect(check("participant.member.reference.resolve().empty()", res)).toBe(true);
+    expect(check("participant.member.reference.replaceMatches('other', 'p').resolve().id = 'p'", res)).toBe(true);
+  });
+
+  it("is indeterminate for #id when the root has no contained resources", () => {
+    const res = { resourceType: "CareTeam", participant: [{ member: { reference: "#m" } }] };
+    expect(check("participant.member.resolve().empty()", res)).toBe("indeterminate");
+  });
+
+  it("is indeterminate for references outside the resource", () => {
+    const res = {
+      resourceType: "CareTeam",
+      contained: [{ resourceType: "Practitioner", id: "m" }],
+      participant: [{ member: { reference: "Practitioner/m" }, onBehalfOf: { reference: "Organization/1" } }],
+    };
+    expect(check(ctm1, res)).toBe("indeterminate");
+    expect(check("participant.member.identifier.resolve().empty()", res)).toBe(true);
+    expect(check("participant.onBehalfOf.reference.resolve().empty()", res)).toBe("indeterminate");
+    expect(check("participant.onBehalfOf.select(identifier).resolve().empty()", res)).toBe(true);
+    expect(check("participant.onBehalfOf.select(display | reference).resolve().empty()", res)).toBe("indeterminate");
+  });
+
+  it("is indeterminate when the root is not a resource (element-level invariant)", () => {
+    const participant = { member: { reference: "#m" }, onBehalfOf: { reference: "Organization/1" } };
+    const expr = "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))";
+    expect(check(expr, participant)).toBe("indeterminate");
+  });
+
+  it("resolves inside a Bundle by fullUrl and by Type/id", () => {
+    const bundle = (memberRef: string, type = "Practitioner") => ({
+      resourceType: "Bundle",
+      type: "collection",
+      entry: [
+        { fullUrl: "urn:uuid:1", resource: { resourceType: type, id: "x" } },
+        {
+          fullUrl: "http://srv/fhir/CareTeam/ct",
+          resource: {
+            resourceType: "CareTeam",
+            id: "ct",
+            participant: [{ member: { reference: memberRef }, onBehalfOf: { reference: "Organization/1" } }],
+          },
+        },
+        { fullUrl: "http://srv/fhir/Patient/p", resource: { resourceType: "Patient", id: "p" } },
+        { fullUrl: "http://elsewhere/Group/g", resource: { resourceType: "Group", id: "g" } },
+      ],
+    });
+    const ex = "entry.resource.ofType(CareTeam).participant.member.resolve()";
+    expect(check(`${ex}.ofType(Practitioner).exists()`, bundle("urn:uuid:1"))).toBe(true);
+    expect(check(`${ex}.ofType(Practitioner).exists()`, bundle("urn:uuid:1", "Patient"))).toBe(false);
+    expect(check(`${ex}.id = 'p'`, bundle("Patient/p"))).toBe(true);
+    expect(check(`${ex}.id = 'p'`, bundle("http://srv/fhir/Patient/p"))).toBe(true);
+    expect(check(`${ex}.exists()`, bundle("Patient/missing"))).toBe("indeterminate");
+    expect(check(`${ex}.exists()`, bundle("http://other/Patient/p"))).toBe("indeterminate");
+    // Same Type/id but a different server base than the referencing entry.
+    expect(check(`${ex}.exists()`, bundle("Group/g"))).toBe("indeterminate");
+    // #id inside an entry resolves against that (non-contained) entry, not the Bundle.
+    expect(check(`${ex}.exists()`, bundle("#nope"))).toBe(false);
+  });
+
+  it("resolves #id inside a Bundle entry against that entry's contained", () => {
+    const bundle = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "CareTeam",
+            contained: [{ resourceType: "Practitioner", id: "m" }],
+            participant: [{ member: { reference: "#m" } }, { member: { reference: "#gone" } }],
+          },
+        },
+      ],
+    };
+    expect(check("entry.resource.participant.member.resolve().count() = 1", bundle)).toBe(true);
+  });
+
+  it("follows the spec's bundle-references example (base and version rules)", () => {
+    const obs = (fullUrl: string, reference: string) => ({
+      fullUrl,
+      resource: { resourceType: "Observation", id: fullUrl.split("/").pop(), subject: { reference } },
+    });
+    const patient = (fullUrl: string, id: string, versionId?: string) => ({
+      fullUrl,
+      resource: { resourceType: "Patient", id, ...(versionId ? { meta: { versionId } } : {}) },
+    });
+    const bundle = (entry: object) => ({
+      resourceType: "Bundle",
+      type: "collection",
+      entry: [
+        patient("http://example.org/fhir/Patient/23", "23"),
+        patient("http://example.org/fhir/Patient/45", "45", "1"),
+        patient("http://example.org/fhir/Patient/45", "45", "2"),
+        entry,
+      ],
+    });
+    const ex = "entry.resource.ofType(Observation).subject.resolve()";
+    expect(check(`${ex}.id = '23'`, bundle(obs("http://example.org/fhir/Observation/1", "Patient/23")))).toBe(true);
+    // Relative to another server's base: not this Bundle's Patient/23.
+    expect(check(`${ex}.exists()`, bundle(obs("http://example.org/fhir-2/Observation/1", "Patient/23")))).toBe(
+      "indeterminate",
+    );
+    const v2 = bundle(obs("http://example.org/fhir/Observation/1", "Patient/45/_history/2"));
+    expect(check(`${ex}.meta.versionId = '2'`, v2)).toBe(true);
+    const abs = bundle(obs("http://example.org/fhir/Observation/1", "http://example.org/fhir/Patient/45/_history/1"));
+    expect(check(`${ex}.meta.versionId = '1'`, abs)).toBe(true);
+    expect(check(`${ex}.exists()`, bundle(obs("http://example.org/fhir/Observation/1", "Patient/45")))).toBe(
+      "indeterminate",
+    );
+  });
+});

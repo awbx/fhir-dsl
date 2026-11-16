@@ -1,6 +1,8 @@
 import { FhirDslError } from "@fhir-dsl/utils";
 import type { Expr } from "./ast.js";
 import { isOfType, lookupProperty, normaliseTypeName } from "./fhir-types.js";
+import { ReferenceUnknownError, resolveReference } from "./resolve.js";
+import { checkNarrativeXhtml, XhtmlUnknownError } from "./xhtml.js";
 
 // Phase 6 — evaluator for the parsed FHIRPath invariant AST. FHIRPath is
 // a *collection* language: every expression returns a list, and a
@@ -238,6 +240,53 @@ function evalCall(expr: Extract<Expr, { kind: "call" }>, ctx: EvalContext): Coll
         return [false];
       }
     }
+    case "replaceMatches": {
+      if (expr.args.length !== 2) throw new FhirPathInvariantEvalError("replaceMatches() expects two arguments");
+      if (subject.length === 0) return [];
+      const target = singletonString(subject);
+      if (target === null) throw new FhirPathInvariantEvalError("replaceMatches() expects a single string");
+      const pattern = singletonString(evaluateExpr(expr.args[0]!, ctx));
+      const substitution = singletonString(evaluateExpr(expr.args[1]!, ctx));
+      if (pattern === null || substitution === null) return [];
+      let regex: RegExp;
+      try {
+        regex = new RegExp(pattern, "gu");
+      } catch {
+        throw new FhirPathInvariantEvalError(`replaceMatches(): invalid regular expression ${pattern}`);
+      }
+      return [target.replace(regex, substitution)];
+    }
+    case "htmlChecks": {
+      if (subject.length === 0) return [];
+      const xhtml = singletonString(subject);
+      if (xhtml === null) throw new FhirPathInvariantEvalError("htmlChecks() expects a single xhtml string");
+      try {
+        return [checkNarrativeXhtml(xhtml)];
+      } catch (err) {
+        if (err instanceof XhtmlUnknownError) {
+          throw new FhirPathInvariantEvalError(`htmlChecks(): cannot check the xhtml: ${err.message}`);
+        }
+        throw err;
+      }
+    }
+    case "resolve": {
+      if (subject.length === 0) return [];
+      // Throws when the root isn't a resource, like %rootResource does.
+      const root = evalEnv("rootResource", ctx)[0] as Record<string, unknown>;
+      const out: Collection = [];
+      for (const item of subject) {
+        try {
+          const target = resolveReference(root, item);
+          if (target !== undefined) out.push(target);
+        } catch (err) {
+          if (err instanceof ReferenceUnknownError) {
+            throw new FhirPathInvariantEvalError(`resolve(): ${err.message}`);
+          }
+          throw err;
+        }
+      }
+      return out;
+    }
     case "where": {
       const out: Collection = [];
       for (const item of subject) {
@@ -296,10 +345,13 @@ function evalCall(expr: Extract<Expr, { kind: "call" }>, ctx: EvalContext): Coll
       return [haystack.endsWith(needle)];
     }
     case "iif": {
-      // iif(cond, then, else?) — evaluates lazily.
-      const cond = toBooleanCollection(evaluateExpr(expr.args[0]!, ctx));
-      if (cond === true) return evaluateExpr(expr.args[1]!, ctx);
-      if (cond === false && expr.args[2]) return evaluateExpr(expr.args[2], ctx);
+      // iif(cond, then, else?) — evaluates lazily. In method form
+      // (`x.iif(...)`) the arguments are evaluated against the input
+      // collection as a whole, as the full engine does.
+      const argCtx = expr.left ? { ...ctx, this: subject } : ctx;
+      const cond = toBooleanCollection(evaluateExpr(expr.args[0]!, argCtx));
+      if (cond === true) return evaluateExpr(expr.args[1]!, argCtx);
+      if (cond === false && expr.args[2]) return evaluateExpr(expr.args[2], argCtx);
       return [];
     }
     case "is":
